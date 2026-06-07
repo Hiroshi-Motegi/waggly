@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 
 interface OnboardingProps {
   onComplete: () => void;
+  isReagreement?: boolean;
 }
 
 const slides = [
@@ -40,8 +41,8 @@ const termsContent = [
   { title: "第7条（規約の変更）", body: "本規約は予告なく変更することがあります。変更後の規約は本ページに掲載した時点で効力を生じます。" },
 ];
 
-export function Onboarding({ onComplete }: OnboardingProps) {
-  const [currentSlide, setCurrentSlide] = useState(0);
+export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
+  const [currentSlide, setCurrentSlide] = useState(isReagreement ? slides.length - 1 : 0);
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
 
@@ -88,22 +89,34 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-dvh px-6 py-10 bg-background">
       <div className="flex-1 flex flex-col items-center justify-center text-center max-w-sm">
-        <span className="text-6xl mb-6">{slide.icon}</span>
-        <h2 className="text-2xl font-bold mb-3">{slide.title}</h2>
-        <p className="text-muted-foreground text-sm leading-relaxed">{slide.description}</p>
+        {isReagreement && isLastSlide ? (
+          <>
+            <span className="text-6xl mb-6">📋</span>
+            <h2 className="text-2xl font-bold mb-3">利用規約が更新されました</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">引き続きご利用いただくには、更新された利用規約への同意が必要です。</p>
+          </>
+        ) : (
+          <>
+            <span className="text-6xl mb-6">{slide.icon}</span>
+            <h2 className="text-2xl font-bold mb-3">{slide.title}</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">{slide.description}</p>
+          </>
+        )}
       </div>
 
       {/* Dots */}
-      <div className="flex gap-2 mb-8">
-        {slides.map((_, i) => (
-          <div
-            key={i}
-            className={`h-2 rounded-full transition-all ${
-              i === currentSlide ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
-            }`}
-          />
-        ))}
-      </div>
+      {!isReagreement && (
+        <div className="flex gap-2 mb-8">
+          {slides.map((_, i) => (
+            <div
+              key={i}
+              className={`h-2 rounded-full transition-all ${
+                i === currentSlide ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
+              }`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Actions */}
       <div className="w-full max-w-sm space-y-4">

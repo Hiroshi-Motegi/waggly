@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Onboarding } from "@/components/onboarding";
+import { TERMS_UPDATED_AT } from "@/lib/constants";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -19,11 +20,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show onboarding if user hasn't agreed to terms
-  if (user && !user.agreed_terms_at && !onboardingDone) {
+  // Show onboarding if user hasn't agreed or terms were updated
+  const needsAgreement = user && (
+    !user.agreed_terms_at || new Date(user.agreed_terms_at) < new Date(TERMS_UPDATED_AT)
+  );
+
+  if (needsAgreement && !onboardingDone) {
     return (
       <div className="mx-auto max-w-md min-h-dvh border-x border-border shadow-sm bg-background">
         <Onboarding
+          isReagreement={!!user.agreed_terms_at}
           onComplete={async () => {
             await fetch("/api/auth/agree", { method: "POST" });
             setOnboardingDone(true);
