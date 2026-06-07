@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
@@ -9,7 +10,13 @@ import { TERMS_UPDATED_AT } from "@/lib/constants";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
+  const pathname = usePathname();
   const [onboardingDone, setOnboardingDone] = useState(false);
+
+  // Skip onboarding for admin pages
+  if (pathname?.startsWith("/admin")) {
+    return <>{children}</>;
+  }
 
   // Show loading
   if (isLoading) {

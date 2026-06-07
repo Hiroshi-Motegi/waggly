@@ -49,8 +49,6 @@ export default function NewPlanPage() {
 
     // Navigate immediately
     router.push("/coach/plans?generating=true");
-    return;
-    }
   }
 
   return (
