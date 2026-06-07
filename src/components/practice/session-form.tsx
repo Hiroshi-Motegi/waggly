@@ -35,7 +35,10 @@ interface SessionFormProps {
 }
 
 export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmitting }: SessionFormProps) {
-  const today = new Date().toISOString().split("T")[0];
+  // Use JST for default date
+  const now = new Date();
+  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const today = jst.toISOString().split("T")[0];
   const [practicedAt, setPracticedAt] = useState(initialData?.practiced_at ?? today);
   const [location, setLocation] = useState(initialData?.location ?? "");
   const [totalBalls, setTotalBalls] = useState(initialData?.total_balls ?? 0);
