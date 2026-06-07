@@ -1,13 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import type { Club, ClubWithImages, ClubStatus } from "@/types/database";
 
 export function useClubs(status?: ClubStatus) {
+  const { user } = useAuth();
   const [clubs, setClubs] = useState<ClubWithImages[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchClubs = useCallback(async () => {
+    if (!user) return;
     setIsLoading(true);
     const params = status ? `?status=${status}` : "";
     const res = await fetch(`/api/clubs${params}`);
@@ -15,7 +18,7 @@ export function useClubs(status?: ClubStatus) {
       setClubs(await res.json());
     }
     setIsLoading(false);
-  }, [status]);
+  }, [status, user]);
 
   useEffect(() => {
     fetchClubs();
@@ -25,11 +28,13 @@ export function useClubs(status?: ClubStatus) {
 }
 
 export function useClub(clubId: string) {
+  const { user } = useAuth();
   const [club, setClub] = useState<ClubWithImages & { maintenances: any[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchClub() {
+      if (!user) return;
       const res = await fetch(`/api/clubs/${clubId}`);
       if (res.ok) {
         setClub(await res.json());
@@ -37,7 +42,7 @@ export function useClub(clubId: string) {
       setIsLoading(false);
     }
     fetchClub();
-  }, [clubId]);
+  }, [clubId, user]);
 
   return { club, isLoading };
 }

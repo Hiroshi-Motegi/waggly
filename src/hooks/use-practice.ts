@@ -1,20 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import type { PracticeSessionWithClubs } from "@/types/database";
 
 export function usePracticeSessions() {
+  const { user } = useAuth();
   const [sessions, setSessions] = useState<PracticeSessionWithClubs[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSessions = useCallback(async () => {
+    if (!user) return;
     setIsLoading(true);
     const res = await fetch("/api/practice");
     if (res.ok) {
       setSessions(await res.json());
     }
     setIsLoading(false);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchSessions();

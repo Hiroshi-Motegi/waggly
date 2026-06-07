@@ -32,11 +32,8 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute = request.nextUrl.pathname.startsWith("/api/auth");
   const isPublicAsset = request.nextUrl.pathname.startsWith("/_next");
 
-  if (!user && !isAuthRoute && !isPublicAsset) {
-    if (request.nextUrl.pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  // API routes handle their own auth — don't block them here
+  // The proxy just refreshes the session cookie
 
   return supabaseResponse;
 }
