@@ -74,12 +74,14 @@ function HistoryPanel({
   activeId,
   isLoading,
   onSelect,
+  onDelete,
   onClose,
 }: {
   conversations: ConversationItem[];
   activeId: string | null;
   isLoading: boolean;
   onSelect: (id: string) => void;
+  onDelete: (id: string) => void;
   onClose: () => void;
 }) {
   function formatDate(dateStr: string) {
@@ -106,17 +108,24 @@ function HistoryPanel({
         ) : (
           <ul>
             {conversations.map((conv) => (
-              <li key={conv.id}>
+              <li key={conv.id} className={`flex items-center border-b ${conv.id === activeId ? "bg-muted" : ""}`}>
                 <button
                   onClick={() => onSelect(conv.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 text-left border-b hover:bg-muted/50 transition-colors ${
-                    conv.id === activeId ? "bg-muted font-medium" : ""
-                  }`}
+                  className="flex-1 flex items-center justify-between px-4 py-3 text-left hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm truncate flex-1 mr-3">{conv.title}</span>
                   <span className="text-xs text-muted-foreground shrink-0">
                     {formatDate(conv.created_at)}
                   </span>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm("この会話を削除しますか？")) onDelete(conv.id);
+                  }}
+                  className="px-3 py-3 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                >
+                  削除
                 </button>
               </li>
             ))}
@@ -194,6 +203,23 @@ export default function CoachPage() {
     }
   }
 
+  async function handleDeleteConversation(id: string) {
+    try {
+      const res = await fetch(`/api/coach/chat/history?conversationId=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete conversation");
+      // Remove from list
+      setConversations((prev) => prev.filter((c) => c.id !== id));
+      // If deleted the active conversation, start a new one
+      if (id === conversationId) {
+        setConversationId(crypto.randomUUID());
+        setInitialMessages([]);
+        setChatKey((k) => k + 1);
+      }
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
+    }
+  }
+
   async function handleSelectConversation(id: string) {
     try {
       const res = await fetch(`/api/coach/chat/history?conversationId=${id}`);
@@ -229,6 +255,7 @@ export default function CoachPage() {
         activeId={conversationId}
         isLoading={historyFetching}
         onSelect={handleSelectConversation}
+        onDelete={handleDeleteConversation}
         onClose={() => setShowHistory(false)}
       />
     );

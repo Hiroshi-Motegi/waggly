@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
+export async function DELETE(request: NextRequest) {
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
+
+  const conversationId = request.nextUrl.searchParams.get("conversationId");
+  if (!conversationId) {
+    return NextResponse.json({ error: "conversationId required" }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from("ai_chats")
+    .delete()
+    .eq("user_id", userId)
+    .eq("conversation_id", conversationId);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
+}
+
 export async function GET(request: NextRequest) {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
