@@ -102,7 +102,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             aria-label="種別"
             value={form.category ?? ""}
             onChange={(e) => update("category", e.target.value || undefined)}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <option value="">選択してください</option>
             {categories.map((c) => (
@@ -167,7 +167,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
                 setShaftType(e.target.value as "carbon" | "steel");
                 update("shaft_flex", undefined);
               }}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="carbon">カーボン</option>
               <option value="steel">スチール</option>
@@ -180,7 +180,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             id="shaft_flex"
             value={form.shaft_flex ?? ""}
             onChange={(e) => update("shaft_flex", e.target.value || undefined)}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <option value="">選択</option>
             {shaftType === "carbon"
