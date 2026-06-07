@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SessionForm } from "@/components/practice/session-form";
@@ -10,6 +10,8 @@ import { createPracticeSession } from "@/hooks/use-practice";
 
 export default function NewPracticePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const planId = searchParams.get("planId");
   const { clubs } = useClubs("bag");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -19,7 +21,7 @@ export default function NewPracticePage() {
   async function handleSubmit(data: any) {
     setIsSubmitting(true);
     try {
-      await createPracticeSession(data);
+      await createPracticeSession({ ...data, plan_id: planId ?? undefined });
       setSaved(true);
     } catch (error) {
       console.error("Failed to create practice session:", error);
@@ -47,6 +49,25 @@ export default function NewPracticePage() {
   }
 
   if (saved) {
+    // If came from a plan, go to feedback
+    if (planId) {
+      return (
+        <div className="flex flex-col items-center justify-center px-6 py-16 space-y-6 text-center">
+          <span className="text-5xl">🎉</span>
+          <h2 className="text-xl font-bold">練習お疲れさまでした！</h2>
+          <p className="text-sm text-muted-foreground">記録を保存しました</p>
+          <div className="space-y-3 w-full max-w-sm">
+            <Link href={`/coach/plans/${planId}?feedback=true`}>
+              <Button className="w-full">練習の振り返りを記録する</Button>
+            </Link>
+            <Link href="/practice">
+              <Button variant="outline" className="w-full">スキップ</Button>
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center px-6 py-16 space-y-6 text-center">
         <span className="text-5xl">🎉</span>
@@ -85,6 +106,9 @@ export default function NewPracticePage() {
   return (
     <div>
       <h2 className="px-4 pt-4 text-xl font-bold">練習を記録</h2>
+      {planId && (
+        <p className="px-4 pt-1 text-xs text-muted-foreground">練習メニューに紐づけて記録します</p>
+      )}
       <SessionForm clubs={clubs} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </div>
   );

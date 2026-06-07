@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,9 +21,11 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
   const { planId } = use(params);
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const autoFeedback = searchParams.get("feedback") === "true";
   const [plan, setPlan] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showFeedback, setShowFeedback] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(autoFeedback);
   const [memo, setMemo] = useState("");
   const [rating, setRating] = useState<number | null>(null);
 
@@ -49,7 +51,8 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
   }, [planId, user]);
 
   async function handleDone() {
-    setShowFeedback(true);
+    // Navigate to practice recording with plan ID
+    router.push(`/practice/new?planId=${planId}`);
   }
 
   async function handleSaveFeedback() {
