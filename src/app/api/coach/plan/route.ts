@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       .order("created_at", { ascending: false })
       .limit(5),
     supabase.from("accessories").select("*").eq("user_id", userId).eq("status", "active"),
-    supabase.from("knowledge_base").select("category, title, content").eq("is_active", true),
+    supabase.from("knowledge_base").select("category, title, content").eq("status", "active"),
   ]);
 
   const clubs = clubsRes.data ?? [];
