@@ -27,10 +27,13 @@ export default function EditClubPage({ params }: { params: Promise<{ clubId: str
   if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
+  // Extract only editable fields (exclude joined data like club_images, maintenances)
+  const { club_images, maintenances, id, user_id, created_at, ...editableData } = club as any;
+
   return (
     <div>
       <h2 className="px-4 pt-4 text-xl font-bold">クラブを編集</h2>
-      <ClubForm initialData={club} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      <ClubForm initialData={editableData} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </div>
   );
 }
