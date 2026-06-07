@@ -25,10 +25,13 @@ export default function PlansPage() {
   // Poll for new plan when generating
   useEffect(() => {
     if (!generating) return;
-    if (prevCount === null && plans.length >= 0) {
+    // Wait for initial load to complete before setting baseline
+    if (isLoading) return;
+    if (prevCount === null) {
       setPrevCount(plans.length);
+      return;
     }
-    if (prevCount !== null && plans.length > prevCount) {
+    if (plans.length > prevCount) {
       setGenerating(false);
       return;
     }
@@ -36,7 +39,7 @@ export default function PlansPage() {
       refetch();
     }, 3000);
     return () => clearInterval(interval);
-  }, [generating, plans.length, prevCount, refetch]);
+  }, [generating, isLoading, plans.length, prevCount, refetch]);
 
   return (
     <div className="space-y-4 p-4">
