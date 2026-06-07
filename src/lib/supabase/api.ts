@@ -2,7 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createRawClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-const DEV_USER_ID = "00000000-0000-0000-0000-000000000001";
+const DEV_EMAIL = "dev@waggly.local";
+const DEV_PASSWORD = "devpassword123";
+
+let cachedDevUserId: string | null = null;
 
 function isDevMode() {
   return (
@@ -25,36 +28,61 @@ export async function getApiAuth(): Promise<{
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Ensure dev user exists in DB
-    const { data: existing } = await supabase
-      .from("users")
-      .select("id")
-      .eq("id", DEV_USER_ID)
-      .single();
-
-    if (!existing) {
-      // Create auth user first
-      const { data: authData } = await supabase.auth.admin.createUser({
-        email: "dev@waggly.local",
-        password: "devpassword123",
-        email_confirm: true,
-        user_metadata: { display_name: "開発ユーザー" },
-      });
-
-      const authUserId = authData?.user?.id ?? DEV_USER_ID;
-
-      await supabase.from("users").upsert({
-        id: authUserId,
-        line_user_id: "dev-line-id",
-        display_name: "開発ユーザー",
-        avatar_url: null,
-      });
-
-      // Return with actual auth user ID
-      return { supabase, userId: authUserId };
+    // Use cached ID if available
+    if (cachedDevUserId) {
+      return { supabase, userId: cachedDevUserId };
     }
 
-    return { supabase, userId: DEV_USER_ID };
+    // Check if dev user exists by email
+    const { data: existingUsers } = await supabase
+      .from("users")
+      .select("id")
+      .eq("line_user_id", "dev-line-id")
+      .limit(1);
+
+    if (existingUsers && existingUsers.length > 0) {
+      cachedDevUserId = existingUsers[0].id;
+      return { supabase, userId: cachedDevUserId! };
+    }
+
+    // Create auth user first (Supabase assigns the UUID)
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: DEV_EMAIL,
+      password: DEV_PASSWORD,
+      email_confirm: true,
+      user_metadata: { display_name: "開発ユーザー" },
+    });
+
+    if (authError) {
+      // User might already exist in auth but not in users table
+      const { data: { users } } = await supabase.auth.admin.listUsers();
+      const existing = users?.find((u: any) => u.email === DEV_EMAIL);
+      if (existing) {
+        // Insert profile with auth user's ID
+        await supabase.from("users").upsert({
+          id: existing.id,
+          line_user_id: "dev-line-id",
+          display_name: "開発ユーザー",
+          avatar_url: null,
+        });
+        cachedDevUserId = existing.id;
+        return { supabase, userId: cachedDevUserId! };
+      }
+      return null;
+    }
+
+    const authUserId = authData.user.id;
+
+    // Create profile using the auth-assigned UUID
+    await supabase.from("users").insert({
+      id: authUserId,
+      line_user_id: "dev-line-id",
+      display_name: "開発ユーザー",
+      avatar_url: null,
+    });
+
+    cachedDevUserId = authUserId;
+    return { supabase, userId: authUserId };
   }
 
   // Production: cookie-based auth
