@@ -49,8 +49,42 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     onSubmit(cleaned);
   }
 
+  const [isSearching, setIsSearching] = useState(false);
+
   function update(field: string, value: string | number | undefined | null) {
     setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function handleAutofill() {
+    setIsSearching(true);
+    try {
+      const res = await fetch("/api/clubs/autofill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: form.category,
+          club_number: form.club_number,
+          maker: form.maker,
+          model: form.model,
+          shaft_name: form.shaft_name,
+          shaft_flex: form.shaft_flex,
+        }),
+      });
+      if (!res.ok) throw new Error("検索に失敗しました");
+      const specs = await res.json();
+      // Only fill in fields that are currently empty
+      setForm((prev) => ({
+        ...prev,
+        loft: prev.loft ?? specs.loft ?? prev.loft,
+        lie: prev.lie ?? specs.lie ?? prev.lie,
+        length: prev.length ?? specs.length ?? prev.length,
+        distance: prev.distance ?? specs.distance ?? prev.distance,
+      }));
+    } catch (error) {
+      console.error("Autofill failed:", error);
+    } finally {
+      setIsSearching(false);
+    }
   }
 
   return (
@@ -135,6 +169,22 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             </select>
           </div>
         </div>
+      </div>
+
+      {/* Auto-fill */}
+      <div className="space-y-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={isSearching || (!form.maker && !form.model)}
+          onClick={handleAutofill}
+        >
+          {isSearching ? "検索中..." : "自動検索"}
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          ※クラブ情報はウェブサイトなどの公開情報から情報を収集します。自動入力された内容は誤りがある場合があります。
+        </p>
       </div>
 
       {/* Specs */}
