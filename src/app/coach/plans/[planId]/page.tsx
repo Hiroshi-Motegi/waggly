@@ -98,15 +98,33 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
 
       <Card>
         <CardHeader><CardTitle className="text-base">練習内容</CardTitle></CardHeader>
-        <CardContent className="space-y-2">
-          {plan.practice_plan_items?.map((item: any) => (
-            <div key={item.id} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">{item.club?.club_number ?? "?"}</Badge>
-                <span>{item.focus}</span>
+        <CardContent className="space-y-4">
+          {plan.practice_plan_items?.map((item: any, index: number) => {
+            // Parse focus: 【title｜subtitle】body
+            const titleMatch = item.focus?.match(/^【(.+?)(?:｜|\\|)(.+?)】\s*([\s\S]*)$/);
+            const title = titleMatch ? titleMatch[1] : null;
+            const subtitle = titleMatch ? titleMatch[2] : null;
+            const body = titleMatch ? titleMatch[3] : item.focus;
+
+            return (
+            <div key={item.id}>
+              {index > 0 && <Separator className="mb-4" />}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">{item.club?.club_number ?? "?"}</Badge>
+                    <span className="text-sm font-medium">{item.balls}球</span>
+                  </div>
+                </div>
+                {title && (
+                  <h4 className="text-sm font-bold">{title}
+                    {subtitle && <span className="text-xs text-muted-foreground font-normal ml-2">{subtitle}</span>}
+                  </h4>
+                )}
+                {body && <p className="text-xs text-muted-foreground leading-relaxed">{body}</p>}
               </div>
-              <span className="font-medium">{item.balls}球</span>
             </div>
+            );}
           ))}
           <Separator className="my-2" />
           <div className="flex justify-between text-sm font-medium">
