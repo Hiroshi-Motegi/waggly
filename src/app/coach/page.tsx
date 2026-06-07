@@ -46,7 +46,7 @@ function ChatView({
   }
 
   return (
-    <div className="flex h-[calc(100vh-7.5rem)] flex-col">
+    <div className="flex h-full flex-col">
       <div className="flex justify-end gap-3 px-4 py-2 border-b">
         <button
           onClick={onShowHistory}
@@ -90,7 +90,7 @@ function HistoryPanel({
   }
 
   return (
-    <div className="flex h-[calc(100vh-7.5rem)] flex-col">
+    <div className="flex h-full flex-col">
       <div className="flex items-center justify-between px-4 py-2 border-b">
         <span className="text-sm font-medium">会話履歴</span>
         <button

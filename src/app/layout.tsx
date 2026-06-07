@@ -16,16 +16,17 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja">
-      <body className={inter.className}>
+      <body className={`${inter.className} overscroll-none`}>
         <AuthProvider>
-          <div className="mx-auto max-w-md min-h-screen border-x border-border shadow-sm bg-background">
+          <div className="mx-auto max-w-md h-dvh flex flex-col border-x border-border shadow-sm bg-background overflow-hidden">
             <Header />
-            <main className="min-h-[calc(100vh-7.5rem)]">{children}</main>
+            <main className="flex-1 overflow-y-auto">{children}</main>
             <BottomNav />
           </div>
         </AuthProvider>
