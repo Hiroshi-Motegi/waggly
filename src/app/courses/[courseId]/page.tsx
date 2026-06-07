@@ -191,10 +191,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
               <CardTitle className="text-base">料金</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {course.weekdayMinPrice > 0 && (
+              {course.weekdayMinPrice != null && course.weekdayMinPrice > 0 && (
                 <InfoRow label="平日最安値" value={`¥${course.weekdayMinPrice.toLocaleString()}〜`} />
               )}
-              {course.holidayMinPrice > 0 && (
+              {course.holidayMinPrice != null && course.holidayMinPrice > 0 && (
                 <InfoRow label="休日最安値" value={`¥${course.holidayMinPrice.toLocaleString()}〜`} />
               )}
             </CardContent>
@@ -224,18 +224,18 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex items-center gap-2 pb-1">
-                <span className="text-2xl font-bold">{course.evaluation.toFixed(1)}</span>
+                <span className="text-2xl font-bold">{course.evaluation?.toFixed(1) ?? "—"}</span>
                 <span className="text-amber-500 text-lg">★</span>
-                <span className="text-sm text-muted-foreground">({course.reviewCount.toLocaleString()}件)</span>
+                {course.reviewCount != null && <span className="text-sm text-muted-foreground">({course.reviewCount.toLocaleString()}件)</span>}
               </div>
               <Separator />
-              {course.evaluationStaff > 0 && <StarDisplay rating={course.evaluationStaff} label="スタッフ" />}
-              {course.evaluationFacility > 0 && <StarDisplay rating={course.evaluationFacility} label="施設" />}
-              {course.evaluationMeal > 0 && <StarDisplay rating={course.evaluationMeal} label="食事" />}
-              {course.evaluationCourse > 0 && <StarDisplay rating={course.evaluationCourse} label="コース" />}
-              {course.evaluationCostperformance > 0 && <StarDisplay rating={course.evaluationCostperformance} label="コスパ" />}
-              {course.evaluationDistance > 0 && <StarDisplay rating={course.evaluationDistance} label="距離" />}
-              {course.evaluationFairway > 0 && <StarDisplay rating={course.evaluationFairway} label="フェアウェイ" />}
+              {course.evaluationStaff != null && course.evaluationStaff > 0 && <StarDisplay rating={course.evaluationStaff} label="スタッフ" />}
+              {course.evaluationFacility != null && course.evaluationFacility > 0 && <StarDisplay rating={course.evaluationFacility} label="施設" />}
+              {course.evaluationMeal != null && course.evaluationMeal > 0 && <StarDisplay rating={course.evaluationMeal} label="食事" />}
+              {course.evaluationCourse != null && course.evaluationCourse > 0 && <StarDisplay rating={course.evaluationCourse} label="コース" />}
+              {course.evaluationCostperformance != null && course.evaluationCostperformance > 0 && <StarDisplay rating={course.evaluationCostperformance} label="コスパ" />}
+              {course.evaluationDistance != null && course.evaluationDistance > 0 && <StarDisplay rating={course.evaluationDistance} label="距離" />}
+              {course.evaluationFairway != null && course.evaluationFairway > 0 && <StarDisplay rating={course.evaluationFairway} label="フェアウェイ" />}
             </CardContent>
           </Card>
         )}
