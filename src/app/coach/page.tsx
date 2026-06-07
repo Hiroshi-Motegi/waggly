@@ -8,14 +8,60 @@ import { ChatMessages } from "@/components/coach/chat-messages";
 import { ChatInput } from "@/components/coach/chat-input";
 import { useAuth } from "@/hooks/use-auth";
 
-export default function CoachPage() {
-  const { user } = useAuth();
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [initialMessages, setInitialMessages] = useState<UIMessage[] | undefined>(undefined);
-  const [historyLoaded, setHistoryLoaded] = useState(false);
+function ChatView({
+  conversationId,
+  initialMessages,
+  onNewChat,
+}: {
+  conversationId: string;
+  initialMessages: UIMessage[];
+  onNewChat: () => void;
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Load chat history on mount
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/coach/chat",
+      body: { conversationId },
+    }),
+    messages: initialMessages,
+  });
+
+  const isLoading = status === "submitted" || status === "streaming";
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
+
+  function handleSend(content: string) {
+    sendMessage({ text: content });
+  }
+
+  return (
+    <div className="flex h-[calc(100vh-7.5rem)] flex-col">
+      <div className="flex justify-end px-4 py-2 border-b">
+        <button
+          onClick={onNewChat}
+          className="text-xs text-muted-foreground hover:text-foreground"
+        >
+          新しい会話
+        </button>
+      </div>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+        <ChatMessages messages={messages} isLoading={isLoading} />
+      </div>
+      <ChatInput onSend={handleSend} isLoading={isLoading} />
+    </div>
+  );
+}
+
+export default function CoachPage() {
+  const { user } = useAuth();
+  const [chatKey, setChatKey] = useState(0);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+
   useEffect(() => {
     if (!user) return;
 
@@ -27,7 +73,6 @@ export default function CoachPage() {
 
         if (data.conversationId && data.messages?.length > 0) {
           setConversationId(data.conversationId);
-          // Convert DB messages to UIMessage format
           const uiMessages: UIMessage[] = data.messages.map((m: any) => ({
             id: m.id,
             role: m.role as "user" | "assistant",
@@ -50,50 +95,26 @@ export default function CoachPage() {
     loadHistory();
   }, [user]);
 
-  const { messages, sendMessage, status } = useChat({
-    transport: historyLoaded && conversationId
-      ? new DefaultChatTransport({
-          api: "/api/coach/chat",
-          body: { conversationId },
-        })
-      : undefined as any,
-    messages: initialMessages,
-  });
-
-  const isLoading = status === "submitted" || status === "streaming";
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
-
-  function handleSend(content: string) {
-    sendMessage({ text: content });
-  }
-
   function handleNewChat() {
     setConversationId(crypto.randomUUID());
     setInitialMessages([]);
-    setHistoryLoaded(true);
+    setChatKey((k) => k + 1); // Force remount ChatView
   }
 
   if (!historyLoaded) {
     return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
   }
 
+  if (!conversationId) {
+    return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  }
+
   return (
-    <div className="flex h-[calc(100vh-7.5rem)] flex-col">
-      <div className="flex justify-end px-4 py-2 border-b">
-        <button
-          onClick={handleNewChat}
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          新しい会話
-        </button>
-      </div>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        <ChatMessages messages={messages} isLoading={isLoading} />
-      </div>
-      <ChatInput onSend={handleSend} isLoading={isLoading} />
-    </div>
+    <ChatView
+      key={chatKey}
+      conversationId={conversationId}
+      initialMessages={initialMessages}
+      onNewChat={handleNewChat}
+    />
   );
 }
