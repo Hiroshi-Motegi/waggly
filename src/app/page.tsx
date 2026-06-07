@@ -53,8 +53,7 @@ export default function HomePage() {
         body: JSON.stringify({ source: "auto" }),
       });
       if (res.ok) {
-        const plan = await res.json();
-        setLatestPlan(plan);
+        window.location.href = "/coach/plans";
       }
     } catch (error) {
       console.error("Failed to generate plan:", error);
@@ -83,21 +82,15 @@ export default function HomePage() {
         </CardHeader>
         <CardContent className="space-y-3">
           {latestPlan ? (
-            <>
+            <Link href="/coach/plans">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">{latestPlan.title}</p>
                 <Badge variant={latestPlan.status === "new" ? "default" : "secondary"}>
                   {latestPlan.status === "new" ? "未実行" : latestPlan.status === "done" ? "実行済" : "スキップ"}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground line-clamp-2">{latestPlan.summary}</p>
-              {latestPlan.practice_plan_items?.map((item: any) => (
-                <div key={item.id} className="flex justify-between text-xs">
-                  <span>{item.club?.club_number ?? "?"} — {item.focus}</span>
-                  <span className="text-muted-foreground">{item.balls}球</span>
-                </div>
-              ))}
-            </>
+              <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{latestPlan.summary}</p>
+            </Link>
           ) : (
             <p className="text-sm text-muted-foreground">まだ練習メニューがありません</p>
           )}
