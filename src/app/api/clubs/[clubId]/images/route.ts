@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ clubId: string }> }
 ) {
   const { clubId } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
 
   // Verify club ownership
   const { data: club } = await supabase
     .from("clubs")
     .select("id")
     .eq("id", clubId)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .single();
 
   if (!club) return NextResponse.json({ error: "Club not found" }, { status: 404 });
@@ -25,7 +25,7 @@ export async function POST(
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
   const ext = file.name.split(".").pop();
-  const filePath = `${user.id}/${clubId}/${Date.now()}.${ext}`;
+  const filePath = `${userId}/${clubId}/${Date.now()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from("club-images")

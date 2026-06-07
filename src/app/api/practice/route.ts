@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
 
   const { data, error } = await supabase
     .from("practice_sessions")
     .select("*, practice_clubs(*, club:clubs(id, club_number, category))")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .order("practiced_at", { ascending: false })
     .limit(20);
 
@@ -18,16 +18,16 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
 
   const { clubs: clubBalls, ...sessionData } = await request.json();
 
   // Create session
   const { data: session, error: sessionError } = await supabase
     .from("practice_sessions")
-    .insert({ ...sessionData, user_id: user.id })
+    .insert({ ...sessionData, user_id: userId })
     .select()
     .single();
 

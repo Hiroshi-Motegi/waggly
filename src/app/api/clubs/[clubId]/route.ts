@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ clubId: string }> }
 ) {
   const { clubId } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
 
   const { data, error } = await supabase
     .from("clubs")
     .select("*, club_images(*), maintenances(*)")
     .eq("id", clubId)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 404 });
@@ -26,9 +26,9 @@ export async function PATCH(
   { params }: { params: Promise<{ clubId: string }> }
 ) {
   const { clubId } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
 
   const body = await request.json();
 
@@ -36,7 +36,7 @@ export async function PATCH(
     .from("clubs")
     .update(body)
     .eq("id", clubId)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .select()
     .single();
 
@@ -49,15 +49,15 @@ export async function DELETE(
   { params }: { params: Promise<{ clubId: string }> }
 ) {
   const { clubId } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
 
   const { error } = await supabase
     .from("clubs")
     .delete()
     .eq("id", clubId)
-    .eq("user_id", user.id);
+    .eq("user_id", userId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });

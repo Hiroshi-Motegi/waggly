@@ -1,29 +1,29 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 import { analyzeGaps } from "@/lib/gap-analysis";
 import { parsePlanResponse } from "@/lib/ai/plan-parser";
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
 
   const { source } = await request.json();
 
   // Fetch context data
   const [clubsRes, sessionsRes, plansRes] = await Promise.all([
-    supabase.from("clubs").select("*").eq("user_id", user.id).eq("status", "active").order("sort_order"),
+    supabase.from("clubs").select("*").eq("user_id", userId).eq("status", "active").order("sort_order"),
     supabase.from("practice_sessions")
       .select("*, practice_clubs(*, club:clubs(club_number))")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("practiced_at", { ascending: false })
       .limit(10),
     supabase.from("practice_plans")
       .select("title, status, created_at")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(3),
   ]);
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   const gapAnalysis = analyzeGaps(clubs);
 
   const systemPrompt = buildSystemPrompt({
-    clubs: clubs.map((c) => ({
+    clubs: clubs.map((c: any) => ({
       club_number: c.club_number, maker: c.maker, model: c.model,
       shaft_name: c.shaft_name, distance: c.distance,
     })),
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
   const { data: plan, error: planError } = await supabase
     .from("practice_plans")
     .insert({
-      user_id: user.id,
+      user_id: userId,
       title: parsed.title,
       summary: parsed.summary,
       source: source ?? "auto",
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
 
   // Match club_number to club_id and save items
   const items = parsed.items.map((item, i) => {
-    const matchedClub = clubs.find((c) => c.club_number === item.club_number);
+    const matchedClub = clubs.find((c: any) => c.club_number === item.club_number);
     return {
       plan_id: plan.id,
       club_id: matchedClub?.id ?? null,

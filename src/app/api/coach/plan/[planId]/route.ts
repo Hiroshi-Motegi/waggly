@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ planId: string }> }
 ) {
   const { planId } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
 
   const { status } = await request.json();
 
@@ -16,7 +16,7 @@ export async function PATCH(
     .from("practice_plans")
     .update({ status })
     .eq("id", planId)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .select()
     .single();
 
