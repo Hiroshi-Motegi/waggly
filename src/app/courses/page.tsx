@@ -162,14 +162,14 @@ export default function CoursesPage() {
                           <div className="flex items-center gap-1">
                             <StarDisplay rating={course.evaluation} />
                             <span className="text-xs text-muted-foreground">
-                              {course.evaluation.toFixed(1)} ({course.reviewCount.toLocaleString()}件)
+                              {course.evaluation?.toFixed(1) ?? "—"}{course.reviewCount ? ` (${course.reviewCount.toLocaleString()}件)` : ""}
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground space-y-0.5">
-                            {course.weekdayMinPrice > 0 && (
+                            {course.weekdayMinPrice != null && course.weekdayMinPrice > 0 && (
                               <p>平日 ¥{course.weekdayMinPrice.toLocaleString()}〜</p>
                             )}
-                            {course.holidayMinPrice > 0 && (
+                            {course.holidayMinPrice != null && course.holidayMinPrice > 0 && (
                               <p>休日 ¥{course.holidayMinPrice.toLocaleString()}〜</p>
                             )}
                           </div>
