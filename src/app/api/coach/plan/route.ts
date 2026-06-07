@@ -17,16 +17,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "今月のAI利用上限に達しました" }, { status: 429 });
   }
 
-  const { source, duration, selectedClubs, focus, location, notes } = await request.json();
+  const { source, duration, selectedClubs, focus, location, notes, referPracticeMonths } = await request.json();
+
+  // Calculate practice record date range
+  const months = referPracticeMonths ?? 3;
+  const practiceFromDate = months > 0
+    ? new Date(Date.now() - months * 30 * 24 * 60 * 60 * 1000).toISOString()
+    : null;
 
   // Fetch context data
+  let sessionsQuery = supabase
+    .from("practice_sessions")
+    .select("*, practice_clubs(*, club:clubs(club_number))")
+    .eq("user_id", userId)
+    .order("practiced_at", { ascending: false })
+    .limit(20);
+
+  if (practiceFromDate) {
+    sessionsQuery = sessionsQuery.gte("practiced_at", practiceFromDate.split("T")[0]);
+  }
+
   const [clubsRes, sessionsRes, plansRes, accessoriesRes] = await Promise.all([
     supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
-    supabase.from("practice_sessions")
-      .select("*, practice_clubs(*, club:clubs(club_number))")
-      .eq("user_id", userId)
-      .order("practiced_at", { ascending: false })
-      .limit(10),
+    practiceFromDate ? sessionsQuery : Promise.resolve({ data: [] }),
     supabase.from("practice_plans")
       .select("title, status, created_at")
       .eq("user_id", userId)

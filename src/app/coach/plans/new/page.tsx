@@ -15,6 +15,7 @@ export default function NewPlanPage() {
   const [focus, setFocus] = useState("");
   const [location, setLocation] = useState("練習場");
   const [notes, setNotes] = useState("");
+  const [referPractice, setReferPractice] = useState("3months");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
 
@@ -41,6 +42,7 @@ export default function NewPlanPage() {
           focus,
           location,
           notes,
+          referPracticeMonths: referPractice === "none" ? 0 : parseInt(referPractice),
         }),
       });
       if (!res.ok) {
@@ -88,7 +90,8 @@ export default function NewPlanPage() {
                 onChange={(e) => setLocation(e.target.value)}
                 className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="練習場">練習場</option>
+                <option value="練習場">練習場（屋外）</option>
+                <option value="インドア">インドア練習場</option>
                 <option value="コース前">コース前</option>
                 <option value="自宅">自宅</option>
               </select>
@@ -104,6 +107,22 @@ export default function NewPlanPage() {
                 rows={3}
                 className="h-auto"
               />
+            </div>
+
+            {/* Refer practice records */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">過去の練習記録を参考にする</label>
+              <select
+                value={referPractice}
+                onChange={(e) => setReferPractice(e.target.value)}
+                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="1">直近1ヶ月</option>
+                <option value="3">直近3ヶ月</option>
+                <option value="6">直近6ヶ月</option>
+                <option value="none">参考にしない</option>
+              </select>
+              <p className="text-xs text-muted-foreground">練習の傾向やメモをAIが分析して提案に活かします</p>
             </div>
 
             {/* Notes */}
