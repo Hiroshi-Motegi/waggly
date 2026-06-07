@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
   // Fetch context data
   const [clubsRes, sessionsRes, plansRes] = await Promise.all([
-    supabase.from("clubs").select("*").eq("user_id", userId).eq("status", "bag").order("sort_order"),
+    supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
     supabase.from("practice_sessions")
       .select("*, practice_clubs(*, club:clubs(club_number))")
       .eq("user_id", userId)
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
   const systemPrompt = buildSystemPrompt({
     clubs: clubs.map((c: any) => ({
-      club_number: c.club_number, maker: c.maker, model: c.model,
+      club_number: c.club_number, maker: c.maker, model: c.model, status: c.status,
       shaft_name: c.shaft_name, distance: c.distance,
     })),
     recentSessions: sessions.map((s: any) => ({

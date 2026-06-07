@@ -6,6 +6,7 @@ interface ClubSummary {
   model: string | null;
   shaft_name: string | null;
   distance: number | null;
+  status: string;
 }
 
 interface SessionSummary {
@@ -43,7 +44,8 @@ export function buildSystemPrompt(ctx: PromptContext): string {
       const name = [c.maker, c.model].filter(Boolean).join(" ") || "不明";
       const dist = c.distance ? `${c.distance}yd` : "飛距離未入力";
       const shaft = c.shaft_name ? ` / ${c.shaft_name}` : "";
-      parts.push(`- ${c.club_number}: ${name}${shaft} (${dist})`);
+      const statusLabel = c.status === "bag" ? "" : c.status === "reserve" ? " [予備]" : " [売却済]";
+      parts.push(`- ${c.club_number}: ${name}${shaft} (${dist})${statusLabel}`);
     }
   }
 

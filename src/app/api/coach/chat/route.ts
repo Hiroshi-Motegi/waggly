@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
   // Fetch user's context data in parallel
   const [clubsRes, sessionsRes, plansRes] = await Promise.all([
-    supabase.from("clubs").select("*").eq("user_id", userId).eq("status", "bag").order("sort_order"),
+    supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
     supabase.from("practice_sessions")
       .select("*, practice_clubs(*, club:clubs(club_number))")
       .eq("user_id", userId)
@@ -48,6 +48,7 @@ export async function POST(request: Request) {
       model: c.model,
       shaft_name: c.shaft_name,
       distance: c.distance,
+      status: c.status,
     })),
     recentSessions: sessions.map((s: any) => ({
       practiced_at: s.practiced_at,
