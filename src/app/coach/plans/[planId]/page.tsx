@@ -118,13 +118,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
         </CardContent>
       </Card>
 
-      {/* Action buttons */}
-      <div className="flex gap-2">
-        <Button className="flex-1" onClick={handleDone}>練習を記録する</Button>
-        {plan.status === "new" && (
-          <Button variant="outline" className="flex-1" onClick={handleSkip}>スキップ</Button>
-        )}
-      </div>
+      <Button className="w-full" onClick={handleDone}>練習を記録する</Button>
     </div>
   );
 }
