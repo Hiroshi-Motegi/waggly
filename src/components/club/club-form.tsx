@@ -49,6 +49,10 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     onSubmit(cleaned);
   }
 
+  const steelFlexes = ["X100", "S400", "S300", "S200", "R400", "R300", "R200"];
+  const [shaftType, setShaftType] = useState<"carbon" | "steel">(
+    initialData?.shaft_flex && steelFlexes.includes(initialData.shaft_flex) ? "steel" : "carbon"
+  );
   const [isSearching, setIsSearching] = useState(false);
 
   function update(field: string, value: string | number | undefined | null) {
@@ -155,19 +159,39 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="shaft_flex">フレックス</Label>
+            <Label htmlFor="shaft_type">素材</Label>
             <select
-              id="shaft_flex"
-              value={form.shaft_flex ?? ""}
-              onChange={(e) => update("shaft_flex", e.target.value || undefined)}
+              id="shaft_type"
+              value={shaftType}
+              onChange={(e) => {
+                setShaftType(e.target.value as "carbon" | "steel");
+                update("shaft_flex", undefined);
+              }}
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
-              <option value="">選択</option>
-              {["X", "S", "SR", "R", "R2", "L"].map((f) => (
-                <option key={f} value={f}>{f}</option>
-              ))}
+              <option value="carbon">カーボン</option>
+              <option value="steel">スチール</option>
             </select>
           </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="shaft_flex">フレックス</Label>
+          <select
+            id="shaft_flex"
+            value={form.shaft_flex ?? ""}
+            onChange={(e) => update("shaft_flex", e.target.value || undefined)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="">選択</option>
+            {shaftType === "carbon"
+              ? ["X", "S", "SR", "R", "R2", "L"].map((f) => (
+                  <option key={f} value={f}>{f}</option>
+                ))
+              : ["X100", "S400", "S300", "S200", "R400", "R300", "R200"].map((f) => (
+                  <option key={f} value={f}>{f}</option>
+                ))
+            }
+          </select>
         </div>
       </div>
 
