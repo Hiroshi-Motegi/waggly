@@ -5,10 +5,10 @@ import type { PracticePlanWithItems } from "@/types/database";
 
 interface PlanListProps {
   plans: PracticePlanWithItems[];
-  onStatusChange?: (planId: string, status: "done" | "skipped") => void;
+  onUpdate?: (planId: string, data: { status?: string; memo?: string; rating?: number | null }) => void;
 }
 
-export function PlanList({ plans, onStatusChange }: PlanListProps) {
+export function PlanList({ plans, onUpdate }: PlanListProps) {
   if (plans.length === 0) {
     return (
       <p className="py-8 text-center text-muted-foreground">
@@ -20,7 +20,7 @@ export function PlanList({ plans, onStatusChange }: PlanListProps) {
   return (
     <div className="space-y-3">
       {plans.map((plan) => (
-        <PlanCard key={plan.id} plan={plan} onStatusChange={onStatusChange} />
+        <PlanCard key={plan.id} plan={plan} onUpdate={onUpdate} />
       ))}
     </div>
   );

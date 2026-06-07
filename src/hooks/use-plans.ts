@@ -33,12 +33,12 @@ export async function generatePlan(source: "auto" | "chat" = "auto") {
   return res.json();
 }
 
-export async function updatePlanStatus(planId: string, status: "done" | "skipped") {
+export async function updatePlan(planId: string, data: { status?: string; memo?: string; rating?: number | null }) {
   const res = await fetch(`/api/coach/plan/${planId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to update plan status");
+  if (!res.ok) throw new Error("Failed to update plan");
   return res.json();
 }

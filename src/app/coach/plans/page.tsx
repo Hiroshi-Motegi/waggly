@@ -1,13 +1,13 @@
 "use client";
 
-import { usePlans, updatePlanStatus } from "@/hooks/use-plans";
+import { usePlans, updatePlan } from "@/hooks/use-plans";
 import { PlanList } from "@/components/coach/plan-list";
 
 export default function PlansPage() {
   const { plans, isLoading, refetch } = usePlans();
 
-  async function handleStatusChange(planId: string, status: "done" | "skipped") {
-    await updatePlanStatus(planId, status);
+  async function handleUpdate(planId: string, data: { status?: string; memo?: string; rating?: number | null }) {
+    await updatePlan(planId, data);
     refetch();
   }
 
@@ -17,7 +17,7 @@ export default function PlansPage() {
       {isLoading ? (
         <p className="text-center text-muted-foreground">読み込み中...</p>
       ) : (
-        <PlanList plans={plans} onStatusChange={handleStatusChange} />
+        <PlanList plans={plans} onUpdate={handleUpdate} />
       )}
     </div>
   );
