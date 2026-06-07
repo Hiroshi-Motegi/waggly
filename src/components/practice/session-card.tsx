@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { PracticeSessionWithClubs } from "@/types/database";
@@ -37,6 +38,16 @@ export function SessionCard({ session }: SessionCardProps) {
         )}
         {session.memo && (
           <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{session.memo}</p>
+        )}
+        {session.plan_id && (
+          <Link
+            href={`/coach/plans/${session.plan_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-2 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            <FileText className="h-3 w-3" />
+            練習メニューを見る
+          </Link>
         )}
       </CardContent>
     </Card>
