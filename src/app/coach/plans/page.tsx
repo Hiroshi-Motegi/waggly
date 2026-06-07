@@ -40,7 +40,7 @@ export default function PlansPage() {
               <Link key={plan.id} href={`/coach/plans/${plan.id}`}>
                 <Card className="mb-2">
                   <CardContent className="flex items-center justify-between p-3">
-                    <p className="text-sm font-medium flex-1 truncate mr-2">{plan.title}</p>
+                    <p className="text-sm font-medium flex-1 mr-2">{plan.title}</p>
                     <Badge variant={status.variant}>{status.label}</Badge>
                   </CardContent>
                 </Card>
