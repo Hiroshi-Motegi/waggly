@@ -28,7 +28,7 @@ export default function HomePage() {
   const gapResult = analyzeGaps(clubs);
 
   return (
-    <div className="space-y-5 px-4 py-6">
+    <div className="flex flex-col gap-4 px-4 py-6">
       <h2 className="text-xl font-bold">こんにちは、{user.display_name}さん</h2>
       <BagSummary clubs={clubs} />
       <GapAnalysisCard result={gapResult} />
