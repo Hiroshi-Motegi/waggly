@@ -1,6 +1,7 @@
 "use client";
 
 import type { UIMessage } from "ai";
+import ReactMarkdown from "react-markdown";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface ChatMessagesProps {
@@ -45,7 +46,13 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
                   : "bg-muted"
               }`}
             >
-              <p className="whitespace-pre-wrap">{textContent}</p>
+              {message.role === "assistant" ? (
+                <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                  <ReactMarkdown>{textContent}</ReactMarkdown>
+                </div>
+              ) : (
+                <p className="whitespace-pre-wrap">{textContent}</p>
+              )}
             </div>
           </div>
         );
