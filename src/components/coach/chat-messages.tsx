@@ -47,7 +47,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
               }`}
             >
               {message.role === "assistant" ? (
-                <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_hr]:my-2">
                   <ReactMarkdown>{textContent}</ReactMarkdown>
                 </div>
               ) : (
