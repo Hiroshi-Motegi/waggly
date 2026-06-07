@@ -60,7 +60,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="category">種別</Label>
-          <Select value={form.category} onValueChange={(v) => update("category", v)}>
+          <Select value={form.category ?? ""} onValueChange={(v) => update("category", v)}>
             <SelectTrigger id="category" aria-label="種別">
               <SelectValue placeholder="選択してください" />
             </SelectTrigger>
