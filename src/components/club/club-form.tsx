@@ -88,7 +88,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-4 overflow-x-hidden">
+    <form onSubmit={handleSubmit} className="space-y-6 p-4 pb-8 overflow-x-hidden">
       {/* Basic Info */}
       <div className="space-y-4">
         <div className="space-y-2">
