@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Club, ClubCategory } from "@/types/database";
 
 const categories: { value: ClubCategory; label: string }[] = [
@@ -60,16 +59,18 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="category">種別</Label>
-          <Select value={form.category ?? ""} onValueChange={(v) => update("category", v)}>
-            <SelectTrigger id="category" aria-label="種別">
-              <SelectValue placeholder="選択してください" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((c) => (
-                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            id="category"
+            aria-label="種別"
+            value={form.category ?? ""}
+            onChange={(e) => update("category", e.target.value || undefined)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="">選択してください</option>
+            {categories.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
@@ -121,16 +122,17 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
           </div>
           <div className="space-y-2">
             <Label htmlFor="shaft_flex">フレックス</Label>
-            <Select value={form.shaft_flex ?? ""} onValueChange={(v) => update("shaft_flex", v)}>
-              <SelectTrigger id="shaft_flex">
-                <SelectValue placeholder="選択" />
-              </SelectTrigger>
-              <SelectContent>
-                {["X", "S", "SR", "R", "R2", "L"].map((f) => (
-                  <SelectItem key={f} value={f}>{f}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <select
+              id="shaft_flex"
+              value={form.shaft_flex ?? ""}
+              onChange={(e) => update("shaft_flex", e.target.value || undefined)}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <option value="">選択</option>
+              {["X", "S", "SR", "R", "R2", "L"].map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
