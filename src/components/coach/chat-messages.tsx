@@ -13,13 +13,17 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   return (
     <div className="space-y-4 p-4">
       {messages.length === 0 && (
-        <div className="py-8 text-center text-muted-foreground">
+        <div className="py-6 text-center text-muted-foreground">
           <p className="text-lg font-semibold">Waggly AIコーチ</p>
           <p className="mt-2 text-sm">クラブや練習のことなんでも聞いてください</p>
           <div className="mt-4 space-y-2 text-xs">
             <p>例: 「最近スライスが多いんだけど」</p>
             <p>例: 「練習メニューを作って」</p>
             <p>例: 「7番アイアンの飛距離を伸ばすには？」</p>
+          </div>
+          <div className="mt-6 mx-4 p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground text-left space-y-1">
+            <p>AIコーチはベータ版につき無料公開中です。コーチ内容は誤りがある場合があります。</p>
+            <p>会話の利用上限は<a href="/settings" className="underline">設定画面</a>で確認できます。</p>
           </div>
         </div>
       )}

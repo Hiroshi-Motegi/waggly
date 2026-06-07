@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
-const MONTHLY_TOKEN_LIMIT = 300000; // 30万トークン/月
+const MONTHLY_TOKEN_LIMIT = 150000; // 15万トークン/月
 
 export async function GET() {
   const auth = await getApiAuth();

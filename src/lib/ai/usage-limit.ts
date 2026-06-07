@@ -1,4 +1,4 @@
-const MONTHLY_TOKEN_LIMIT = 300000;
+const MONTHLY_TOKEN_LIMIT = 150000;
 
 export async function checkUsageLimit(supabase: any, userId: string): Promise<boolean> {
   const now = new Date();
