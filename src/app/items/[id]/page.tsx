@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2, ExternalLink } from "lucide-react";
+import { toAffiliateUrl, getUrlPlatform } from "@/lib/affiliate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -303,17 +304,22 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       </Card>
 
       {/* Purchase URL */}
-      {item.purchase_url && (
-        <a
-          href={item.purchase_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full rounded-md border border-input bg-background px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
-        >
-          <ExternalLink className="h-4 w-4" />
-          購入する
-        </a>
-      )}
+      {item.purchase_url && (() => {
+        const affiliateUrl = toAffiliateUrl(item.purchase_url!);
+        const platform = getUrlPlatform(item.purchase_url!);
+        const platformLabel = platform === "amazon" ? "Amazonで購入" : platform === "rakuten" ? "楽天で購入" : "購入する";
+        return (
+          <a
+            href={affiliateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full rounded-md border border-input bg-background px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+            {platformLabel}
+          </a>
+        );
+      })()}
     </div>
   );
 }
