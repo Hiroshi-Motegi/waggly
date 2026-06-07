@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await initLiff();
         const { profile } = await getLiffProfile();
 
+        // Exchange LINE profile for Supabase credentials
         const res = await fetch("/api/auth/line", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -41,13 +42,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (!res.ok) throw new Error("Auth failed");
 
-        const { userId } = await res.json();
+        const { email, password } = await res.json();
 
+        // Sign in to Supabase to establish browser session
         const supabase = createClient();
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) throw new Error(signInError.message);
+
+        // Fetch user profile
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (!authUser) throw new Error("No auth user");
+
         const { data } = await supabase
           .from("users")
           .select("*")
-          .eq("id", userId)
+          .eq("id", authUser.id)
           .single();
 
         setUser(data);

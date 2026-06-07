@@ -1,11 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 
 function getSupabaseAdmin() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
+}
+
+// Derive a deterministic password from LINE user ID + secret
+function derivePassword(lineUserId: string): string {
+  return crypto
+    .createHmac("sha256", process.env.SUPABASE_SERVICE_ROLE_KEY!)
+    .update(lineUserId)
+    .digest("hex");
 }
 
 export async function POST(request: NextRequest) {
@@ -16,6 +25,8 @@ export async function POST(request: NextRequest) {
   }
 
   const supabaseAdmin = getSupabaseAdmin();
+  const email = `${lineUserId}@line.waggly.app`;
+  const password = derivePassword(lineUserId);
 
   // Check if user exists
   const { data: existingUser } = await supabaseAdmin
@@ -33,9 +44,10 @@ export async function POST(request: NextRequest) {
       .update({ display_name: displayName, avatar_url: avatarUrl })
       .eq("id", userId);
   } else {
-    const email = `${lineUserId}@line.waggly.app`;
+    // Create auth user with password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
+      password,
       email_confirm: true,
       user_metadata: { line_user_id: lineUserId, display_name: displayName },
     });
@@ -46,26 +58,23 @@ export async function POST(request: NextRequest) {
 
     userId = authUser.user.id;
 
-    await supabaseAdmin.from("users").insert({
+    // Create profile
+    const { error: profileError } = await supabaseAdmin.from("users").insert({
       id: userId,
       line_user_id: lineUserId,
       display_name: displayName,
       avatar_url: avatarUrl,
     });
+
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 500 });
+    }
   }
 
-  const { data: session, error: sessionError } =
-    await supabaseAdmin.auth.admin.generateLink({
-      type: "magiclink",
-      email: `${lineUserId}@line.waggly.app`,
-    });
-
-  if (sessionError) {
-    return NextResponse.json({ error: sessionError.message }, { status: 500 });
-  }
-
+  // Return credentials for client-side sign in
   return NextResponse.json({
     userId,
-    verificationUrl: session.properties?.action_link,
+    email,
+    password,
   });
 }
