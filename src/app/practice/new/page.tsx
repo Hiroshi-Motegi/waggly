@@ -8,7 +8,7 @@ import { createPracticeSession } from "@/hooks/use-practice";
 
 export default function NewPracticePage() {
   const router = useRouter();
-  const { clubs } = useClubs("active");
+  const { clubs } = useClubs("bag");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(data: any) {

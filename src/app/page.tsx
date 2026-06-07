@@ -10,7 +10,7 @@ import { analyzeGaps } from "@/lib/gap-analysis";
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
-  const { clubs } = useClubs("active");
+  const { clubs } = useClubs("bag");
   const { sessions } = usePracticeSessions();
 
   if (authLoading) {

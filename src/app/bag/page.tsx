@@ -4,39 +4,81 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ClubCard } from "@/components/club/club-card";
 import { StatusFilter } from "@/components/club/status-filter";
 import { useClubs } from "@/hooks/use-clubs";
-import type { ClubStatus } from "@/types/database";
+import type { ClubStatus, ClubWithImages } from "@/types/database";
 
-const categoryOrder = ["driver", "fairway_wood", "utility", "iron", "wedge", "putter"];
-const categoryLabels: Record<string, string> = {
-  driver: "ドライバー",
-  fairway_wood: "フェアウェイウッド",
-  utility: "ユーティリティ",
-  iron: "アイアン",
-  wedge: "ウェッジ",
-  putter: "パター",
-};
+const MAX_BAG_CLUBS = 14;
+
+function GapIndicator({ gap }: { gap: number }) {
+  return (
+    <div className="flex items-center gap-2 py-0.5 pl-12">
+      <div className="flex flex-col items-center">
+        <div className="h-3 w-px bg-border" />
+      </div>
+      <span className="text-xs text-muted-foreground">{gap} yds</span>
+    </div>
+  );
+}
+
+function ClubRow({ club }: { club: ClubWithImages }) {
+  return (
+    <Link href={`/bag/${club.id}`}>
+      <div className="flex items-start gap-3 rounded-lg px-3 py-3 hover:bg-muted/50 transition-colors">
+        <div className="w-10 shrink-0 text-center">
+          <span className="text-sm font-semibold">{club.club_number}</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium leading-tight truncate">
+            {club.model ?? "—"}
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+            {club.maker ?? "—"}
+          </p>
+        </div>
+        <div className="shrink-0 text-right">
+          {club.distance != null ? (
+            <>
+              <p className="text-sm font-semibold">{club.distance}</p>
+              <p className="text-xs text-muted-foreground">yds</p>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">—</p>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 export default function BagPage() {
-  const [statusFilter, setStatusFilter] = useState<ClubStatus | "all">("active");
+  const [statusFilter, setStatusFilter] = useState<ClubStatus | "all">("bag");
   const { clubs, isLoading } = useClubs(statusFilter === "all" ? undefined : statusFilter);
 
-  const groupedClubs = categoryOrder
-    .map((cat) => ({
-      category: cat,
-      label: categoryLabels[cat],
-      clubs: clubs.filter((c) => c.category === cat),
-    }))
-    .filter((g) => g.clubs.length > 0);
+  const isBagView = statusFilter === "bag";
+
+  // For bag view: sort by distance descending (clubs without distance go last)
+  const sortedClubs = isBagView
+    ? [...clubs].sort((a, b) => {
+        if (a.distance == null && b.distance == null) return 0;
+        if (a.distance == null) return 1;
+        if (b.distance == null) return -1;
+        return b.distance - a.distance;
+      })
+    : clubs;
+
+  const bagCount = isBagView ? clubs.length : null;
 
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">マイバッグ</h2>
+        <h2 className="text-xl font-bold">
+          {isBagView && bagCount !== null
+            ? `マイバッグ (${bagCount}/${MAX_BAG_CLUBS})`
+            : "マイバッグ"}
+        </h2>
         <Link href="/bag/new">
-          <Button size="sm">
+          <Button size="sm" disabled={isBagView && (bagCount ?? 0) >= MAX_BAG_CLUBS}>
             <Plus className="mr-1 h-4 w-4" />
             追加
           </Button>
@@ -51,16 +93,36 @@ export default function BagPage() {
         <p className="text-center text-muted-foreground py-8">
           クラブが登録されていません
         </p>
-      ) : (
-        <div className="space-y-6">
-          {groupedClubs.map((group) => (
-            <div key={group.category} className="space-y-2">
-              <h3 className="text-sm font-semibold text-muted-foreground">{group.label}</h3>
-              <div className="space-y-2">
-                {group.clubs.map((club) => (
-                  <ClubCard key={club.id} club={club} />
-                ))}
+      ) : isBagView ? (
+        <div className="rounded-xl border bg-card overflow-hidden">
+          {sortedClubs.map((club, index) => {
+            const next = sortedClubs[index + 1];
+            const gap =
+              club.distance != null && next?.distance != null
+                ? club.distance - next.distance
+                : null;
+
+            return (
+              <div key={club.id}>
+                <ClubRow club={club} />
+                {index < sortedClubs.length - 1 && (
+                  <div className="border-t mx-3" />
+                )}
+                {gap !== null && gap > 0 && (
+                  <GapIndicator gap={gap} />
+                )}
               </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="rounded-xl border bg-card overflow-hidden">
+          {sortedClubs.map((club, index) => (
+            <div key={club.id}>
+              <ClubRow club={club} />
+              {index < sortedClubs.length - 1 && (
+                <div className="border-t mx-3" />
+              )}
             </div>
           ))}
         </div>

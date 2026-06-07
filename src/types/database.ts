@@ -1,5 +1,5 @@
 export type ClubCategory = "driver" | "fairway_wood" | "utility" | "iron" | "wedge" | "putter";
-export type ClubStatus = "active" | "stored" | "sold";
+export type ClubStatus = "bag" | "reserve" | "sold";
 export type MaintenanceType = "grip_change" | "reshaft" | "loft_adjust" | "other";
 export type PlanSource = "auto" | "chat";
 export type PlanStatus = "new" | "done" | "skipped";

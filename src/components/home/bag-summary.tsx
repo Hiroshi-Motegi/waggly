@@ -9,7 +9,7 @@ interface BagSummaryProps {
 }
 
 export function BagSummary({ clubs }: BagSummaryProps) {
-  const activeClubs = clubs.filter((c) => c.status === "active");
+  const activeClubs = clubs.filter((c) => c.status === "bag");
   const totalInvestment = activeClubs.reduce((sum, c) => sum + (c.purchase_price ?? 0), 0);
 
   return (

@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
   // Fetch context data
   const [clubsRes, sessionsRes, plansRes] = await Promise.all([
-    supabase.from("clubs").select("*").eq("user_id", userId).eq("status", "active").order("sort_order"),
+    supabase.from("clubs").select("*").eq("user_id", userId).eq("status", "bag").order("sort_order"),
     supabase.from("practice_sessions")
       .select("*, practice_clubs(*, club:clubs(club_number))")
       .eq("user_id", userId)

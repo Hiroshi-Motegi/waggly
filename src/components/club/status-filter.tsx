@@ -5,8 +5,8 @@ import type { ClubStatus } from "@/types/database";
 
 const statuses: { value: ClubStatus | "all"; label: string }[] = [
   { value: "all", label: "すべて" },
-  { value: "active", label: "使用中" },
-  { value: "stored", label: "保管中" },
+  { value: "bag", label: "マイバッグ" },
+  { value: "reserve", label: "予備" },
   { value: "sold", label: "売却済" },
 ];
 
