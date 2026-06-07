@@ -21,7 +21,15 @@ function GapIndicator({ gap }: { gap: number }) {
   );
 }
 
-function ClubRow({ club }: { club: ClubWithImages }) {
+import { Badge } from "@/components/ui/badge";
+
+const statusLabels: Record<string, string> = {
+  bag: "マイバッグ",
+  reserve: "予備",
+  sold: "売却済",
+};
+
+function ClubRow({ club, showStatus }: { club: ClubWithImages; showStatus?: boolean }) {
   return (
     <Link href={`/bag/${club.id}`}>
       <div className="flex items-start gap-3 rounded-lg px-3 py-3 hover:bg-muted/50 transition-colors">
@@ -29,9 +37,16 @@ function ClubRow({ club }: { club: ClubWithImages }) {
           <span className="text-sm font-semibold">{club.club_number}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium leading-tight truncate">
-            {club.model ?? "—"}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium leading-tight truncate">
+              {club.model ?? "—"}
+            </p>
+            {showStatus && club.status !== "bag" && (
+              <Badge variant={club.status === "reserve" ? "secondary" : "outline"} className="text-[10px] px-1.5 py-0">
+                {statusLabels[club.status]}
+              </Badge>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">
             {club.maker ?? "—"}
           </p>
@@ -119,7 +134,7 @@ export default function BagPage() {
         <div className="rounded-xl border bg-card overflow-hidden">
           {sortedClubs.map((club, index) => (
             <div key={club.id}>
-              <ClubRow club={club} />
+              <ClubRow club={club} showStatus={statusFilter === "all"} />
               {index < sortedClubs.length - 1 && (
                 <div className="border-t mx-3" />
               )}

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ClubSpecTable } from "@/components/club/club-spec-table";
-import { useClub, deleteClub } from "@/hooks/use-clubs";
+import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
 
 const maintenanceTypeLabels: Record<string, string> = {
   grip_change: "グリップ交換",
@@ -22,6 +22,11 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
   const { clubId } = use(params);
   const { club, isLoading } = useClub(clubId);
   const router = useRouter();
+
+  async function handleStatusChange(newStatus: string) {
+    await updateClub(clubId, { status: newStatus as any });
+    router.push("/bag");
+  }
 
   async function handleDelete() {
     if (!confirm("このクラブを削除しますか？")) return;
@@ -50,6 +55,25 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
+      </div>
+
+      {/* Status Change */}
+      <div className="flex gap-2">
+        {club.status !== "bag" && (
+          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleStatusChange("bag")}>
+            マイバッグに入れる
+          </Button>
+        )}
+        {club.status !== "reserve" && (
+          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleStatusChange("reserve")}>
+            予備にする
+          </Button>
+        )}
+        {club.status !== "sold" && (
+          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleStatusChange("sold")}>
+            売却済みにする
+          </Button>
+        )}
       </div>
 
       {/* Specs */}
