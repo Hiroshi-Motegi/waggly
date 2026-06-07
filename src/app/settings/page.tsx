@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { liffLogout } from "@/lib/liff";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 interface UsageData {
@@ -18,21 +20,29 @@ interface UsageData {
   limitReached: boolean;
 }
 
+interface SubscriptionData {
+  plan_id: string;
+  plan?: { name: string; price: number; ai_monthly_tokens: number };
+  status: string;
+  free_until: string | null;
+}
+
 export default function SettingsPage() {
   const { user } = useAuth();
   const [usage, setUsage] = useState<UsageData | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
 
   useEffect(() => {
     if (!user) return;
-    fetch("/api/usage")
-      .then((res) => res.ok ? res.json() : null)
-      .then(setUsage)
-      .catch(() => {});
+    fetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch(() => {});
+    fetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch(() => {});
   }, [user]);
 
   if (!user) return null;
 
   const usagePercent = usage ? Math.min(100, Math.round((usage.totalTokens / usage.limit) * 100)) : 0;
+  const isFreePlan = subscription?.plan_id === "free" || !subscription?.plan_id;
+  const isFreeTrialActive = subscription?.free_until && new Date(subscription.free_until) > new Date();
 
   return (
     <div className="space-y-4 px-4 py-6">
@@ -51,6 +61,33 @@ export default function SettingsPage() {
             <p className="font-semibold">{user.display_name}</p>
             <p className="text-sm text-muted-foreground">LINE連携済み</p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">プラン</CardTitle>
+            <Badge variant={isFreePlan ? "secondary" : "default"}>
+              {subscription?.plan?.name ?? "フリー"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          {isFreePlan ? (
+            <p className="text-muted-foreground">
+              フリープランをご利用中です。AI機能に利用制限があります。
+            </p>
+          ) : (
+            <div className="space-y-1">
+              <p>月額 {subscription?.plan?.price?.toLocaleString()}円</p>
+              {isFreeTrialActive && (
+                <p className="text-primary text-xs">
+                  無料期間中（{new Date(subscription!.free_until!).toLocaleDateString("ja-JP")}まで）
+                </p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -90,6 +127,12 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Link href="/terms">
+        <Button variant="link" className="w-full text-muted-foreground text-xs">
+          利用規約
+        </Button>
+      </Link>
 
       <Separator />
 
