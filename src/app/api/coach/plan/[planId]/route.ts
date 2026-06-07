@@ -10,11 +10,15 @@ export async function PATCH(
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  const { status } = await request.json();
+  const body = await request.json();
+  const updateData: Record<string, unknown> = {};
+  if (body.status !== undefined) updateData.status = body.status;
+  if (body.memo !== undefined) updateData.memo = body.memo;
+  if (body.rating !== undefined) updateData.rating = body.rating;
 
   const { data, error } = await supabase
     .from("practice_plans")
-    .update({ status })
+    .update(updateData)
     .eq("id", planId)
     .eq("user_id", userId)
     .select()
@@ -22,4 +26,17 @@ export async function PATCH(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ planId: string }> }
+) {
+  const { planId } = await params;
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
+
+  await supabase.from("practice_plans").delete().eq("id", planId).eq("user_id", userId);
+  return NextResponse.json({ success: true });
 }

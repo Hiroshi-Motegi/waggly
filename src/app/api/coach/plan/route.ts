@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "今月のAI利用上限に達しました" }, { status: 429 });
   }
 
-  const { source } = await request.json();
+  const { source, duration, selectedClubs, focus, location, notes } = await request.json();
 
   // Fetch context data
   const [clubsRes, sessionsRes, plansRes, accessoriesRes] = await Promise.all([
@@ -70,6 +70,12 @@ export async function POST(request: Request) {
     system: systemPrompt,
     prompt: `ユーザーの練習記録とクラブセットを分析して、次の練習メニューを提案してください。
 合計球数は100〜200球程度にしてください。
+${duration ? `練習時間: ${duration}` : ""}
+${location ? `練習場所: ${location}` : ""}
+${selectedClubs && selectedClubs.length > 0 ? `利用するクラブ: ${selectedClubs.join(", ")}` : ""}
+${focus ? `重点的に練習したいこと: ${focus}` : ""}
+${notes ? `その他の要望: ${notes}` : ""}
+
 以下のJSON形式で出力してください:
 
 \`\`\`json
