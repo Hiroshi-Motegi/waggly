@@ -18,7 +18,7 @@ interface SessionFormProps {
     location: string | null;
     total_balls: number | null;
     memo: string | null;
-    rating: number | null;
+    rating?: number | null;
     practice_clubs?: { club_id: string; balls: number }[];
   };
   showRating?: boolean;
