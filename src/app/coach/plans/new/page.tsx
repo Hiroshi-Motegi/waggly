@@ -134,7 +134,23 @@ export default function NewPlanPage() {
         {/* Club selection */}
         {clubs.length > 0 && (
           <Card>
-            <CardHeader><CardTitle className="text-base">利用するクラブ</CardTitle></CardHeader>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">利用するクラブ</CardTitle>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const allNumbers = clubs.map((c) => c.club_number);
+                    setSelectedClubs((prev) =>
+                      prev.length === allNumbers.length ? [] : allNumbers
+                    );
+                  }}
+                  className="text-xs text-primary hover:underline"
+                >
+                  {selectedClubs.length === clubs.length ? "すべて解除" : "すべて追加"}
+                </button>
+              </div>
+            </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-2">
                 {clubs.map((club) => (
