@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const RAKUTEN_APP_ID = process.env.RAKUTEN_APP_ID;
+const RAKUTEN_ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY;
 const RAKUTEN_AFFILIATE_ID = process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID;
+const APP_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ? "https://waggly-alpha.vercel.app" : "http://localhost:3000";
 
 export async function GET(request: NextRequest) {
-  if (!RAKUTEN_APP_ID) {
+  if (!RAKUTEN_APP_ID || !RAKUTEN_ACCESS_KEY) {
     return NextResponse.json({ error: "Rakuten API not configured" }, { status: 500 });
   }
 
@@ -14,6 +16,7 @@ export async function GET(request: NextRequest) {
 
   const params = new URLSearchParams({
     applicationId: RAKUTEN_APP_ID,
+    accessKey: RAKUTEN_ACCESS_KEY,
     hits: "20",
     page,
     formatVersion: "2",
@@ -26,8 +29,14 @@ export async function GET(request: NextRequest) {
   if (areaCode) params.set("areaCode", areaCode);
 
   const res = await fetch(
-    `https://app.rakuten.co.jp/services/api/Gora/GoraGolfCourseSearch/20170623?${params}`,
-    { next: { revalidate: 3600 } }
+    `https://openapi.rakuten.co.jp/engine/api/Gora/GoraGolfCourseSearch/20170623?${params}`,
+    {
+      headers: {
+        Referer: APP_URL,
+        Origin: APP_URL,
+      },
+      next: { revalidate: 3600 },
+    }
   );
 
   const data = await res.json();
