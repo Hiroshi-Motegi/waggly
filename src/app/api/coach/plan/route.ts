@@ -93,7 +93,7 @@ export async function POST(request: Request) {
 合計球数は100〜200球程度にしてください。
 ${duration ? `練習時間: ${duration}` : ""}
 ${location ? `練習場所: ${location}` : ""}
-${selectedClubs && selectedClubs.length > 0 ? `利用するクラブ: ${selectedClubs.join(", ")}` : ""}
+${selectedClubs && selectedClubs.length > 0 ? `利用可能なクラブ: ${selectedClubs.join(", ")}（すべて使う必要はありません。練習目的に合ったクラブを選んでください）` : ""}
 ${focus ? `重点的に練習したいこと: ${focus}` : ""}
 ${notes ? `その他の要望: ${notes}` : ""}
 
