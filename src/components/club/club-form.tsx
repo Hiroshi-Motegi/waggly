@@ -43,7 +43,11 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.category || !form.club_number) return;
-    onSubmit(form);
+    // Clean empty strings to null for nullable DB fields
+    const cleaned = Object.fromEntries(
+      Object.entries(form).map(([k, v]) => [k, v === "" ? null : v])
+    );
+    onSubmit(cleaned);
   }
 
   function update(field: string, value: string | number | undefined | null) {
