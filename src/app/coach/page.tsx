@@ -36,9 +36,17 @@ function ChatView({
   });
 
   const isLoading = status === "submitted" || status === "streaming";
+  const initialScrollDone = useRef(false);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (!initialScrollDone.current && messages.length > 0) {
+      // Initial load: jump to bottom instantly
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+      initialScrollDone.current = true;
+    } else if (initialScrollDone.current) {
+      // Subsequent messages: smooth scroll
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    }
   }, [messages]);
 
   function handleSend(content: string) {
@@ -46,7 +54,7 @@ function ChatView({
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <>
       <div className="flex justify-end gap-3 px-4 py-2 border-b">
         <button
           onClick={onShowHistory}
@@ -61,11 +69,13 @@ function ChatView({
           新しい会話
         </button>
       </div>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      <div ref={scrollRef} className="overflow-y-auto pb-16">
         <ChatMessages messages={messages} isLoading={isLoading} />
       </div>
-      <ChatInput onSend={handleSend} isLoading={isLoading} />
-    </div>
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-md z-40">
+        <ChatInput onSend={handleSend} isLoading={isLoading} />
+      </div>
+    </>
   );
 }
 
