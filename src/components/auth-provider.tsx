@@ -26,10 +26,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        const supabase = createClient();
+
+        // Check for existing Supabase session first (fast path)
+        const { data: { user: existingAuth } } = await supabase.auth.getUser();
+        if (existingAuth) {
+          const { data } = await supabase
+            .from("users")
+            .select("*")
+            .eq("id", existingAuth.id)
+            .single();
+
+          if (data) {
+            setUser(data);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // No session — do full LIFF auth flow
         await initLiff();
         const { profile } = await getLiffProfile();
 
-        // Exchange LINE profile for Supabase credentials
         const res = await fetch("/api/auth/line", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -44,8 +62,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const { email, password } = await res.json();
 
-        // Sign in to Supabase to establish browser session
-        const supabase = createClient();
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -53,7 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (signInError) throw new Error(signInError.message);
 
-        // Fetch user profile
         const { data: { user: authUser } } = await supabase.auth.getUser();
         if (!authUser) throw new Error("No auth user");
 
