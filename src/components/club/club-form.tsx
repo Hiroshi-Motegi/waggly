@@ -46,7 +46,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     onSubmit(form);
   }
 
-  function update(field: string, value: string | number | undefined) {
+  function update(field: string, value: string | number | undefined | null) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
