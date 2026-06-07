@@ -7,8 +7,8 @@ import { Home, Briefcase, ClipboardList, Package, MessageSquare } from "lucide-r
 const tabs = [
   { href: "/", label: "ホーム", icon: Home },
   { href: "/bag", label: "マイバッグ", icon: Briefcase },
-  { href: "/practice", label: "練習記録", icon: ClipboardList },
   { href: "/items", label: "アイテム", icon: Package },
+  { href: "/practice", label: "練習記録", icon: ClipboardList },
   { href: "/coach", label: "AIコーチ", icon: MessageSquare },
 ];
 
