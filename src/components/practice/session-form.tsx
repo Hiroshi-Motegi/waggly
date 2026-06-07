@@ -18,19 +18,22 @@ interface SessionFormProps {
     location: string | null;
     total_balls: number | null;
     memo: string | null;
+    rating: number | null;
     practice_clubs?: { club_id: string; balls: number }[];
   };
+  showRating?: boolean;
   onSubmit: (data: {
     practiced_at: string;
     location: string;
     total_balls: number;
     memo: string;
+    rating: number | null;
     clubs: { club_id: string; balls: number }[];
   }) => void;
   isSubmitting?: boolean;
 }
 
-export function SessionForm({ clubs, initialData, onSubmit, isSubmitting }: SessionFormProps) {
+export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmitting }: SessionFormProps) {
   const today = new Date().toISOString().split("T")[0];
   const [practicedAt, setPracticedAt] = useState(initialData?.practiced_at ?? today);
   const [location, setLocation] = useState(initialData?.location ?? "");
@@ -39,6 +42,7 @@ export function SessionForm({ clubs, initialData, onSubmit, isSubmitting }: Sess
     initialData?.practice_clubs ?? []
   );
   const [memo, setMemo] = useState(initialData?.memo ?? "");
+  const [rating, setRating] = useState<number | null>(initialData?.rating ?? null);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,6 +51,7 @@ export function SessionForm({ clubs, initialData, onSubmit, isSubmitting }: Sess
       location,
       total_balls: totalBalls,
       memo,
+      rating,
       clubs: clubBalls,
     });
   }
@@ -106,6 +111,26 @@ export function SessionForm({ clubs, initialData, onSubmit, isSubmitting }: Sess
           rows={4}
         />
       </div>
+
+      {showRating !== false && (
+        <div>
+          <Label>今日の練習の評価</Label>
+          <div className="flex gap-2 mt-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setRating(rating === star ? null : star)}
+                className={`text-2xl transition-colors ${
+                  rating != null && star <= rating ? "text-amber-500" : "text-muted-foreground/30"
+                }`}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? "保存中..." : "保存"}

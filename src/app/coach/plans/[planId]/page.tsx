@@ -1,12 +1,12 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { updatePlan } from "@/hooks/use-plans";
 import { useAuth } from "@/hooks/use-auth";
@@ -21,13 +21,8 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
   const { planId } = use(params);
   const { user } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const autoFeedback = searchParams.get("feedback") === "true";
   const [plan, setPlan] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showFeedback, setShowFeedback] = useState(autoFeedback);
-  const [memo, setMemo] = useState("");
-  const [rating, setRating] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -36,14 +31,9 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       .then(data => {
         // If the API returns array, find our plan
         if (Array.isArray(data)) {
-          const found = data.find((p: any) => p.id === planId);
-          setPlan(found ?? null);
-          setMemo(found?.memo ?? "");
-          setRating(found?.rating ?? null);
+          setPlan(data.find((p: any) => p.id === planId) ?? null);
         } else if (data) {
           setPlan(data);
-          setMemo(data.memo ?? "");
-          setRating(data.rating ?? null);
         }
       })
       .catch(() => {})
@@ -53,12 +43,6 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
   async function handleDone() {
     // Navigate to practice recording with plan ID
     router.push(`/practice/new?planId=${planId}`);
-  }
-
-  async function handleSaveFeedback() {
-    await updatePlan(planId, { status: "done", memo: memo || undefined, rating });
-    setPlan({ ...plan, status: "done", memo, rating });
-    setShowFeedback(false);
   }
 
   async function handleSkip() {
@@ -124,8 +108,8 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
                 {body && <p className="text-xs text-muted-foreground leading-relaxed">{body}</p>}
               </div>
             </div>
-            );}
-          ))}
+            );
+          })}
           <Separator className="my-2" />
           <div className="flex justify-between text-sm font-medium">
             <span>合計</span>
@@ -134,62 +118,22 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
         </CardContent>
       </Card>
 
-      {/* Feedback form */}
-      {showFeedback && (
-        <Card>
-          <CardHeader><CardTitle className="text-base">練習の振り返り</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">評価</p>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(rating === star ? null : star)}
-                    className={`text-2xl transition-colors ${
-                      rating != null && star <= rating ? "text-amber-500" : "text-muted-foreground/30"
-                    }`}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">メモ</p>
-              <Textarea
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="感想や気づきを記録..."
-                rows={3}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => setShowFeedback(false)}>キャンセル</Button>
-              <Button className="flex-1" onClick={handleSaveFeedback}>保存</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Status buttons */}
-      {plan.status === "new" && !showFeedback && (
+      {plan.status === "new" && (
         <div className="flex gap-2">
           <Button className="flex-1" onClick={handleDone}>実行した</Button>
           <Button variant="outline" className="flex-1" onClick={handleSkip}>スキップ</Button>
         </div>
       )}
 
-      {/* Saved feedback */}
-      {plan.status === "done" && (plan.rating != null || plan.memo) && (
+      {/* Linked practice session */}
+      {plan.status === "done" && (
         <Card>
-          <CardHeader><CardTitle className="text-base">振り返り</CardTitle></CardHeader>
-          <CardContent className="space-y-1">
-            {plan.rating != null && (
-              <span className="text-amber-500">{"★".repeat(plan.rating)}{"☆".repeat(5 - plan.rating)}</span>
-            )}
-            {plan.memo && <p className="text-sm text-muted-foreground">{plan.memo}</p>}
+          <CardHeader><CardTitle className="text-base">練習記録</CardTitle></CardHeader>
+          <CardContent>
+            <Link href={`/practice`}>
+              <Button variant="outline" className="w-full">練習記録を確認する</Button>
+            </Link>
           </CardContent>
         </Card>
       )}

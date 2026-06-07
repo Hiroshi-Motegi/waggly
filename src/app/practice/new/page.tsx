@@ -22,6 +22,14 @@ export default function NewPracticePage() {
     setIsSubmitting(true);
     try {
       await createPracticeSession({ ...data, plan_id: planId ?? undefined });
+      // Mark plan as done if linked
+      if (planId) {
+        await fetch(`/api/coach/plan/${planId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "done" }),
+        });
+      }
       setSaved(true);
     } catch (error) {
       console.error("Failed to create practice session:", error);
