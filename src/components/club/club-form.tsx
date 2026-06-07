@@ -145,8 +145,8 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         </div>
       </div>
 
-      {/* Shaft */}
-      <div className="space-y-4">
+      {/* Shaft (hidden for putter) */}
+      {form.category !== "putter" && <div className="space-y-4">
         <h3 className="text-sm font-semibold text-muted-foreground">シャフト</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -193,7 +193,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             }
           </select>
         </div>
-      </div>
+      </div>}
 
       {/* Auto-fill */}
       <div className="space-y-2">
