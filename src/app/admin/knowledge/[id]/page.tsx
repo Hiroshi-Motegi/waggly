@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 const categories = [
   { value: "swing_basics", label: "スイング基礎" },
@@ -26,6 +27,12 @@ export default function KnowledgeEditPage() {
 
   const [isLoading, setIsLoading] = useState(!isNew);
   const [isSaving, setIsSaving] = useState(false);
+  const [meta, setMeta] = useState<{
+    status: string;
+    analysis_summary: string | null;
+    search_sources: string[] | null;
+    generated_at: string | null;
+  } | null>(null);
   const [form, setForm] = useState({
     category: "swing_basics",
     title: "",
@@ -45,6 +52,12 @@ export default function KnowledgeEditPage() {
           content: data.content,
           tags: data.tags?.join(", ") ?? "",
           source: data.source ?? "",
+        });
+        setMeta({
+          status: data.status,
+          analysis_summary: data.analysis_summary,
+          search_sources: data.search_sources,
+          generated_at: data.generated_at,
         });
       })
       .finally(() => setIsLoading(false));
@@ -66,7 +79,7 @@ export default function KnowledgeEditPage() {
       await fetch("/api/admin/knowledge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ ...body, status: "active" }),
       });
     } else {
       await fetch(`/api/admin/knowledge/${id}`, {
@@ -76,6 +89,24 @@ export default function KnowledgeEditPage() {
       });
     }
 
+    router.push("/admin/knowledge");
+  }
+
+  async function handleApprove() {
+    await fetch(`/api/admin/knowledge/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "active" }),
+    });
+    router.push("/admin/knowledge");
+  }
+
+  async function handleReject() {
+    await fetch(`/api/admin/knowledge/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "rejected" }),
+    });
     router.push("/admin/knowledge");
   }
 
@@ -91,6 +122,43 @@ export default function KnowledgeEditPage() {
         </Button>
         <h1 className="text-xl font-bold">{isNew ? "教師データ追加" : "教師データ編集"}</h1>
       </div>
+
+      {/* Auto-generated metadata */}
+      {meta?.status === "draft" && (
+        <Card className="border-blue-200 dark:border-blue-800">
+          <CardContent className="p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="default">レビュー待ち</Badge>
+              {meta.generated_at && (
+                <span className="text-xs text-muted-foreground">
+                  {new Date(meta.generated_at).toLocaleDateString("ja-JP")} 自動生成
+                </span>
+              )}
+            </div>
+            {meta.analysis_summary && (
+              <p className="text-sm"><span className="font-medium">分析理由:</span> {meta.analysis_summary}</p>
+            )}
+            {meta.search_sources && meta.search_sources.length > 0 && (
+              <div className="text-sm">
+                <span className="font-medium">参照URL:</span>
+                <ul className="list-disc list-inside mt-1">
+                  {meta.search_sources.map((url, i) => (
+                    <li key={i}>
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs break-all">
+                        {url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="flex gap-2 pt-1">
+              <Button size="sm" onClick={handleApprove}>承認して有効化</Button>
+              <Button size="sm" variant="outline" onClick={handleReject}>却下</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="p-4">
