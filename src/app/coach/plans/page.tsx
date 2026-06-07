@@ -39,13 +39,9 @@ export default function PlansPage() {
             return (
               <Link key={plan.id} href={`/coach/plans/${plan.id}`}>
                 <Card className="mb-2">
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium flex-1 truncate mr-2">{plan.title}</p>
-                      <Badge variant={status.variant}>{status.label}</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{plan.summary}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{new Date(plan.created_at).toLocaleDateString("ja-JP")}</p>
+                  <CardContent className="flex items-center justify-between p-3">
+                    <p className="text-sm font-medium flex-1 truncate mr-2">{plan.title}</p>
+                    <Badge variant={status.variant}>{status.label}</Badge>
                   </CardContent>
                 </Card>
               </Link>
