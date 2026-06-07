@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     gapAnalysis,
   });
 
-  const { text } = await generateText({
+  const { text, usage } = await generateText({
     model: anthropic("claude-sonnet-4-6"),
     system: systemPrompt,
     prompt: `ユーザーの練習記録とクラブセットを分析して、次の練習メニューを提案してください。
@@ -68,6 +68,17 @@ export async function POST(request: Request) {
 \`\`\``,
     maxOutputTokens: 1000,
   });
+
+  // Save token usage
+  if (usage) {
+    await supabase.from("ai_usage").insert({
+      user_id: userId,
+      input_tokens: usage.inputTokens ?? 0,
+      output_tokens: usage.outputTokens ?? 0,
+      model: "claude-sonnet-4-6",
+      source: "plan",
+    });
+  }
 
   const parsed = parsePlanResponse(text);
   if (!parsed) {

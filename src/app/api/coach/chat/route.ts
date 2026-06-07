@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     system: systemPrompt,
     messages: modelMessages,
     maxOutputTokens: 1000,
-    async onFinish({ text }) {
+    async onFinish({ text, usage }) {
       // Save assistant response
       await supabase.from("ai_chats").insert({
         user_id: userId,
@@ -89,6 +89,17 @@ export async function POST(request: Request) {
         role: "assistant",
         message: text,
       });
+
+      // Save token usage
+      if (usage) {
+        await supabase.from("ai_usage").insert({
+          user_id: userId,
+          input_tokens: usage.inputTokens ?? 0,
+          output_tokens: usage.outputTokens ?? 0,
+          model: "claude-sonnet-4-6",
+          source: "chat",
+        });
+      }
     },
   });
 
