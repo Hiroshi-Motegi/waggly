@@ -8,14 +8,22 @@ import { ChatMessages } from "@/components/coach/chat-messages";
 import { ChatInput } from "@/components/coach/chat-input";
 import { useAuth } from "@/hooks/use-auth";
 
+type ConversationItem = {
+  id: string;
+  title: string;
+  created_at: string;
+};
+
 function ChatView({
   conversationId,
   initialMessages,
   onNewChat,
+  onShowHistory,
 }: {
   conversationId: string;
   initialMessages: UIMessage[];
   onNewChat: () => void;
+  onShowHistory: () => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +47,13 @@ function ChatView({
 
   return (
     <div className="flex h-[calc(100vh-7.5rem)] flex-col">
-      <div className="flex justify-end px-4 py-2 border-b">
+      <div className="flex justify-end gap-3 px-4 py-2 border-b">
+        <button
+          onClick={onShowHistory}
+          className="text-xs text-muted-foreground hover:text-foreground"
+        >
+          履歴
+        </button>
         <button
           onClick={onNewChat}
           className="text-xs text-muted-foreground hover:text-foreground"
@@ -55,12 +69,74 @@ function ChatView({
   );
 }
 
+function HistoryPanel({
+  conversations,
+  activeId,
+  isLoading,
+  onSelect,
+  onClose,
+}: {
+  conversations: ConversationItem[];
+  activeId: string | null;
+  isLoading: boolean;
+  onSelect: (id: string) => void;
+  onClose: () => void;
+}) {
+  function formatDate(dateStr: string) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" });
+  }
+
+  return (
+    <div className="flex h-[calc(100vh-7.5rem)] flex-col">
+      <div className="flex items-center justify-between px-4 py-2 border-b">
+        <span className="text-sm font-medium">会話履歴</span>
+        <button
+          onClick={onClose}
+          className="text-xs text-muted-foreground hover:text-foreground"
+        >
+          閉じる
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {isLoading ? (
+          <p className="p-4 text-center text-sm text-muted-foreground">読み込み中...</p>
+        ) : conversations.length === 0 ? (
+          <p className="p-4 text-center text-sm text-muted-foreground">会話履歴がありません</p>
+        ) : (
+          <ul>
+            {conversations.map((conv) => (
+              <li key={conv.id}>
+                <button
+                  onClick={() => onSelect(conv.id)}
+                  className={`w-full flex items-center justify-between px-4 py-3 text-left border-b hover:bg-muted/50 transition-colors ${
+                    conv.id === activeId ? "bg-muted font-medium" : ""
+                  }`}
+                >
+                  <span className="text-sm truncate flex-1 mr-3">{conv.title}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {formatDate(conv.created_at)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function CoachPage() {
   const { user } = useAuth();
   const [chatKey, setChatKey] = useState(0);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+
+  const [showHistory, setShowHistory] = useState(false);
+  const [conversations, setConversations] = useState<ConversationItem[]>([]);
+  const [historyFetching, setHistoryFetching] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -98,7 +174,44 @@ export default function CoachPage() {
   function handleNewChat() {
     setConversationId(crypto.randomUUID());
     setInitialMessages([]);
-    setChatKey((k) => k + 1); // Force remount ChatView
+    setShowHistory(false);
+    setChatKey((k) => k + 1);
+  }
+
+  async function handleShowHistory() {
+    setShowHistory(true);
+    setHistoryFetching(true);
+    try {
+      const res = await fetch("/api/coach/chat/history?list=true");
+      if (!res.ok) throw new Error("Failed to load conversation list");
+      const data: ConversationItem[] = await res.json();
+      setConversations(data);
+    } catch (error) {
+      console.error("Failed to load conversation list:", error);
+      setConversations([]);
+    } finally {
+      setHistoryFetching(false);
+    }
+  }
+
+  async function handleSelectConversation(id: string) {
+    try {
+      const res = await fetch(`/api/coach/chat/history?conversationId=${id}`);
+      if (!res.ok) throw new Error("Failed to load conversation");
+      const data = await res.json();
+
+      setConversationId(id);
+      const uiMessages: UIMessage[] = (data ?? []).map((m: any) => ({
+        id: m.id,
+        role: m.role as "user" | "assistant",
+        parts: [{ type: "text" as const, text: m.message }],
+      }));
+      setInitialMessages(uiMessages);
+      setShowHistory(false);
+      setChatKey((k) => k + 1);
+    } catch (error) {
+      console.error("Failed to load conversation:", error);
+    }
   }
 
   if (!historyLoaded) {
@@ -109,12 +222,25 @@ export default function CoachPage() {
     return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
   }
 
+  if (showHistory) {
+    return (
+      <HistoryPanel
+        conversations={conversations}
+        activeId={conversationId}
+        isLoading={historyFetching}
+        onSelect={handleSelectConversation}
+        onClose={() => setShowHistory(false)}
+      />
+    );
+  }
+
   return (
     <ChatView
       key={chatKey}
       conversationId={conversationId}
       initialMessages={initialMessages}
       onNewChat={handleNewChat}
+      onShowHistory={handleShowHistory}
     />
   );
 }
