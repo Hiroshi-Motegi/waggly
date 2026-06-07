@@ -43,3 +43,18 @@ export async function createPracticeSession(data: CreateSessionData) {
   if (!res.ok) throw new Error("Failed to create practice session");
   return res.json();
 }
+
+export async function updatePracticeSession(sessionId: string, data: any) {
+  const res = await fetch(`/api/practice/${sessionId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update practice session");
+  return res.json();
+}
+
+export async function deletePracticeSession(sessionId: string) {
+  const res = await fetch(`/api/practice/${sessionId}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete practice session");
+}

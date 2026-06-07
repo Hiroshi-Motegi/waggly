@@ -13,6 +13,13 @@ const totalBallsPresets = [50, 100, 150, 200, 300];
 
 interface SessionFormProps {
   clubs: Club[];
+  initialData?: {
+    practiced_at: string;
+    location: string | null;
+    total_balls: number | null;
+    memo: string | null;
+    practice_clubs?: { club_id: string; balls: number }[];
+  };
   onSubmit: (data: {
     practiced_at: string;
     location: string;
@@ -23,13 +30,15 @@ interface SessionFormProps {
   isSubmitting?: boolean;
 }
 
-export function SessionForm({ clubs, onSubmit, isSubmitting }: SessionFormProps) {
+export function SessionForm({ clubs, initialData, onSubmit, isSubmitting }: SessionFormProps) {
   const today = new Date().toISOString().split("T")[0];
-  const [practicedAt, setPracticedAt] = useState(today);
-  const [location, setLocation] = useState("");
-  const [totalBalls, setTotalBalls] = useState(0);
-  const [clubBalls, setClubBalls] = useState<{ club_id: string; balls: number }[]>([]);
-  const [memo, setMemo] = useState("");
+  const [practicedAt, setPracticedAt] = useState(initialData?.practiced_at ?? today);
+  const [location, setLocation] = useState(initialData?.location ?? "");
+  const [totalBalls, setTotalBalls] = useState(initialData?.total_balls ?? 0);
+  const [clubBalls, setClubBalls] = useState<{ club_id: string; balls: number }[]>(
+    initialData?.practice_clubs ?? []
+  );
+  const [memo, setMemo] = useState(initialData?.memo ?? "");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

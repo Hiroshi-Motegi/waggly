@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { PracticeSessionWithClubs } from "@/types/database";
@@ -8,6 +9,7 @@ interface SessionCardProps {
 
 export function SessionCard({ session }: SessionCardProps) {
   return (
+    <Link href={`/practice/${session.id}`}>
     <Card>
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
@@ -33,5 +35,6 @@ export function SessionCard({ session }: SessionCardProps) {
         )}
       </CardContent>
     </Card>
+    </Link>
   );
 }
