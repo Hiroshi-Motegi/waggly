@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +44,7 @@ export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmit
   );
   const [memo, setMemo] = useState(initialData?.memo ?? "");
   const [rating, setRating] = useState<number | null>(initialData?.rating ?? null);
+  const [clubBallsOpen, setClubBallsOpen] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -95,10 +97,19 @@ export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmit
       </div>
 
       <div>
-        <Label>番手別球数</Label>
-        <div className="mt-2">
-          <ClubBallsInput clubs={clubs} value={clubBalls} onChange={setClubBalls} />
-        </div>
+        <button
+          type="button"
+          onClick={() => setClubBallsOpen(!clubBallsOpen)}
+          className="flex items-center justify-between w-full"
+        >
+          <Label className="cursor-pointer">番手別球数{clubBalls.length > 0 && ` (${clubBalls.length}番手)`}</Label>
+          {clubBallsOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </button>
+        {clubBallsOpen && (
+          <div className="mt-2">
+            <ClubBallsInput clubs={clubs} value={clubBalls} onChange={setClubBalls} />
+          </div>
+        )}
       </div>
 
       <div>
