@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   const { supabase } = auth;
 
   const category = request.nextUrl.searchParams.get("category");
+  const status = request.nextUrl.searchParams.get("status");
 
   let query = supabase
     .from("knowledge_base")
@@ -14,6 +15,7 @@ export async function GET(request: NextRequest) {
     .order("created_at", { ascending: false });
 
   if (category) query = query.eq("category", category);
+  if (status) query = query.eq("status", status);
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
