@@ -31,31 +31,25 @@ export default function NewPlanPage() {
     e.preventDefault();
     setIsGenerating(true);
     setError("");
-    try {
-      const res = await fetch("/api/coach/plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          source: "manual",
-          duration,
-          selectedClubs,
-          focus,
-          location,
-          notes,
-          referPracticeMonths: referPractice === "none" ? 0 : parseInt(referPractice),
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "生成に失敗しました");
-        return;
-      }
-      const plan = await res.json();
-      router.push(`/coach/plans/${plan.id}`);
-    } catch {
-      setError("生成に失敗しました");
-    } finally {
-      setIsGenerating(false);
+
+    // Fire and navigate - generation continues in background
+    fetch("/api/coach/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        source: "manual",
+        duration,
+        selectedClubs,
+        focus,
+        location,
+        notes,
+        referPracticeMonths: referPractice === "none" ? 0 : parseInt(referPractice),
+      }),
+    }).catch(() => {});
+
+    // Navigate immediately
+    router.push("/coach/plans?generating=true");
+    return;
     }
   }
 
