@@ -6,7 +6,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const AREA_CODES = [
   { code: "", label: "全国" },
@@ -103,18 +102,15 @@ export default function CoursesPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <Select value={areaCode} onValueChange={(v) => setAreaCode(v ?? "")}>
-          <SelectTrigger className="h-11">
-            <SelectValue placeholder="エリアを選択" />
-          </SelectTrigger>
-          <SelectContent>
-            {AREA_CODES.map((area) => (
-              <SelectItem key={area.code} value={area.code}>
-                {area.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <select
+          value={areaCode}
+          onChange={(e) => setAreaCode(e.target.value)}
+          className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          {AREA_CODES.map((area) => (
+            <option key={area.code} value={area.code}>{area.label}</option>
+          ))}
+        </select>
         <Button type="submit" className="w-full h-11" disabled={isLoading}>
           {isLoading ? "検索中..." : "検索する"}
         </Button>
