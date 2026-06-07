@@ -63,6 +63,8 @@ export interface PracticeSession {
   location: string | null;
   total_balls: number | null;
   memo: string | null;
+  rating: number | null;
+  plan_id: string | null;
   created_at: string;
 }
 

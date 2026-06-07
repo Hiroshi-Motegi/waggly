@@ -30,8 +30,13 @@ export function SessionCard({ session }: SessionCardProps) {
             ))}
           </div>
         )}
+        {session.rating != null && (
+          <div className="mt-2">
+            <span className="text-amber-500 text-sm">{"★".repeat(session.rating)}{"☆".repeat(5 - session.rating)}</span>
+          </div>
+        )}
         {session.memo && (
-          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{session.memo}</p>
+          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{session.memo}</p>
         )}
       </CardContent>
     </Card>

@@ -118,25 +118,13 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
         </CardContent>
       </Card>
 
-      {/* Status buttons */}
-      {plan.status === "new" && (
-        <div className="flex gap-2">
-          <Button className="flex-1" onClick={handleDone}>実行した</Button>
+      {/* Action buttons */}
+      <div className="flex gap-2">
+        <Button className="flex-1" onClick={handleDone}>練習を記録する</Button>
+        {plan.status === "new" && (
           <Button variant="outline" className="flex-1" onClick={handleSkip}>スキップ</Button>
-        </div>
-      )}
-
-      {/* Linked practice session */}
-      {plan.status === "done" && (
-        <Card>
-          <CardHeader><CardTitle className="text-base">練習記録</CardTitle></CardHeader>
-          <CardContent>
-            <Link href={`/practice`}>
-              <Button variant="outline" className="w-full">練習記録を確認する</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+        )}
+      </div>
     </div>
   );
 }
