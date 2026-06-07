@@ -5,11 +5,17 @@ import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 import { analyzeGaps } from "@/lib/gap-analysis";
 import { parsePlanResponse } from "@/lib/ai/plan-parser";
+import { checkUsageLimit } from "@/lib/ai/usage-limit";
 
 export async function POST(request: Request) {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
+
+  const withinLimit = await checkUsageLimit(supabase, userId);
+  if (!withinLimit) {
+    return NextResponse.json({ error: "今月のAI利用上限に達しました" }, { status: 429 });
+  }
 
   const { source } = await request.json();
 

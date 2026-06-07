@@ -3,6 +3,7 @@ import { streamText, convertToModelMessages } from "ai";
 import { getApiAuth } from "@/lib/supabase/api";
 import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 import { analyzeGaps } from "@/lib/gap-analysis";
+import { checkUsageLimit } from "@/lib/ai/usage-limit";
 
 export async function POST(request: Request) {
   try {
@@ -10,9 +11,14 @@ export async function POST(request: Request) {
   if (!auth) return new Response("Unauthorized", { status: 401 });
   const { supabase, userId } = auth;
 
+  // Check usage limit
+  const withinLimit = await checkUsageLimit(supabase, userId);
+  if (!withinLimit) {
+    return new Response(JSON.stringify({ error: "今月のAI利用上限に達しました" }), { status: 429 });
+  }
+
   const body = await request.json();
   const { messages, conversationId } = body;
-  console.log("[chat] userId:", userId, "messages:", messages?.length, "conversationId:", conversationId);
 
   // Fetch user's context data in parallel
   const [clubsRes, sessionsRes, plansRes] = await Promise.all([
