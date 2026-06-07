@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   const { messages, conversationId } = body;
 
   // Fetch user's context data in parallel
-  const [clubsRes, sessionsRes, plansRes, accessoriesRes] = await Promise.all([
+  const [clubsRes, sessionsRes, plansRes, accessoriesRes, knowledgeRes] = await Promise.all([
     supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
     supabase.from("practice_sessions")
       .select("*, practice_clubs(*, club:clubs(club_number)), plan:practice_plans(id, title, summary, practice_plan_items(club:clubs(club_number), balls, focus))")
@@ -34,12 +34,14 @@ export async function POST(request: Request) {
       .order("created_at", { ascending: false })
       .limit(3),
     supabase.from("accessories").select("*").eq("user_id", userId).eq("status", "active"),
+    supabase.from("knowledge_base").select("category, title, content").eq("is_active", true),
   ]);
 
   const clubs = clubsRes.data ?? [];
   const sessions = sessionsRes.data ?? [];
   const plans = plansRes.data ?? [];
   const accessories = accessoriesRes.data ?? [];
+  const knowledge = knowledgeRes.data ?? [];
 
   const gapAnalysis = analyzeGaps(clubs);
 
@@ -81,6 +83,11 @@ export async function POST(request: Request) {
       model: a.model,
       rating: a.rating,
       memo: a.memo,
+    })),
+    knowledge: knowledge.map((k: any) => ({
+      category: k.category,
+      title: k.title,
+      content: k.content,
     })),
   });
 

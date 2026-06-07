@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     sessionsQuery = sessionsQuery.gte("practiced_at", practiceFromDate.split("T")[0]);
   }
 
-  const [clubsRes, sessionsRes, plansRes, accessoriesRes] = await Promise.all([
+  const [clubsRes, sessionsRes, plansRes, accessoriesRes, knowledgeRes] = await Promise.all([
     supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
     practiceFromDate ? sessionsQuery : Promise.resolve({ data: [] }),
     supabase.from("practice_plans")
@@ -46,12 +46,14 @@ export async function POST(request: Request) {
       .order("created_at", { ascending: false })
       .limit(5),
     supabase.from("accessories").select("*").eq("user_id", userId).eq("status", "active"),
+    supabase.from("knowledge_base").select("category, title, content").eq("is_active", true),
   ]);
 
   const clubs = clubsRes.data ?? [];
   const sessions = sessionsRes.data ?? [];
   const plans = plansRes.data ?? [];
   const accessories = accessoriesRes.data ?? [];
+  const knowledge = knowledgeRes.data ?? [];
   const gapAnalysis = analyzeGaps(clubs);
 
   const systemPrompt = buildSystemPrompt({
@@ -76,6 +78,11 @@ export async function POST(request: Request) {
       model: a.model,
       rating: a.rating,
       memo: a.memo,
+    })),
+    knowledge: knowledge.map((k: any) => ({
+      category: k.category,
+      title: k.title,
+      content: k.content,
     })),
   });
 

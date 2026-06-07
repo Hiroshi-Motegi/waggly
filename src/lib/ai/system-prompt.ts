@@ -34,12 +34,19 @@ interface AccessorySummary {
   memo: string | null;
 }
 
+interface KnowledgeItem {
+  category: string;
+  title: string;
+  content: string;
+}
+
 interface PromptContext {
   clubs: ClubSummary[];
   recentSessions: SessionSummary[];
   recentPlans: PlanSummary[];
   gapAnalysis: GapResult;
   accessories?: AccessorySummary[];
+  knowledge?: KnowledgeItem[];
 }
 
 export function buildSystemPrompt(ctx: PromptContext): string {
@@ -117,6 +124,15 @@ export function buildSystemPrompt(ctx: PromptContext): string {
       const memoStr = a.memo ? ` ${a.memo}` : "";
       const categoryLabel = categoryLabels[a.category] ?? a.category;
       parts.push(`- [${categoryLabel}] ${name}${ratingStr}${memoStr}`);
+    }
+  }
+
+  // Knowledge base (teaching data)
+  if (ctx.knowledge && ctx.knowledge.length > 0) {
+    parts.push("\n## ゴルフの基礎知識（以下の情報を参考にアドバイスしてください）");
+    for (const k of ctx.knowledge) {
+      parts.push(`\n### ${k.title}`);
+      parts.push(k.content);
     }
   }
 
