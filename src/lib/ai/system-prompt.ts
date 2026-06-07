@@ -13,7 +13,9 @@ interface SessionSummary {
   practiced_at: string;
   total_balls: number | null;
   memo: string | null;
+  rating: number | null;
   clubs: { club_number: string; balls: number }[];
+  plan?: { title: string; items: { club_number: string; focus: string }[] } | null;
 }
 
 interface PlanSummary {
@@ -74,8 +76,15 @@ export function buildSystemPrompt(ctx: PromptContext): string {
     parts.push("\n## 最近の練習記録");
     for (const s of ctx.recentSessions) {
       const clubStr = s.clubs.map((c) => `${c.club_number}: ${c.balls}球`).join(", ");
-      parts.push(`- ${s.practiced_at}: ${s.total_balls ?? "?"}球${clubStr ? ` (${clubStr})` : ""}`);
+      const ratingStr = s.rating != null ? ` 評価: ${"★".repeat(s.rating)}` : "";
+      parts.push(`- ${s.practiced_at}: ${s.total_balls ?? "?"}球${clubStr ? ` (${clubStr})` : ""}${ratingStr}`);
       if (s.memo) parts.push(`  メモ: ${s.memo}`);
+      if (s.plan) {
+        parts.push(`  使用メニュー: ${s.plan.title}`);
+        for (const item of s.plan.items) {
+          parts.push(`    - ${item.club_number}: ${item.focus}`);
+        }
+      }
     }
   }
 

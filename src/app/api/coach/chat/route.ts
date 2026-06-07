@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const [clubsRes, sessionsRes, plansRes, accessoriesRes] = await Promise.all([
     supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
     supabase.from("practice_sessions")
-      .select("*, practice_clubs(*, club:clubs(club_number))")
+      .select("*, practice_clubs(*, club:clubs(club_number)), plan:practice_plans(id, title, summary, practice_plan_items(club:clubs(club_number), balls, focus))")
       .eq("user_id", userId)
       .order("practiced_at", { ascending: false })
       .limit(10),
@@ -56,10 +56,18 @@ export async function POST(request: Request) {
       practiced_at: s.practiced_at,
       total_balls: s.total_balls,
       memo: s.memo,
+      rating: s.rating,
       clubs: (s.practice_clubs ?? []).map((pc: any) => ({
         club_number: pc.club?.club_number ?? "?",
         balls: pc.balls,
       })),
+      plan: s.plan ? {
+        title: s.plan.title,
+        items: (s.plan.practice_plan_items ?? []).map((i: any) => ({
+          club_number: i.club?.club_number ?? "?",
+          focus: i.focus,
+        })),
+      } : null,
     })),
     recentPlans: plans.map((p: any) => ({
       title: p.title,
