@@ -8,7 +8,7 @@ export function Header() {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b bg-background px-4">
+    <header className="shrink-0 z-50 flex h-14 items-center justify-between border-b bg-background px-4">
       <h1 className="text-lg font-bold">Waggly</h1>
       {user && (
         <Link href="/settings">
