@@ -128,6 +128,10 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      <Link href="/courses">
+        <Button variant="outline" className="w-full">ゴルフ場を探す</Button>
+      </Link>
+
       <Link href="/terms">
         <Button variant="link" className="w-full text-muted-foreground text-xs">
           利用規約

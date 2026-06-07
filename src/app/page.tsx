@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useClubs } from "@/hooks/use-clubs";
 import { usePracticeSessions } from "@/hooks/use-practice";
 import { useAuth } from "@/hooks/use-auth";
@@ -7,6 +8,7 @@ import { BagSummary } from "@/components/home/bag-summary";
 import { RecentPractice } from "@/components/home/recent-practice";
 import { GapAnalysisCard } from "@/components/home/gap-analysis-card";
 import { analyzeGaps } from "@/lib/gap-analysis";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -33,6 +35,17 @@ export default function HomePage() {
       <BagSummary clubs={clubs} />
       <GapAnalysisCard result={gapResult} />
       <RecentPractice sessions={sessions} />
+      <Link href="/courses">
+        <Card>
+          <CardContent className="flex items-center justify-between p-4">
+            <div>
+              <p className="font-semibold">ゴルフ場を探す</p>
+              <p className="text-xs text-muted-foreground">楽天GORAでコースを検索</p>
+            </div>
+            <span className="text-muted-foreground">→</span>
+          </CardContent>
+        </Card>
+      </Link>
     </div>
   );
 }
