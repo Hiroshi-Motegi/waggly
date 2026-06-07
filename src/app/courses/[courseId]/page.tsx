@@ -14,7 +14,8 @@ interface CourseDetail {
   address: string;
   golfCourseDetailUrl: string;
   reserveCalUrl: string;
-  layoutImageUrl: string;
+  layoutUrl: string;
+  routeMapUrl: string;
   golfCourseImageUrl1: string;
   golfCourseImageUrl2: string;
   golfCourseImageUrl3: string;
@@ -272,26 +273,20 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
           </CardContent>
         </Card>
 
-        {/* Layout image */}
-        {course.layoutImageUrl && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">コースレイアウト</CardTitle>
-            </CardHeader>
-            <CardContent className="p-3">
-              <a href={course.layoutImageUrl} target="_blank" rel="noopener noreferrer">
-                <div className="relative h-48 w-full bg-muted rounded overflow-hidden">
-                  <Image
-                    src={course.layoutImageUrl}
-                    alt="コースレイアウト"
-                    fill
-                    className="object-contain"
-                    unoptimized
-                  />
-                </div>
+        {/* Layout & Route links */}
+        {(course.layoutUrl || course.routeMapUrl) && (
+          <div className="flex gap-2">
+            {course.layoutUrl && (
+              <a href={course.layoutUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+                <Button variant="outline" className="w-full h-11">コースレイアウト</Button>
               </a>
-            </CardContent>
-          </Card>
+            )}
+            {course.routeMapUrl && (
+              <a href={course.routeMapUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+                <Button variant="outline" className="w-full h-11">アクセスマップ</Button>
+              </a>
+            )}
+          </div>
         )}
 
         {/* Reserve button at bottom */}
