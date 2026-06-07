@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/admin/knowledge/auto-collect",
+      "schedule": "0 21 * * 0"
+    }
+  ]
+}
