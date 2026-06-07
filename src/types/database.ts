@@ -1,4 +1,6 @@
 export type ClubCategory = "driver" | "fairway_wood" | "utility" | "iron" | "wedge" | "putter";
+export type AccessoryCategory = "ball" | "glove" | "tee" | "other";
+export type AccessoryStatus = "active" | "past";
 export type ClubStatus = "bag" | "reserve" | "sold";
 export type MaintenanceType = "grip_change" | "reshaft" | "loft_adjust" | "other";
 export type PlanSource = "auto" | "chat";
@@ -96,6 +98,19 @@ export interface AiChat {
   conversation_id: string;
   role: ChatRole;
   message: string;
+  created_at: string;
+}
+
+export interface Accessory {
+  id: string;
+  user_id: string;
+  category: AccessoryCategory;
+  brand: string | null;
+  model: string | null;
+  memo: string | null;
+  rating: number | null;
+  status: AccessoryStatus;
+  purchase_url: string | null;
   created_at: string;
 }
 

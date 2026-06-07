@@ -22,11 +22,20 @@ interface PlanSummary {
   created_at: string;
 }
 
+interface AccessorySummary {
+  category: string;
+  brand: string | null;
+  model: string | null;
+  rating: number | null;
+  memo: string | null;
+}
+
 interface PromptContext {
   clubs: ClubSummary[];
   recentSessions: SessionSummary[];
   recentPlans: PlanSummary[];
   gapAnalysis: GapResult;
+  accessories?: AccessorySummary[];
 }
 
 export function buildSystemPrompt(ctx: PromptContext): string {
@@ -75,6 +84,24 @@ export function buildSystemPrompt(ctx: PromptContext): string {
     parts.push("\n## 直近の練習提案");
     for (const p of ctx.recentPlans) {
       parts.push(`- ${p.title} (${p.status === "done" ? "実行済み" : p.status === "skipped" ? "スキップ" : "未実行"}) - ${p.created_at}`);
+    }
+  }
+
+  // Accessories (consumables)
+  if (ctx.accessories && ctx.accessories.length > 0) {
+    const categoryLabels: Record<string, string> = {
+      ball: "ボール",
+      glove: "グローブ",
+      tee: "ティー",
+      other: "その他",
+    };
+    parts.push("\n## 使用中のアイテム（消耗品）");
+    for (const a of ctx.accessories) {
+      const name = [a.brand, a.model].filter(Boolean).join(" ") || "不明";
+      const ratingStr = a.rating != null ? ` (評価: ${"★".repeat(a.rating)})` : "";
+      const memoStr = a.memo ? ` ${a.memo}` : "";
+      const categoryLabel = categoryLabels[a.category] ?? a.category;
+      parts.push(`- [${categoryLabel}] ${name}${ratingStr}${memoStr}`);
     }
   }
 

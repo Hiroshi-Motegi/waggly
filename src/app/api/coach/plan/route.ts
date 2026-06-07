@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const { source } = await request.json();
 
   // Fetch context data
-  const [clubsRes, sessionsRes, plansRes] = await Promise.all([
+  const [clubsRes, sessionsRes, plansRes, accessoriesRes] = await Promise.all([
     supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
     supabase.from("practice_sessions")
       .select("*, practice_clubs(*, club:clubs(club_number))")
@@ -32,11 +32,13 @@ export async function POST(request: Request) {
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(3),
+    supabase.from("accessories").select("*").eq("user_id", userId).eq("status", "active"),
   ]);
 
   const clubs = clubsRes.data ?? [];
   const sessions = sessionsRes.data ?? [];
   const plans = plansRes.data ?? [];
+  const accessories = accessoriesRes.data ?? [];
   const gapAnalysis = analyzeGaps(clubs);
 
   const systemPrompt = buildSystemPrompt({
@@ -54,6 +56,13 @@ export async function POST(request: Request) {
       title: p.title, status: p.status, created_at: p.created_at,
     })),
     gapAnalysis,
+    accessories: accessories.map((a: any) => ({
+      category: a.category,
+      brand: a.brand,
+      model: a.model,
+      rating: a.rating,
+      memo: a.memo,
+    })),
   });
 
   const { text, usage } = await generateText({

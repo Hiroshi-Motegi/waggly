@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ShoppingBag, ClipboardList, MessageSquare } from "lucide-react";
+import { Home, Briefcase, ClipboardList, Package, MessageSquare } from "lucide-react";
 
 const tabs = [
   { href: "/", label: "ホーム", icon: Home },
-  { href: "/bag", label: "マイバッグ", icon: ShoppingBag },
+  { href: "/bag", label: "マイバッグ", icon: Briefcase },
   { href: "/practice", label: "練習記録", icon: ClipboardList },
+  { href: "/items", label: "アイテム", icon: Package },
   { href: "/coach", label: "AIコーチ", icon: MessageSquare },
 ];
 
