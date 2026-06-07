@@ -30,10 +30,12 @@ export async function GET(request: NextRequest) {
     { next: { revalidate: 3600 } }
   );
 
+  const data = await res.json();
+
   if (!res.ok) {
-    return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 });
+    console.error("[courses] Rakuten API error:", JSON.stringify(data));
+    return NextResponse.json({ error: "Failed to fetch courses", detail: data }, { status: 500 });
   }
 
-  const data = await res.json();
   return NextResponse.json(data);
 }
