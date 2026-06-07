@@ -39,10 +39,13 @@ export async function POST(request: NextRequest) {
 
   if (existingUser) {
     userId = existingUser.id;
+    // Update profile
     await supabaseAdmin
       .from("users")
       .update({ display_name: displayName, avatar_url: avatarUrl })
       .eq("id", userId);
+    // Ensure password is set (may be missing from old auth flow)
+    await supabaseAdmin.auth.admin.updateUserById(userId, { password });
   } else {
     // Create auth user with password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
