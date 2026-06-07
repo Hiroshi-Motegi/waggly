@@ -13,6 +13,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function authenticate() {
       try {
+        // Development mode: skip LIFF auth
+        if (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true") {
+          setUser({
+            id: "dev-user",
+            line_user_id: "dev-line-id",
+            display_name: "開発ユーザー",
+            avatar_url: null,
+            created_at: new Date().toISOString(),
+          });
+          setIsLoading(false);
+          return;
+        }
+
         await initLiff();
         const { profile } = await getLiffProfile();
 

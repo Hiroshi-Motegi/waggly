@@ -1,7 +1,11 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function proxy(request: NextRequest) {
+  // Skip auth in development
+  if (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true") {
+    return NextResponse.next();
+  }
   return await updateSession(request);
 }
 

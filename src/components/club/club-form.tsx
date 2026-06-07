@@ -54,7 +54,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     <form onSubmit={handleSubmit} className="space-y-6 p-4">
       {/* Basic Info */}
       <div className="space-y-4">
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="category">種別</Label>
           <Select value={form.category} onValueChange={(v) => update("category", v)}>
             <SelectTrigger id="category" aria-label="種別">
@@ -68,7 +68,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
           </Select>
         </div>
 
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="club_number">番手</Label>
           <Input
             id="club_number"
@@ -80,7 +80,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="maker">メーカー</Label>
             <Input
               id="maker"
@@ -90,7 +90,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
               placeholder="例: Titleist"
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="model">モデル</Label>
             <Input
               id="model"
@@ -106,7 +106,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-muted-foreground">シャフト</h3>
         <div className="grid grid-cols-2 gap-4">
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="shaft_name">シャフト名</Label>
             <Input
               id="shaft_name"
@@ -115,7 +115,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
               placeholder="例: Speeder NX"
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="shaft_flex">フレックス</Label>
             <Select value={form.shaft_flex ?? ""} onValueChange={(v) => update("shaft_flex", v)}>
               <SelectTrigger id="shaft_flex">
@@ -135,7 +135,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-muted-foreground">スペック</h3>
         <div className="grid grid-cols-3 gap-4">
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="loft">ロフト角</Label>
             <Input
               id="loft"
@@ -146,7 +146,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
               placeholder="10.5"
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="lie">ライ角</Label>
             <Input
               id="lie"
@@ -157,7 +157,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
               placeholder="56"
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="length">長さ(inch)</Label>
             <Input
               id="length"
@@ -169,7 +169,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             />
           </div>
         </div>
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="distance">飛距離 (yd)</Label>
           <Input
             id="distance"
@@ -184,7 +184,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       {/* Purchase */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-muted-foreground">購入情報</h3>
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="purchase_date">購入日</Label>
           <Input
             id="purchase_date"
@@ -193,7 +193,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             onChange={(e) => update("purchase_date", e.target.value || undefined)}
           />
         </div>
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="purchase_shop">購入店</Label>
           <Input
             id="purchase_shop"
@@ -202,7 +202,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             placeholder="例: ゴルフ5 新宿店"
           />
         </div>
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="purchase_price">価格 (円)</Label>
           <Input
             id="purchase_price"

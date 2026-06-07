@@ -23,9 +23,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ja">
       <body className={inter.className}>
         <AuthProvider>
-          <Header />
-          <main className="pb-16 pt-14">{children}</main>
-          <BottomNav />
+          <div className="mx-auto max-w-md min-h-screen border-x border-border shadow-sm bg-background">
+            <Header />
+            <main className="min-h-[calc(100vh-7.5rem)]">{children}</main>
+            <BottomNav />
+          </div>
         </AuthProvider>
       </body>
     </html>
