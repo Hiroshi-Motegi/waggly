@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ClubSpecTable } from "@/components/club/club-spec-table";
+import { ClubImageGallery } from "@/components/club/club-image-gallery";
 import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
 
 const maintenanceTypeLabels: Record<string, string> = {
@@ -103,6 +104,13 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
           </Button>
         </div>
       </div>
+
+      {/* Image Gallery */}
+      <ClubImageGallery
+        clubId={clubId}
+        images={club.club_images ?? []}
+        onUpload={() => window.location.reload()}
+      />
 
       {/* Status Change */}
       <div className="flex gap-2">

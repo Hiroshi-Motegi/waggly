@@ -108,7 +108,15 @@ export default function ItemsPage() {
               <Link href={`/items/${item.id}`}>
                 <div className="flex items-center gap-3 px-3 py-3 hover:bg-muted/50 transition-colors">
                   <div className="text-muted-foreground shrink-0">
-                    <CategoryIcon category={item.category} />
+                    {item.image_url ? (
+                      <img
+                        src={item.image_url}
+                        alt={item.model ?? ""}
+                        className="h-10 w-10 rounded-md object-cover"
+                      />
+                    ) : (
+                      <CategoryIcon category={item.category} />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2, ExternalLink } from "lucide-react";
 import { toAffiliateUrl, getUrlPlatform } from "@/lib/affiliate";
@@ -47,6 +47,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Accessory>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function load() {
@@ -119,6 +120,23 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       setItem(updated);
       setEditForm(updated);
     }
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`/api/accessories/${id}/image`, {
+      method: "POST",
+      body: formData,
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setItem(updated);
+      setEditForm(updated);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
@@ -254,6 +272,32 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
+      </div>
+
+      {/* Image */}
+      <div className="relative">
+        {item.image_url ? (
+          <img
+            src={item.image_url}
+            alt={item.model ?? ""}
+            className="w-full h-48 object-cover rounded-lg cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          />
+        ) : (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full h-32 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center text-muted-foreground text-sm hover:border-primary hover:text-primary transition-colors"
+          >
+            写真を追加
+          </button>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
       </div>
 
       {/* Status change */}

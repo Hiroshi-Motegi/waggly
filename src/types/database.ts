@@ -111,6 +111,7 @@ export interface Accessory {
   rating: number | null;
   status: AccessoryStatus;
   purchase_url: string | null;
+  image_url: string | null;
   created_at: string;
 }
 
