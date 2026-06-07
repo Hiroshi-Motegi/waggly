@@ -21,9 +21,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   // Show onboarding if user hasn't agreed or terms were updated
-  // Use JST (UTC+9) end of day to avoid timezone mismatch
   const needsAgreement = user && (
-    !user.agreed_terms_at || new Date(user.agreed_terms_at) < new Date(TERMS_UPDATED_AT + "T23:59:59+09:00")
+    !user.agreed_terms_at || new Date(user.agreed_terms_at) < new Date(TERMS_UPDATED_AT)
   );
 
   if (needsAgreement && !onboardingDone) {
