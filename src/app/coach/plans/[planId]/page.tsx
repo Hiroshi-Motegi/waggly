@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,42 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
   done: { label: "実行済み", variant: "secondary" },
   skipped: { label: "スキップ", variant: "outline" },
 };
+
+function PlanItem({ item, showSeparator }: { item: any; showSeparator: boolean }) {
+  const [open, setOpen] = useState(false);
+  const hasDetail = !!item.detail;
+
+  return (
+    <div>
+      {showSeparator && <Separator className="mb-4" />}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">{item.club?.club_number ?? "?"}</Badge>
+            <span className="text-sm font-medium">{item.balls}球</span>
+          </div>
+        </div>
+        <p className="text-sm font-medium">{item.focus}</p>
+        {hasDetail && (
+          <>
+            <button
+              onClick={() => setOpen(!open)}
+              className="flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+              {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {open ? "閉じる" : "詳細を見る"}
+            </button>
+            {open && (
+              <p className="text-xs text-muted-foreground leading-relaxed pl-1 border-l-2 border-primary/20 ml-1 py-1">
+                {item.detail}
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function PlanDetailPage({ params }: { params: Promise<{ planId: string }> }) {
   const { planId } = use(params);
@@ -83,33 +119,9 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       <Card>
         <CardHeader><CardTitle className="text-base">練習内容</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          {plan.practice_plan_items?.map((item: any, index: number) => {
-            // Parse focus: 【title｜subtitle】body
-            const titleMatch = item.focus?.match(/^【(.+?)(?:｜|\\|)(.+?)】\s*([\s\S]*)$/);
-            const title = titleMatch ? titleMatch[1] : null;
-            const subtitle = titleMatch ? titleMatch[2] : null;
-            const body = titleMatch ? titleMatch[3] : item.focus;
-
-            return (
-            <div key={item.id}>
-              {index > 0 && <Separator className="mb-4" />}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{item.club?.club_number ?? "?"}</Badge>
-                    <span className="text-sm font-medium">{item.balls}球</span>
-                  </div>
-                </div>
-                {title && (
-                  <h4 className="text-sm font-bold">{title}
-                    {subtitle && <span className="text-xs text-muted-foreground font-normal ml-2">{subtitle}</span>}
-                  </h4>
-                )}
-                {body && <p className="text-xs text-muted-foreground leading-relaxed">{body}</p>}
-              </div>
-            </div>
-            );
-          })}
+          {plan.practice_plan_items?.map((item: any, index: number) => (
+            <PlanItem key={item.id} item={item} showSeparator={index > 0} />
+          ))}
           <Separator className="my-2" />
           <div className="flex justify-between text-sm font-medium">
             <span>合計</span>

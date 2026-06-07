@@ -5,6 +5,7 @@ export interface ParsedPlan {
     club_number: string;
     balls: number;
     focus: string;
+    detail?: string;
   }[];
 }
 

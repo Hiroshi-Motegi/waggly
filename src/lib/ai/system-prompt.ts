@@ -21,6 +21,8 @@ interface SessionSummary {
 interface PlanSummary {
   title: string;
   status: string;
+  rating?: number | null;
+  memo?: string | null;
   created_at: string;
 }
 
@@ -88,11 +90,15 @@ export function buildSystemPrompt(ctx: PromptContext): string {
     }
   }
 
-  // Recent plans
+  // Recent plans with feedback
   if (ctx.recentPlans.length > 0) {
-    parts.push("\n## 直近の練習提案");
+    parts.push("\n## 直近の練習提案とフィードバック");
+    parts.push("※過去の提案への評価やメモを参考に、次の提案をより具体的で分かりやすくしてください。評価が低かった場合は、何が問題だったか考慮してください。");
     for (const p of ctx.recentPlans) {
-      parts.push(`- ${p.title} (${p.status === "done" ? "実行済み" : p.status === "skipped" ? "スキップ" : "未実行"}) - ${p.created_at}`);
+      const statusLabel = p.status === "done" ? "実行済み" : p.status === "skipped" ? "スキップ" : "未実行";
+      const ratingStr = p.rating != null ? ` 評価: ${"★".repeat(p.rating)}${"☆".repeat(5 - p.rating)}` : "";
+      parts.push(`- ${p.title} (${statusLabel})${ratingStr} - ${p.created_at}`);
+      if (p.memo) parts.push(`  ユーザーの感想: ${p.memo}`);
     }
   }
 

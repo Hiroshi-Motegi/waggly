@@ -41,10 +41,10 @@ export async function POST(request: Request) {
     supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
     practiceFromDate ? sessionsQuery : Promise.resolve({ data: [] }),
     supabase.from("practice_plans")
-      .select("title, status, created_at")
+      .select("title, status, rating, memo, created_at, practice_plan_items(focus)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
-      .limit(3),
+      .limit(5),
     supabase.from("accessories").select("*").eq("user_id", userId).eq("status", "active"),
   ]);
 
@@ -61,6 +61,7 @@ export async function POST(request: Request) {
     })),
     recentSessions: sessions.map((s: any) => ({
       practiced_at: s.practiced_at, total_balls: s.total_balls, memo: s.memo,
+      rating: s.rating,
       clubs: (s.practice_clubs ?? []).map((pc: any) => ({
         club_number: pc.club?.club_number ?? "?", balls: pc.balls,
       })),
@@ -89,18 +90,20 @@ ${selectedClubs && selectedClubs.length > 0 ? `利用するクラブ: ${selected
 ${focus ? `重点的に練習したいこと: ${focus}` : ""}
 ${notes ? `その他の要望: ${notes}` : ""}
 
-以下のJSON形式で出力してください:
+以下のJSON形式で出力してください。
+focusは短い練習テーマ（10文字程度）。
+detailは具体的な練習方法・体の使い方・意識するポイント・注意点を詳しく記述してください（100〜200文字）。
 
 \`\`\`json
 {
   "title": "提案タイトル",
   "summary": "提案の概要と理由",
   "items": [
-    { "club_number": "番手名", "balls": 球数, "focus": "練習のポイント" }
+    { "club_number": "番手名", "balls": 球数, "focus": "短い練習テーマ", "detail": "具体的な体の使い方、スイングのポイント、意識すること、よくあるミスと対策など詳しく記述" }
   ]
 }
 \`\`\``,
-    maxOutputTokens: 1000,
+    maxOutputTokens: 2000,
   });
 
   // Save token usage
@@ -141,6 +144,7 @@ ${notes ? `その他の要望: ${notes}` : ""}
       club_id: matchedClub?.id ?? null,
       balls: item.balls,
       focus: item.focus,
+      detail: item.detail ?? null,
       sort_order: i,
     };
   });
