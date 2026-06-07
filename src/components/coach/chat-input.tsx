@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SendHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,19 +12,24 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, isLoading }: ChatInputProps) {
   const [input, setInput] = useState("");
+  const composingRef = useRef(false);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function send() {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
     onSend(trimmed);
     setInput("");
   }
 
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    send();
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !composingRef.current) {
       e.preventDefault();
-      handleSubmit(e);
+      send();
     }
   }
 
@@ -34,6 +39,8 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
+        onCompositionStart={() => { composingRef.current = true; }}
+        onCompositionEnd={() => { composingRef.current = false; }}
         placeholder="メッセージを入力..."
         rows={1}
         className="min-h-[40px] resize-none"

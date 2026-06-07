@@ -5,11 +5,14 @@ import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 import { analyzeGaps } from "@/lib/gap-analysis";
 
 export async function POST(request: Request) {
+  try {
   const auth = await getApiAuth();
   if (!auth) return new Response("Unauthorized", { status: 401 });
   const { supabase, userId } = auth;
 
-  const { messages, conversationId } = await request.json();
+  const body = await request.json();
+  const { messages, conversationId } = body;
+  console.log("[chat] userId:", userId, "messages:", messages?.length, "conversationId:", conversationId);
 
   // Fetch user's context data in parallel
   const [clubsRes, sessionsRes, plansRes] = await Promise.all([
@@ -74,7 +77,7 @@ export async function POST(request: Request) {
   const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
-    model: anthropic("claude-sonnet-4-20250514"),
+    model: anthropic("claude-sonnet-4-6"),
     system: systemPrompt,
     messages: modelMessages,
     maxOutputTokens: 1000,
@@ -90,4 +93,8 @@ export async function POST(request: Request) {
   });
 
   return result.toUIMessageStreamResponse();
+  } catch (error: any) {
+    console.error("[chat] Error:", error?.message ?? error);
+    return new Response(JSON.stringify({ error: error?.message ?? "Unknown error" }), { status: 500 });
+  }
 }

@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   });
 
   const { text } = await generateText({
-    model: anthropic("claude-sonnet-4-20250514"),
+    model: anthropic("claude-sonnet-4-6"),
     system: systemPrompt,
     prompt: `ユーザーの練習記録とクラブセットを分析して、次の練習メニューを提案してください。
 合計球数は100〜200球程度にしてください。
