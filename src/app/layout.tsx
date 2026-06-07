@@ -24,9 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ja">
       <body className={`${inter.className} overscroll-none`}>
         <AuthProvider>
-          <div className="mx-auto max-w-md h-dvh flex flex-col border-x border-border shadow-sm bg-background overflow-hidden">
+          <div className="mx-auto max-w-md min-h-dvh border-x border-border shadow-sm bg-background relative">
             <Header />
-            <main className="flex-1 overflow-y-auto overflow-x-hidden">{children}</main>
+            <main className="pb-20 overflow-x-hidden">{children}</main>
             <BottomNav />
           </div>
         </AuthProvider>
