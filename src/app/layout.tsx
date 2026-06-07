@@ -2,8 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth-provider";
-import { BottomNav } from "@/components/layout/bottom-nav";
-import { Header } from "@/components/layout/header";
+import { AppShell } from "@/components/app-shell";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,11 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ja">
       <body className={`${inter.className} overscroll-none`}>
         <AuthProvider>
-          <div className="mx-auto max-w-md min-h-dvh border-x border-border shadow-sm bg-background relative">
-            <Header />
-            <main className="pb-20 overflow-x-hidden">{children}</main>
-            <BottomNav />
-          </div>
+          <AppShell>{children}</AppShell>
         </AuthProvider>
       </body>
     </html>

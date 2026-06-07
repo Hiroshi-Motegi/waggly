@@ -20,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             line_user_id: "dev-line-id",
             display_name: "開発ユーザー",
             avatar_url: null,
+            agreed_terms_at: new Date().toISOString(),
             created_at: new Date().toISOString(),
           });
           setIsLoading(false);

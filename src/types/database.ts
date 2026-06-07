@@ -8,6 +8,7 @@ export type ChatRole = "user" | "assistant";
 export interface User {
   id: string;
   line_user_id: string;
+  agreed_terms_at: string | null;
   display_name: string;
   avatar_url: string | null;
   created_at: string;
