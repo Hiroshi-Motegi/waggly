@@ -70,7 +70,7 @@ function ChatView({
         <ChatMessages messages={messages} isLoading={isLoading} />
         <div ref={bottomRef} />
       </div>
-      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-md z-40 bg-white dark:bg-zinc-950">
+      <div className="fixed bottom-[4.5rem] left-1/2 -translate-x-1/2 w-full max-w-md z-40 bg-white dark:bg-zinc-950">
         <ChatInput onSend={handleSend} isLoading={isLoading} />
       </div>
     </>
