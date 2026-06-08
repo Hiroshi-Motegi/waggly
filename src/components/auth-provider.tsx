@@ -14,10 +14,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Handle liff.state: clean URL param, then redirect after auth
+    // Capture liff.state deep link target (persists across login redirects)
     const params = new URLSearchParams(window.location.search);
     const liffState = params.get("liff.state");
-    if (liffState) {
+    if (liffState && liffState !== "/") {
+      sessionStorage.setItem("liff_redirect", liffState);
       window.history.replaceState(null, "", pathname);
     }
 
@@ -102,9 +103,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error("Authentication error:", error);
       } finally {
         setIsLoading(false);
-        // Redirect to liff.state target after auth
-        if (liffState && liffState !== "/" && liffState !== pathname) {
-          router.replace(liffState);
+        // Redirect to saved deep link target
+        const redirect = sessionStorage.getItem("liff_redirect");
+        if (redirect && redirect !== pathname) {
+          sessionStorage.removeItem("liff_redirect");
+          router.replace(redirect);
         }
       }
     }
