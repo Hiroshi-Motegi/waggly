@@ -31,6 +31,10 @@ interface ActivityItem {
   // memo
   distance?: number | null;
   memo?: string | null;
+  condition?: string | null;
+  symptom_tags?: string[];
+  feeling_tags?: string[];
+  gear_tags?: string[];
   // practice
   session_id?: string;
   practiced_at?: string;
@@ -344,11 +348,21 @@ function ActivityRow({ item, clubId, isLast }: { item: ActivityItem; clubId: str
             <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium text-black ${badgeColors[item.type]}`}>
               {badgeLabels[item.type]}
             </span>
+            {item.condition && (
+              <span className="text-sm">{item.condition === "good" ? "😊" : item.condition === "bad" ? "😣" : "😐"}</span>
+            )}
             {summary && (
               <span className="text-[10px] font-medium text-[#8b8b8b]">{summary}</span>
             )}
             <span className="text-[10px] font-medium text-[#8b8b8b] ml-auto shrink-0">{dateStr}</span>
           </div>
+          {[...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])].length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-0.5">
+              {[...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])].map((tag) => (
+                <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#333]">{tag}</span>
+              ))}
+            </div>
+          )}
           {detail && (
             <p className="text-sm font-bold text-black truncate line-clamp-2">{detail}</p>
           )}
