@@ -13,7 +13,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from("practice_sessions")
-    .select("*, practice_clubs(*, club:clubs(id, club_number, category))")
+    .select("*, practice_clubs(*, club:clubs(id, club_number, category, maker, model))")
     .eq("id", sessionId)
     .eq("user_id", userId)
     .single();

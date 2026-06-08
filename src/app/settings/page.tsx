@@ -4,6 +4,7 @@ import { Loading } from "@/components/loading";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Download, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { liffLogout } from "@/lib/liff";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -62,7 +63,7 @@ export default function SettingsPage() {
       </div>
 
       {/* プラン */}
-      <p className="text-base font-bold text-[#006728] px-1">プラン</p>
+      <p className="text-base font-bold text-[#006728] px-1 pt-4">プラン</p>
       <div className="rounded-lg bg-white p-3">
         <div className="flex items-center justify-between mb-1">
           <span className="text-sm font-bold">ベータ版</span>
@@ -76,7 +77,7 @@ export default function SettingsPage() {
       </div>
 
       {/* AIコーチ利用状況 */}
-      <p className="text-base font-bold text-[#006728] px-1">AIコーチ利用状況</p>
+      <p className="text-base font-bold text-[#006728] px-1 pt-4">AI相談利用状況</p>
       <div className="rounded-lg bg-white p-3">
         {usage ? (
           <div className="space-y-2">
@@ -109,6 +110,10 @@ export default function SettingsPage() {
         )}
       </div>
 
+      {/* データエクスポート */}
+      <p className="text-base font-bold text-[#006728] px-1 pt-4">データエクスポート</p>
+      <ExportSection />
+
       {/* 法的情報 */}
       <div className="rounded-lg bg-white p-3">
         <div className="flex flex-col">
@@ -134,6 +139,59 @@ export default function SettingsPage() {
         >
           ログアウト
         </button>
+      </div>
+    </div>
+  );
+}
+
+function ExportSection() {
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  async function handleExport(type: string, label: string) {
+    setDownloading(type);
+    try {
+      const res = await fetch(`/api/export?type=${type}`);
+      if (!res.ok) throw new Error("Failed to export");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `waggly-${type}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(`Export ${label} failed:`, e);
+    } finally {
+      setDownloading(null);
+    }
+  }
+
+  const items = [
+    { type: "clubs", label: "マイバッグ" },
+    { type: "items", label: "アイテム" },
+    { type: "practice", label: "練習記録" },
+  ];
+
+  return (
+    <div className="rounded-lg bg-white p-3">
+      <p className="text-xs text-[#8b8b8b] mb-2">登録データをCSVファイルでダウンロードできます。</p>
+      <div className="flex flex-col">
+        {items.map((item, i) => (
+          <button
+            key={item.type}
+            onClick={() => handleExport(item.type, item.label)}
+            disabled={downloading !== null}
+            className={`flex items-center gap-2.5 py-2.5 text-left ${i < items.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}
+          >
+            {downloading === item.type ? (
+              <Loader2 className="h-4 w-4 text-[#006728] animate-spin shrink-0" />
+            ) : (
+              <Download className="h-4 w-4 text-[#006728] shrink-0" />
+            )}
+            <span className="flex-1 text-sm font-bold">{item.label}</span>
+            <span className="text-xs text-[#8b8b8b]">CSV</span>
+          </button>
+        ))}
       </div>
     </div>
   );

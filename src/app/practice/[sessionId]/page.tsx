@@ -84,27 +84,35 @@ export default function PracticeDetailPage() {
           </div>
         )}
 
-        {session.practice_clubs && session.practice_clubs.length > 0 && (
-          <div className="border-t border-[#dfdfdf] pt-3">
-            <p className="text-xs font-medium text-[#8b8b8b] mb-2">クラブ別</p>
-            <div className="flex flex-col gap-1.5">
-              {session.practice_clubs.map((pc) => (
-                <div key={pc.club_id} className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{pc.club?.club_number ?? "?"}</span>
-                  <div className="flex items-center gap-2">
-                    {pc.avg_distance != null && (
-                      <span className="text-xs text-[#8b8b8b]">{pc.avg_distance} yd</span>
-                    )}
-                    <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs">
-                      {pc.balls}球
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+
+      {session.practice_clubs && session.practice_clubs.length > 0 && (
+        <>
+          <p className="text-base font-bold text-[#006728] px-1 pt-4">クラブ別</p>
+          <div className="flex flex-col rounded-lg bg-white p-3">
+            {session.practice_clubs.map((pc, i) => (
+              <div key={pc.club_id} className={`flex items-center justify-between py-2 text-sm ${i < session.practice_clubs.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                <div className="min-w-0">
+                  <span className="font-bold">{pc.club?.club_number ?? "?"}</span>
+                  {(pc.club?.maker || pc.club?.model) && (
+                    <span className="ml-1.5 text-xs text-[#8b8b8b]">
+                      {[pc.club?.maker, pc.club?.model].filter(Boolean).join(" ")}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {pc.avg_distance != null && (
+                    <span className="text-xs text-[#8b8b8b]">{pc.avg_distance} yd</span>
+                  )}
+                  <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs">
+                    {pc.balls}球
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

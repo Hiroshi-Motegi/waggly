@@ -14,12 +14,21 @@ export default function NewPracticePage() {
   const searchParams = useSearchParams();
   const planId = searchParams.get("planId");
   const { clubs } = useClubs("bag");
+  const { clubs: reserveClubs } = useClubs("reserve");
+  const [pastLocations, setPastLocations] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [planGenerated, setPlanGenerated] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [planOpen, setPlanOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/practice/locations")
+      .then((r) => r.ok ? r.json() : [])
+      .then(setPastLocations)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!planId) return;
@@ -151,7 +160,7 @@ export default function NewPracticePage() {
         </div>
       )}
 
-      <SessionForm clubs={clubs} onSubmit={handleSubmit} isSubmitting={isSubmitting} showCancel onCancel={() => router.back()} />
+      <SessionForm clubs={clubs} reserveClubs={reserveClubs} pastLocations={pastLocations} onSubmit={handleSubmit} isSubmitting={isSubmitting} showCancel onCancel={() => router.back()} />
     </div>
   );
 }

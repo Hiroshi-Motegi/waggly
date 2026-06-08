@@ -200,29 +200,27 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         </div>
       </div>
 
-      {/* Activity */}
+      {/* Activity header */}
+      <div className="flex items-center gap-2 px-1 pt-4">
+        <h3 className="flex-1 text-base font-bold text-[#006728]">アクティビティ</h3>
+        <Link
+          href={`/bag/${clubId}/memos?add=1`}
+          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+        >
+          <Plus className="h-3 w-3" />
+          メモ
+        </Link>
+        <Link
+          href={`/bag/${clubId}/maintenances?add=1`}
+          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+        >
+          <Plus className="h-3 w-3" />
+          メンテナンス記録
+        </Link>
+      </div>
+
+      {/* Activity card */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
-        <h3 className="text-base font-bold text-[#006728]">アクティビティ</h3>
-
-        {/* Add buttons */}
-        <div className="flex items-center justify-end gap-1 py-1">
-          <Link
-            href={`/bag/${clubId}/memos?add=1`}
-            className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
-          >
-            <Plus className="h-3 w-3" />
-            メモ
-          </Link>
-          <Link
-            href={`/bag/${clubId}/maintenances?add=1`}
-            className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
-          >
-            <Plus className="h-3 w-3" />
-            メンテナンス記録
-          </Link>
-        </div>
-
-        {/* Timeline */}
         {activity.length > 0 ? (
           <div className="flex flex-col">
             {activity.map((item, i) => (

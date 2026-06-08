@@ -8,6 +8,8 @@ type BallsTab = "total" | "per_club";
 
 interface SessionFormProps {
   clubs: Club[];
+  reserveClubs?: Club[];
+  pastLocations?: string[];
   initialData?: {
     practiced_at: string;
     location: string | null;
@@ -30,7 +32,7 @@ interface SessionFormProps {
   onCancel?: () => void;
 }
 
-export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmitting, showCancel, onCancel }: SessionFormProps) {
+export function SessionForm({ clubs, reserveClubs, pastLocations, initialData, showRating, onSubmit, isSubmitting, showCancel, onCancel }: SessionFormProps) {
   const now = new Date();
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   const today = jst.toISOString().split("T")[0];
@@ -77,16 +79,24 @@ export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmit
         <div className="flex flex-col gap-0.5 py-1">
           <span className="text-xs">練習場</span>
           <input
+            list="past-locations"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="練習場名を入力"
             className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           />
+          {pastLocations && pastLocations.length > 0 && (
+            <datalist id="past-locations">
+              {pastLocations.map((loc) => (
+                <option key={loc} value={loc} />
+              ))}
+            </datalist>
+          )}
         </div>
       </div>
 
       {/* Section title: 練習球数 */}
-      <h3 className="px-1 text-base font-bold text-[#006728]">練習球数</h3>
+      <h3 className="px-1 pt-4 text-base font-bold text-[#006728]">練習球数</h3>
 
       {/* Card 2: Balls (tabbed) */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
@@ -141,7 +151,7 @@ export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmit
           </div>
         ) : (
           <div className="py-2">
-            <ClubBallsInput clubs={clubs} value={clubBalls} onChange={setClubBalls} />
+            <ClubBallsInput clubs={clubs} reserveClubs={reserveClubs} value={clubBalls} onChange={setClubBalls} />
             {clubBalls.length > 0 && (
               <p className="text-sm text-[#8b8b8b] pt-2">
                 合計: {clubBalls.reduce((s, c) => s + c.balls, 0)}球
@@ -152,7 +162,7 @@ export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmit
       </div>
 
       {/* Section title: 気づき・メモ */}
-      <h3 className="px-1 text-base font-bold text-[#006728]">気づき・メモ</h3>
+      <h3 className="px-1 pt-4 text-base font-bold text-[#006728]">気づき・メモ</h3>
 
       {/* Card 3: Rating & Memo */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">

@@ -16,13 +16,22 @@ export default function EditPracticePage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const { user, isLoading: authLoading } = useAuth();
   const { clubs } = useClubs("bag");
+  const { clubs: reserveClubs } = useClubs("reserve");
 
+  const [pastLocations, setPastLocations] = useState<string[]>([]);
   const [session, setSession] = useState<PracticeSessionWithClubs | null>(null);
   const [plan, setPlan] = useState<any>(null);
   const [planOpen, setPlanOpen] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/practice/locations")
+      .then((r) => r.ok ? r.json() : [])
+      .then(setPastLocations)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (authLoading || !user) return;
@@ -145,6 +154,8 @@ export default function EditPracticePage() {
 
       <SessionForm
         clubs={clubs}
+        reserveClubs={reserveClubs}
+        pastLocations={pastLocations}
         initialData={initialData}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}

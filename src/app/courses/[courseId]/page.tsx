@@ -204,7 +204,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       {/* Price */}
       {(course.weekdayMinPrice > 0 || course.holidayMinPrice > 0) && (
         <>
-          <p className="text-base font-bold text-[#006728] px-1">料金</p>
+          <p className="text-base font-bold text-[#006728] px-1 pt-4">料金</p>
           <div className="rounded-lg bg-white p-3">
             {course.weekdayMinPrice != null && course.weekdayMinPrice > 0 && (
               <InfoRow label="平日最安値" value={`¥${course.weekdayMinPrice.toLocaleString()}〜`} />
@@ -217,7 +217,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       )}
 
       {/* Course info */}
-      <p className="text-base font-bold text-[#006728] px-1">コース情報</p>
+      <p className="text-base font-bold text-[#006728] px-1 pt-4">コース情報</p>
       <div className="rounded-lg bg-white p-3">
         <InfoRow label="コースタイプ" value={course.courseType} />
         <InfoRow label="設計者" value={course.designer} />
@@ -230,7 +230,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       {/* Ratings */}
       {course.evaluation > 0 && (
         <>
-          <p className="text-base font-bold text-[#006728] px-1">評価</p>
+          <p className="text-base font-bold text-[#006728] px-1 pt-4">評価</p>
           <div className="rounded-lg bg-white p-3">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl font-bold">{course.evaluation?.toFixed(1) ?? "—"}</span>
@@ -251,7 +251,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       )}
 
       {/* Facilities */}
-      <p className="text-base font-bold text-[#006728] px-1">設備・ルール</p>
+      <p className="text-base font-bold text-[#006728] px-1 pt-4">設備・ルール</p>
       <div className="rounded-lg bg-white p-3">
         <InfoRow label="練習場" value={course.praticeFacility} />
         <InfoRow label="宿泊" value={course.lodging} />
@@ -261,7 +261,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       </div>
 
       {/* Location */}
-      <p className="text-base font-bold text-[#006728] px-1">アクセス</p>
+      <p className="text-base font-bold text-[#006728] px-1 pt-4">アクセス</p>
       <div className="rounded-lg bg-white p-3">
         <InfoRow label="住所" value={course.address} />
         <InfoRow label="高速道路" value={course.highwayName} />
