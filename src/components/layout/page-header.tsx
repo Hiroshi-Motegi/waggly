@@ -8,11 +8,14 @@ interface PageHeaderProps {
   subtitle?: string;
   backHref?: string;
   showBack?: boolean;
+  /** "dark" for green bg pages (white text), default for normal pages */
+  variant?: "default" | "dark";
   children?: React.ReactNode;
 }
 
-export function PageHeader({ title, subtitle, backHref, showBack = true, children }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, backHref, showBack = true, variant = "default", children }: PageHeaderProps) {
   const router = useRouter();
+  const isDark = variant === "dark";
 
   function handleBack() {
     if (backHref) {
@@ -23,17 +26,17 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, childre
   }
 
   return (
-    <div className="sticky top-0 z-10 bg-[#ebf1eb] flex items-center gap-2 px-1 py-2">
+    <div className={`sticky top-0 z-10 flex items-center gap-2 px-1 py-2 ${isDark ? "bg-[#139847]/80 backdrop-blur-sm" : "bg-[#ebf1eb]"}`}>
       {showBack && (
         <button onClick={handleBack} className="shrink-0 -ml-1 p-1">
-          <ChevronLeft className="h-5 w-5 text-[#006728]" />
+          <ChevronLeft className={`h-5 w-5 ${isDark ? "text-white" : "text-[#006728]"}`} />
         </button>
       )}
       <div className="flex flex-1 flex-col min-w-0">
         {subtitle && (
-          <span className="text-xs font-bold text-[#1e944c] truncate">{subtitle}</span>
+          <span className={`text-xs font-bold truncate ${isDark ? "text-white/80" : "text-[#1e944c]"}`}>{subtitle}</span>
         )}
-        <h2 className="text-lg font-bold text-[#006728] truncate">{title}</h2>
+        <h2 className={`text-lg font-bold truncate ${isDark ? "text-white" : "text-[#006728]"}`}>{title}</h2>
       </div>
       {children}
     </div>

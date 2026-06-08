@@ -170,16 +170,19 @@ export default function BagPage() {
   }
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader
         title={isBagView && bagCount !== null ? `マイバッグ (${bagCount}/${MAX_BAG_CLUBS})` : "マイバッグ"}
         showBack={false}
+        variant="dark"
       >
         <div className="flex gap-2">
           {isBagView && !isReordering && clubs.length > 1 && (
             <button
               onClick={startReorder}
-              className="flex items-center gap-1 rounded-full border border-[#006728] px-3 py-1.5 text-xs font-bold text-[#006728]"
+              className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-xs font-bold text-white"
             >
               <GripVertical className="h-4 w-4" />
               並替
@@ -188,7 +191,7 @@ export default function BagPage() {
           {!isReordering && (
             <Link href="/bag/new">
               <button
-                className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728] disabled:opacity-50"
                 disabled={isBagView && (bagCount ?? 0) >= MAX_BAG_CLUBS}
               >
                 <Plus className="h-4 w-4" />
@@ -276,6 +279,7 @@ export default function BagPage() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
