@@ -11,6 +11,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    function handleLiffRedirect() {
+      const params = new URLSearchParams(window.location.search);
+      const liffState = params.get("liff.state");
+      if (liffState && liffState !== "/" && liffState !== window.location.pathname) {
+        window.location.replace(liffState);
+        return true;
+      }
+      return false;
+    }
+
     async function authenticate() {
       try {
         // Development mode: skip LIFF auth
@@ -41,6 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (data) {
             setUser(data);
             setIsLoading(false);
+            // Handle liff.state redirect after auth
+            handleLiffRedirect();
             return;
           }
         }
@@ -87,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
 
         setUser(data);
+        handleLiffRedirect();
       } catch (error) {
         console.error("Authentication error:", error);
       } finally {
