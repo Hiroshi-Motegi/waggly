@@ -45,7 +45,7 @@ function PlanItem({ item, showSeparator }: { item: any; showSeparator: boolean }
               {open ? "閉じる" : "詳細を見る"}
             </button>
             {open && (
-              <p className="text-sm text-[#8b8b8b] leading-relaxed pl-3 border-l-2 border-[#006728]/20">
+              <p className="text-sm text-[#8b8b8b] leading-relaxed pl-3 border-l-2 border-[#006728]/20 whitespace-pre-wrap">
                 {item.detail}
               </p>
             )}
