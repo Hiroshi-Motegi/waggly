@@ -15,8 +15,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const params = new URLSearchParams(window.location.search);
       const liffState = params.get("liff.state");
       if (liffState && liffState !== "/" && liffState !== window.location.pathname) {
+        // Navigate using Next.js router to avoid full reload loop
+        window.history.replaceState(null, "", liffState);
         window.location.replace(liffState);
         return true;
+      }
+      // Clean up liff.state from URL if we're already on the right page
+      if (liffState) {
+        window.history.replaceState(null, "", window.location.pathname);
       }
       return false;
     }
