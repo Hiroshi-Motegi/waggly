@@ -87,8 +87,10 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       .catch(() => {});
   }, [clubId, club]);
 
-  async function handleStatusChange(newStatus: string) {
-    await updateClub(clubId, { status: newStatus as any });
+  async function handleStatusChange(newStatus: string, bagNumber?: number) {
+    const update: any = { status: newStatus };
+    if (bagNumber != null) update.bag_number = bagNumber;
+    await updateClub(clubId, update);
     router.push("/bag");
   }
 
@@ -184,20 +186,25 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         </div>
 
         {/* Status change buttons inside card */}
-        <div className="flex items-center justify-center gap-2.5 py-5">
+        <div className="flex flex-wrap items-center justify-center gap-2 py-5">
+          {!(club.status === "bag" && club.bag_number === 1) && (
+            <button onClick={() => handleStatusChange("bag", 1)} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-sm font-bold text-[#006728]">
+              マイバッグに入れる
+            </button>
+          )}
+          {!(club.status === "bag" && club.bag_number === 2) && (
+            <button onClick={() => handleStatusChange("bag", 2)} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-sm font-bold text-[#006728]">
+              予備バッグに入れる
+            </button>
+          )}
           {club.status !== "reserve" && (
-            <button onClick={() => handleStatusChange("reserve")} className="rounded-full border border-[#006728] bg-white px-5 py-1 text-sm font-bold text-[#006728]">
+            <button onClick={() => handleStatusChange("reserve")} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-sm font-bold text-[#006728]">
               予備にする
             </button>
           )}
           {club.status !== "sold" && (
-            <button onClick={() => handleStatusChange("sold")} className="rounded-full border border-[#006728] bg-white px-5 py-1 text-sm font-bold text-[#006728]">
+            <button onClick={() => handleStatusChange("sold")} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-sm font-bold text-[#006728]">
               アーカイブする
-            </button>
-          )}
-          {club.status !== "bag" && (
-            <button onClick={() => handleStatusChange("bag")} className="rounded-full border border-[#006728] bg-white px-5 py-1 text-sm font-bold text-[#006728]">
-              マイバッグに入れる
             </button>
           )}
         </div>

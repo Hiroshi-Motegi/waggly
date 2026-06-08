@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   const { supabase, userId } = auth;
 
   const status = request.nextUrl.searchParams.get("status");
+  const bagNumber = request.nextUrl.searchParams.get("bag_number");
 
   let query = supabase
     .from("clubs")
@@ -16,6 +17,9 @@ export async function GET(request: NextRequest) {
 
   if (status) {
     query = query.eq("status", status);
+  }
+  if (bagNumber) {
+    query = query.eq("bag_number", parseInt(bagNumber, 10));
   }
 
   const { data, error } = await query;

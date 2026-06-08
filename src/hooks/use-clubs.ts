@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import type { Club, ClubWithImages, ClubStatus } from "@/types/database";
 
-export function useClubs(status?: ClubStatus) {
+export function useClubs(status?: ClubStatus, bagNumber?: number) {
   const { user } = useAuth();
   const [clubs, setClubs] = useState<ClubWithImages[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -12,13 +12,16 @@ export function useClubs(status?: ClubStatus) {
   const fetchClubs = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
-    const params = status ? `?status=${status}` : "";
-    const res = await fetch(`/api/clubs${params}`);
+    const params = new URLSearchParams();
+    if (status) params.set("status", status);
+    if (bagNumber != null) params.set("bag_number", String(bagNumber));
+    const qs = params.toString();
+    const res = await fetch(`/api/clubs${qs ? `?${qs}` : ""}`);
     if (res.ok) {
       setClubs(await res.json());
     }
     setIsLoading(false);
-  }, [status, user]);
+  }, [status, bagNumber, user]);
 
   useEffect(() => {
     fetchClubs();

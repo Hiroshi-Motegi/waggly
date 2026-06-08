@@ -33,18 +33,27 @@ const statusLabels: Record<string, string> = {
   sold: "アーカイブ",
 };
 
-type FilterTab = ClubStatus | "all";
+type FilterTab = "all" | "bag1" | "bag2" | "reserve" | "sold";
 
 const filterTabs: { value: FilterTab; label: string }[] = [
   { value: "all", label: "すべて" },
-  { value: "bag", label: "マイバッグ" },
+  { value: "bag1", label: "マイバッグ" },
+  { value: "bag2", label: "予備バッグ" },
   { value: "reserve", label: "予備" },
   { value: "sold", label: "アーカイブ" },
 ];
 
+function getFilterParams(tab: FilterTab): { status?: ClubStatus; bagNumber?: number } {
+  if (tab === "all") return {};
+  if (tab === "bag1") return { status: "bag", bagNumber: 1 };
+  if (tab === "bag2") return { status: "bag", bagNumber: 2 };
+  return { status: tab as ClubStatus };
+}
+
 function ClubRow({
   club,
   showStatus,
+  bagLabel,
   isReordering,
   isFirst,
   isLast,
@@ -53,6 +62,7 @@ function ClubRow({
 }: {
   club: ClubWithImages;
   showStatus?: boolean;
+  bagLabel?: string;
   isReordering?: boolean;
   isFirst?: boolean;
   isLast?: boolean;
@@ -104,9 +114,9 @@ function ClubRow({
           {(club.latest_avg_distance ?? club.distance) != null && ` · ${club.latest_avg_distance ?? club.distance} yd`}
         </span>
       </div>
-      {showStatus && club.status !== "bag" && (
+      {showStatus && bagLabel && (
         <span className="shrink-0 rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
-          {statusLabels[club.status]}
+          {bagLabel}
         </span>
       )}
       {!isReordering && (
@@ -126,12 +136,13 @@ function ClubRow({
 }
 
 export default function BagPage() {
-  const [statusFilter, setStatusFilter] = useState<FilterTab>("bag");
-  const { clubs, isLoading, refetch } = useClubs(statusFilter === "all" ? undefined : statusFilter);
+  const [statusFilter, setStatusFilter] = useState<FilterTab>("bag1");
+  const filterParams = getFilterParams(statusFilter);
+  const { clubs, isLoading, refetch } = useClubs(filterParams.status, filterParams.bagNumber);
   const [isReordering, setIsReordering] = useState(false);
   const [localClubs, setLocalClubs] = useState<ClubWithImages[]>([]);
 
-  const isBagView = statusFilter === "bag";
+  const isBagView = statusFilter === "bag1" || statusFilter === "bag2";
 
   const displayClubs = isReordering
     ? localClubs
@@ -140,6 +151,7 @@ export default function BagPage() {
       : clubs;
 
   const bagCount = isBagView ? clubs.length : null;
+  const bagLabel = statusFilter === "bag1" ? "マイバッグ" : statusFilter === "bag2" ? "予備バッグ" : "マイバッグ";
 
   function startReorder() {
     setLocalClubs([...clubs].sort((a, b) => a.sort_order - b.sort_order));
@@ -174,7 +186,7 @@ export default function BagPage() {
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader
-        title={isBagView && bagCount !== null ? `マイバッグ (${bagCount}/${MAX_BAG_CLUBS})` : "マイバッグ"}
+        title={isBagView && bagCount !== null ? `${bagLabel} (${bagCount}/${MAX_BAG_CLUBS})` : "マイバッグ"}
         showBack={false}
         variant="dark"
       >
@@ -274,7 +286,7 @@ export default function BagPage() {
                 key={club.id}
                 className={index < displayClubs.length - 1 ? "border-b border-[#dfdfdf]" : ""}
               >
-                <ClubRow club={club} showStatus={statusFilter === "all"} />
+                <ClubRow club={club} showStatus={statusFilter === "all"} bagLabel={statusFilter === "all" ? (club.status === "bag" ? (club.bag_number === 2 ? "予備バッグ" : "マイバッグ") : statusLabels[club.status]) : undefined} />
               </div>
             ))}
           </div>

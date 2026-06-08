@@ -35,6 +35,7 @@ export interface Club {
   purchase_shop: string | null;
   purchase_price: number | null;
   status: ClubStatus;
+  bag_number: number;
   sort_order: number;
   created_at: string;
 }
