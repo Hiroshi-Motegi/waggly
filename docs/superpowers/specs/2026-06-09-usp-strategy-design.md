@@ -147,6 +147,11 @@ Wagglyは「点」のサービス同士をつなぐ「線」— 隙間のソリ�
 - **Web版と並行運用**: LIFF版は無料のまま維持。アプリ版は有料の付加価値版
 - **Phase 1と並行で開発**: ストア配信も早めに実施
 - **Apple/Google手数料**: 300円の場合、手取り約210円（30%手数料）
+- **ソースコード共通化**: UIコンポーネント・ビジネスロジックはWeb版と共通。プラットフォーム固有部分のみアダプター層で分岐:
+  - ローカルDB（SQLite）: `Capacitor.isNativePlatform()` でアプリ版のみ有効化
+  - 課金（IAP）: Capacitor IAPプラグイン。アプリ版のみ
+  - 認証: Web版はLIFF（LINE）、アプリ版はApple/Googleログイン。Supabase Authで同一ユーザーに紐付け
+- **AI月額課金**: アプリ版ではApple IAP経由（手数料15〜30%）。Web版ではStripe経由。機能は同一
 
 ## 3. Phase 1 機能セット
 
