@@ -263,7 +263,12 @@ export default function CoachPage() {
   }
 
   if (!historyLoaded || !conversationId) {
-    return <Loading />;
+    return (
+      <div className="flex flex-col px-2 py-2 space-y-2" style={{ height: "100dvh" }}>
+        <PageHeader title="AIに相談" showBack={false} />
+        <Loading />
+      </div>
+    );
   }
 
   if (showHistory) {
