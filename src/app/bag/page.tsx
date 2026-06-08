@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { useClubs, updateClub } from "@/hooks/use-clubs";
 import type { ClubStatus, ClubWithImages } from "@/types/database";
-import { getDistanceStaircaseData, getWeightFlowData } from "@/lib/gap-analysis";
+import { getDistanceStaircaseData, getWeightFlowData, getDistanceInsights, getWeightInsights } from "@/lib/gap-analysis";
 import { DistanceStaircase } from "@/components/charts/distance-staircase";
 import { WeightFlow } from "@/components/charts/weight-flow";
+import { ChartInsights } from "@/components/charts/chart-insights";
 
 const MAX_BAG_CLUBS = 14;
 
@@ -168,6 +169,8 @@ export default function BagPage() {
   const bagClubs = clubs.filter((c) => c.status === "bag" && c.bag_number === (statusFilter === "bag2" ? 2 : 1));
   const distanceData = getDistanceStaircaseData(bagClubs);
   const weightData = getWeightFlowData(bagClubs);
+  const distanceInsights = getDistanceInsights(distanceData);
+  const weightInsights = getWeightInsights(weightData);
   const showCharts = statusFilter === "bag1" || statusFilter === "bag2";
 
   const displayClubs = isReordering
@@ -290,9 +293,15 @@ export default function BagPage() {
               </button>
             </div>
             {chartTab === "distance" ? (
-              <DistanceStaircase data={distanceData} />
+              <>
+                <DistanceStaircase data={distanceData} />
+                <ChartInsights insights={distanceInsights} />
+              </>
             ) : (
-              <WeightFlow data={weightData} />
+              <>
+                <WeightFlow data={weightData} />
+                <ChartInsights insights={weightInsights} />
+              </>
             )}
           </div>
         )}
