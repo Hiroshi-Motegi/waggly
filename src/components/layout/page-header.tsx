@@ -35,22 +35,28 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
     }
   }
 
-  const darkBg = scrolled ? "bg-[#139847]/90 backdrop-blur-sm" : "";
-
   return (
-    <div className={`sticky top-0 z-10 flex items-center gap-2 -mx-2 -mt-2 px-3 pt-3 pb-1 transition-colors duration-200 ${isDark ? darkBg : "bg-[#ebf1eb]"}`}>
-      {showBack && (
-        <button onClick={handleBack} className="shrink-0 -ml-1 p-1">
-          <ChevronLeft className={`h-5 w-5 ${isDark ? "text-white" : "text-[#006728]"}`} />
-        </button>
+    <div className={`sticky top-0 z-10 -mx-2 -mt-2 px-3 py-2 overflow-hidden transition-all duration-200 ${isDark ? (scrolled ? "shadow-sm" : "") : "bg-[#ebf1eb]"}`}>
+      {isDark && scrolled && (
+        <>
+          <div className="absolute inset-0 bg-[#139847]/80" />
+          <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none" />
+        </>
       )}
-      <div className="flex flex-1 flex-col min-w-0">
-        {subtitle && (
-          <span className={`text-xs font-bold truncate ${isDark ? "text-white/80" : "text-[#1e944c]"}`}>{subtitle}</span>
+      <div className="relative z-10 flex items-center gap-2">
+        {showBack && (
+          <button onClick={handleBack} className="shrink-0 -ml-1 p-1">
+            <ChevronLeft className={`h-5 w-5 ${isDark ? "text-white" : "text-[#006728]"}`} />
+          </button>
         )}
-        <h2 className={`text-lg font-bold truncate ${isDark ? "text-white" : "text-[#006728]"}`}>{title}</h2>
+        <div className="flex flex-1 flex-col min-w-0">
+          {subtitle && (
+            <span className={`text-xs font-bold truncate ${isDark ? "text-white/80" : "text-[#1e944c]"}`}>{subtitle}</span>
+          )}
+          <h2 className={`text-lg font-bold truncate ${isDark ? "text-white" : "text-[#006728]"}`}>{title}</h2>
+        </div>
+        {children}
       </div>
-      {children}
     </div>
   );
 }
