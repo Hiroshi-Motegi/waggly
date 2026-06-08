@@ -263,7 +263,7 @@ export default function CoachPage() {
   }
 
   if (!historyLoaded || !conversationId) {
-    return <p className="p-4 text-center text-[#8b8b8b]">読み込み中...</p>;
+    return <Loading />;
   }
 
   if (showHistory) {
