@@ -253,6 +253,7 @@ export default function CoachPage() {
         id: m.id,
         role: m.role as "user" | "assistant",
         parts: [{ type: "text" as const, text: m.message }],
+        metadata: { created_at: m.created_at },
       }));
       setInitialMessages(uiMessages);
       setShowHistory(false);

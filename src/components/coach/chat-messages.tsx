@@ -10,8 +10,26 @@ interface ChatMessagesProps {
   isLoading?: boolean;
 }
 
+function formatTime(dateStr: string): string {
+  const d = new Date(dateStr);
+  return `${d.getHours()}:${d.getMinutes().toString().padStart(2, "0")}`;
+}
+
+function formatDateLabel(dateStr: string): string {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = today.getTime() - msgDate.getTime();
+  if (diff === 0) return "今日";
+  if (diff === 86400000) return "昨日";
+  return `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")}`;
+}
+
 export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   const { user } = useAuth();
+
+  let lastDateLabel = "";
 
   return (
     <div className="flex flex-col gap-2.5 p-3">
@@ -37,28 +55,49 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
           .join("");
 
         const isUser = message.role === "user";
+        const meta = message.metadata as { created_at?: string } | undefined;
+        const createdAt = meta?.created_at;
+
+        // Date separator
+        let dateSeparator = null;
+        if (createdAt) {
+          const dateLabel = formatDateLabel(createdAt);
+          if (dateLabel !== lastDateLabel) {
+            lastDateLabel = dateLabel;
+            dateSeparator = (
+              <div className="flex items-center justify-center py-1">
+                <span className="text-[10px] text-[#8b8b8b] bg-[#ebf1eb] px-2 py-0.5 rounded-full">{dateLabel}</span>
+              </div>
+            );
+          }
+        }
 
         return (
-          <div
-            key={message.id}
-            className={`flex gap-2 items-start ${isUser ? "flex-row-reverse" : ""}`}
-          >
-            {isUser ? (
-              <Avatar className="h-8 w-8 shrink-0">
-                <AvatarImage src={user?.avatar_url ?? undefined} />
-                <AvatarFallback>{user?.display_name?.[0] ?? "U"}</AvatarFallback>
-              </Avatar>
-            ) : (
-              <img src="/icons/ai-coach.svg" alt="AI" className="h-8 w-8 shrink-0" />
-            )}
-            <div className="max-w-[80%] rounded-lg border border-[#c5c5c5] px-3 py-2 text-xs font-medium">
-              {message.role === "assistant" ? (
-                <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_hr]:my-2 text-xs">
-                  <ReactMarkdown>{textContent}</ReactMarkdown>
-                </div>
+          <div key={message.id}>
+            {dateSeparator}
+            <div className={`flex gap-2 items-start ${isUser ? "flex-row-reverse" : ""}`}>
+              {isUser ? (
+                <Avatar className="h-8 w-8 shrink-0">
+                  <AvatarImage src={user?.avatar_url ?? undefined} />
+                  <AvatarFallback>{user?.display_name?.[0] ?? "U"}</AvatarFallback>
+                </Avatar>
               ) : (
-                <p className="whitespace-pre-wrap">{textContent}</p>
+                <img src="/icons/ai-coach.svg" alt="AI" className="h-8 w-8 shrink-0" />
               )}
+              <div className={`flex flex-col ${isUser ? "items-end" : "items-start"} max-w-[80%]`}>
+                <div className="rounded-lg border border-[#c5c5c5] px-3 py-2 text-xs font-medium">
+                  {message.role === "assistant" ? (
+                    <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_hr]:my-2 text-xs">
+                      <ReactMarkdown>{textContent}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="whitespace-pre-wrap">{textContent}</p>
+                  )}
+                </div>
+                {createdAt && (
+                  <span className="text-[9px] text-[#8b8b8b] mt-0.5 px-1">{formatTime(createdAt)}</span>
+                )}
+              </div>
             </div>
           </div>
         );
