@@ -4,8 +4,10 @@ import { PageHeader } from "@/components/layout/page-header";
 
 export default function PrivacyPage() {
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
-      <PageHeader title="プライバシーポリシー" />
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
+      <PageHeader title="プライバシーポリシー" variant="dark" />
 
       <div className="rounded-lg bg-white p-4 space-y-5 leading-relaxed">
         <p className="text-xs text-[#8b8b8b]">最終更新日: 2026年6月8日</p>
@@ -75,6 +77,7 @@ export default function PrivacyPage() {
           <h3 className="text-base font-bold text-[#006728]">9. お問い合わせ</h3>
           <p className="text-base">個人情報の取り扱いに関するお問い合わせは、LINEの公式アカウントよりご連絡ください。</p>
         </section>
+      </div>
       </div>
     </div>
   );

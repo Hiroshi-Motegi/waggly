@@ -3,6 +3,7 @@ import { Loading } from "@/components/loading";
 
 import { useEffect, useState, use } from "react";
 import Image from "next/image";
+import { PageHeader } from "@/components/layout/page-header";
 
 interface CourseDetail {
   golfCourseId: number;
@@ -158,13 +159,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
     <div className="relative flex flex-col px-2 py-2 space-y-2 pb-8 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
-      {/* Course name & address */}
-      <div className="px-1">
-        <h1 className="text-lg font-bold text-white leading-tight">{course.golfCourseName}</h1>
-        {course.address && (
-          <p className="mt-0.5 text-xs text-white/70">{course.address}</p>
-        )}
-      </div>
+      <PageHeader
+        title={course.golfCourseName}
+        subtitle={course.address}
+        backHref="/courses"
+        variant="dark"
+      />
 
       {/* Image carousel */}
       {images.length > 0 && (
