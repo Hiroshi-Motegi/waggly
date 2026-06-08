@@ -38,3 +38,49 @@ export function analyzeGaps(clubs: Club[]): GapResult {
 
   return { gaps, missingDistance };
 }
+
+// --- Chart data types ---
+
+export interface DistanceStaircaseItem {
+  club_number: string;
+  distance: number;
+  hasGap: boolean;
+}
+
+export interface WeightFlowItem {
+  club_number: string;
+  weight: number;
+  isFlowCorrect: boolean;
+}
+
+// --- Chart data functions ---
+
+export function getDistanceStaircaseData(clubs: Club[]): DistanceStaircaseItem[] {
+  const withDistance = clubs.filter((c) => c.distance != null);
+  const sorted = [...withDistance].sort((a, b) => b.distance! - a.distance!);
+
+  return sorted.map((club, i) => {
+    const next = sorted[i + 1];
+    const hasGap = next != null && club.distance! - next.distance! > GAP_THRESHOLD_YD;
+    return {
+      club_number: club.club_number,
+      distance: club.distance!,
+      hasGap,
+    };
+  });
+}
+
+export function getWeightFlowData(clubs: Club[]): WeightFlowItem[] {
+  const withWeight = clubs.filter((c) => c.weight != null);
+  const sorted = [...withWeight].sort((a, b) => a.sort_order - b.sort_order);
+
+  return sorted.map((club, i) => {
+    const prev = sorted[i - 1];
+    const isFlowCorrect = prev == null || club.weight! >= prev.weight!;
+    return {
+      club_number: club.club_number,
+      weight: club.weight!,
+      isFlowCorrect,
+    };
+  });
+}
