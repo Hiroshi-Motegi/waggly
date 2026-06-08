@@ -2,14 +2,12 @@
 
 import { Loading } from "@/components/loading";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { liffLogout } from "@/lib/liff";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { PageHeader } from "@/components/layout/page-header";
 
 interface UsageData {
   month: string;
@@ -46,104 +44,97 @@ export default function SettingsPage() {
   const isFreeTrialActive = subscription?.free_until && new Date(subscription.free_until) > new Date();
 
   return (
-    <div className="space-y-4 px-4 py-6">
-      <h2 className="text-xl font-bold">設定</h2>
+    <div className="flex flex-col px-2 py-2 space-y-2">
+      <PageHeader title="設定" />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">プロフィール</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center gap-4">
-          <Avatar className="h-16 w-16">
+      {/* プロフィール */}
+      <div className="rounded-lg bg-white p-3">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-14 w-14">
             <AvatarImage src={user.avatar_url ?? undefined} />
             <AvatarFallback className="text-lg">{user.display_name[0]}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-semibold">{user.display_name}</p>
-            <p className="text-sm text-muted-foreground">LINE連携済み</p>
+            <p className="text-sm font-bold">{user.display_name}</p>
+            <p className="text-xs text-[#8b8b8b]">LINE連携済み</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">プラン</CardTitle>
-            <Badge variant={isFreePlan ? "secondary" : "default"}>
-              {subscription?.plan?.name ?? "フリー"}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          {isFreePlan ? (
-            <p className="text-muted-foreground">
-              フリープランをご利用中です。AI機能に利用制限があります。
-            </p>
-          ) : (
-            <div className="space-y-1">
-              <p>月額 {subscription?.plan?.price?.toLocaleString()}円</p>
-              {isFreeTrialActive && (
-                <p className="text-primary text-xs">
-                  無料期間中（{new Date(subscription!.free_until!).toLocaleDateString("ja-JP")}まで）
-                </p>
-              )}
+      {/* プラン */}
+      <p className="text-base font-bold text-[#006728] px-1">プラン</p>
+      <div className="rounded-lg bg-white p-3">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-sm font-bold">ベータ版</span>
+          <span className="rounded-full bg-[#ebf1eb] px-2.5 py-0.5 text-xs font-bold text-[#006728]">
+            無料提供中
+          </span>
+        </div>
+        <p className="text-xs text-[#8b8b8b]">
+          現在ベータ版として全機能を無料で提供しています。正式リリース時にプラン体系が変更される場合があります。
+        </p>
+      </div>
+
+      {/* AIコーチ利用状況 */}
+      <p className="text-base font-bold text-[#006728] px-1">AIコーチ利用状況</p>
+      <div className="rounded-lg bg-white p-3">
+        {usage ? (
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs">
+              <span className="text-[#8b8b8b]">{usage.month}月</span>
+              <span className="font-medium">
+                {usage.totalTokens.toLocaleString()} / {usage.limit.toLocaleString()} トークン
+              </span>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <div className="h-2 rounded-full bg-[#ebf1eb] overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  usagePercent >= 90 ? "bg-red-500" : usagePercent >= 70 ? "bg-yellow-500" : "bg-[#006728]"
+                }`}
+                style={{ width: `${usagePercent}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[10px] text-[#8b8b8b]">
+              <span>使用率 {usagePercent}%</span>
+              <span>残り {usage.remaining.toLocaleString()} トークン</span>
+            </div>
+            {usage.limitReached && (
+              <p className="text-xs text-red-500 font-medium">
+                今月の利用上限に達しました。来月リセットされます。
+              </p>
+            )}
+          </div>
+        ) : (
+          <Loading />
+        )}
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">AIコーチ利用状況</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {usage ? (
-            <>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{usage.month}月</span>
-                <span className="font-medium">
-                  {usage.totalTokens.toLocaleString()} / {usage.limit.toLocaleString()} トークン
-                </span>
+      {/* 法的情報 */}
+      <div className="rounded-lg bg-white p-3">
+        <div className="flex flex-col">
+          {[
+            { href: "/terms", label: "利用規約" },
+            { href: "/privacy", label: "プライバシーポリシー" },
+          ].map((item, i, arr) => (
+            <Link key={item.href} href={item.href}>
+              <div className={`flex items-center gap-2.5 py-2.5 ${i < arr.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                <span className="flex-1 text-sm font-bold">{item.label}</span>
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
               </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all ${
-                    usagePercent >= 90 ? "bg-destructive" : usagePercent >= 70 ? "bg-yellow-500" : "bg-primary"
-                  }`}
-                  style={{ width: `${usagePercent}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>使用率 {usagePercent}%</span>
-                <span>残り {usage.remaining.toLocaleString()} トークン</span>
-              </div>
-              {usage.limitReached && (
-                <p className="text-sm text-destructive font-medium">
-                  今月の利用上限に達しました。来月リセットされます。
-                </p>
-              )}
-            </>
-          ) : (
-            <Loading />
-          )}
-        </CardContent>
-      </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
 
-      <Link href="/courses">
-        <Button variant="outline" className="w-full">ゴルフ場を探す</Button>
-      </Link>
-
-      <Link href="/terms">
-        <Button variant="link" className="w-full text-muted-foreground text-xs">
-          利用規約
-        </Button>
-      </Link>
-
-      <Separator />
-
-      <Button variant="outline" className="w-full" onClick={liffLogout}>
-        ログアウト
-      </Button>
+      {/* ログアウト */}
+      <div className="flex flex-col items-center pt-4">
+        <button
+          onClick={liffLogout}
+          className="w-full max-w-xs rounded-full border border-[#c4c4c4] py-2.5 text-sm font-bold text-[#8b8b8b]"
+        >
+          ログアウト
+        </button>
+      </div>
     </div>
   );
 }

@@ -118,7 +118,14 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         {/* 種類 */}
         <div className="flex flex-col gap-0.5 py-1">
           <span className={labelClass}>種類</span>
-          <select value={form.category ?? ""} onChange={(e) => { update("category", e.target.value || undefined); setUseCustomNumber(false); update("club_number", ""); }} className={selectClass}>
+          <select value={form.category ?? ""} onChange={(e) => {
+            const cat = e.target.value || undefined;
+            update("category", cat);
+            setUseCustomNumber(false);
+            if (cat === "driver") { update("club_number", "1W"); }
+            else if (cat === "putter") { update("club_number", "PT"); }
+            else { update("club_number", ""); }
+          }} className={selectClass}>
             <option value="">選択してください</option>
             {categories.map((c) => (
               <option key={c.value} value={c.value}>{c.label}</option>
@@ -127,7 +134,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         </div>
 
         {/* 番手 */}
-        {form.category && (
+        {form.category && form.category !== "driver" && form.category !== "putter" && (
           <div className="flex flex-col gap-1 py-1">
             <span className={labelClass}>番手</span>
             <div className="flex flex-wrap gap-2">

@@ -1,13 +1,13 @@
 "use client";
 import { Loading } from "@/components/loading";
 
-import { use, useState } from "react";
+import { use, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ClubForm } from "@/components/club/club-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { ClubImageGallery } from "@/components/club/club-image-gallery";
 import { useClub, updateClub } from "@/hooks/use-clubs";
-import type { Club } from "@/types/database";
+import type { Club, ClubImage } from "@/types/database";
 
 export default function EditClubPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
@@ -27,6 +27,19 @@ export default function EditClubPage({ params }: { params: Promise<{ clubId: str
     }
   }
 
+  const [clubImages, setClubImages] = useState<ClubImage[]>([]);
+  const [imagesInitialized, setImagesInitialized] = useState(false);
+
+  // Sync images from club data on first load
+  if (club && !imagesInitialized) {
+    setClubImages(club.club_images ?? []);
+    setImagesInitialized(true);
+  }
+
+  const handleImageUpload = useCallback((newImage: ClubImage) => {
+    setClubImages((prev) => [...prev, newImage]);
+  }, []);
+
   if (isLoading) return <Loading />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
@@ -40,8 +53,8 @@ export default function EditClubPage({ params }: { params: Promise<{ clubId: str
           <span className="text-xs">写真</span>
           <ClubImageGallery
             clubId={clubId}
-            images={club.club_images ?? []}
-            onUpload={() => window.location.reload()}
+            images={clubImages}
+            onUpload={handleImageUpload}
           />
         </div>
       </div>

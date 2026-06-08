@@ -13,8 +13,8 @@ export default function NewClubPage() {
   async function handleSubmit(data: Partial<Club>) {
     setIsSubmitting(true);
     try {
-      await createClub({ status: "bag", ...data });
-      router.push("/bag");
+      const club = await createClub({ status: "bag", ...data });
+      router.push(`/bag/${club.id}`);
     } catch (error) {
       console.error("Failed to create club:", error);
     } finally {

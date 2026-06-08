@@ -1,36 +1,41 @@
 "use client";
 
-import { useRef } from "react";
-import { Plus } from "lucide-react";
+import { useRef, useState } from "react";
+import { Plus, Loader2 } from "lucide-react";
 import type { ClubImage } from "@/types/database";
 
 interface ClubImageGalleryProps {
   clubId: string;
   images: ClubImage[];
-  onUpload: () => void;
+  onUpload: (newImage: ClubImage) => void;
 }
 
 export function ClubImageGallery({ clubId, images, onUpload }: ClubImageGalleryProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const res = await fetch(`/api/clubs/${clubId}/images`, {
-      method: "POST",
-      body: formData,
-    });
+      const res = await fetch(`/api/clubs/${clubId}/images`, {
+        method: "POST",
+        body: formData,
+      });
 
-    if (res.ok) {
-      onUpload();
+      if (res.ok) {
+        const newImage = await res.json();
+        onUpload(newImage);
+      }
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-
-    // Reset input
-    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   return (
@@ -41,17 +46,23 @@ export function ClubImageGallery({ clubId, images, onUpload }: ClubImageGalleryP
             key={img.id}
             src={img.image_url}
             alt="Club"
-            className={`h-20 w-20 shrink-0 rounded-md object-cover ${
-              img.is_primary ? "ring-2 ring-primary" : ""
+            className={`h-20 w-20 shrink-0 rounded-lg object-cover ${
+              img.is_primary ? "ring-2 ring-[#006728]" : ""
             }`}
           />
         ))}
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex h-20 w-20 shrink-0 items-center justify-center rounded-md border-2 border-dashed text-muted-foreground hover:border-primary hover:text-primary"
-        >
-          <Plus className="h-6 w-6" />
-        </button>
+        {isUploading ? (
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#006728] text-[#006728]">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]"
+          >
+            <Plus className="h-6 w-6" />
+          </button>
+        )}
       </div>
       <input
         ref={fileInputRef}
