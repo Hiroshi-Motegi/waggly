@@ -64,7 +64,7 @@ export function ShareWitbButton({ bagNumber }: Props) {
     <>
       <button
         onClick={generateImage}
-        className="flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white"
+        className="flex items-center gap-1 rounded-full border border-[#006728] bg-white px-3 py-1.5 text-xs font-bold text-[#006728]"
       >
         <Share2 className="h-3.5 w-3.5" />
         WITB画像
