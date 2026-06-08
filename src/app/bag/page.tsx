@@ -4,6 +4,7 @@ import { Loading } from "@/components/loading";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, ArrowUp, ArrowDown, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -135,8 +136,24 @@ function ClubRow({
   return <Link href={`/bag/${club.id}`}>{content}</Link>;
 }
 
+const validTabs: FilterTab[] = ["all", "bag1", "bag2", "reserve", "sold"];
+
 export default function BagPage() {
-  const [statusFilter, setStatusFilter] = useState<FilterTab>("bag1");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tabParam = searchParams.get("tab") as FilterTab | null;
+  const statusFilter: FilterTab = tabParam && validTabs.includes(tabParam) ? tabParam : "bag1";
+
+  function setStatusFilter(tab: FilterTab) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "bag1") {
+      params.delete("tab");
+    } else {
+      params.set("tab", tab);
+    }
+    const qs = params.toString();
+    router.replace(`/bag${qs ? `?${qs}` : ""}`, { scroll: false });
+  }
   const filterParams = getFilterParams(statusFilter);
   const { clubs, isLoading, refetch } = useClubs(filterParams.status, filterParams.bagNumber);
   const [isReordering, setIsReordering] = useState(false);

@@ -4,6 +4,7 @@ import { Loading } from "@/components/loading";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Plus } from "lucide-react";
 import type { Accessory, AccessoryCategory, AccessoryStatus } from "@/types/database";
@@ -43,10 +44,26 @@ const filterTabs: { value: FilterTab; label: string }[] = [
   { value: "past", label: "アーカイブ" },
 ];
 
+const validItemTabs: FilterTab[] = ["all", "active", "past"];
+
 export default function ItemsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tabParam = searchParams.get("tab") as FilterTab | null;
+  const filter: FilterTab = tabParam && validItemTabs.includes(tabParam) ? tabParam : "all";
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterTab>("all");
+
+  function setFilter(tab: FilterTab) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "all") {
+      params.delete("tab");
+    } else {
+      params.set("tab", tab);
+    }
+    const qs = params.toString();
+    router.replace(`/items${qs ? `?${qs}` : ""}`, { scroll: false });
+  }
 
   useEffect(() => {
     async function load() {
