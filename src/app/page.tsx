@@ -41,7 +41,7 @@ export default function HomePage() {
           <CardContent className="flex items-center justify-between p-4">
             <div>
               <p className="font-semibold">練習メニュー</p>
-              <p className="text-xs text-muted-foreground">AIが最適な練習を提案</p>
+              <p className="text-xs text-muted-foreground">AIに練習メニューを相談</p>
             </div>
             <span className="text-muted-foreground">→</span>
           </CardContent>
