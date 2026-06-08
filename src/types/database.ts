@@ -6,6 +6,7 @@ export type MaintenanceType = "grip_change" | "reshaft" | "loft_adjust" | "other
 export type PlanSource = "auto" | "chat";
 export type PlanStatus = "new" | "done" | "skipped";
 export type ChatRole = "user" | "assistant";
+export type MemoCondition = "good" | "normal" | "bad";
 
 export interface User {
   id: string;
@@ -119,6 +120,10 @@ export interface ClubMemo {
   club_id: string;
   distance: number | null;
   memo: string | null;
+  condition: MemoCondition | null;
+  symptom_tags: string[];
+  feeling_tags: string[];
+  gear_tags: string[];
   created_at: string;
 }
 
