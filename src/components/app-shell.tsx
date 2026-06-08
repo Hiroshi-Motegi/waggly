@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-md min-h-dvh shadow-sm bg-[#ebf1eb] relative">
       <Header />
-      <main className="pb-28 overflow-x-hidden">{children}</main>
+      <main className={pathname === "/coach" ? "" : ""} style={{ paddingBottom: pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>{children}</main>
       <BottomNav />
     </div>
   );

@@ -3,6 +3,7 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClubForm } from "@/components/club/club-form";
+import { PageHeader } from "@/components/layout/page-header";
 import { ClubImageGallery } from "@/components/club/club-image-gallery";
 import { useClub, updateClub } from "@/hooks/use-clubs";
 import type { Club } from "@/types/database";
@@ -31,8 +32,8 @@ export default function EditClubPage({ params }: { params: Promise<{ clubId: str
   const { club_images, maintenances, id, user_id, created_at, ...editableData } = club as any;
 
   return (
-    <div>
-      <h2 className="px-3 pt-4 text-lg font-bold text-[#006728]">クラブを編集</h2>
+    <div className="px-2 py-4">
+      <PageHeader title="クラブを編集" />
       <div className="px-3 pt-3">
         <div className="rounded-lg bg-white p-3">
           <span className="text-xs">写真</span>

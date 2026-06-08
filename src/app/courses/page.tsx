@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { PageHeader } from "@/components/layout/page-header";
 import Image from "next/image";
 
 const STORAGE_KEY = "courses-search-state";
@@ -116,10 +117,8 @@ export default function CoursesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
-      <div className="sticky top-0 z-10 bg-[#ebf1eb] px-1 pb-1">
-        <h2 className="text-lg font-bold text-[#006728]">ゴルフ場を探す</h2>
-      </div>
+    <div className="flex flex-col px-2 py-2 space-y-2">
+      <PageHeader title="ゴルフ場を探す" showBack={false} />
 
       <div className="rounded-lg bg-white p-3">
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,16 +50,15 @@ export default function PracticeDetailPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-[#006728]">練習記録</h2>
+    <div className="flex flex-col px-2 py-2 space-y-2">
+      <PageHeader title="練習記録" backHref="/practice">
         <Link href={`/practice/${sessionId}/edit`}>
           <Button size="sm" variant="outline" className="gap-1 border-[#006728] text-[#006728]">
             <Pencil className="h-4 w-4" />
             編集
           </Button>
         </Link>
-      </div>
+      </PageHeader>
 
       <div className="flex flex-col gap-3 rounded-lg bg-white p-4">
         <div className="flex items-center justify-between">

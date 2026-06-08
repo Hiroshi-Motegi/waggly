@@ -64,7 +64,7 @@ export default function NewItemPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
+    <div className="flex flex-col px-2 py-2 space-y-2">
       <h2 className="px-1 text-lg font-bold text-[#006728]">アイテムを追加</h2>
       <form onSubmit={handleSubmit} className="flex flex-col rounded-lg bg-white p-3">
         <div className="flex flex-col gap-0.5 py-1">

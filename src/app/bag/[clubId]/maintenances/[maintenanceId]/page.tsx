@@ -49,7 +49,7 @@ export default function MaintenanceDetailPage({
   if (!item) return <p className="p-4 text-center text-muted-foreground">記録が見つかりません</p>;
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
+    <div className="flex flex-col px-2 py-2 space-y-2">
       <div className="flex items-center justify-between px-1">
         <div>
           <span className="text-xs font-bold text-[#1e944c]">{club?.club_number}</span>

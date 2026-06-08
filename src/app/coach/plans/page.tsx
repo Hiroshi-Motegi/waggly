@@ -2,17 +2,22 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/layout/page-header";
 import { usePlans } from "@/hooks/use-plans";
 
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
-  new: { label: "未実行", variant: "default" },
-  done: { label: "実行済み", variant: "secondary" },
-  skipped: { label: "スキップ", variant: "outline" },
+const statusLabels: Record<string, string> = {
+  new: "未実行",
+  done: "実行済み",
+  skipped: "スキップ",
+};
+
+const statusColors: Record<string, string> = {
+  new: "bg-[#c7e2ca] text-black",
+  done: "bg-[#d4e8f7] text-black",
+  skipped: "bg-[#e0e0e0] text-black",
 };
 
 export default function PlansPage() {
@@ -22,10 +27,8 @@ export default function PlansPage() {
   const [generating, setGenerating] = useState(isGenerating);
   const [prevCount, setPrevCount] = useState<number | null>(null);
 
-  // Poll for new plan when generating
   useEffect(() => {
     if (!generating) return;
-    // Wait for initial load to complete before setting baseline
     if (isLoading) return;
     if (prevCount === null) {
       setPrevCount(plans.length);
@@ -42,45 +45,47 @@ export default function PlansPage() {
   }, [generating, isLoading, plans.length, prevCount, refetch]);
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">練習メニュー</h2>
+    <div className="flex flex-col px-2 py-2 space-y-2">
+      <PageHeader title="練習メニュー" showBack={false}>
         <Link href="/coach/plans/new">
-          <Button size="sm">
-            <Plus className="mr-1 h-4 w-4" />
+          <button className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white">
+            <Plus className="h-4 w-4" />
             新規作成
-          </Button>
+          </button>
         </Link>
-      </div>
+      </PageHeader>
 
       {generating && (
-        <Card>
-          <CardContent className="flex items-center gap-3 p-3">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">練習メニューを生成中...</p>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-3 rounded-lg bg-white p-3">
+          <Loader2 className="h-4 w-4 animate-spin text-[#006728]" />
+          <p className="text-sm text-[#8b8b8b]">練習メニューを生成中...</p>
+        </div>
       )}
 
       {isLoading ? (
-        <p className="text-center text-muted-foreground">読み込み中...</p>
+        <p className="text-center text-sm text-[#8b8b8b]">読み込み中...</p>
       ) : plans.length === 0 && !generating ? (
-        <p className="text-center text-muted-foreground py-8">まだ練習メニューがありません</p>
+        <p className="text-center text-sm text-[#8b8b8b] py-8">まだ練習メニューがありません</p>
       ) : (
-        <div className="space-y-2">
-          {plans.map((plan) => {
-            const status = statusLabels[plan.status];
-            return (
-              <Link key={plan.id} href={`/coach/plans/${plan.id}`}>
-                <Card className="mb-2">
-                  <CardContent className="flex items-center justify-between p-3">
-                    <p className="text-sm font-medium flex-1 mr-2">{plan.title}</p>
-                    <Badge variant={status.variant}>{status.label}</Badge>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
+        <div className="flex flex-col rounded-lg bg-white p-3">
+          {plans.map((plan, i) => (
+            <Link key={plan.id} href={`/coach/plans/${plan.id}`}>
+              <div className={`flex items-center gap-2.5 py-2 ${i < plans.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                <div className="flex flex-1 flex-col gap-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${statusColors[plan.status]}`}>
+                      {statusLabels[plan.status]}
+                    </span>
+                    <span className="text-xs text-[#8b8b8b]">
+                      {new Date(plan.created_at).toLocaleDateString("ja-JP")}
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold truncate">{plan.title}</p>
+                </div>
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" />
+              </div>
+            </Link>
+          ))}
         </div>
       )}
     </div>

@@ -7,6 +7,7 @@ import type { UIMessage } from "ai";
 import { Plus, Clock } from "lucide-react";
 import { ChatMessages } from "@/components/coach/chat-messages";
 import { ChatInput } from "@/components/coach/chat-input";
+import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 
 type ConversationItem = {
@@ -52,10 +53,8 @@ function ChatView({
   }
 
   return (
-    <div className="flex flex-col gap-4 px-2 pt-4 pb-1">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#ebf1eb] flex items-center gap-3 px-1 pb-1">
-        <h2 className="flex-1 text-lg font-bold text-[#006728]">AIに相談</h2>
+    <div className="flex flex-col px-2 py-2 space-y-2" style={{ height: "100dvh" }}>
+      <PageHeader title="AIに相談" showBack={false}>
         <div className="flex gap-1">
           <button
             onClick={onShowHistory}
@@ -72,15 +71,17 @@ function ChatView({
             新しい会話
           </button>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Chat card */}
-      <div className="flex flex-col rounded-lg bg-white" style={{ minHeight: "calc(100dvh - 260px)" }}>
+      <div className="flex flex-col flex-1 min-h-0 rounded-lg bg-white" style={{ marginBottom: "var(--bottom-nav-height)" }}>
         <div className="flex-1 overflow-y-auto">
           <ChatMessages messages={messages} isLoading={isLoading} />
           <div ref={bottomRef} />
         </div>
-        <ChatInput onSend={handleSend} isLoading={isLoading} />
+        <div className="shrink-0">
+          <ChatInput onSend={handleSend} isLoading={isLoading} />
+        </div>
       </div>
     </div>
   );
@@ -107,7 +108,7 @@ function HistoryPanel({
   }
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
+    <div className="flex flex-col px-2 py-2 space-y-2">
       <div className="flex items-center justify-between px-1">
         <h2 className="text-lg font-bold text-[#006728]">会話履歴</h2>
         <button

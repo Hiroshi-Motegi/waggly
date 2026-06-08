@@ -77,7 +77,7 @@ export default function MaintenanceEditPage({
   if (isFetching) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
+    <div className="flex flex-col px-2 py-2 space-y-2">
       <div className="px-1">
         <span className="text-xs font-bold text-[#1e944c]">{club?.club_number}</span>
         <h2 className="text-lg font-bold text-[#006728]">メンテナンスを編集</h2>

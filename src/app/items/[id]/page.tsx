@@ -3,6 +3,7 @@
 import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
 import { toAffiliateUrl, getUrlPlatform } from "@/lib/affiliate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,7 +179,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
   if (isEditing) {
     return (
-      <div className="flex flex-col gap-4 px-2 py-4">
+      <div className="flex flex-col px-2 py-2 space-y-2">
         <h2 className="px-1 text-lg font-bold text-[#006728]">アイテムを編集</h2>
         <form onSubmit={handleSave} className="flex flex-col rounded-lg bg-white p-3">
           {/* 画像 */}
@@ -304,17 +305,12 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const statusLabel = item.status === "active" ? "使用中" : "アーカイブ";
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-1">
-        <div className="flex flex-1 flex-col gap-px min-w-0">
-          <span className="text-xs font-bold text-[#1e944c]">
-            {categoryLabels[item.category]}
-          </span>
-          <span className="text-lg font-bold text-[#006728]">
-            {[item.brand, item.model].filter(Boolean).join(" ") || "—"}
-          </span>
-        </div>
+    <div className="flex flex-col px-2 py-2 space-y-2">
+      <PageHeader
+        title={[item.brand, item.model].filter(Boolean).join(" ") || "—"}
+        subtitle={categoryLabels[item.category]}
+        backHref="/items"
+      >
         <div className="flex gap-1 shrink-0">
           <button
             onClick={() => setIsEditing(true)}
@@ -329,7 +325,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             <Trash2 className="h-4 w-4 text-white" />
           </button>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Card */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">

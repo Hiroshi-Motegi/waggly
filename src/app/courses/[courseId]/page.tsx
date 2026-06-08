@@ -154,7 +154,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   ].filter(Boolean);
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4 pb-8">
+    <div className="flex flex-col px-2 py-2 space-y-2 pb-8">
       {/* Course name & address */}
       <div className="px-1">
         <h1 className="text-lg font-bold text-[#006728] leading-tight">{course.golfCourseName}</h1>

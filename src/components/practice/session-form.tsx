@@ -62,7 +62,7 @@ export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmit
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-2 py-4">
+    <form onSubmit={handleSubmit} className="flex flex-col py-2 space-y-2">
       {/* Card 1: Date & Location */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         <div className="flex flex-col gap-0.5 py-1">

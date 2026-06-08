@@ -101,7 +101,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
           </span>
           <h2 className="text-lg font-bold text-[#006728]">メンテナンス記録の追加</h2>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-2 py-4">
+        <form onSubmit={handleSubmit} className="flex flex-col px-2 py-2 space-y-2">
           <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
             <div className="flex flex-col gap-0.5 py-1">
               <span className="text-xs">種別</span>
@@ -161,7 +161,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
 
   // List mode
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
+    <div className="flex flex-col px-2 py-2 space-y-2">
       <div className="flex items-center justify-between px-1">
         <div>
           <span className="text-xs font-bold text-[#1e944c]">{club.club_number}</span>

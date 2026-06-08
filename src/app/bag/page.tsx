@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Plus, ArrowUp, ArrowDown, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
 import { useClubs, updateClub } from "@/hooks/use-clubs";
 import type { ClubStatus, ClubWithImages } from "@/types/database";
 
@@ -168,13 +169,11 @@ export default function BagPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
-      <div className="sticky top-0 z-10 bg-[#ebf1eb] flex items-center justify-between px-1 pb-1">
-        <h2 className="text-lg font-bold text-[#006728]">
-          {isBagView && bagCount !== null
-            ? `マイバッグ (${bagCount}/${MAX_BAG_CLUBS})`
-            : "マイバッグ"}
-        </h2>
+    <div className="flex flex-col px-2 py-2 space-y-2">
+      <PageHeader
+        title={isBagView && bagCount !== null ? `マイバッグ (${bagCount}/${MAX_BAG_CLUBS})` : "マイバッグ"}
+        showBack={false}
+      >
         <div className="flex gap-2">
           {isBagView && !isReordering && clubs.length > 1 && (
             <button
@@ -197,7 +196,7 @@ export default function BagPage() {
             </Link>
           )}
         </div>
-      </div>
+      </PageHeader>
 
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* Tabs */}

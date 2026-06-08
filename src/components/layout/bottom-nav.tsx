@@ -21,7 +21,7 @@ export function BottomNav() {
         {tabs.map((tab) => {
           const isActive =
             pathname === tab.href ||
-            (tab.href !== "/" && pathname.startsWith(tab.href + "/"));
+            (tab.href !== "/" && pathname.startsWith(tab.href + "/") && !pathname.startsWith("/coach/plans"));
           return (
             <Link
               key={tab.href}

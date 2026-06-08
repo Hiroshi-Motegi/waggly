@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { PageHeader } from "@/components/layout/page-header";
 import { Plus } from "lucide-react";
 import type { Accessory, AccessoryCategory, AccessoryStatus } from "@/types/database";
 
@@ -64,16 +65,15 @@ export default function ItemsPage() {
   }, [filter]);
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
-      <div className="sticky top-0 z-10 bg-[#ebf1eb] flex items-center justify-between px-1 pb-1">
-        <h2 className="text-lg font-bold text-[#006728]">アイテム</h2>
+    <div className="flex flex-col px-2 py-2 space-y-2">
+      <PageHeader title="アイテム" showBack={false}>
         <Link href="/items/new">
           <button className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white">
             <Plus className="h-4 w-4" />
             追加
           </button>
         </Link>
-      </div>
+      </PageHeader>
 
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* Tabs */}

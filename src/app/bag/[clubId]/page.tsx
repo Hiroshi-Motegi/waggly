@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
 import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
 
 const statusLabels: Record<string, string> = {
@@ -100,17 +101,12 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#ebf1eb] flex items-center gap-3 px-1 pb-1">
-        <div className="flex flex-1 flex-col gap-px min-w-0">
-          <span className="text-xs font-bold text-[#1e944c]">
-            {club.club_number}{club.maker ? ` / ${club.maker}` : ""}
-          </span>
-          <span className="text-lg font-bold text-[#006728]">
-            {club.model || "—"}
-          </span>
-        </div>
+    <div className="flex flex-col px-2 py-2 space-y-2">
+      <PageHeader
+        title={club.model || "—"}
+        subtitle={`${club.club_number}${club.maker ? ` / ${club.maker}` : ""}`}
+        backHref="/bag"
+      >
         <div className="flex gap-1 shrink-0">
           <Link href={`/bag/${clubId}/edit`}>
             <button className="flex items-center justify-center rounded-full bg-[#006728] p-2">
@@ -124,7 +120,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             <Trash2 className="h-4 w-4 text-white" />
           </button>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Specs card */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
