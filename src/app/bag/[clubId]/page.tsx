@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { ClubUsageSummary } from "@/components/club/club-usage-summary";
 import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
 
 const statusLabels: Record<string, string> = {
@@ -253,6 +254,12 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             </button>
           )}
         </div>
+      </div>
+
+      {/* 使用サマリー */}
+      <div className="rounded-lg bg-white p-3">
+        <h3 className="text-sm font-bold mb-2">使用サマリー（3ヶ月）</h3>
+        <ClubUsageSummary clubId={clubId} />
       </div>
 
       {/* Activity header */}
