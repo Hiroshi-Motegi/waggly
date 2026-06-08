@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { AuthContext } from "@/hooks/use-auth";
 import { initLiff, getLiffProfile } from "@/lib/liff";
 import { createClient } from "@/lib/supabase/client";
@@ -9,27 +10,24 @@ import type { User } from "@/types/database";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    function handleLiffRedirect() {
-      const params = new URLSearchParams(window.location.search);
-      const liffState = params.get("liff.state");
-      if (liffState && liffState !== "/" && liffState !== window.location.pathname) {
-        // Navigate using Next.js router to avoid full reload loop
-        window.history.replaceState(null, "", liffState);
-        window.location.replace(liffState);
-        return true;
-      }
-      // Clean up liff.state from URL if we're already on the right page
-      if (liffState) {
-        window.history.replaceState(null, "", window.location.pathname);
-      }
-      return false;
+    // Handle liff.state redirect once, client-side only
+    const params = new URLSearchParams(window.location.search);
+    const liffState = params.get("liff.state");
+    if (liffState && liffState !== "/" && liffState !== pathname) {
+      // Clean URL and navigate via Next.js router (no full reload)
+      window.history.replaceState(null, "", pathname);
+      router.replace(liffState);
+      return;
+    }
+    if (liffState) {
+      window.history.replaceState(null, "", pathname);
     }
 
     async function authenticate() {
-      // Handle liff.state redirect immediately before anything renders
-      if (handleLiffRedirect()) return;
 
       try {
         // Development mode: skip LIFF auth
