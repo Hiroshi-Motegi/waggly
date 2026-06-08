@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { useRef, useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
@@ -120,7 +121,7 @@ function HistoryPanel({
       </div>
       <div className="flex flex-col rounded-lg bg-white p-3">
         {isLoading ? (
-          <p className="py-4 text-center text-sm text-[#8b8b8b]">読み込み中...</p>
+          <Loading />
         ) : conversations.length === 0 ? (
           <p className="py-4 text-center text-sm text-[#8b8b8b]">会話履歴がありません</p>
         ) : (

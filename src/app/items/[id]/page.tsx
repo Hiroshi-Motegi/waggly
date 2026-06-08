@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -167,7 +168,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (isLoading) return <Loading />;
   if (!item) return <p className="p-4 text-center text-muted-foreground">アイテムが見つかりません</p>;
 
   function handleImageDelete() {

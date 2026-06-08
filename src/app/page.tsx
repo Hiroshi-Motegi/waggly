@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -36,7 +37,7 @@ export default function HomePage() {
   const { sessions } = usePracticeSessions();
 
   if (authLoading) {
-    return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+    return <Loading />;
   }
 
   if (!user) {

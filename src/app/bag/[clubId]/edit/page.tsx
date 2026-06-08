@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -26,7 +27,7 @@ export default function EditClubPage({ params }: { params: Promise<{ clubId: str
     }
   }
 
-  if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (isLoading) return <Loading />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   const { club_images, maintenances, id, user_id, created_at, ...editableData } = club as any;

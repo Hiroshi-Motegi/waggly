@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -26,7 +27,7 @@ export default function PracticePage() {
       </PageHeader>
 
       {isLoading ? (
-        <p className="text-center text-muted-foreground">読み込み中...</p>
+        <Loading />
       ) : sessions.length === 0 ? (
         <p className="text-center text-muted-foreground py-8">
           まだ練習記録がありません

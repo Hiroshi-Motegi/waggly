@@ -1,5 +1,6 @@
 "use client";
 
+import { Loading } from "@/components/loading";
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -45,7 +46,7 @@ export default function MaintenanceDetailPage({
     if (res.ok) router.push(`/bag/${clubId}/maintenances`);
   }
 
-  if (isFetching) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (isFetching) return <Loading />;
   if (!item) return <p className="p-4 text-center text-muted-foreground">記録が見つかりません</p>;
 
   return (

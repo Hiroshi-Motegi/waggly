@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -258,7 +259,7 @@ export default function BagPage() {
             </div>
           </>
         ) : isLoading ? (
-          <p className="py-4 text-center text-sm text-muted-foreground">読み込み中...</p>
+          <Loading />
         ) : clubs.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             クラブが登録されていません

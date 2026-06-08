@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Onboarding } from "@/components/onboarding";
+import { Loading } from "@/components/loading";
 import { TERMS_UPDATED_AT } from "@/lib/constants";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -21,8 +22,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Show loading
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-md min-h-dvh flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">読み込み中...</p>
+      <div className="mx-auto max-w-md min-h-dvh flex items-center justify-center bg-[#ebf1eb]">
+        <Loading />
       </div>
     );
   }

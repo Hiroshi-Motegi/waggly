@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { use, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -91,7 +92,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
     }
   }
 
-  if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (isLoading) return <Loading />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   // Add mode: dedicated form page

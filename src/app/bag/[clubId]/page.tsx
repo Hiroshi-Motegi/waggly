@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -97,7 +98,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
     router.push("/bag");
   }
 
-  if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (isLoading) return <Loading />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   return (

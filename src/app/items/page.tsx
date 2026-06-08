@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -101,7 +102,7 @@ export default function ItemsPage() {
 
         {/* List */}
         {isLoading ? (
-          <p className="py-4 text-center text-sm text-muted-foreground">読み込み中...</p>
+          <Loading />
         ) : accessories.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             アイテムが登録されていません

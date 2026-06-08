@@ -137,6 +137,42 @@
   }
 }
 
+/* Loading animation */
+.loading-bounce {
+  animation: bounce 0.8s ease-in-out infinite;
+}
+.loading-shadow {
+  width: 40px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 103, 40, 0.15);
+  animation: shadow 0.8s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0) scaleX(1) scaleY(1);
+  }
+  15% {
+    transform: translateY(0) scaleX(1.1) scaleY(0.85);
+  }
+  50% {
+    transform: translateY(-30px) scaleX(0.95) scaleY(1.05);
+  }
+  85% {
+    transform: translateY(0) scaleX(1.1) scaleY(0.85);
+  }
+}
+@keyframes shadow {
+  0%, 100% {
+    transform: scaleX(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleX(0.5);
+    opacity: 0.1;
+  }
+}
+
 /* Club balls slider */
 .club-balls-slider {
   -webkit-appearance: none;

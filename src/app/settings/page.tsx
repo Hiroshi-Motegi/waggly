@@ -1,5 +1,6 @@
 "use client";
 
+import { Loading } from "@/components/loading";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
@@ -123,7 +124,7 @@ export default function SettingsPage() {
               )}
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">読み込み中...</p>
+            <Loading />
           )}
         </CardContent>
       </Card>

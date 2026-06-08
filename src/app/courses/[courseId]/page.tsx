@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { useEffect, useState, use } from "react";
 import Image from "next/image";
@@ -132,7 +133,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-sm text-[#8b8b8b]">読み込み中...</p>
+        <Loading />
       </div>
     );
   }

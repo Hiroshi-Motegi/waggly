@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { use, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -86,7 +87,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
     }
   }
 
-  if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (isLoading) return <Loading />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";

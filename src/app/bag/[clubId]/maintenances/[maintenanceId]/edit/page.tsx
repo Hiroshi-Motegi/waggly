@@ -1,5 +1,6 @@
 "use client";
 
+import { Loading } from "@/components/loading";
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -74,7 +75,7 @@ export default function MaintenanceEditPage({
     }
   }
 
-  if (isFetching) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (isFetching) return <Loading />;
 
   return (
     <div className="flex flex-col px-2 py-2 space-y-2">

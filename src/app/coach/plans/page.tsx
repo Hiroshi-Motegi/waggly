@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -63,7 +64,7 @@ export default function PlansPage() {
       )}
 
       {isLoading ? (
-        <p className="text-center text-sm text-[#8b8b8b]">読み込み中...</p>
+        <Loading />
       ) : plans.length === 0 && !generating ? (
         <p className="text-center text-sm text-[#8b8b8b] py-8">まだ練習メニューがありません</p>
       ) : (

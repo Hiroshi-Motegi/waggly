@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -180,7 +181,7 @@ export default function KnowledgePage() {
       <p className="text-sm text-muted-foreground">{items.length}件</p>
 
       {isLoading ? (
-        <p className="text-center text-muted-foreground">読み込み中...</p>
+        <Loading />
       ) : (
         <div className="space-y-2">
           {items.map((item) => (

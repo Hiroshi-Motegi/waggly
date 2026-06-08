@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -42,7 +43,7 @@ export default function PracticeDetailPage() {
   }, [sessionId, user, authLoading]);
 
   if (authLoading || isFetching) {
-    return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+    return <Loading />;
   }
 
   if (!session) {

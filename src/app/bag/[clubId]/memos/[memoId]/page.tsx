@@ -1,5 +1,6 @@
 "use client";
 
+import { Loading } from "@/components/loading";
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -34,7 +35,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
     if (res.ok) router.push(`/bag/${clubId}/memos`);
   }
 
-  if (isFetching) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (isFetching) return <Loading />;
   if (!memo) return <p className="p-4 text-center text-muted-foreground">メモが見つかりません</p>;
 
   return (

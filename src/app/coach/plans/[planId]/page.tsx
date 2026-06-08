@@ -1,4 +1,5 @@
 "use client";
+import { Loading } from "@/components/loading";
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
@@ -92,7 +93,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
     router.push("/coach/plans");
   }
 
-  if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (isLoading) return <Loading />;
   if (!plan) return <p className="p-4 text-center text-muted-foreground">見つかりません</p>;
 
   const totalBalls = plan.practice_plan_items?.reduce((sum: number, i: any) => sum + i.balls, 0) ?? 0;
