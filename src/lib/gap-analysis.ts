@@ -55,16 +55,18 @@ export interface WeightFlowItem {
 
 // --- Chart data functions ---
 
-export function getDistanceStaircaseData(clubs: Club[]): DistanceStaircaseItem[] {
-  const withDistance = clubs.filter((c) => c.distance != null);
-  const sorted = [...withDistance].sort((a, b) => b.distance! - a.distance!);
+export function getDistanceStaircaseData(clubs: (Club & { latest_avg_distance?: number | null })[]): DistanceStaircaseItem[] {
+  const getDistance = (c: Club & { latest_avg_distance?: number | null }) => c.latest_avg_distance ?? c.distance;
+  const withDistance = clubs.filter((c) => getDistance(c) != null);
+  const sorted = [...withDistance].sort((a, b) => getDistance(b)! - getDistance(a)!);
 
   return sorted.map((club, i) => {
+    const dist = getDistance(club)!;
     const next = sorted[i + 1];
-    const hasGap = next != null && club.distance! - next.distance! > GAP_THRESHOLD_YD;
+    const hasGap = next != null && dist - getDistance(next)! > GAP_THRESHOLD_YD;
     return {
       club_number: club.club_number,
-      distance: club.distance!,
+      distance: dist,
       hasGap,
     };
   });
