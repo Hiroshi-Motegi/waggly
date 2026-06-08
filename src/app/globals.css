@@ -129,7 +129,7 @@
     @apply font-sans;
   }
   :root {
-    --bottom-nav-height: calc(4.5rem + 0.5rem + env(safe-area-inset-bottom));
+    --bottom-nav-height: calc(4.5rem + env(safe-area-inset-bottom));
   }
 }
 
