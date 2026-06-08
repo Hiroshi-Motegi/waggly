@@ -55,7 +55,8 @@ export default function HomePage() {
         <img
           src="/images/home-bg.jpg"
           alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
+          className="absolute inset-0 h-full object-cover opacity-40"
+          style={{ width: "auto", minHeight: "100%" }}
         />
         <div className="relative z-10 flex flex-col items-center px-2 pt-2 pb-6">
           {/* Logo */}
@@ -104,8 +105,8 @@ export default function HomePage() {
       </div>
 
       {/* Recent practice section */}
-      <div className="px-2 bg-[#ebf1eb]">
-        <h3 className="text-base font-bold text-[#006728] px-1 py-2">最近の練習記録</h3>
+      <div className="px-2">
+        <h3 className="text-base font-bold text-white px-1 py-2">最近の練習記録</h3>
         <RecentPractice sessions={sessions} />
       </div>
     </>
