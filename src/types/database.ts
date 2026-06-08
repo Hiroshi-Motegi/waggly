@@ -37,6 +37,13 @@ export interface Club {
   status: ClubStatus;
   bag_number: number;
   sort_order: number;
+  // 詳細スペック（プログレッシブディスクロージャー: 詳細層）
+  weight: number | null;          // 総重量 (g)
+  swing_weight: string | null;    // バランス (D0, D1, D2 等)
+  frequency: number | null;       // 振動数 (cpm)
+  kick_point: string | null;      // キックポイント
+  head_volume: number | null;     // ヘッド体積 (cc)
+  head_weight: number | null;     // ヘッド重量 (g)
   created_at: string;
 }
 
