@@ -8,7 +8,10 @@ function makeClub(overrides: Partial<Club>): Club {
     maker: null, model: null, shaft_name: null, shaft_flex: null,
     loft: null, lie: null, length: null, distance: null,
     purchase_date: null, purchase_shop: null, purchase_price: null,
-    status: "active", sort_order: 0, created_at: "2026-01-01",
+    status: "bag", sort_order: 0, created_at: "2026-01-01",
+    release_year: null, memo: null, bag_number: 1,
+    weight: null, swing_weight: null, frequency: null,
+    kick_point: null, head_volume: null, head_weight: null,
     ...overrides,
   };
 }
