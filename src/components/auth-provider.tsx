@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AuthContext } from "@/hooks/use-auth";
 import { initLiff, getLiffProfile } from "@/lib/liff";
 import { createClient } from "@/lib/supabase/client";
@@ -9,6 +10,7 @@ import type { User } from "@/types/database";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     async function authenticate() {
@@ -27,8 +29,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        // Always init LIFF first — this handles liff.state redirect automatically
-        await initLiff();
+        // Init LIFF first — captures liff.state deep link path
+        const deepLink = await initLiff();
 
         // Mark LIFF client for CSS
         const { liff } = await import("@/lib/liff");
@@ -50,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (data) {
             setUser(data);
             setIsLoading(false);
+            if (deepLink) router.replace(deepLink);
             return;
           }
         }
@@ -88,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
 
         setUser(data);
+        if (deepLink) router.replace(deepLink);
       } catch (error) {
         console.error("Authentication error:", error);
       } finally {
