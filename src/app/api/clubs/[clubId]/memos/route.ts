@@ -56,6 +56,10 @@ export async function POST(
       club_id: clubId,
       distance: body.distance || null,
       memo: body.memo || null,
+      condition: body.condition || null,
+      symptom_tags: body.symptom_tags || [],
+      feeling_tags: body.feeling_tags || [],
+      gear_tags: body.gear_tags || [],
     })
     .select()
     .single();
