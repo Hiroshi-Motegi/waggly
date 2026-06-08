@@ -102,23 +102,26 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader
         title={club.model || "—"}
         subtitle={`${club.club_number}${club.maker ? ` / ${club.maker}` : ""}`}
         backHref="/bag"
+        variant="dark"
       >
         <div className="flex gap-1 shrink-0">
           <Link href={`/bag/${clubId}/edit`}>
-            <button className="flex items-center justify-center rounded-full bg-[#006728] p-2">
-              <Pencil className="h-4 w-4 text-white" />
+            <button className="flex items-center justify-center rounded-full bg-white p-2">
+              <Pencil className="h-4 w-4 text-[#006728]" />
             </button>
           </Link>
           <button
             onClick={handleDelete}
-            className="flex items-center justify-center rounded-full bg-[#006728] p-2"
+            className="flex items-center justify-center rounded-full bg-white p-2"
           >
-            <Trash2 className="h-4 w-4 text-white" />
+            <Trash2 className="h-4 w-4 text-[#006728]" />
           </button>
         </div>
       </PageHeader>
@@ -202,17 +205,17 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 
       {/* Activity header */}
       <div className="flex items-center gap-2 px-1 pt-4">
-        <h3 className="flex-1 text-base font-bold text-[#006728]">アクティビティ</h3>
+        <h3 className="flex-1 text-base font-bold text-white">アクティビティ</h3>
         <Link
           href={`/bag/${clubId}/memos?add=1`}
-          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+          className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]"
         >
           <Plus className="h-3 w-3" />
           メモ
         </Link>
         <Link
           href={`/bag/${clubId}/maintenances?add=1`}
-          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+          className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]"
         >
           <Plus className="h-3 w-3" />
           メンテナンス記録
@@ -239,6 +242,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             すべて見る
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );

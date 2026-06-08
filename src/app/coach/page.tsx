@@ -54,19 +54,21 @@ function ChatView({
   }
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2" style={{ height: "calc(100dvh - var(--header-height, 0px) - var(--bottom-nav-height))" }}>
-      <PageHeader title="AIに相談" showBack={false}>
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ height: "calc(100dvh - var(--header-height, 0px) - var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col flex-1 min-h-0 space-y-2">
+      <PageHeader title="AIに相談" showBack={false} variant="dark">
         <div className="flex gap-1">
           <button
             onClick={onShowHistory}
-            className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+            className="flex items-center gap-1 rounded-full border border-white px-4 py-1.5 text-xs font-bold text-white"
           >
             <Clock className="h-4 w-4" />
             履歴
           </button>
           <button
             onClick={onNewChat}
-            className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+            className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]"
           >
             <Plus className="h-4 w-4" />
             新しい会話
@@ -83,6 +85,7 @@ function ChatView({
         <div className="shrink-0">
           <ChatInput onSend={handleSend} isLoading={isLoading} />
         </div>
+      </div>
       </div>
     </div>
   );
@@ -109,11 +112,13 @@ function HistoryPanel({
   }
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
-      <PageHeader title="会話履歴" showBack={false}>
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
+      <PageHeader title="会話履歴" showBack={false} variant="dark">
         <button
           onClick={onClose}
-          className="rounded-full border border-[#006728] px-4 py-1 text-xs font-bold text-[#006728]"
+          className="rounded-full border border-white px-4 py-1 text-xs font-bold text-white"
         >
           閉じる
         </button>
@@ -154,6 +159,7 @@ function HistoryPanel({
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
@@ -264,9 +270,12 @@ export default function CoachPage() {
 
   if (!historyLoaded || !conversationId) {
     return (
-      <div className="flex flex-col px-2 py-2 space-y-2">
-        <PageHeader title="AIに相談" showBack={false} />
+      <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <div className="relative z-10 flex flex-col space-y-2">
+        <PageHeader title="AIに相談" showBack={false} variant="dark" />
         <Loading />
+        </div>
       </div>
     );
   }

@@ -101,8 +101,10 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
   const totalBalls = plan.practice_plan_items?.reduce((sum: number, i: any) => sum + i.balls, 0) ?? 0;
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
-      <PageHeader title="練習メニュー" backHref="/coach/plans">
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
+      <PageHeader title="練習メニュー" backHref="/coach/plans" variant="dark">
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${statusColors[plan.status]}`}>
           {statusLabels[plan.status]}
         </span>
@@ -120,7 +122,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       </div>
 
       {/* Items */}
-      <h3 className="px-1 pt-4 text-base font-bold text-[#006728]">練習内容</h3>
+      <h3 className="px-1 pt-4 text-base font-bold text-white">練習内容</h3>
       <div className="flex flex-col rounded-lg bg-white p-3">
         {plan.practice_plan_items?.map((item: any, index: number) => (
           <PlanItem key={item.id} item={item} isLast={index === (plan.practice_plan_items?.length ?? 0) - 1} />
@@ -131,16 +133,17 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       <div className="flex flex-col items-center gap-1 px-[30px] pt-2">
         <button
           onClick={handleDone}
-          className="w-full rounded-full bg-[#006728] border border-[#006728] py-2 text-sm font-bold text-white"
+          className="w-full rounded-full bg-white border border-white py-2 text-sm font-bold text-[#006728]"
         >
           この内容で練習を記録する
         </button>
         <button
           onClick={handleDelete}
-          className="px-5 py-1 text-sm font-bold text-black"
+          className="px-5 py-1 text-sm font-bold text-white"
         >
           削除
         </button>
+      </div>
       </div>
     </div>
   );

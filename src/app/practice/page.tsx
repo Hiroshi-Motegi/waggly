@@ -16,10 +16,12 @@ export default function PracticePage() {
   const { sessions, isLoading } = usePracticeSessions();
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
-      <PageHeader title="練習記録" showBack={false}>
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
+      <PageHeader title="練習記録" showBack={false} variant="dark">
         <Link href="/practice/new">
-          <button className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white">
+          <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]">
             <Plus className="h-4 w-4" />
             記録する
           </button>
@@ -66,6 +68,7 @@ export default function PracticePage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -80,14 +80,14 @@ function LinkButtons({ layoutUrl, routeMapUrl }: { layoutUrl?: string; routeMapU
     <div className="flex gap-2">
       {layoutUrl && (
         <a href={layoutUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-          <button className="w-full rounded-full border border-[#006728] py-2 text-sm font-bold text-[#006728]">
+          <button className="w-full rounded-full border border-white py-2 text-sm font-bold text-white">
             コースレイアウト
           </button>
         </a>
       )}
       {routeMapUrl && (
         <a href={routeMapUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-          <button className="w-full rounded-full border border-[#006728] py-2 text-sm font-bold text-[#006728]">
+          <button className="w-full rounded-full border border-white py-2 text-sm font-bold text-white">
             アクセスマップ
           </button>
         </a>
@@ -100,7 +100,7 @@ function ReserveButton({ url }: { url?: string }) {
   if (!url) return null;
   return (
     <a href={url} target="_blank" rel="noopener noreferrer">
-      <button className="w-full rounded-full bg-[#006728] py-2 text-sm font-bold text-white">
+      <button className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728]">
         予約する
       </button>
     </a>
@@ -155,12 +155,14 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   ].filter(Boolean);
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2 pb-8">
+    <div className="relative flex flex-col px-2 py-2 space-y-2 pb-8 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
       {/* Course name & address */}
       <div className="px-1">
-        <h1 className="text-lg font-bold text-[#006728] leading-tight">{course.golfCourseName}</h1>
+        <h1 className="text-lg font-bold text-white leading-tight">{course.golfCourseName}</h1>
         {course.address && (
-          <p className="mt-0.5 text-xs text-[#6d6d6d]">{course.address}</p>
+          <p className="mt-0.5 text-xs text-white/70">{course.address}</p>
         )}
       </div>
 
@@ -204,7 +206,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       {/* Price */}
       {(course.weekdayMinPrice > 0 || course.holidayMinPrice > 0) && (
         <>
-          <p className="text-base font-bold text-[#006728] px-1 pt-4">料金</p>
+          <p className="text-base font-bold text-white px-1 pt-4">料金</p>
           <div className="rounded-lg bg-white p-3">
             {course.weekdayMinPrice != null && course.weekdayMinPrice > 0 && (
               <InfoRow label="平日最安値" value={`¥${course.weekdayMinPrice.toLocaleString()}〜`} />
@@ -217,7 +219,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       )}
 
       {/* Course info */}
-      <p className="text-base font-bold text-[#006728] px-1 pt-4">コース情報</p>
+      <p className="text-base font-bold text-white px-1 pt-4">コース情報</p>
       <div className="rounded-lg bg-white p-3">
         <InfoRow label="コースタイプ" value={course.courseType} />
         <InfoRow label="設計者" value={course.designer} />
@@ -230,7 +232,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       {/* Ratings */}
       {course.evaluation > 0 && (
         <>
-          <p className="text-base font-bold text-[#006728] px-1 pt-4">評価</p>
+          <p className="text-base font-bold text-white px-1 pt-4">評価</p>
           <div className="rounded-lg bg-white p-3">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl font-bold">{course.evaluation?.toFixed(1) ?? "—"}</span>
@@ -251,7 +253,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       )}
 
       {/* Facilities */}
-      <p className="text-base font-bold text-[#006728] px-1 pt-4">設備・ルール</p>
+      <p className="text-base font-bold text-white px-1 pt-4">設備・ルール</p>
       <div className="rounded-lg bg-white p-3">
         <InfoRow label="練習場" value={course.praticeFacility} />
         <InfoRow label="宿泊" value={course.lodging} />
@@ -261,7 +263,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       </div>
 
       {/* Location */}
-      <p className="text-base font-bold text-[#006728] px-1 pt-4">アクセス</p>
+      <p className="text-base font-bold text-white px-1 pt-4">アクセス</p>
       <div className="rounded-lg bg-white p-3">
         <InfoRow label="住所" value={course.address} />
         <InfoRow label="高速道路" value={course.highwayName} />
@@ -274,6 +276,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       {/* Bottom link buttons + Reserve */}
       <LinkButtons layoutUrl={course.layoutUrl} routeMapUrl={course.routeMapUrl} />
       <ReserveButton url={course.reserveCalUrl} />
+      </div>
     </div>
   );
 }

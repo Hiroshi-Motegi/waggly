@@ -306,24 +306,27 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const statusLabel = item.status === "active" ? "使用中" : "アーカイブ";
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader
         title={[item.brand, item.model].filter(Boolean).join(" ") || "—"}
         subtitle={categoryLabels[item.category]}
         backHref="/items"
+        variant="dark"
       >
         <div className="flex gap-1 shrink-0">
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center justify-center rounded-full bg-[#006728] p-2"
+            className="flex items-center justify-center rounded-full bg-white p-2"
           >
-            <Pencil className="h-4 w-4 text-white" />
+            <Pencil className="h-4 w-4 text-[#006728]" />
           </button>
           <button
             onClick={handleDelete}
-            className="flex items-center justify-center rounded-full bg-[#006728] p-2"
+            className="flex items-center justify-center rounded-full bg-white p-2"
           >
-            <Trash2 className="h-4 w-4 text-white" />
+            <Trash2 className="h-4 w-4 text-[#006728]" />
           </button>
         </div>
       </PageHeader>
@@ -383,7 +386,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
               href={affiliateUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-[#006728] bg-white px-5 py-1 text-sm font-bold text-[#006728]"
+              className="rounded-full border border-white bg-transparent px-5 py-1 text-sm font-bold text-white"
             >
               {platformLabel}
             </a>
@@ -396,18 +399,19 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         {item.status === "active" ? (
           <button
             onClick={() => handleStatusChange("past")}
-            className="text-sm font-bold text-[#006728]"
+            className="text-sm font-bold text-white"
           >
             アーカイブに移動
           </button>
         ) : (
           <button
             onClick={() => handleStatusChange("active")}
-            className="text-sm font-bold text-[#006728]"
+            className="text-sm font-bold text-white"
           >
             使用中に戻す
           </button>
         )}
+      </div>
       </div>
     </div>
   );
