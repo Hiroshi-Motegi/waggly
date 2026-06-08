@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { useClubs, updateClub } from "@/hooks/use-clubs";
 import type { ClubStatus, ClubWithImages } from "@/types/database";
+import { getDistanceStaircaseData, getWeightFlowData } from "@/lib/gap-analysis";
+import { DistanceStaircase } from "@/components/charts/distance-staircase";
+import { WeightFlow } from "@/components/charts/weight-flow";
 
 const MAX_BAG_CLUBS = 14;
 
@@ -158,8 +161,14 @@ export default function BagPage() {
   const { clubs, isLoading, refetch } = useClubs(filterParams.status, filterParams.bagNumber);
   const [isReordering, setIsReordering] = useState(false);
   const [localClubs, setLocalClubs] = useState<ClubWithImages[]>([]);
+  const [chartTab, setChartTab] = useState<"distance" | "weight">("distance");
 
   const isBagView = statusFilter === "bag1" || statusFilter === "bag2";
+
+  const bagClubs = clubs.filter((c) => c.status === "bag" && c.bag_number === (statusFilter === "bag2" ? 2 : 1));
+  const distanceData = getDistanceStaircaseData(bagClubs);
+  const weightData = getWeightFlowData(bagClubs);
+  const showCharts = statusFilter === "bag1" || statusFilter === "bag2";
 
   const displayClubs = isReordering
     ? localClubs
@@ -252,6 +261,39 @@ export default function BagPage() {
               </button>
             ))}
             <div className="h-0.5 flex-1 bg-[#ececec]" />
+          </div>
+        )}
+
+        {/* Charts */}
+        {showCharts && !isReordering && (
+          <div className="rounded-lg bg-white p-3">
+            <div className="flex gap-2 mb-2">
+              <button
+                onClick={() => setChartTab("distance")}
+                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  chartTab === "distance"
+                    ? "bg-[#006728] text-white"
+                    : "bg-[#f0f0f0] text-[#666]"
+                }`}
+              >
+                飛距離階段
+              </button>
+              <button
+                onClick={() => setChartTab("weight")}
+                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  chartTab === "weight"
+                    ? "bg-[#006728] text-white"
+                    : "bg-[#f0f0f0] text-[#666]"
+                }`}
+              >
+                重量フロー
+              </button>
+            </div>
+            {chartTab === "distance" ? (
+              <DistanceStaircase data={distanceData} />
+            ) : (
+              <WeightFlow data={weightData} />
+            )}
           </div>
         )}
 
