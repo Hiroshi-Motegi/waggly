@@ -65,7 +65,7 @@ export default function SettingsPage() {
       </div>
 
       {/* プラン */}
-      <p className="text-base font-bold text-[#006728] px-1 pt-4">プラン</p>
+      <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
       <div className="rounded-lg bg-white p-3">
         <div className="flex items-center justify-between mb-1">
           <span className="text-sm font-bold">ベータ版</span>
@@ -79,7 +79,7 @@ export default function SettingsPage() {
       </div>
 
       {/* AIコーチ利用状況 */}
-      <p className="text-base font-bold text-[#006728] px-1 pt-4">AI相談利用状況</p>
+      <p className="text-base font-bold text-white px-1 pt-4">AI相談利用状況</p>
       <div className="rounded-lg bg-white p-3">
         {usage ? (
           <div className="space-y-2">
@@ -113,7 +113,7 @@ export default function SettingsPage() {
       </div>
 
       {/* データエクスポート */}
-      <p className="text-base font-bold text-[#006728] px-1 pt-4">データエクスポート</p>
+      <p className="text-base font-bold text-white px-1 pt-4">データエクスポート</p>
       <ExportSection />
 
       {/* 法的情報 */}
