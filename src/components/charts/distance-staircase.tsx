@@ -26,7 +26,7 @@ export function DistanceStaircase({ data }: Props) {
           formatter={(value) => [`${value} yd`, "飛距離"]}
           contentStyle={{ fontSize: 12 }}
         />
-        <Bar dataKey="distance" radius={[4, 4, 0, 0]}>
+        <Bar dataKey="distance" radius={[4, 4, 0, 0]} maxBarSize={20}>
           {data.map((item, i) => (
             <Cell
               key={i}
