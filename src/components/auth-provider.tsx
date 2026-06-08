@@ -22,6 +22,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function authenticate() {
+      // Handle liff.state redirect immediately before anything renders
+      if (handleLiffRedirect()) return;
+
       try {
         // Development mode: skip LIFF auth
         if (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true") {
@@ -51,8 +54,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (data) {
             setUser(data);
             setIsLoading(false);
-            // Handle liff.state redirect after auth
-            handleLiffRedirect();
             return;
           }
         }
@@ -99,7 +100,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
 
         setUser(data);
-        handleLiffRedirect();
       } catch (error) {
         console.error("Authentication error:", error);
       } finally {
