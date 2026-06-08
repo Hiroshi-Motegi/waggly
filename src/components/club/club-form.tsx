@@ -113,7 +113,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-2 pb-8 pt-3 overflow-x-hidden">
       {/* Section 1: クラブ詳細 */}
-      <h3 className="px-1 pt-4 text-base font-bold text-[#006728]">クラブ詳細</h3>
+      <h3 className="px-1 pt-4 text-base font-bold text-white">クラブ詳細</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* 種類 */}
         <div className="flex flex-col gap-0.5 py-1">
@@ -224,7 +224,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       </div>
 
       {/* Section 2: スペック */}
-      <h3 className="px-1 pt-4 text-base font-bold text-[#006728]">スペック</h3>
+      <h3 className="px-1 pt-4 text-base font-bold text-white">スペック</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* 自動入力 */}
         <div className="flex flex-col items-center gap-1 rounded bg-[#ebf1eb] p-3">
@@ -260,7 +260,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       </div>
 
       {/* Section 3: 購入情報 */}
-      <h3 className="px-1 pt-4 text-base font-bold text-[#006728]">購入情報</h3>
+      <h3 className="px-1 pt-4 text-base font-bold text-white">購入情報</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         <div className="flex flex-col gap-0.5 py-1">
           <span className={labelClass}>購入日</span>
@@ -278,7 +278,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
 
       {/* Buttons */}
       <div className="flex flex-col items-center gap-1 pt-3">
-        <button type="submit" disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-[#006728] py-2.5 text-sm font-bold text-white disabled:opacity-50">
+        <button type="submit" disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-sm font-bold text-[#006728] disabled:opacity-50">
           {isSubmitting ? "保存中..." : "保存する"}
         </button>
       </div>
