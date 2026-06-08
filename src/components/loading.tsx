@@ -4,7 +4,7 @@ const text = "読み込み中...";
 
 export function Loading() {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 py-12">
+    <div className="flex flex-col items-center justify-center gap-0 py-12">
       <div className="loading-bounce">
         <img
           src="/icons/loading-ball.svg"
