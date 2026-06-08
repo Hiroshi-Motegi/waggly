@@ -50,9 +50,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Normal app
   return (
-    <div className="mx-auto max-w-md min-h-dvh shadow-sm bg-[#ebf1eb] relative animate-fade-in">
+    <div className={`mx-auto max-w-md min-h-dvh shadow-sm relative animate-fade-in ${pathname === "/" ? "bg-[#139847]" : "bg-[#ebf1eb]"}`}>
       <Header />
-      <main style={{ paddingBottom: "var(--bottom-nav-height)" }}>
+      <main style={{ paddingBottom: pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
       </main>
       <BottomNav />
