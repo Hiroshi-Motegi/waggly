@@ -49,7 +49,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative bg-[#139847]" style={{ minHeight: "calc(100dvh - var(--bottom-nav-height))" }}>
+    <div className="relative bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       {/* Background image covers entire page */}
       <img
         src="/images/home-bg.jpg"
