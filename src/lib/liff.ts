@@ -1,21 +1,28 @@
 import liff from "@line/liff";
 
-let liffInitialized = false;
+let initPromise: Promise<void> | null = null;
 
 /** Initialize LIFF. Returns the deep link path from liff.state if present. */
 export async function initLiff(): Promise<string | null> {
-  if (liffInitialized) return null;
-
   // Capture liff.state before init (init may modify URL)
   const params = new URLSearchParams(window.location.search);
   const liffState = params.get("liff.state");
 
-  await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! });
-  liffInitialized = true;
+  // Only call liff.init() once, but allow multiple callers to await the same promise
+  if (!initPromise) {
+    initPromise = liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! });
+  }
+
+  try {
+    await initPromise;
+  } catch (e) {
+    // If init fails (e.g. already initialized), continue
+    console.warn("liff.init warning:", e);
+  }
 
   if (!liff.isLoggedIn()) {
     liff.login();
-    return null; // will redirect, never reaches here
+    return null;
   }
 
   return liffState && liffState !== "/" ? liffState : null;
