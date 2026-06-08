@@ -49,7 +49,7 @@ function PlanItem({ item, isLast }: { item: any; isLast: boolean }) {
       </button>
       {open && hasDetail && (
         <div className={`pb-3 ${!isLast ? "border-b border-[#dfdfdf]" : ""}`}>
-          <p className="text-xs leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">
             {item.detail}
           </p>
         </div>
@@ -120,7 +120,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       </div>
 
       {/* Items */}
-      <h3 className="px-1 text-base font-bold text-[#006728]">練習内容</h3>
+      <h3 className="px-1 pt-4 text-base font-bold text-[#006728]">練習内容</h3>
       <div className="flex flex-col rounded-lg bg-white p-3">
         {plan.practice_plan_items?.map((item: any, index: number) => (
           <PlanItem key={item.id} item={item} isLast={index === (plan.practice_plan_items?.length ?? 0) - 1} />
