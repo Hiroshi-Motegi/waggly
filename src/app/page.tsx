@@ -1,6 +1,6 @@
 "use client";
-import { Loading } from "@/components/loading";
 
+import { Loading } from "@/components/loading";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
@@ -49,28 +49,55 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-6">
-      <p className="text-center text-lg font-medium">
-        こんにちは、{user.display_name}さん
-      </p>
+    <div className="-mt-14 relative">
+      {/* Green hero section */}
+      <div className="relative bg-[#139847] overflow-hidden">
+        {/* Background image */}
+        <img
+          src="/images/home-bg.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+        />
+        <div className="relative z-10 flex flex-col items-center px-2 pt-4 pb-6">
+          {/* Logo */}
+          <div className="flex items-center justify-center w-full relative h-14">
+            <Image src="/icons/waggly-logo-white.svg" alt="Waggly β" width={151} height={46} priority />
+            {user.avatar_url && (
+              <Link href="/settings" className="absolute right-2">
+                <img src={user.avatar_url} alt="" className="h-8 w-8 rounded-full" />
+              </Link>
+            )}
+          </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        {featureCards.map((card) => (
-          <Link key={card.href} href={card.href}>
-            <div className="flex flex-col items-center gap-[5px] rounded-lg border border-[#72937f] bg-white p-5 h-[121px] drop-shadow-[2px_2px_0px_#72937f]">
-              <Image src={card.icon} alt={card.label} width={48} height={48} />
-              <div className="flex flex-col items-center gap-[2px] text-center">
-                <span className="text-sm font-bold text-[#006728]">{card.label}</span>
-                {card.sub && (
-                  <span className="text-[10px] text-[#717171]">{card.sub}</span>
-                )}
-              </div>
-            </div>
-          </Link>
-        ))}
+          {/* Greeting */}
+          <p className="text-lg font-medium text-white mt-2">
+            こんにちは、{user.display_name}さん
+          </p>
+
+          {/* Feature cards */}
+          <div className="grid grid-cols-2 gap-2 w-full mt-4">
+            {featureCards.map((card) => (
+              <Link key={card.href} href={card.href}>
+                <div className="flex flex-col items-center gap-[5px] rounded-lg border border-[#72937f] bg-white p-5 h-[121px] drop-shadow-[2px_2px_0px_#72937f]">
+                  <Image src={card.icon} alt={card.label} width={48} height={48} />
+                  <div className="flex flex-col items-center gap-[2px] text-center">
+                    <span className="text-sm font-bold text-[#006728]">{card.label}</span>
+                    {card.sub && (
+                      <span className="text-[10px] text-[#717171]">{card.sub}</span>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <RecentPractice sessions={sessions} />
+      {/* Recent practice section */}
+      <div className="px-2 -mt-1">
+        <h3 className="text-base font-bold text-[#006728] px-1 py-2">最近の練習記録</h3>
+        <RecentPractice sessions={sessions} />
+      </div>
     </div>
   );
 }

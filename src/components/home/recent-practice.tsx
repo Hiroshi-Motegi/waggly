@@ -16,7 +16,6 @@ function formatDate(dateStr: string): string {
 export function RecentPractice({ sessions }: RecentPracticeProps) {
   return (
     <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
-      <h3 className="text-base font-bold text-[#006728]">最近の練習記録</h3>
       <div className="flex flex-col gap-1.5">
         {sessions.length === 0 ? (
           <p className="py-2 text-sm text-muted-foreground">まだ記録がありません</p>
