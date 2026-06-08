@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { PageTransition } from "@/components/layout/page-transition";
 import { Onboarding } from "@/components/onboarding";
 import { Loading } from "@/components/loading";
 import { TERMS_UPDATED_AT } from "@/lib/constants";
@@ -51,7 +52,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-md min-h-dvh shadow-sm bg-[#ebf1eb] relative">
       <Header />
-      <main className={pathname === "/coach" ? "" : ""} style={{ paddingBottom: pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>{children}</main>
+      <main style={{ paddingBottom: pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
+        <PageTransition>{children}</PageTransition>
+      </main>
       <BottomNav />
     </div>
   );
