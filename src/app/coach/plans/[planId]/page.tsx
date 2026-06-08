@@ -21,37 +21,39 @@ const statusColors: Record<string, string> = {
   skipped: "bg-[#e0e0e0] text-black",
 };
 
-function PlanItem({ item, showSeparator }: { item: any; showSeparator: boolean }) {
+function PlanItem({ item, isLast }: { item: any; isLast: boolean }) {
   const [open, setOpen] = useState(false);
   const hasDetail = !!item.detail;
 
   return (
-    <div className={showSeparator ? "border-t border-[#dfdfdf] pt-3" : ""}>
-      <div className="flex flex-col gap-1.5">
-        <p className="text-sm font-bold">{item.focus}</p>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-[10px] font-medium text-black">
-            {item.club?.club_number ?? "?"}
-          </span>
-          <span className="text-xs text-[#8b8b8b]">{item.balls}球</span>
+    <div className={!isLast ? "border-b border-[#dfdfdf]" : ""}>
+      <button
+        type="button"
+        onClick={() => hasDetail && setOpen(!open)}
+        className="flex items-center gap-1 w-full py-3 text-left"
+      >
+        <div className="flex flex-1 flex-col gap-1 min-w-0">
+          <p className="text-base font-bold text-[#006728]">{item.focus}</p>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
+              {item.club?.club_number ?? "?"}
+            </span>
+            <span className="text-xs text-[#5c5c5c]">{item.balls}球</span>
+          </div>
         </div>
         {hasDetail && (
-          <>
-            <button
-              onClick={() => setOpen(!open)}
-              className="flex items-center gap-1 text-xs font-bold text-[#006728]"
-            >
-              {open ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-              {open ? "閉じる" : "詳細を見る"}
-            </button>
-            {open && (
-              <p className="text-sm text-[#8b8b8b] leading-relaxed pl-3 border-l-2 border-[#006728]/20 whitespace-pre-wrap">
-                {item.detail}
-              </p>
-            )}
-          </>
+          <div className="shrink-0 ml-2">
+            {open ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
+          </div>
         )}
-      </div>
+      </button>
+      {open && hasDetail && (
+        <div className={`pb-3 ${!isLast ? "border-b border-[#dfdfdf]" : ""}`}>
+          <p className="text-xs leading-relaxed whitespace-pre-wrap">
+            {item.detail}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -118,15 +120,11 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       </div>
 
       {/* Items */}
-      <div className="flex flex-col gap-3 rounded-lg bg-white p-3">
-        <h3 className="text-base font-bold text-[#006728]">練習内容</h3>
+      <h3 className="px-1 text-base font-bold text-[#006728]">練習内容</h3>
+      <div className="flex flex-col rounded-lg bg-white p-3">
         {plan.practice_plan_items?.map((item: any, index: number) => (
-          <PlanItem key={item.id} item={item} showSeparator={index > 0} />
+          <PlanItem key={item.id} item={item} isLast={index === (plan.practice_plan_items?.length ?? 0) - 1} />
         ))}
-        <div className="flex justify-between border-t border-[#dfdfdf] pt-2 text-sm font-bold">
-          <span>合計</span>
-          <span>{totalBalls}球</span>
-        </div>
       </div>
 
       {/* Actions */}
