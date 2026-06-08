@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
 import { AuthContext } from "@/hooks/use-auth";
 import { initLiff, getLiffProfile } from "@/lib/liff";
 import { createClient } from "@/lib/supabase/client";
@@ -10,20 +9,9 @@ import type { User } from "@/types/database";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
-    // Capture liff.state deep link target (persists across login redirects)
-    const params = new URLSearchParams(window.location.search);
-    const liffState = params.get("liff.state");
-    if (liffState && liffState !== "/") {
-      sessionStorage.setItem("liff_redirect", liffState);
-      window.history.replaceState(null, "", pathname);
-    }
-
     async function authenticate() {
-
       try {
         // Development mode: skip LIFF auth
         if (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true") {
@@ -39,9 +27,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        // Always init LIFF first — this handles liff.state redirect automatically
+        await initLiff();
+
+        // Mark LIFF client for CSS
+        const { liff } = await import("@/lib/liff");
+        if (liff.isInClient()) {
+          document.documentElement.classList.add("liff-client");
+        }
+
         const supabase = createClient();
 
-        // Check for existing Supabase session first (fast path)
+        // Check for existing Supabase session
         const { data: { user: existingAuth } } = await supabase.auth.getUser();
         if (existingAuth) {
           const { data } = await supabase
@@ -58,14 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // No session — do full LIFF auth flow
-        await initLiff();
-
-        // Mark LIFF client for CSS
-        const { liff } = await import("@/lib/liff");
-        if (liff.isInClient()) {
-          document.documentElement.classList.add("liff-client");
-        }
-
         const { profile } = await getLiffProfile();
 
         const res = await fetch("/api/auth/line", {
@@ -103,12 +92,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error("Authentication error:", error);
       } finally {
         setIsLoading(false);
-        // Redirect to saved deep link target
-        const redirect = sessionStorage.getItem("liff_redirect");
-        if (redirect && redirect !== pathname) {
-          sessionStorage.removeItem("liff_redirect");
-          router.replace(redirect);
-        }
       }
     }
 
