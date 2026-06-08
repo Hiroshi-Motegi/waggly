@@ -183,6 +183,51 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
               <span className="flex-1 text-right font-medium">{club.purchase_price.toLocaleString()}円</span>
             </div>
           )}
+
+          {/* 詳細スペック（入力済みの場合のみ表示） */}
+          {(club.weight != null || club.swing_weight || club.frequency != null || club.kick_point || club.head_volume != null || club.head_weight != null) && (
+            <div className="border-t border-[#e8e8e8] pt-3 mt-3">
+              <p className="text-xs text-[#8b8b8b] mb-2">詳細スペック</p>
+              <div className="grid grid-cols-3 gap-2 text-sm">
+                {club.weight != null && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">重量</span>
+                    <p className="font-medium">{club.weight}g</p>
+                  </div>
+                )}
+                {club.swing_weight && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">バランス</span>
+                    <p className="font-medium">{club.swing_weight}</p>
+                  </div>
+                )}
+                {club.frequency != null && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">振動数</span>
+                    <p className="font-medium">{club.frequency}cpm</p>
+                  </div>
+                )}
+                {club.kick_point && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">キックポイント</span>
+                    <p className="font-medium">{club.kick_point}</p>
+                  </div>
+                )}
+                {club.head_volume != null && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">ヘッド体積</span>
+                    <p className="font-medium">{club.head_volume}cc</p>
+                  </div>
+                )}
+                {club.head_weight != null && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">ヘッド重量</span>
+                    <p className="font-medium">{club.head_weight}g</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Status change buttons inside card */}
