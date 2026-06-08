@@ -33,7 +33,11 @@ export async function POST(request: NextRequest) {
   "loft": ロフト角(数値またはnull),
   "lie": ライ角(数値またはnull),
   "length": 長さインチ(数値またはnull),
-  "distance": 一般的な飛距離yd(数値またはnull)
+  "distance": 一般的な飛距離yd(数値またはnull),
+  "weight": 総重量g(数値またはnull),
+  "swing_weight": バランス("D0","D1","D2"等の文字列またはnull),
+  "head_volume": ヘッド体積cc(数値またはnull),
+  "head_weight": ヘッド重量g(数値またはnull)
 }
 \`\`\``;
 
