@@ -107,6 +107,10 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         lie: prev.lie ?? specs.lie ?? prev.lie,
         length: prev.length ?? specs.length ?? prev.length,
         distance: prev.distance ?? specs.distance ?? prev.distance,
+        weight: prev.weight ?? specs.weight ?? prev.weight,
+        swing_weight: prev.swing_weight || specs.swing_weight || prev.swing_weight,
+        head_volume: prev.head_volume ?? specs.head_volume ?? prev.head_volume,
+        head_weight: prev.head_weight ?? specs.head_weight ?? prev.head_weight,
       }));
     } catch (error) {
       console.error("Autofill failed:", error);
