@@ -214,7 +214,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
             <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="詳細メモ..." rows={3} className={inputClass} />
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setShowForm(false)} className="flex-1 rounded-full border border-[#006728] py-2 text-sm font-bold text-[#006728]">
+            <button type="button" onClick={() => setShowForm(false)} className="flex-1 rounded-full border border-white py-2 text-sm font-bold text-white">
               キャンセル
             </button>
             <button type="submit" disabled={submitting} className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50">

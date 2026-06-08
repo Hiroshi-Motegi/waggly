@@ -82,7 +82,7 @@ export default function NewPracticePage() {
   if (saved) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-16 space-y-4 text-center">
-        <h2 className="text-lg font-bold text-[#006728]">練習お疲れさまでした！</h2>
+        <h2 className="text-lg font-bold text-white">練習お疲れさまでした！</h2>
         <p className="text-sm text-[#8b8b8b]">記録を保存しました</p>
 
         {planId ? (
@@ -93,12 +93,12 @@ export default function NewPracticePage() {
               </button>
             </Link>
             <Link href="/practice">
-              <button className="px-5 py-1 text-sm font-bold text-[#006728]">練習記録に戻る</button>
+              <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
             </Link>
           </div>
         ) : planGenerated ? (
           <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-            <p className="text-sm font-bold text-[#006728]">練習メニューを作成しました！</p>
+            <p className="text-sm font-bold text-white">練習メニューを作成しました！</p>
             <Link href="/coach/plans" className="w-full">
               <button className="w-full rounded-full bg-[#006728] border border-[#006728] py-2 text-sm font-bold text-white">
                 提案を見る
@@ -116,7 +116,7 @@ export default function NewPracticePage() {
             </button>
             <p className="text-xs text-[#8b8b8b]">練習データをもとにAIが最適な練習メニューを提案します</p>
             <Link href="/practice">
-              <button className="px-5 py-1 text-sm font-bold text-[#006728]">練習記録に戻る</button>
+              <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
             </Link>
           </div>
         )}

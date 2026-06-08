@@ -60,7 +60,7 @@ export default function PlansPage() {
 
       {generating && (
         <div className="flex items-center gap-3 rounded-lg bg-white p-3">
-          <Loader2 className="h-4 w-4 animate-spin text-[#006728]" />
+          <Loader2 className="h-4 w-4 animate-spin text-white" />
           <p className="text-sm text-[#8b8b8b]">練習メニューを生成中...</p>
         </div>
       )}

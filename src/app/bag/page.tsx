@@ -278,7 +278,7 @@ export default function BagPage() {
             <div className="flex gap-2 pt-2">
               <button
                 onClick={cancelReorder}
-                className="flex-1 rounded-full border border-[#006728] py-2 text-sm font-bold text-[#006728]"
+                className="flex-1 rounded-full border border-white py-2 text-sm font-bold text-white"
               >
                 キャンセル
               </button>
