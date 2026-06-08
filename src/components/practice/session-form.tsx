@@ -96,7 +96,7 @@ export function SessionForm({ clubs, reserveClubs, pastLocations, initialData, s
       </div>
 
       {/* Section title: 練習球数 */}
-      <h3 className="px-1 pt-4 text-base font-bold text-[#006728]">練習球数</h3>
+      <h3 className="px-1 pt-4 text-base font-bold text-white">練習球数</h3>
 
       {/* Card 2: Balls (tabbed) */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
@@ -162,7 +162,7 @@ export function SessionForm({ clubs, reserveClubs, pastLocations, initialData, s
       </div>
 
       {/* Section title: 気づき・メモ */}
-      <h3 className="px-1 pt-4 text-base font-bold text-[#006728]">気づき・メモ</h3>
+      <h3 className="px-1 pt-4 text-base font-bold text-white">気づき・メモ</h3>
 
       {/* Card 3: Rating & Memo */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
@@ -202,7 +202,7 @@ export function SessionForm({ clubs, reserveClubs, pastLocations, initialData, s
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-full bg-[#006728] border border-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50"
+          className="w-full rounded-full bg-white border border-white py-2 text-sm font-bold text-[#006728] disabled:opacity-50"
         >
           {isSubmitting ? "保存中..." : "保存する"}
         </button>
@@ -210,7 +210,7 @@ export function SessionForm({ clubs, reserveClubs, pastLocations, initialData, s
           <button
             type="button"
             onClick={onCancel}
-            className="px-5 py-1 text-sm font-bold text-[#006728]"
+            className="px-5 py-1 text-sm font-bold text-white"
           >
             キャンセル
           </button>

@@ -7,8 +7,6 @@ import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import type { PracticeSessionWithClubs } from "@/types/database";
 
 function formatDate(dateStr: string): string {
@@ -56,10 +54,10 @@ export default function PracticeDetailPage() {
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="練習記録" backHref="/practice" variant="dark">
         <Link href={`/practice/${sessionId}/edit`}>
-          <Button size="sm" variant="outline" className="gap-1 border-white text-white">
+          <button className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-xs font-bold text-white">
             <Pencil className="h-4 w-4" />
             編集
-          </Button>
+          </button>
         </Link>
       </PageHeader>
 
@@ -69,9 +67,9 @@ export default function PracticeDetailPage() {
             {formatDate(session.practiced_at)}
           </span>
           {session.total_balls && (
-            <Badge className="bg-[#c7e2ca] text-black hover:bg-[#c7e2ca]">
+            <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-[10px] font-medium text-black">
               {session.total_balls}球
-            </Badge>
+            </span>
           )}
         </div>
 
