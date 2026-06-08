@@ -14,15 +14,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Handle liff.state redirect once, client-side only
+    // Handle liff.state: clean URL param, then redirect after auth
     const params = new URLSearchParams(window.location.search);
     const liffState = params.get("liff.state");
-    if (liffState && liffState !== "/" && liffState !== pathname) {
-      // Clean URL and navigate via Next.js router (no full reload)
-      window.history.replaceState(null, "", pathname);
-      router.replace(liffState);
-      return;
-    }
     if (liffState) {
       window.history.replaceState(null, "", pathname);
     }
@@ -108,6 +102,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error("Authentication error:", error);
       } finally {
         setIsLoading(false);
+        // Redirect to liff.state target after auth
+        if (liffState && liffState !== "/" && liffState !== pathname) {
+          router.replace(liffState);
+        }
       }
     }
 
