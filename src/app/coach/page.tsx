@@ -54,7 +54,7 @@ function ChatView({
   }
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2" style={{ height: "100dvh" }}>
+    <div className="flex flex-col px-2 py-2 space-y-2" style={{ height: "calc(100dvh - var(--header-height, 0px) - var(--bottom-nav-height))" }}>
       <PageHeader title="AIに相談" showBack={false}>
         <div className="flex gap-1">
           <button
@@ -75,7 +75,7 @@ function ChatView({
       </PageHeader>
 
       {/* Chat card */}
-      <div className="flex flex-col flex-1 min-h-0 rounded-lg bg-white" style={{ marginBottom: "var(--bottom-nav-height)" }}>
+      <div className="flex flex-col flex-1 min-h-0 rounded-lg bg-white">
         <div className="flex-1 overflow-y-auto">
           <ChatMessages messages={messages} isLoading={isLoading} />
           <div ref={bottomRef} />
@@ -110,15 +110,14 @@ function HistoryPanel({
 
   return (
     <div className="flex flex-col px-2 py-2 space-y-2">
-      <div className="flex items-center justify-between px-1">
-        <h2 className="text-lg font-bold text-[#006728]">会話履歴</h2>
+      <PageHeader title="会話履歴" showBack={false}>
         <button
           onClick={onClose}
           className="rounded-full border border-[#006728] px-4 py-1 text-xs font-bold text-[#006728]"
         >
           閉じる
         </button>
-      </div>
+      </PageHeader>
       <div className="flex flex-col rounded-lg bg-white p-3">
         {isLoading ? (
           <Loading />
@@ -265,7 +264,7 @@ export default function CoachPage() {
 
   if (!historyLoaded || !conversationId) {
     return (
-      <div className="flex flex-col px-2 py-2 space-y-2" style={{ height: "100dvh" }}>
+      <div className="flex flex-col px-2 py-2 space-y-2">
         <PageHeader title="AIに相談" showBack={false} />
         <Loading />
       </div>

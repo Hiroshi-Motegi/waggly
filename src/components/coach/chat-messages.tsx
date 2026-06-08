@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import type { UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/hooks/use-auth";
@@ -28,6 +29,8 @@ function formatDateLabel(dateStr: string): string {
 
 export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   const { user } = useAuth();
+  // Cache timestamps for messages without created_at (new messages)
+  const timestampCache = useRef<Map<string, string>>(new Map());
 
   let lastDateLabel = "";
 
@@ -56,20 +59,26 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
 
         const isUser = message.role === "user";
         const meta = message.metadata as { created_at?: string } | undefined;
-        const createdAt = meta?.created_at;
+        let timestamp = meta?.created_at;
+
+        // For new messages without created_at, assign current time (cached per id)
+        if (!timestamp) {
+          if (!timestampCache.current.has(message.id)) {
+            timestampCache.current.set(message.id, new Date().toISOString());
+          }
+          timestamp = timestampCache.current.get(message.id)!;
+        }
 
         // Date separator
         let dateSeparator = null;
-        if (createdAt) {
-          const dateLabel = formatDateLabel(createdAt);
-          if (dateLabel !== lastDateLabel) {
-            lastDateLabel = dateLabel;
-            dateSeparator = (
-              <div className="flex items-center justify-center py-1">
-                <span className="text-[10px] text-[#8b8b8b] bg-[#ebf1eb] px-2 py-0.5 rounded-full">{dateLabel}</span>
-              </div>
-            );
-          }
+        const dateLabel = formatDateLabel(timestamp);
+        if (dateLabel !== lastDateLabel) {
+          lastDateLabel = dateLabel;
+          dateSeparator = (
+            <div className="flex items-center justify-center py-1">
+              <span className="text-[10px] text-[#8b8b8b] bg-[#ebf1eb] px-2 py-0.5 rounded-full">{dateLabel}</span>
+            </div>
+          );
         }
 
         return (
@@ -94,9 +103,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
                     <p className="whitespace-pre-wrap">{textContent}</p>
                   )}
                 </div>
-                {createdAt && (
-                  <span className="text-[9px] text-[#8b8b8b] mt-0.5 px-1">{formatTime(createdAt)}</span>
-                )}
+                <span className="text-[9px] text-[#8b8b8b] mt-0.5 px-1">{formatTime(timestamp)}</span>
               </div>
             </div>
           </div>
