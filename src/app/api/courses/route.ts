@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const RAKUTEN_APP_ID = process.env.RAKUTEN_APP_ID;
 const RAKUTEN_ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY;
 const RAKUTEN_AFFILIATE_ID = process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID;
-const APP_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ? "https://waggly-alpha.vercel.app" : "http://localhost:3000";
+const APP_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ? "https://waggly.jp" : "http://localhost:3000";
 
 export async function GET(request: NextRequest) {
   if (!RAKUTEN_APP_ID || !RAKUTEN_ACCESS_KEY) {
