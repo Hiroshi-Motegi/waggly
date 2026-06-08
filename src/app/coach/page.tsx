@@ -75,7 +75,7 @@ function ChatView({
       </div>
 
       {/* Chat card */}
-      <div className="flex flex-col rounded-lg bg-white" style={{ minHeight: "calc(100dvh - 200px)" }}>
+      <div className="flex flex-col rounded-lg bg-white" style={{ minHeight: "calc(100dvh - 260px)" }}>
         <div className="flex-1 overflow-y-auto">
           <ChatMessages messages={messages} isLoading={isLoading} />
           <div ref={bottomRef} />
