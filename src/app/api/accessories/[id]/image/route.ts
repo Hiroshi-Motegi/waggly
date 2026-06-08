@@ -38,3 +38,24 @@ export async function POST(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
+
+  const { data, error } = await supabase
+    .from("accessories")
+    .update({ image_url: null })
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
+}

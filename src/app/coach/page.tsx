@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
+import { Plus, Clock } from "lucide-react";
 import { ChatMessages } from "@/components/coach/chat-messages";
 import { ChatInput } from "@/components/coach/chat-input";
 import { useAuth } from "@/hooks/use-auth";
@@ -51,29 +52,37 @@ function ChatView({
   }
 
   return (
-    <>
-      <div className="flex justify-end gap-3 px-4 py-2 border-b">
-        <button
-          onClick={onShowHistory}
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          履歴
-        </button>
-        <button
-          onClick={onNewChat}
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          新しい会話
-        </button>
+    <div className="flex flex-col gap-4 px-2 pt-4 pb-1">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-1">
+        <h2 className="flex-1 text-lg font-bold text-[#006728]">AIに相談</h2>
+        <div className="flex gap-1">
+          <button
+            onClick={onShowHistory}
+            className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+          >
+            <Clock className="h-4 w-4" />
+            履歴
+          </button>
+          <button
+            onClick={onNewChat}
+            className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+          >
+            <Plus className="h-4 w-4" />
+            新しい会話
+          </button>
+        </div>
       </div>
-      <div className="pb-32">
-        <ChatMessages messages={messages} isLoading={isLoading} />
-        <div ref={bottomRef} />
-      </div>
-      <div className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 w-full max-w-md z-40 bg-white dark:bg-zinc-950">
+
+      {/* Chat card */}
+      <div className="flex flex-col rounded-lg bg-white" style={{ minHeight: "calc(100dvh - 200px)" }}>
+        <div className="flex-1 overflow-y-auto">
+          <ChatMessages messages={messages} isLoading={isLoading} />
+          <div ref={bottomRef} />
+        </div>
         <ChatInput onSend={handleSend} isLoading={isLoading} />
       </div>
-    </>
+    </div>
   );
 }
 
@@ -98,31 +107,36 @@ function HistoryPanel({
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between px-4 py-2 border-b">
-        <span className="text-sm font-medium">会話履歴</span>
+    <div className="flex flex-col gap-4 px-2 py-4">
+      <div className="flex items-center justify-between px-1">
+        <h2 className="text-lg font-bold text-[#006728]">会話履歴</h2>
         <button
           onClick={onClose}
-          className="text-xs text-muted-foreground hover:text-foreground"
+          className="rounded-full border border-[#006728] px-4 py-1 text-xs font-bold text-[#006728]"
         >
           閉じる
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex flex-col rounded-lg bg-white p-3">
         {isLoading ? (
-          <p className="p-4 text-center text-sm text-muted-foreground">読み込み中...</p>
+          <p className="py-4 text-center text-sm text-[#8b8b8b]">読み込み中...</p>
         ) : conversations.length === 0 ? (
-          <p className="p-4 text-center text-sm text-muted-foreground">会話履歴がありません</p>
+          <p className="py-4 text-center text-sm text-[#8b8b8b]">会話履歴がありません</p>
         ) : (
-          <ul>
-            {conversations.map((conv) => (
-              <li key={conv.id} className={`flex items-center border-b ${conv.id === activeId ? "bg-muted" : ""}`}>
+          <div className="flex flex-col">
+            {conversations.map((conv, i) => (
+              <div
+                key={conv.id}
+                className={`flex items-center gap-2 py-2 ${
+                  i < conversations.length - 1 ? "border-b border-[#dfdfdf]" : ""
+                } ${conv.id === activeId ? "bg-[#ebf1eb] -mx-3 px-3 rounded" : ""}`}
+              >
                 <button
                   onClick={() => onSelect(conv.id)}
-                  className="flex-1 flex items-center justify-between px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+                  className="flex flex-1 items-center justify-between text-left min-w-0"
                 >
-                  <span className="text-sm truncate flex-1 mr-3">{conv.title}</span>
-                  <span className="text-xs text-muted-foreground shrink-0">
+                  <span className="text-sm font-medium truncate flex-1 mr-3">{conv.title}</span>
+                  <span className="text-xs text-[#8b8b8b] shrink-0">
                     {formatDate(conv.created_at)}
                   </span>
                 </button>
@@ -131,13 +145,13 @@ function HistoryPanel({
                     e.stopPropagation();
                     if (confirm("この会話を削除しますか？")) onDelete(conv.id);
                   }}
-                  className="px-3 py-3 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                  className="shrink-0 text-xs text-[#8b8b8b] hover:text-red-500"
                 >
                   削除
                 </button>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>
@@ -215,9 +229,7 @@ export default function CoachPage() {
     try {
       const res = await fetch(`/api/coach/chat/history?conversationId=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete conversation");
-      // Remove from list
       setConversations((prev) => prev.filter((c) => c.id !== id));
-      // If deleted the active conversation, start a new one
       if (id === conversationId) {
         setConversationId(crypto.randomUUID());
         setInitialMessages([]);
@@ -248,12 +260,8 @@ export default function CoachPage() {
     }
   }
 
-  if (!historyLoaded) {
-    return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
-  }
-
-  if (!conversationId) {
-    return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (!historyLoaded || !conversationId) {
+    return <p className="p-4 text-center text-[#8b8b8b]">読み込み中...</p>;
   }
 
   if (showHistory) {

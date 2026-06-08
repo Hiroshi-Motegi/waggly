@@ -48,7 +48,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Normal app
   return (
-    <div className="mx-auto max-w-md min-h-dvh border-x border-border shadow-sm bg-background relative">
+    <div className="mx-auto max-w-md min-h-dvh shadow-sm bg-[#ebf1eb] relative">
       <Header />
       <main className="pb-20 overflow-x-hidden">{children}</main>
       <BottomNav />

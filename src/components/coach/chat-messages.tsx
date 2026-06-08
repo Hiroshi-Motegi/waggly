@@ -2,7 +2,8 @@
 
 import type { UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ChatMessagesProps {
   messages: UIMessage[];
@@ -10,20 +11,22 @@ interface ChatMessagesProps {
 }
 
 export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
+  const { user } = useAuth();
+
   return (
-    <div className="space-y-4 p-4">
+    <div className="flex flex-col gap-2.5 p-3">
       {messages.length === 0 && (
-        <div className="py-6 text-center text-muted-foreground">
-          <p className="text-lg font-semibold">Waggly AIコーチ</p>
-          <p className="mt-2 text-sm">クラブや練習のことなんでも聞いてください</p>
-          <div className="mt-4 space-y-2 text-xs">
+        <div className="py-6 text-center">
+          <p className="text-base font-bold text-[#006728]">Waggly AIコーチ</p>
+          <p className="mt-2 text-sm text-[#8b8b8b]">クラブや練習のことなんでも聞いてください</p>
+          <div className="mt-4 space-y-2 text-xs text-[#8b8b8b]">
             <p>例: 「最近スライスが多いんだけど」</p>
             <p>例: 「練習メニューを作って」</p>
             <p>例: 「7番アイアンの飛距離を伸ばすには？」</p>
           </div>
-          <div className="mt-6 mx-4 p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground text-left space-y-1">
+          <div className="mt-6 mx-2 p-3 rounded-lg bg-[#ebf1eb] text-xs text-[#8b8b8b] text-left space-y-1">
             <p>AIコーチはベータ版につき無料公開中です。コーチ内容は誤りがある場合があります。</p>
-            <p>会話の利用上限は<a href="/settings" className="underline">設定画面</a>で確認できます。</p>
+            <p>会話の利用上限は<a href="/settings" className="underline text-[#006728]">設定画面</a>で確認できます。</p>
           </div>
         </div>
       )}
@@ -33,25 +36,24 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
           .map((p) => (p as { type: "text"; text: string }).text)
           .join("");
 
+        const isUser = message.role === "user";
+
         return (
           <div
             key={message.id}
-            className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : ""}`}
+            className={`flex gap-2 items-start ${isUser ? "flex-row-reverse" : ""}`}
           >
-            <Avatar className="h-8 w-8 shrink-0">
-              <AvatarFallback>
-                {message.role === "user" ? "You" : "AI"}
-              </AvatarFallback>
-            </Avatar>
-            <div
-              className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                message.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
-              }`}
-            >
+            {isUser ? (
+              <Avatar className="h-8 w-8 shrink-0">
+                <AvatarImage src={user?.avatar_url ?? undefined} />
+                <AvatarFallback>{user?.display_name?.[0] ?? "U"}</AvatarFallback>
+              </Avatar>
+            ) : (
+              <img src="/icons/ai-coach.svg" alt="AI" className="h-8 w-8 shrink-0" />
+            )}
+            <div className="max-w-[80%] rounded-lg border border-[#c5c5c5] px-3 py-2 text-xs font-medium">
               {message.role === "assistant" ? (
-                <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_hr]:my-2">
+                <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_hr]:my-2 text-xs">
                   <ReactMarkdown>{textContent}</ReactMarkdown>
                 </div>
               ) : (
@@ -62,11 +64,9 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
         );
       })}
       {isLoading && (
-        <div className="flex gap-3">
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarFallback>AI</AvatarFallback>
-          </Avatar>
-          <div className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+        <div className="flex gap-2 items-start">
+          <img src="/icons/ai-coach.svg" alt="AI" className="h-8 w-8 shrink-0" />
+          <div className="rounded-lg border border-[#c5c5c5] px-3 py-2 text-xs text-[#8b8b8b]">
             考え中...
           </div>
         </div>

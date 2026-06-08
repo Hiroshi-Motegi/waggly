@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Plus, Circle, Hand, Triangle, Package } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import type { Accessory, AccessoryCategory, AccessoryStatus } from "@/types/database";
 
 const categoryLabels: Record<AccessoryCategory, string> = {
@@ -13,29 +13,33 @@ const categoryLabels: Record<AccessoryCategory, string> = {
   other: "その他",
 };
 
-function CategoryIcon({ category }: { category: AccessoryCategory }) {
-  switch (category) {
-    case "ball":
-      return <Circle className="h-5 w-5" />;
-    case "glove":
-      return <Hand className="h-5 w-5" />;
-    case "tee":
-      return <Triangle className="h-5 w-5" />;
-    default:
-      return <Package className="h-5 w-5" />;
-  }
-}
+const categoryIcons: Record<AccessoryCategory, string> = {
+  ball: "/icons/cat-ball.svg",
+  glove: "/icons/cat-glove.svg",
+  tee: "/icons/cat-tee.svg",
+  other: "/icons/cat-other.svg",
+};
 
 function StarRating({ rating }: { rating: number | null }) {
   if (rating == null) return null;
   return (
-    <span className="text-xs text-amber-500">
-      {"★".repeat(rating)}{"☆".repeat(5 - rating)}
-    </span>
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span key={i} className={`text-xs ${i <= rating ? "text-amber-400" : "text-gray-300"}`}>
+          ★
+        </span>
+      ))}
+    </div>
   );
 }
 
 type FilterTab = "all" | AccessoryStatus;
+
+const filterTabs: { value: FilterTab; label: string }[] = [
+  { value: "all", label: "すべて" },
+  { value: "active", label: "使用中" },
+  { value: "past", label: "アーカイブ" },
+];
 
 export default function ItemsPage() {
   const [accessories, setAccessories] = useState<Accessory[]>([]);
@@ -49,8 +53,7 @@ export default function ItemsPage() {
         const url = filter === "all" ? "/api/accessories" : `/api/accessories?status=${filter}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error("Failed to fetch");
-        const data = await res.json();
-        setAccessories(data);
+        setAccessories(await res.json());
       } catch {
         setAccessories([]);
       } finally {
@@ -60,96 +63,92 @@ export default function ItemsPage() {
     load();
   }, [filter]);
 
-  const filterTabs: { value: FilterTab; label: string }[] = [
-    { value: "all", label: "すべて" },
-    { value: "active", label: "使用中" },
-    { value: "past", label: "過去" },
-  ];
-
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">アイテム</h2>
+    <div className="flex flex-col gap-4 px-2 py-4">
+      <div className="flex items-center justify-between px-1">
+        <h2 className="text-lg font-bold text-[#006728]">アイテム</h2>
         <Link href="/items/new">
-          <Button size="sm">
-            <Plus className="mr-1 h-4 w-4" />
+          <button className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white">
+            <Plus className="h-4 w-4" />
             追加
-          </Button>
+          </button>
         </Link>
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-1 rounded-lg bg-muted p-1">
-        {filterTabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setFilter(tab.value)}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              filter === tab.value
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+        {/* Tabs */}
+        <div className="flex items-end gap-0.5">
+          {filterTabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setFilter(tab.value)}
+              className="flex flex-col items-center gap-0.5 pt-1"
+            >
+              <span
+                className={`px-2 py-0.5 text-sm font-bold text-[#006728]`}
+              >
+                {tab.label}
+              </span>
+              <div
+                className={`h-0.5 w-full ${
+                  filter === tab.value ? "bg-[#006728]" : "bg-[#a5cbb4]"
+                }`}
+              />
+            </button>
+          ))}
+          <div className="h-0.5 flex-1 bg-[#ececec]" />
+        </div>
 
-      {isLoading ? (
-        <p className="text-center text-muted-foreground">読み込み中...</p>
-      ) : accessories.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">
-          アイテムが登録されていません
-        </p>
-      ) : (
-        <div className="rounded-xl border bg-card overflow-hidden">
-          {accessories.map((item, index) => (
-            <div key={item.id}>
-              <Link href={`/items/${item.id}`}>
-                <div className="flex items-center gap-3 px-3 py-3 hover:bg-muted/50 transition-colors">
-                  <div className="text-muted-foreground shrink-0">
+        {/* List */}
+        {isLoading ? (
+          <p className="py-4 text-center text-sm text-muted-foreground">読み込み中...</p>
+        ) : accessories.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            アイテムが登録されていません
+          </p>
+        ) : (
+          <div className="flex flex-col">
+            {accessories.map((item, i) => (
+              <Link key={item.id} href={`/items/${item.id}`}>
+                <div
+                  className={`flex items-center gap-2.5 py-2 ${
+                    i < accessories.length - 1 ? "border-b border-[#dfdfdf]" : ""
+                  }`}
+                >
+                  <div className="size-[50px] shrink-0 overflow-hidden rounded bg-[#f0f0f0] flex items-center justify-center">
                     {item.image_url ? (
-                      <img
-                        src={item.image_url}
-                        alt={item.model ?? ""}
-                        className="h-10 w-10 rounded-md object-cover"
-                      />
+                      <img src={item.image_url} alt={item.model ?? ""} className="size-full object-cover" />
                     ) : (
-                      <CategoryIcon category={item.category} />
+                      <Image src={categoryIcons[item.category]} alt="" width={30} height={30} className="opacity-50" />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {categoryLabels[item.category]}
-                      </span>
-                      {item.status === "past" && (
-                        <span className="text-[10px] px-1.5 py-0 rounded border text-muted-foreground">
-                          過去
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm font-medium leading-tight truncate">
+                  <div className="flex flex-1 flex-col gap-px min-w-0">
+                    <span className="text-xs font-medium text-[#8b8b8b]">
+                      {categoryLabels[item.category]}
+                    </span>
+                    <span className="text-sm font-bold text-black truncate">
                       {[item.brand, item.model].filter(Boolean).join(" ") || "—"}
-                    </p>
-                    {item.rating != null && (
-                      <StarRating rating={item.rating} />
-                    )}
-                    {item.memo && (
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        {item.memo}
-                      </p>
-                    )}
+                    </span>
+                    <StarRating rating={item.rating} />
                   </div>
+                  {item.status === "past" && (
+                    <span className="shrink-0 rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
+                      アーカイブ
+                    </span>
+                  )}
+                  <Image
+                    src="/icons/chevron-right.svg"
+                    alt=""
+                    width={6}
+                    height={10}
+                    className="shrink-0 opacity-60"
+                  />
                 </div>
               </Link>
-              {index < accessories.length - 1 && (
-                <div className="border-t mx-3" />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

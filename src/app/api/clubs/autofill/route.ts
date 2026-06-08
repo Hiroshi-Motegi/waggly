@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "今月のAI利用上限に達しました" }, { status: 429 });
   }
 
-  const { category, club_number, maker, model, shaft_name, shaft_flex } = await request.json();
+  const { category, club_number, maker, model, shaft_name, shaft_flex, release_year } = await request.json();
 
   const prompt = `以下のゴルフクラブの公開スペック情報を検索して、JSON形式で回答してください。
 分からない項目はnullにしてください。推測ではなく、公開情報に基づいて回答してください。
@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
 モデル: ${model ?? "不明"}
 シャフト: ${shaft_name ?? "不明"}
 フレックス: ${shaft_flex ?? "不明"}
+発売年: ${release_year ?? "不明"}
 
 以下のJSON形式で回答してください。JSON以外のテキストは不要です:
 \`\`\`json

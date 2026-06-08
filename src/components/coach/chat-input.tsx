@@ -2,8 +2,6 @@
 
 import { useRef, useState } from "react";
 import { SendHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -34,20 +32,23 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 border-t bg-background p-3">
-      <Textarea
+    <form onSubmit={handleSubmit} className="flex items-start gap-2.5 border-t border-[#aeaeae] p-3">
+      <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
         onCompositionStart={() => { composingRef.current = true; }}
         onCompositionEnd={() => { composingRef.current = false; }}
         placeholder="メッセージを入力..."
-        rows={1}
-        className="min-h-[40px] resize-none"
+        className="flex-1 rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
       />
-      <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+      <button
+        type="submit"
+        disabled={isLoading || !input.trim()}
+        className="flex h-[33px] w-[33px] shrink-0 items-center justify-center rounded-[7px] bg-[#006728] text-white disabled:opacity-50"
+      >
         <SendHorizontal className="h-4 w-4" />
-      </Button>
+      </button>
     </form>
   );
 }

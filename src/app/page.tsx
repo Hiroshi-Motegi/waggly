@@ -1,18 +1,38 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useClubs } from "@/hooks/use-clubs";
-import { usePracticeSessions } from "@/hooks/use-practice";
 import { useAuth } from "@/hooks/use-auth";
-import { BagSummary } from "@/components/home/bag-summary";
+import { usePracticeSessions } from "@/hooks/use-practice";
 import { RecentPractice } from "@/components/home/recent-practice";
-import { GapAnalysisCard } from "@/components/home/gap-analysis-card";
-import { analyzeGaps } from "@/lib/gap-analysis";
-import { Card, CardContent } from "@/components/ui/card";
+
+const featureCards = [
+  {
+    href: "/bag",
+    icon: "/icons/my-bag.svg",
+    label: "マイバッグ",
+  },
+  {
+    href: "/items",
+    icon: "/icons/items.svg",
+    label: "アイテム",
+  },
+  {
+    href: "/courses",
+    icon: "/icons/golf-course.svg",
+    label: "ゴルフ場を探す",
+    sub: "楽天GORA",
+  },
+  {
+    href: "/coach/plans",
+    icon: "/icons/practice-menu.svg",
+    label: "練習メニュー",
+    sub: "AIに練習メニューを相談",
+  },
+];
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
-  const { clubs } = useClubs("bag");
   const { sessions } = usePracticeSessions();
 
   if (authLoading) {
@@ -27,40 +47,29 @@ export default function HomePage() {
     );
   }
 
-  const gapResult = analyzeGaps(clubs);
-
   return (
-    <div className="flex flex-col gap-4 px-4 py-6">
-      <h2 className="text-xl font-bold">こんにちは、{user.display_name}さん</h2>
-      <BagSummary clubs={clubs} />
-      <GapAnalysisCard result={gapResult} />
+    <div className="flex flex-col gap-4 px-2 py-6">
+      <p className="text-center text-lg font-medium">
+        こんにちは、{user.display_name}さん
+      </p>
 
-      {/* Practice Plan */}
-      <Link href="/coach/plans">
-        <Card>
-          <CardContent className="flex items-center justify-between p-4">
-            <div>
-              <p className="font-semibold">練習メニュー</p>
-              <p className="text-xs text-muted-foreground">AIに練習メニューを相談</p>
+      <div className="grid grid-cols-2 gap-2">
+        {featureCards.map((card) => (
+          <Link key={card.href} href={card.href}>
+            <div className="flex flex-col items-center gap-[5px] rounded-lg border border-[#72937f] bg-white p-5 h-[121px] drop-shadow-[2px_2px_0px_#72937f]">
+              <Image src={card.icon} alt={card.label} width={48} height={48} />
+              <div className="flex flex-col items-center gap-[2px] text-center">
+                <span className="text-sm font-bold text-[#006728]">{card.label}</span>
+                {card.sub && (
+                  <span className="text-[10px] text-[#717171]">{card.sub}</span>
+                )}
+              </div>
             </div>
-            <span className="text-muted-foreground">→</span>
-          </CardContent>
-        </Card>
-      </Link>
+          </Link>
+        ))}
+      </div>
 
       <RecentPractice sessions={sessions} />
-
-      <Link href="/courses">
-        <Card>
-          <CardContent className="flex items-center justify-between p-4">
-            <div>
-              <p className="font-semibold">ゴルフ場を探す</p>
-              <p className="text-xs text-muted-foreground">楽天GORAでコースを検索</p>
-            </div>
-            <span className="text-muted-foreground">→</span>
-          </CardContent>
-        </Card>
-      </Link>
     </div>
   );
 }

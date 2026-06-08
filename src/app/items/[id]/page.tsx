@@ -2,10 +2,9 @@
 
 import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { toAffiliateUrl, getUrlPlatform } from "@/lib/affiliate";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +17,13 @@ const categoryLabels: Record<AccessoryCategory, string> = {
   other: "その他",
 };
 
+const categoryIcons: Record<AccessoryCategory, string> = {
+  ball: "/icons/cat-ball.svg",
+  glove: "/icons/cat-glove.svg",
+  tee: "/icons/cat-tee.svg",
+  other: "/icons/cat-other.svg",
+};
+
 const categories: { value: AccessoryCategory; label: string }[] = [
   { value: "ball", label: "ボール" },
   { value: "glove", label: "グローブ" },
@@ -27,15 +33,19 @@ const categories: { value: AccessoryCategory; label: string }[] = [
 
 const statuses: { value: AccessoryStatus; label: string }[] = [
   { value: "active", label: "使用中" },
-  { value: "past", label: "過去" },
+  { value: "past", label: "アーカイブ" },
 ];
 
 function StarRating({ rating }: { rating: number | null }) {
-  if (rating == null) return <span className="text-muted-foreground text-sm">未評価</span>;
+  if (rating == null) return <span className="text-sm text-[#8b8b8b]">未評価</span>;
   return (
-    <span className="text-amber-500">
-      {"★".repeat(rating)}{"☆".repeat(5 - rating)}
-    </span>
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span key={i} className={`text-xs ${i <= rating ? "text-amber-400" : "text-gray-300"}`}>
+          ★
+        </span>
+      ))}
+    </div>
   );
 }
 
@@ -48,6 +58,9 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Accessory>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [deleteImage, setDeleteImage] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -75,6 +88,17 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     if (!editForm.category) return;
     setIsSubmitting(true);
     try {
+      // Handle image delete
+      if (deleteImage) {
+        await fetch(`/api/accessories/${id}/image`, { method: "DELETE" });
+      }
+      // Handle image upload
+      if (pendingFile) {
+        const formData = new FormData();
+        formData.append("file", pendingFile);
+        await fetch(`/api/accessories/${id}/image`, { method: "POST", body: formData });
+      }
+      // Save form data
       const body = {
         category: editForm.category,
         brand: editForm.brand || null,
@@ -90,15 +114,25 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error("Failed to update");
-      const updated = await res.json();
+      // Reload latest data
+      const refetchRes = await fetch(`/api/accessories/${id}`);
+      const updated = await refetchRes.json();
       setItem(updated);
       setEditForm(updated);
+      resetImageState();
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update accessory:", error);
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function resetImageState() {
+    setPendingFile(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setDeleteImage(false);
   }
 
   async function handleDelete() {
@@ -122,39 +156,73 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     }
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch(`/api/accessories/${id}/image`, {
-      method: "POST",
-      body: formData,
-    });
-    if (res.ok) {
-      const updated = await res.json();
-      setItem(updated);
-      setEditForm(updated);
-    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPendingFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setDeleteImage(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
   if (!item) return <p className="p-4 text-center text-muted-foreground">アイテムが見つかりません</p>;
 
+  function handleImageDelete() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPendingFile(null);
+    setPreviewUrl(null);
+    setDeleteImage(true);
+  }
+
   if (isEditing) {
     return (
-      <div>
-        <h2 className="px-4 pt-4 text-xl font-bold">アイテムを編集</h2>
-        <form onSubmit={handleSave} className="space-y-6 p-4 pb-8">
-          <div className="space-y-2">
-            <Label htmlFor="category">カテゴリ</Label>
+      <div className="flex flex-col gap-4 px-2 py-4">
+        <h2 className="px-1 text-lg font-bold text-[#006728]">アイテムを編集</h2>
+        <form onSubmit={handleSave} className="flex flex-col rounded-lg bg-white p-3">
+          {/* 画像 */}
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-xs">画像</span>
+            {(() => {
+              const displayUrl = deleteImage ? null : (previewUrl ?? item?.image_url);
+              return (
+                <div className="flex flex-col items-center gap-1">
+                  {displayUrl ? (
+                    <img src={displayUrl} alt="" className="max-h-[229px] rounded object-contain" />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-32 w-full rounded border-2 border-dashed border-[#c4c4c4] flex items-center justify-center text-sm text-[#8b8b8b]"
+                    >
+                      写真を追加
+                    </button>
+                  )}
+                  {displayUrl && (
+                    <div className="flex gap-2.5">
+                      <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-full border border-[#006728] px-5 py-1 text-xs font-bold text-[#006728]">
+                        変更する
+                      </button>
+                      <button type="button" onClick={handleImageDelete} className="rounded-full border border-[#006728] px-5 py-1 text-xs font-bold text-[#006728]">
+                        削除する
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+          </div>
+
+          {/* カテゴリ */}
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-xs">カテゴリ</span>
             <select
-              id="category"
               value={editForm.category ?? ""}
               onChange={(e) => updateEdit("category", e.target.value)}
               required
-              className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
             >
               {categories.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
@@ -162,51 +230,35 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             </select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="brand">ブランド</Label>
-            <Input
-              id="brand"
-              value={editForm.brand ?? ""}
-              onChange={(e) => updateEdit("brand", e.target.value)}
-              placeholder="例: Titleist"
-              className="h-11"
-            />
+          {/* ブランド */}
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-xs">ブランド</span>
+            <input value={editForm.brand ?? ""} onChange={(e) => updateEdit("brand", e.target.value)} placeholder="例: Titleist" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="model">モデル</Label>
-            <Input
-              id="model"
-              value={editForm.model ?? ""}
-              onChange={(e) => updateEdit("model", e.target.value)}
-              placeholder="例: Pro V1"
-              className="h-11"
-            />
+          {/* モデル */}
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-xs">モデル</span>
+            <input value={editForm.model ?? ""} onChange={(e) => updateEdit("model", e.target.value)} placeholder="例: Pro V1" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="memo">メモ</Label>
-            <Textarea
-              id="memo"
-              value={editForm.memo ?? ""}
-              onChange={(e) => updateEdit("memo", e.target.value)}
-              placeholder="使用感など..."
-              rows={3}
-            />
+          {/* メモ */}
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-xs">メモ</span>
+            <textarea value={editForm.memo ?? ""} onChange={(e) => updateEdit("memo", e.target.value)} placeholder="使用感など..." rows={5} className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
-          <div className="space-y-2">
-            <Label>評価</Label>
-            <div className="flex gap-2">
+          {/* 評価 */}
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-xs">評価</span>
+            <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   type="button"
                   onClick={() => updateEdit("rating", editForm.rating === star ? null : star)}
-                  className={`text-2xl transition-colors ${
-                    editForm.rating != null && star <= editForm.rating
-                      ? "text-amber-500"
-                      : "text-muted-foreground"
+                  className={`text-xl transition-colors ${
+                    editForm.rating != null && star <= editForm.rating ? "text-amber-400" : "text-gray-300"
                   }`}
                 >
                   ★
@@ -215,137 +267,113 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="purchase_url">購入URL</Label>
-            <Input
-              id="purchase_url"
-              type="url"
-              value={editForm.purchase_url ?? ""}
-              onChange={(e) => updateEdit("purchase_url", e.target.value)}
-              placeholder="https://..."
-              className="h-11"
-            />
+          {/* 購入URL */}
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-xs">購入URL</span>
+            <input type="url" value={editForm.purchase_url ?? ""} onChange={(e) => updateEdit("purchase_url", e.target.value)} placeholder="https://..." className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="status">ステータス</Label>
+          {/* ステータス */}
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-xs">ステータス</span>
             <select
-              id="status"
               value={editForm.status ?? "active"}
               onChange={(e) => updateEdit("status", e.target.value)}
-              className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
             >
               {statuses.map((s) => (
                 <option key={s.value} value={s.value}>{s.label}</option>
               ))}
             </select>
           </div>
-
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsEditing(false)}>
-              キャンセル
-            </Button>
-            <Button type="submit" className="flex-1" disabled={isSubmitting}>
-              {isSubmitting ? "保存中..." : "保存"}
-            </Button>
-          </div>
         </form>
+
+        {/* Buttons outside card */}
+        <div className="flex flex-col items-center gap-3 pt-3">
+          <button onClick={(e) => { e.preventDefault(); handleSave(e); }} disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-[#006728] py-2.5 text-sm font-bold text-white disabled:opacity-50">
+            {isSubmitting ? "保存中..." : "保存する"}
+          </button>
+          <button type="button" onClick={() => { resetImageState(); setIsEditing(false); }} className="text-sm font-bold text-[#006728]">
+            キャンセル
+          </button>
+        </div>
       </div>
     );
   }
 
+  const statusLabel = item.status === "active" ? "使用中" : "アーカイブ";
+
   return (
-    <div className="space-y-4 p-4 pb-8">
+    <div className="flex flex-col gap-4 px-2 py-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{categoryLabels[item.category]}</p>
-          <h2 className="text-xl font-bold">
+      <div className="flex items-center gap-3 px-1">
+        <div className="flex flex-1 flex-col gap-px min-w-0">
+          <span className="text-xs font-bold text-[#1e944c]">
+            {categoryLabels[item.category]}
+          </span>
+          <span className="text-lg font-bold text-[#006728]">
             {[item.brand, item.model].filter(Boolean).join(" ") || "—"}
-          </h2>
+          </span>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => setIsEditing(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={handleDelete}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Image */}
-      <div className="relative">
-        {item.image_url ? (
-          <img
-            src={item.image_url}
-            alt={item.model ?? ""}
-            className="w-full h-48 object-cover rounded-lg cursor-pointer"
-            onClick={() => fileInputRef.current?.click()}
-          />
-        ) : (
+        <div className="flex gap-1 shrink-0">
           <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full h-32 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center text-muted-foreground text-sm hover:border-primary hover:text-primary transition-colors"
+            onClick={() => setIsEditing(true)}
+            className="flex items-center justify-center rounded-full bg-[#006728] p-2"
           >
-            写真を追加
+            <Pencil className="h-4 w-4 text-white" />
           </button>
-        )}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleImageUpload}
-        />
+          <button
+            onClick={handleDelete}
+            className="flex items-center justify-center rounded-full bg-[#006728] p-2"
+          >
+            <Trash2 className="h-4 w-4 text-white" />
+          </button>
+        </div>
       </div>
 
-      {/* Status change */}
-      <div className="flex gap-2">
-        {item.status !== "active" && (
-          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleStatusChange("active")}>
-            使用中にする
-          </Button>
-        )}
-        {item.status !== "past" && (
-          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleStatusChange("past")}>
-            過去にする
-          </Button>
-        )}
-      </div>
+      {/* Card */}
+      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+        {/* Image */}
+        <div className="flex items-center justify-center py-2">
+          {item.image_url ? (
+            <img src={item.image_url} alt={item.model ?? ""} className="max-h-[229px] rounded object-contain" />
+          ) : (
+            <img src={categoryIcons[item.category]} alt="" className="h-[100px] opacity-40" />
+          )}
+        </div>
 
-      {/* Details */}
-      <Card>
-        <CardHeader><CardTitle className="text-base">詳細</CardTitle></CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">ステータス</span>
-            <span>{item.status === "active" ? "使用中" : "過去"}</span>
+        {/* Detail rows */}
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+            <span className="shrink-0">ステータス</span>
+            <span className="flex-1 text-right">{statusLabel}</span>
           </div>
           {item.brand && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">ブランド</span>
-              <span>{item.brand}</span>
+            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+              <span className="shrink-0">ブランド</span>
+              <span className="flex-1 text-right">{item.brand}</span>
             </div>
           )}
           {item.model && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">モデル</span>
-              <span>{item.model}</span>
+            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+              <span className="shrink-0">モデル</span>
+              <span className="flex-1 text-right">{item.model}</span>
             </div>
           )}
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">評価</span>
+          <div className="flex items-center gap-2.5 py-2 text-sm">
+            <span className="flex-1">評価</span>
             <StarRating rating={item.rating} />
           </div>
-          {item.memo && (
-            <div className="space-y-1">
-              <span className="text-muted-foreground">メモ</span>
-              <p className="text-sm whitespace-pre-wrap">{item.memo}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Memo */}
+        {item.memo && (
+          <div className="border-t border-[#dfdfdf] pt-2">
+            <p className="text-xs font-medium text-[#8b8b8b] mb-1">メモ</p>
+            <p className="text-sm whitespace-pre-wrap">{item.memo}</p>
+          </div>
+        )}
+      </div>
 
       {/* Purchase URL */}
       {item.purchase_url && (() => {
@@ -353,17 +381,37 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         const platform = getUrlPlatform(item.purchase_url!);
         const platformLabel = platform === "amazon" ? "Amazonで購入" : platform === "rakuten" ? "楽天で購入" : "購入する";
         return (
-          <a
-            href={affiliateUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full rounded-md border border-input bg-background px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
-          >
-            <ExternalLink className="h-4 w-4" />
-            {platformLabel}
-          </a>
+          <div className="flex flex-col items-center pt-2">
+            <a
+              href={affiliateUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-[#006728] bg-white px-5 py-1 text-sm font-bold text-[#006728]"
+            >
+              {platformLabel}
+            </a>
+          </div>
         );
       })()}
+
+      {/* Archive / Restore */}
+      <div className="flex flex-col items-center">
+        {item.status === "active" ? (
+          <button
+            onClick={() => handleStatusChange("past")}
+            className="text-sm font-bold text-[#006728]"
+          >
+            アーカイブに移動
+          </button>
+        ) : (
+          <button
+            onClick={() => handleStatusChange("active")}
+            className="text-sm font-bold text-[#006728]"
+          >
+            使用中に戻す
+          </button>
+        )}
+      </div>
     </div>
   );
 }

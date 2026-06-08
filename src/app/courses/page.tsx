@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+
+const STORAGE_KEY = "courses-search-state";
 
 const AREA_CODES = [
   { code: "", label: "全国" },
@@ -66,18 +65,39 @@ export default function CoursesPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  async function search(page = 1) {
+  // Restore from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        setKeyword(state.keyword ?? "");
+        setAreaCode(state.areaCode ?? "");
+        setCurrentPage(state.page ?? 1);
+        setResults(state.results ?? null);
+      }
+    } catch {}
+  }, []);
+
+  function saveState(kw: string, area: string, page: number, data: SearchResult | null) {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ keyword: kw, areaCode: area, page, results: data }));
+    } catch {}
+  }
+
+  async function search(kw: string, area: string, page: number) {
     setIsLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams({ page: String(page) });
-      if (keyword) params.set("keyword", keyword);
-      if (areaCode) params.set("areaCode", areaCode);
+      if (kw) params.set("keyword", kw);
+      if (area) params.set("areaCode", area);
       const res = await fetch(`/api/courses?${params}`);
       if (!res.ok) throw new Error("検索に失敗しました");
       const data = await res.json();
       setResults(data);
       setCurrentPage(page);
+      saveState(kw, area, page, data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "エラーが発生しました");
       setResults(null);
@@ -88,121 +108,129 @@ export default function CoursesPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    search(1);
+    search(keyword, areaCode, 1);
+  }
+
+  function handlePageChange(page: number) {
+    search(keyword, areaCode, page);
   }
 
   return (
-    <div className="space-y-4 px-4 py-6">
-      <h2 className="text-xl font-bold">ゴルフ場を探す</h2>
+    <div className="flex flex-col gap-4 px-2 py-4">
+      <div className="px-1">
+        <h2 className="text-lg font-bold text-[#006728]">ゴルフ場を探す</h2>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <Input
-          className="h-11"
-          placeholder="コース名・キーワード"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-        />
-        <select
-          value={areaCode}
-          onChange={(e) => setAreaCode(e.target.value)}
-          className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          {AREA_CODES.map((area) => (
-            <option key={area.code} value={area.code}>{area.label}</option>
-          ))}
-        </select>
-        <Button type="submit" className="w-full h-11" disabled={isLoading}>
-          {isLoading ? "検索中..." : "検索する"}
-        </Button>
-      </form>
+      <div className="rounded-lg bg-white p-3">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <input
+            placeholder="コース名・キーワード"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+          />
+          <select
+            value={areaCode}
+            onChange={(e) => setAreaCode(e.target.value)}
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+          >
+            {AREA_CODES.map((area) => (
+              <option key={area.code} value={area.code}>{area.label}</option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full rounded-full bg-[#006728] py-2.5 text-sm font-bold text-white disabled:opacity-50"
+          >
+            {isLoading ? "検索中..." : "検索する"}
+          </button>
+        </form>
+      </div>
 
       {error && (
-        <p className="text-sm text-destructive text-center">{error}</p>
+        <p className="text-sm text-red-500 text-center">{error}</p>
       )}
 
       {results && (
         <>
-          <p className="text-sm text-muted-foreground">
+          <p className="px-1 text-xs text-[#8b8b8b]">
             {results.count.toLocaleString()}件のコース
           </p>
 
           {results.Items.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="text-center text-sm text-[#8b8b8b] py-8">
               コースが見つかりませんでした
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="flex flex-col gap-2">
               {results.Items.map((course) => (
                 <Link key={course.golfCourseId} href={`/courses/${course.golfCourseId}`}>
-                  <Card className="hover:bg-muted/50 transition-colors">
-                    <CardContent className="p-3">
-                      <div className="flex gap-3">
-                        {course.golfCourseImageUrl ? (
-                          <div className="relative h-20 w-28 flex-shrink-0 rounded overflow-hidden bg-muted">
-                            <Image
-                              src={course.golfCourseImageUrl}
-                              alt={course.golfCourseName}
-                              fill
-                              className="object-cover"
-                              unoptimized
-                            />
-                          </div>
-                        ) : (
-                          <div className="h-20 w-28 flex-shrink-0 rounded bg-muted flex items-center justify-center">
-                            <span className="text-xs text-muted-foreground">No Image</span>
-                          </div>
-                        )}
-                        <div className="flex flex-col gap-1 min-w-0">
-                          <p className="font-semibold text-sm leading-tight line-clamp-2">
-                            {course.golfCourseName}
-                          </p>
-                          <p className="text-xs text-muted-foreground line-clamp-1">
-                            {course.address}
-                          </p>
-                          <div className="flex items-center gap-1">
-                            <StarDisplay rating={course.evaluation} />
-                            <span className="text-xs text-muted-foreground">
-                              {course.evaluation?.toFixed(1) ?? "—"}{course.reviewCount ? ` (${course.reviewCount.toLocaleString()}件)` : ""}
-                            </span>
-                          </div>
-                          <div className="text-xs text-muted-foreground space-y-0.5">
-                            {course.weekdayMinPrice != null && course.weekdayMinPrice > 0 && (
-                              <p>平日 ¥{course.weekdayMinPrice.toLocaleString()}〜</p>
-                            )}
-                            {course.holidayMinPrice != null && course.holidayMinPrice > 0 && (
-                              <p>休日 ¥{course.holidayMinPrice.toLocaleString()}〜</p>
-                            )}
-                          </div>
+                  <div className="rounded-lg bg-white p-3">
+                    <div className="flex gap-3">
+                      {course.golfCourseImageUrl ? (
+                        <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-[#f5f5f5]">
+                          <Image
+                            src={course.golfCourseImageUrl}
+                            alt={course.golfCourseName}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-20 w-28 flex-shrink-0 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
+                          <span className="text-xs text-[#8b8b8b]">No Image</span>
+                        </div>
+                      )}
+                      <div className="flex flex-col gap-1 min-w-0">
+                        <p className="font-bold text-sm leading-tight line-clamp-2">
+                          {course.golfCourseName}
+                        </p>
+                        <p className="text-xs text-[#8b8b8b] line-clamp-1">
+                          {course.address}
+                        </p>
+                        <div className="flex items-center gap-1">
+                          <StarDisplay rating={course.evaluation} />
+                          <span className="text-xs text-[#8b8b8b]">
+                            {course.evaluation?.toFixed(1) ?? "—"}{course.reviewCount ? ` (${course.reviewCount.toLocaleString()}件)` : ""}
+                          </span>
+                        </div>
+                        <div className="text-xs text-[#8b8b8b] space-y-0.5">
+                          {course.weekdayMinPrice != null && course.weekdayMinPrice > 0 && (
+                            <p>平日 ¥{course.weekdayMinPrice.toLocaleString()}〜</p>
+                          )}
+                          {course.holidayMinPrice != null && course.holidayMinPrice > 0 && (
+                            <p>休日 ¥{course.holidayMinPrice.toLocaleString()}〜</p>
+                          )}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>
           )}
 
           {results.pageCount > 1 && (
-            <div className="flex justify-center gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
+            <div className="flex justify-center items-center gap-3 pt-1">
+              <button
                 disabled={currentPage <= 1 || isLoading}
-                onClick={() => search(currentPage - 1)}
+                onClick={() => handlePageChange(currentPage - 1)}
+                className="rounded-full border border-[#006728] px-4 py-1.5 text-xs font-bold text-[#006728] disabled:opacity-50"
               >
                 前へ
-              </Button>
-              <span className="flex items-center text-sm text-muted-foreground px-2">
+              </button>
+              <span className="text-xs text-[#8b8b8b]">
                 {currentPage} / {results.pageCount}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 disabled={currentPage >= results.pageCount || isLoading}
-                onClick={() => search(currentPage + 1)}
+                onClick={() => handlePageChange(currentPage + 1)}
+                className="rounded-full border border-[#006728] px-4 py-1.5 text-xs font-bold text-[#006728] disabled:opacity-50"
               >
                 次へ
-              </Button>
+              </button>
             </div>
           )}
         </>
