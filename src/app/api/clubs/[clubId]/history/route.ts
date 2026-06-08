@@ -26,7 +26,7 @@ export async function GET(
   // Fetch memos
   const { data: memos } = await supabase
     .from("club_memos")
-    .select("id, distance, memo, created_at")
+    .select("id, distance, memo, condition, symptom_tags, feeling_tags, gear_tags, created_at")
     .eq("club_id", clubId)
     .order("created_at", { ascending: false });
 
@@ -62,6 +62,10 @@ export async function GET(
         date: m.created_at,
         distance: m.distance,
         memo: m.memo,
+        condition: m.condition,
+        symptom_tags: m.symptom_tags,
+        feeling_tags: m.feeling_tags,
+        gear_tags: m.gear_tags,
       });
     }
   }
