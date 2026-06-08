@@ -98,76 +98,83 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
   // Add mode: dedicated form page
   if (isAddMode) {
     return (
-      <form onSubmit={handleMemoSubmit} className="flex flex-col px-2 py-2" style={{ minHeight: "calc(100dvh - var(--bottom-nav-height))" }}>
-        <div className="px-1 pb-2">
-          <span className="text-xs font-bold text-[#1e944c]">
-            {club.club_number}{club.maker ? ` / ${club.maker}` : ""}{club.model ? ` ${club.model}` : ""}
-          </span>
-          <h2 className="text-lg font-bold text-[#006728]">メモの追加</h2>
-        </div>
-        <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
-          <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">飛距離</span>
-            <div className="flex items-center gap-1">
-              <input
-                type="number"
-                value={form.distance}
-                onChange={(e) => setForm({ ...form, distance: e.target.value })}
-                className="w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
-              />
-              <span className="text-xs">yd</span>
+      <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <div className="relative z-10 flex flex-col space-y-2">
+          <form onSubmit={handleMemoSubmit} className="flex flex-col" style={{ minHeight: "calc(100dvh - var(--bottom-nav-height))" }}>
+            <div className="px-1 pb-2">
+              <span className="text-xs font-bold text-white">
+                {club.club_number}{club.maker ? ` / ${club.maker}` : ""}{club.model ? ` ${club.model}` : ""}
+              </span>
+              <h2 className="text-lg font-bold text-white">メモの追加</h2>
             </div>
-          </div>
-          <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">所感・メモ</span>
-            <textarea
-              value={form.memo}
-              onChange={(e) => setForm({ ...form, memo: e.target.value })}
-              rows={10}
-              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
-            />
-          </div>
+            <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+              <div className="flex flex-col gap-0.5 py-1">
+                <span className="text-xs">飛距離</span>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    value={form.distance}
+                    onChange={(e) => setForm({ ...form, distance: e.target.value })}
+                    className="w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+                  />
+                  <span className="text-xs">yd</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-0.5 py-1">
+                <span className="text-xs">所感・メモ</span>
+                <textarea
+                  value={form.memo}
+                  onChange={(e) => setForm({ ...form, memo: e.target.value })}
+                  rows={10}
+                  className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+                />
+              </div>
+            </div>
+            <div className="flex-1" />
+            <div className="flex flex-col items-center gap-1 px-[30px] py-4">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-full bg-white border border-white py-2 text-sm font-bold text-[#006728] disabled:opacity-50"
+              >
+                {submitting ? "保存中..." : "保存する"}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="px-5 py-1 text-sm font-bold text-white"
+              >
+                キャンセル
+              </button>
+            </div>
+          </form>
         </div>
-        <div className="flex-1" />
-        <div className="flex flex-col items-center gap-1 px-[30px] py-4">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-full bg-[#006728] border border-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50"
-          >
-            {submitting ? "保存中..." : "保存する"}
-          </button>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-5 py-1 text-sm font-bold text-[#006728]"
-          >
-            キャンセル
-          </button>
-        </div>
-      </form>
+      </div>
     );
   }
 
   // List mode: activity timeline
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
       <div className="flex items-center justify-between px-1">
         <div>
-          <span className="text-xs font-bold text-[#1e944c]">{club.club_number}</span>
-          <h2 className="text-lg font-bold text-[#006728]">アクティビティ</h2>
+          <span className="text-xs font-bold text-white">{club.club_number}</span>
+          <h2 className="text-lg font-bold text-white">アクティビティ</h2>
         </div>
         <div className="flex gap-1">
           <button
             onClick={() => setShowMemoForm(!showMemoForm)}
-            className="flex items-center gap-1 rounded-full bg-[#006728] px-3 py-1.5 text-xs font-bold text-white"
+            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#006728]"
           >
             <Plus className="h-3 w-3" />
             メモ
           </button>
           <Link
             href={`/bag/${clubId}/maintenances?add=1`}
-            className="flex items-center gap-1 rounded-full bg-[#006728] px-3 py-1.5 text-xs font-bold text-white"
+            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#006728]"
           >
             <Plus className="h-3 w-3" />
             メンテナンス
@@ -265,6 +272,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
             })}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

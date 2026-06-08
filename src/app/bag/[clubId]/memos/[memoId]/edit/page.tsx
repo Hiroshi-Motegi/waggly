@@ -52,10 +52,12 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
   if (isFetching) return <Loading />;
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
       <div className="px-1">
-        <span className="text-xs font-bold text-[#1e944c]">{club?.club_number}</span>
-        <h2 className="text-lg font-bold text-[#006728]">メモを編集</h2>
+        <span className="text-xs font-bold text-white">{club?.club_number}</span>
+        <h2 className="text-lg font-bold text-white">メモを編集</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-lg bg-white p-4">
@@ -84,19 +86,20 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex-1 rounded-full border border-[#006728] py-2 text-sm font-bold text-[#006728]"
+            className="flex-1 rounded-full border border-white py-2 text-sm font-bold text-white"
           >
             キャンセル
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50"
+            className="flex-1 rounded-full bg-white py-2 text-sm font-bold text-[#006728] disabled:opacity-50"
           >
             {submitting ? "保存中..." : "保存"}
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }

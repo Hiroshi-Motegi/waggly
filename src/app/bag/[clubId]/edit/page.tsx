@@ -46,23 +46,26 @@ export default function EditClubPage({ params }: { params: Promise<{ clubId: str
   const { club_images, maintenances, id, user_id, created_at, ...editableData } = club as any;
 
   return (
-    <div className="px-2 py-4">
-      <PageHeader title="クラブを編集" />
-      <div className="px-3 pt-3">
-        <div className="rounded-lg bg-white p-3">
-          <span className="text-xs">写真</span>
-          <ClubImageGallery
-            clubId={clubId}
-            images={clubImages}
-            onUpload={handleImageUpload}
-          />
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
+        <PageHeader title="クラブを編集" variant="dark" />
+        <div className="px-3 pt-3">
+          <div className="rounded-lg bg-white p-3">
+            <span className="text-xs">写真</span>
+            <ClubImageGallery
+              clubId={clubId}
+              images={clubImages}
+              onUpload={handleImageUpload}
+            />
+          </div>
         </div>
-      </div>
-      <ClubForm initialData={editableData} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-      <div className="flex justify-center pb-8 -mt-2">
-        <button onClick={() => router.back()} className="text-sm font-bold text-[#006728]">
-          キャンセル
-        </button>
+        <ClubForm initialData={editableData} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        <div className="flex justify-center pb-8 -mt-2">
+          <button onClick={() => router.back()} className="text-sm font-bold text-white">
+            キャンセル
+          </button>
+        </div>
       </div>
     </div>
   );

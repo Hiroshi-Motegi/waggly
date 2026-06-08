@@ -52,8 +52,10 @@ export default function NewPlanPage() {
   }
 
   return (
-    <div className="space-y-4 p-4 pb-8">
-      <h2 className="text-xl font-bold">練習メニューを作成</h2>
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-4 p-2 pb-8">
+      <h2 className="text-xl font-bold text-white">練習メニューを作成</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Card>
@@ -177,6 +179,7 @@ export default function NewPlanPage() {
           {isGenerating ? "生成中..." : "メニューを生成"}
         </Button>
       </form>
+      </div>
     </div>
   );
 }

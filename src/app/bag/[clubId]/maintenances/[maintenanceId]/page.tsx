@@ -50,14 +50,16 @@ export default function MaintenanceDetailPage({
   if (!item) return <p className="p-4 text-center text-muted-foreground">記録が見つかりません</p>;
 
   return (
-    <div className="flex flex-col px-2 py-2 space-y-2">
+    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="relative z-10 flex flex-col space-y-2">
       <div className="flex items-center justify-between px-1">
         <div>
-          <span className="text-xs font-bold text-[#1e944c]">{club?.club_number}</span>
-          <h2 className="text-lg font-bold text-[#006728]">メンテナンス</h2>
+          <span className="text-xs font-bold text-white">{club?.club_number}</span>
+          <h2 className="text-lg font-bold text-white">メンテナンス</h2>
         </div>
         <Link href={`/bag/${clubId}/maintenances/${maintenanceId}/edit`}>
-          <Button size="sm" variant="outline" className="gap-1 border-[#006728] text-[#006728]">
+          <Button size="sm" variant="outline" className="gap-1 border-white text-white bg-transparent">
             <Pencil className="h-4 w-4" />
             編集
           </Button>
@@ -96,9 +98,10 @@ export default function MaintenanceDetailPage({
       </div>
 
       <div className="flex justify-center">
-        <button onClick={handleDelete} className="text-sm font-bold text-red-500">
+        <button onClick={handleDelete} className="text-sm font-bold text-red-300">
           この記録を削除
         </button>
+      </div>
       </div>
     </div>
   );
