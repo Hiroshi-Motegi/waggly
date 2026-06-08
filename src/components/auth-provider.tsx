@@ -47,6 +47,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // No session — do full LIFF auth flow
         await initLiff();
+
+        // Mark LIFF client for CSS
+        const { liff } = await import("@/lib/liff");
+        if (liff.isInClient()) {
+          document.documentElement.classList.add("liff-client");
+        }
+
         const { profile } = await getLiffProfile();
 
         const res = await fetch("/api/auth/line", {
