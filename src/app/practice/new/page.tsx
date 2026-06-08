@@ -113,11 +113,13 @@ export default function NewPracticePage() {
 
   return (
     <div>
-      <h2 className="px-4 pt-4 text-xl font-bold">練習を記録</h2>
-      {planId && (
-        <p className="px-4 pt-1 text-xs text-muted-foreground">練習メニューに紐づけて記録します</p>
-      )}
-      <SessionForm clubs={clubs} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      <div className="px-3 pt-4">
+        <h2 className="text-lg font-bold text-[#006728]">練習を記録</h2>
+        {planId && (
+          <p className="pt-0.5 text-xs text-[#8b8b8b]">練習メニューに紐づけて記録します</p>
+        )}
+      </div>
+      <SessionForm clubs={clubs} onSubmit={handleSubmit} isSubmitting={isSubmitting} showCancel onCancel={() => router.back()} />
     </div>
   );
 }

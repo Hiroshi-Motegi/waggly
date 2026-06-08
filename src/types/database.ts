@@ -29,6 +29,8 @@ export interface Club {
   lie: number | null;
   length: number | null;
   distance: number | null;
+  release_year: number | null;
+  memo: string | null;
   purchase_date: string | null;
   purchase_shop: string | null;
   purchase_price: number | null;
@@ -73,6 +75,7 @@ export interface PracticeClub {
   session_id: string;
   club_id: string;
   balls: number;
+  avg_distance: number | null;
 }
 
 export interface PracticePlan {
@@ -103,6 +106,14 @@ export interface AiChat {
   created_at: string;
 }
 
+export interface ClubMemo {
+  id: string;
+  club_id: string;
+  distance: number | null;
+  memo: string | null;
+  created_at: string;
+}
+
 export interface Accessory {
   id: string;
   user_id: string;
@@ -120,6 +131,7 @@ export interface Accessory {
 // Joined types for convenience
 export interface ClubWithImages extends Club {
   club_images: ClubImage[];
+  latest_avg_distance?: number | null;
 }
 
 export interface PracticeSessionWithClubs extends PracticeSession {

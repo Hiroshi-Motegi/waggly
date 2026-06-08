@@ -1,0 +1,254 @@
+"use client";
+
+import { use, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useClub } from "@/hooks/use-clubs";
+import type { Maintenance } from "@/types/database";
+
+const maintenanceTypeLabels: Record<string, string> = {
+  grip_change: "グリップ交換",
+  reshaft: "リシャフト",
+  loft_adjust: "ロフト調整",
+  other: "その他",
+};
+
+const maintenanceTypes = [
+  { value: "grip_change", label: "グリップ交換" },
+  { value: "reshaft", label: "リシャフト" },
+  { value: "loft_adjust", label: "ロフト調整" },
+  { value: "other", label: "その他" },
+];
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00");
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
+export default function MaintenanceListPage({ params }: { params: Promise<{ clubId: string }> }) {
+  const { clubId } = use(params);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isAddMode = searchParams.get("add") === "1";
+  const { club, isLoading } = useClub(clubId);
+  const [items, setItems] = useState<Maintenance[]>([]);
+  const [showForm, setShowForm] = useState(isAddMode);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    type: "grip_change",
+    description: "",
+    shop: "",
+    cost: "",
+    done_at: new Date().toISOString().split("T")[0],
+  });
+
+  useEffect(() => {
+    if (!club || isAddMode) return;
+    fetch(`/api/clubs/${clubId}/maintenances`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setItems)
+      .catch(() => setItems([]));
+  }, [clubId, club]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/clubs/${clubId}/maintenances`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: form.type,
+          description: form.description || null,
+          shop: form.shop || null,
+          cost: form.cost ? Number(form.cost) : null,
+          done_at: form.done_at,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      if (isAddMode) {
+        router.push(`/bag/${clubId}`);
+        return;
+      }
+      const newItem = await res.json();
+      setItems((prev) => [newItem, ...prev]);
+      setShowForm(false);
+      setForm({ type: "grip_change", description: "", shop: "", cost: "", done_at: new Date().toISOString().split("T")[0] });
+    } catch (error) {
+      console.error("Failed to create maintenance:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (isLoading) return <p className="p-4 text-center text-muted-foreground">読み込み中...</p>;
+  if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
+
+  const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
+
+  // Add mode: dedicated form page
+  if (isAddMode) {
+    return (
+      <div>
+        <div className="px-3 pt-4">
+          <span className="text-xs font-bold text-[#1e944c]">
+            {club.club_number}{club.maker ? ` / ${club.maker}` : ""}{club.model ? ` ${club.model}` : ""}
+          </span>
+          <h2 className="text-lg font-bold text-[#006728]">メンテナンス記録の追加</h2>
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-2 py-4">
+          <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className="text-xs">種別</span>
+              <select
+                value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value })}
+                className={inputClass}
+              >
+                {maintenanceTypes.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className="text-xs">実施日</span>
+              <input type="date" value={form.done_at} onChange={(e) => setForm({ ...form, done_at: e.target.value })} className={inputClass} />
+            </div>
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className="text-xs">実施店舗</span>
+              <input value={form.shop} onChange={(e) => setForm({ ...form, shop: e.target.value })} placeholder="例: ゴルフ5 新宿店" className={inputClass} />
+            </div>
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className="text-xs">費用（円）</span>
+              <input type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} placeholder="3000" className={inputClass} />
+            </div>
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className="text-xs">メモ</span>
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="詳細メモ..."
+                rows={5}
+                className={inputClass}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-1 px-[30px]">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full rounded-full bg-[#006728] border border-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50"
+            >
+              {submitting ? "保存中..." : "保存する"}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-5 py-1 text-sm font-bold text-[#006728]"
+            >
+              キャンセル
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  // List mode
+  return (
+    <div className="flex flex-col gap-4 px-2 py-4">
+      <div className="flex items-center justify-between px-1">
+        <div>
+          <span className="text-xs font-bold text-[#1e944c]">{club.club_number}</span>
+          <h2 className="text-lg font-bold text-[#006728]">メンテナンス履歴</h2>
+        </div>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="flex items-center gap-1 rounded-full bg-[#006728] px-3 py-1.5 text-xs font-bold text-white"
+        >
+          <Plus className="h-3 w-3" />
+          追加
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-lg bg-white p-3">
+          <div className="space-y-1">
+            <span className="text-xs">種別</span>
+            <select
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value })}
+              className={inputClass}
+            >
+              {maintenanceTypes.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs">実施日</span>
+            <input type="date" value={form.done_at} onChange={(e) => setForm({ ...form, done_at: e.target.value })} className={inputClass} />
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs">実施店舗</span>
+            <input value={form.shop} onChange={(e) => setForm({ ...form, shop: e.target.value })} placeholder="例: ゴルフ5 新宿店" className={inputClass} />
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs">費用（円）</span>
+            <input type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} placeholder="3000" className={inputClass} />
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs">メモ</span>
+            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="詳細メモ..." rows={3} className={inputClass} />
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setShowForm(false)} className="flex-1 rounded-full border border-[#006728] py-2 text-sm font-bold text-[#006728]">
+              キャンセル
+            </button>
+            <button type="submit" disabled={submitting} className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50">
+              {submitting ? "保存中..." : "保存"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="flex flex-col rounded-lg bg-white p-3">
+        {items.length === 0 ? (
+          <p className="py-4 text-center text-sm text-[#8b8b8b]">記録なし</p>
+        ) : (
+          <div className="flex flex-col">
+            {items.map((m, i) => (
+              <Link key={m.id} href={`/bag/${clubId}/maintenances/${m.id}`}>
+                <div
+                  className={`flex items-center gap-2.5 py-2 ${
+                    i < items.length - 1 ? "border-b border-[#dfdfdf]" : ""
+                  }`}
+                >
+                  <div className="flex flex-1 flex-col gap-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-[10px] font-medium text-black">
+                        {maintenanceTypeLabels[m.type]}
+                      </span>
+                      <span className="text-xs text-[#8b8b8b]">{formatDate(m.done_at)}</span>
+                    </div>
+                    {m.description && <p className="text-sm truncate">{m.description}</p>}
+                    <div className="flex gap-4 text-xs text-[#8b8b8b]">
+                      {m.shop && <span>{m.shop}</span>}
+                      {m.cost != null && <span>{m.cost.toLocaleString()}円</span>}
+                    </div>
+                  </div>
+                  <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

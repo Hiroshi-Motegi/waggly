@@ -50,24 +50,24 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: #ebf1eb;
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card: #ffffff;
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
+  --popover: #ffffff;
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --primary: #006728;
+  --primary-foreground: #ffffff;
+  --secondary: #c7e2ca;
+  --secondary-foreground: #000000;
+  --muted: #ebf1eb;
+  --muted-foreground: #717171;
+  --accent: #c7e2ca;
+  --accent-foreground: #006728;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #72937f;
+  --input: #72937f;
+  --ring: #72937f;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -128,4 +128,51 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Club balls slider */
+.club-balls-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  background: transparent;
+  outline: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  display: block;
+}
+.club-balls-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: #d9d9d9;
+  border-radius: 1px;
+}
+.club-balls-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #006728;
+  border: none;
+  margin-top: -10px;
+}
+.club-balls-slider::-moz-range-track {
+  height: 2px;
+  background: #d9d9d9;
+  border-radius: 1px;
+  border: none;
+}
+.club-balls-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #006728;
+  border: none;
+}
+.club-balls-slider::-moz-range-progress {
+  background: #006728;
+  height: 2px;
+  border-radius: 1px;
 }

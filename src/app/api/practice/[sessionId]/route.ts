@@ -32,7 +32,7 @@ export async function PATCH(
   const { supabase, userId } = auth;
 
   const { sessionId } = await params;
-  const { clubs: clubBalls, ...sessionData } = await request.json();
+  const { clubs: clubBalls, rating, ...sessionData } = await request.json();
 
   // Update session fields
   const { data: session, error: sessionError } = await supabase
@@ -61,6 +61,7 @@ export async function PATCH(
         session_id: sessionId,
         club_id: cb.club_id,
         balls: cb.balls,
+        avg_distance: cb.avg_distance ?? null,
       }));
 
     if (records.length > 0) {

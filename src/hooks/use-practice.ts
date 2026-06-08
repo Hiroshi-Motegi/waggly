@@ -31,7 +31,7 @@ interface CreateSessionData {
   location: string;
   total_balls: number;
   memo: string;
-  clubs: { club_id: string; balls: number }[];
+  clubs: { club_id: string; balls: number; avg_distance?: number | null }[];
 }
 
 export async function createPracticeSession(data: CreateSessionData) {

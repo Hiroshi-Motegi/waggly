@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  const { clubs: clubBalls, ...sessionData } = await request.json();
+  const { clubs: clubBalls, rating, ...sessionData } = await request.json();
 
   // Create session
   const { data: session, error: sessionError } = await supabase
@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
-  if (sessionError) return NextResponse.json({ error: sessionError.message }, { status: 500 });
+  if (sessionError) {
+    console.error("practice session insert error:", sessionError.message, sessionData);
+    return NextResponse.json({ error: sessionError.message }, { status: 500 });
+  }
 
   // Create per-club records
   if (clubBalls && clubBalls.length > 0) {
@@ -41,6 +44,7 @@ export async function POST(request: NextRequest) {
         session_id: session.id,
         club_id: cb.club_id,
         balls: cb.balls,
+        avg_distance: cb.avg_distance ?? null,
       }));
 
     if (records.length > 0) {
@@ -48,7 +52,10 @@ export async function POST(request: NextRequest) {
         .from("practice_clubs")
         .insert(records);
 
-      if (clubError) return NextResponse.json({ error: clubError.message }, { status: 500 });
+      if (clubError) {
+        console.error("practice clubs insert error:", clubError.message, records);
+        return NextResponse.json({ error: clubError.message }, { status: 500 });
+      }
     }
   }
 

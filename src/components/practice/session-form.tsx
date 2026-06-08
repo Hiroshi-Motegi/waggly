@@ -1,16 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { ClubBallsInput } from "./club-balls-input";
+import { ClubBallsInput, type ClubBallsValue } from "./club-balls-input";
 import type { Club } from "@/types/database";
 
-const totalBallsPresets = [50, 100, 150, 200, 300];
+type BallsTab = "total" | "per_club";
 
 interface SessionFormProps {
   clubs: Club[];
@@ -20,7 +14,7 @@ interface SessionFormProps {
     total_balls: number | null;
     memo: string | null;
     rating?: number | null;
-    practice_clubs?: { club_id: string; balls: number }[];
+    practice_clubs?: { club_id: string; balls: number; avg_distance?: number | null }[];
   };
   showRating?: boolean;
   onSubmit: (data: {
@@ -29,126 +23,189 @@ interface SessionFormProps {
     total_balls: number;
     memo: string;
     rating: number | null;
-    clubs: { club_id: string; balls: number }[];
+    clubs: { club_id: string; balls: number; avg_distance?: number | null }[];
   }) => void;
   isSubmitting?: boolean;
+  showCancel?: boolean;
+  onCancel?: () => void;
 }
 
-export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmitting }: SessionFormProps) {
-  // Use JST for default date
+export function SessionForm({ clubs, initialData, showRating, onSubmit, isSubmitting, showCancel, onCancel }: SessionFormProps) {
   const now = new Date();
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   const today = jst.toISOString().split("T")[0];
   const [practicedAt, setPracticedAt] = useState(initialData?.practiced_at ?? today);
   const [location, setLocation] = useState(initialData?.location ?? "");
   const [totalBalls, setTotalBalls] = useState(initialData?.total_balls ?? 0);
-  const [clubBalls, setClubBalls] = useState<{ club_id: string; balls: number }[]>(
+  const [clubBalls, setClubBalls] = useState<ClubBallsValue[]>(
     initialData?.practice_clubs ?? []
   );
   const [memo, setMemo] = useState(initialData?.memo ?? "");
   const [rating, setRating] = useState<number | null>(initialData?.rating ?? null);
-  const [clubBallsOpen, setClubBallsOpen] = useState(false);
+  const [ballsTab, setBallsTab] = useState<BallsTab>(
+    initialData?.practice_clubs && initialData.practice_clubs.length > 0 ? "per_club" : "total"
+  );
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const computedTotal = ballsTab === "per_club"
+      ? clubBalls.reduce((sum, cb) => sum + cb.balls, 0)
+      : totalBalls;
     onSubmit({
       practiced_at: practicedAt,
       location,
-      total_balls: totalBalls,
+      total_balls: computedTotal,
       memo,
       rating,
-      clubs: clubBalls,
+      clubs: ballsTab === "per_club" ? clubBalls : [],
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-4">
-      <div>
-        <Label htmlFor="practiced_at">日付</Label>
-        <Input
-          id="practiced_at"
-          type="date"
-          value={practicedAt}
-          onChange={(e) => setPracticedAt(e.target.value)}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="location">練習場</Label>
-        <Input
-          id="location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="練習場名を入力"
-        />
-      </div>
-
-      <div>
-        <Label>総球数</Label>
-        <div className="mt-1 flex gap-2">
-          {totalBallsPresets.map((p) => (
-            <Badge
-              key={p}
-              variant={totalBalls === p ? "default" : "outline"}
-              className="cursor-pointer px-3 py-1.5"
-              onClick={() => setTotalBalls(totalBalls === p ? 0 : p)}
-            >
-              {p}
-            </Badge>
-          ))}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-2 py-4">
+      {/* Card 1: Date & Location */}
+      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className="text-xs">日付</span>
+          <input
+            type="date"
+            value={practicedAt}
+            onChange={(e) => setPracticedAt(e.target.value)}
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+          />
+        </div>
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className="text-xs">練習場</span>
+          <input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="練習場名を入力"
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+          />
         </div>
       </div>
 
-      <div>
-        <button
-          type="button"
-          onClick={() => setClubBallsOpen(!clubBallsOpen)}
-          className="flex items-center justify-between w-full"
-        >
-          <Label className="cursor-pointer">番手別球数{clubBalls.length > 0 && ` (${clubBalls.length}番手)`}</Label>
-          {clubBallsOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-        </button>
-        {clubBallsOpen && (
-          <div className="mt-2">
+      {/* Section title: 練習球数 */}
+      <h3 className="px-1 text-base font-bold text-[#006728]">練習球数</h3>
+
+      {/* Card 2: Balls (tabbed) */}
+      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+        {/* Tabs */}
+        <div className="flex items-end gap-0.5">
+          <button
+            type="button"
+            onClick={() => setBallsTab("total")}
+            className="flex flex-col items-center gap-0.5 pt-1"
+          >
+            <span className="px-2 py-0.5 text-sm font-bold text-[#006728]">総球数のみ</span>
+            <div className={`h-0.5 w-full ${ballsTab === "total" ? "bg-[#006728]" : "bg-[#a5cbb4]"}`} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setBallsTab("per_club")}
+            className="flex flex-col items-center gap-0.5 pt-1"
+          >
+            <span className="px-2 py-0.5 text-sm font-bold text-[#006728]">番手別球数・飛距離</span>
+            <div className={`h-0.5 w-full ${ballsTab === "per_club" ? "bg-[#006728]" : "bg-[#a5cbb4]"}`} />
+          </button>
+          <div className="h-0.5 flex-1 bg-[#ececec]" />
+        </div>
+
+        {/* Tab content */}
+        {ballsTab === "total" ? (
+          <div className="flex flex-col gap-1 py-2">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center">
+                <input
+                  type="range"
+                  min={0}
+                  max={300}
+                  step={10}
+                  value={totalBalls}
+                  onChange={(e) => setTotalBalls(Number(e.target.value))}
+                  className="club-balls-slider w-full"
+                />
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={totalBalls || ""}
+                  onChange={(e) => setTotalBalls(e.target.value ? Number(e.target.value) : 0)}
+                  placeholder="—"
+                  className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+                />
+                <span className="text-xs">球</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="py-2">
             <ClubBallsInput clubs={clubs} value={clubBalls} onChange={setClubBalls} />
+            {clubBalls.length > 0 && (
+              <p className="text-sm text-[#8b8b8b] pt-2">
+                合計: {clubBalls.reduce((s, c) => s + c.balls, 0)}球
+              </p>
+            )}
           </div>
         )}
       </div>
 
-      <div>
-        <Label htmlFor="memo">気づきメモ</Label>
-        <Textarea
-          id="memo"
-          value={memo}
-          onChange={(e) => setMemo(e.target.value)}
-          placeholder="今日の気づきや感覚をメモ..."
-          rows={4}
-        />
+      {/* Section title: 気づき・メモ */}
+      <h3 className="px-1 text-base font-bold text-[#006728]">気づき・メモ</h3>
+
+      {/* Card 3: Rating & Memo */}
+      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+        {showRating !== false && (
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-xs">練習の評価</span>
+            <div className="flex gap-1.5">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(rating === star ? null : star)}
+                  className={`text-xl transition-colors ${
+                    rating != null && star <= rating ? "text-amber-400" : "text-gray-300"
+                  }`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className="text-xs">所感・メモ</span>
+          <textarea
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+            placeholder="今日の気づきや感覚をメモ..."
+            rows={4}
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+          />
+        </div>
       </div>
 
-      {showRating !== false && (
-        <div>
-          <Label>今日の練習の評価</Label>
-          <div className="flex gap-2 mt-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => setRating(rating === star ? null : star)}
-                className={`text-2xl transition-colors ${
-                  rating != null && star <= rating ? "text-amber-500" : "text-muted-foreground/30"
-                }`}
-              >
-                ★
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "保存中..." : "保存"}
-      </Button>
+      {/* Buttons outside cards */}
+      <div className="flex flex-col items-center gap-1 px-[30px] pt-2 pb-3">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full rounded-full bg-[#006728] border border-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50"
+        >
+          {isSubmitting ? "保存中..." : "保存する"}
+        </button>
+        {showCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-5 py-1 text-sm font-bold text-[#006728]"
+          >
+            キャンセル
+          </button>
+        )}
+      </div>
     </form>
   );
 }
