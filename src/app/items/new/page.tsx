@@ -193,7 +193,7 @@ export default function NewItemPage() {
         </div>
       </form>
 
-      <div className="flex flex-col items-center gap-3 pt-3">
+      <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
         <button onClick={(e) => handleSubmit(e)} disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-sm font-bold text-[#006728] disabled:opacity-50">
           {isSubmitting ? (
             <span className="flex items-center justify-center gap-2">

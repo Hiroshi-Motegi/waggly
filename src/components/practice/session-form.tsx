@@ -198,7 +198,7 @@ export function SessionForm({ clubs, reserveClubs, pastLocations, initialData, s
       </div>
 
       {/* Buttons outside cards */}
-      <div className="flex flex-col items-center gap-1 px-[30px] pt-2 pb-3">
+      <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
         <button
           type="submit"
           disabled={isSubmitting}

@@ -132,7 +132,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
               </div>
             </div>
             <div className="flex-1" />
-            <div className="flex flex-col items-center gap-1 px-[30px] py-4">
+            <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
               <button
                 type="submit"
                 disabled={submitting}

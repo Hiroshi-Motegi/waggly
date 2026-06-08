@@ -293,7 +293,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         </form>
 
         {/* Buttons outside card */}
-        <div className="flex flex-col items-center gap-3 pt-3">
+        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
           <button onClick={(e) => { e.preventDefault(); handleSave(e); }} disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-sm font-bold text-[#006728] disabled:opacity-50">
             {isSubmitting ? "保存中..." : "保存する"}
           </button>

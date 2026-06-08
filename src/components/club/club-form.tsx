@@ -277,7 +277,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       </div>
 
       {/* Buttons */}
-      <div className="flex flex-col items-center gap-1 pt-3">
+      <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
         <button type="submit" disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-sm font-bold text-[#006728] disabled:opacity-50">
           {isSubmitting ? "保存中..." : "保存する"}
         </button>

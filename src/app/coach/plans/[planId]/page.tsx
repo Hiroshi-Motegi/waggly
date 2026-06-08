@@ -130,7 +130,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col items-center gap-1 px-[30px] pt-2">
+      <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
         <button
           onClick={handleDone}
           className="w-full rounded-full bg-white border border-white py-2 text-sm font-bold text-[#006728]"
