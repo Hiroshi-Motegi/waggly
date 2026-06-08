@@ -35,7 +35,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
     <div className="flex flex-col gap-2.5 p-3">
       {messages.length === 0 && (
         <div className="py-6 text-center">
-          <p className="text-base font-bold text-[#006728]">Waggly AIコーチ</p>
+          <p className="text-base font-bold text-[#006728]">AIに相談</p>
           <p className="mt-2 text-sm text-[#8b8b8b]">クラブや練習のことなんでも聞いてください</p>
           <div className="mt-4 space-y-2 text-xs text-[#8b8b8b]">
             <p>例: 「最近スライスが多いんだけど」</p>
