@@ -221,7 +221,6 @@ export default function BagPage() {
         variant="dark"
       >
         <div className="flex gap-2">
-          {isBagView && <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />}
           {isBagView && !isReordering && clubs.length > 1 && (
             <button
               onClick={startReorder}
@@ -272,7 +271,7 @@ export default function BagPage() {
         {/* Charts */}
         {showCharts && !isReordering && (
           <div className="rounded-lg bg-white p-3">
-            <div className="flex gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2">
               <button
                 onClick={() => setChartTab("distance")}
                 className={`rounded-full px-3 py-1 text-xs font-bold ${
@@ -293,6 +292,9 @@ export default function BagPage() {
               >
                 重量フロー
               </button>
+              <div className="ml-auto">
+                <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />
+              </div>
             </div>
             {chartTab === "distance" ? (
               <>
