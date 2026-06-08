@@ -102,7 +102,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
   return (
     <div className="flex flex-col gap-4 px-2 py-4">
       {/* Header */}
-      <div className="flex items-center gap-3 px-1">
+      <div className="sticky top-0 z-10 bg-[#ebf1eb] flex items-center gap-3 px-1 pb-1">
         <div className="flex flex-1 flex-col gap-px min-w-0">
           <span className="text-xs font-bold text-[#1e944c]">
             {club.club_number}{club.maker ? ` / ${club.maker}` : ""}

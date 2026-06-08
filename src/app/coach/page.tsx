@@ -54,7 +54,7 @@ function ChatView({
   return (
     <div className="flex flex-col gap-4 px-2 pt-4 pb-1">
       {/* Header */}
-      <div className="flex items-center gap-3 px-1">
+      <div className="sticky top-0 z-10 bg-[#ebf1eb] flex items-center gap-3 px-1 pb-1">
         <h2 className="flex-1 text-lg font-bold text-[#006728]">AIに相談</h2>
         <div className="flex gap-1">
           <button

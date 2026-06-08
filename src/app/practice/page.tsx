@@ -15,7 +15,7 @@ export default function PracticePage() {
 
   return (
     <div className="flex flex-col gap-4 px-2 py-4">
-      <div className="flex items-center justify-between px-1">
+      <div className="sticky top-0 z-10 bg-[#ebf1eb] flex items-center justify-between px-1 pb-1">
         <h2 className="text-lg font-bold text-[#006728]">練習記録</h2>
         <Link href="/practice/new">
           <button className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white">

@@ -169,7 +169,7 @@ export default function BagPage() {
 
   return (
     <div className="flex flex-col gap-4 px-2 py-4">
-      <div className="flex items-center justify-between px-1">
+      <div className="sticky top-0 z-10 bg-[#ebf1eb] flex items-center justify-between px-1 pb-1">
         <h2 className="text-lg font-bold text-[#006728]">
           {isBagView && bagCount !== null
             ? `マイバッグ (${bagCount}/${MAX_BAG_CLUBS})`

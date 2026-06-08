@@ -117,7 +117,7 @@ export default function CoursesPage() {
 
   return (
     <div className="flex flex-col gap-4 px-2 py-4">
-      <div className="px-1">
+      <div className="sticky top-0 z-10 bg-[#ebf1eb] px-1 pb-1">
         <h2 className="text-lg font-bold text-[#006728]">ゴルフ場を探す</h2>
       </div>
 
