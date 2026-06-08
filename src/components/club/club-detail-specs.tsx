@@ -74,13 +74,14 @@ export function ClubDetailSpecs({ form, onChange }: Props) {
             <select
               value={form.kick_point ?? ""}
               onChange={(e) => onChange("kick_point", e.target.value || undefined)}
-              className="w-[107px] border-b border-[#c4c4c4] bg-white px-1 py-1 text-center text-sm focus-visible:outline-none"
+              className="w-[77px] border-b border-[#c4c4c4] bg-white px-1 py-1 text-center text-sm focus-visible:outline-none"
             >
               <option value="">—</option>
               {kickPointOptions.map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
+            <span className="w-[30px] text-xs"></span>
           </div>
           <div className="flex items-center gap-0.5">
             <span className="flex-1 text-xs">ヘッド体積</span>
