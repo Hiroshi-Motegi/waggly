@@ -65,14 +65,15 @@ describe("getDistanceStaircaseData", () => {
     expect(result[3].hasGap).toBe(false);
   });
 
-  it("excludes clubs without distance", () => {
+  it("includes all clubs, distance null for missing", () => {
     const clubs = [
       makeClub({ id: "1", club_number: "7I", distance: 150, sort_order: 1 }),
       makeClub({ id: "2", club_number: "8I", distance: null, sort_order: 2 }),
     ];
     const result = getDistanceStaircaseData(clubs);
-    expect(result).toHaveLength(1);
-    expect(result[0].club_number).toBe("7I");
+    expect(result).toHaveLength(2);
+    expect(result[0].distance).toBe(150);
+    expect(result[1].distance).toBeNull();
   });
 
   it("returns empty array for no clubs", () => {
@@ -107,19 +108,25 @@ describe("getWeightFlowData", () => {
     expect(result[1].isFlowCorrect).toBe(false);
   });
 
-  it("excludes clubs without weight", () => {
+  it("includes all clubs, weight null for missing", () => {
     const clubs = [
       makeClub({ id: "1", club_number: "Dr", weight: 310, sort_order: 1, category: "driver" }),
       makeClub({ id: "2", club_number: "5W", weight: null, sort_order: 2, category: "fairway_wood" }),
+      makeClub({ id: "3", club_number: "7I", weight: 420, sort_order: 3 }),
     ];
     const result = getWeightFlowData(clubs);
-    expect(result).toHaveLength(1);
+    expect(result).toHaveLength(3);
+    expect(result[0].weight).toBe(310);
+    expect(result[1].weight).toBeNull();
+    expect(result[2].weight).toBe(420);
   });
 
-  it("returns empty array for no clubs with weight", () => {
+  it("returns all clubs even with no weight data", () => {
     const clubs = [
       makeClub({ id: "1", club_number: "7I", weight: null, sort_order: 1 }),
     ];
-    expect(getWeightFlowData(clubs)).toEqual([]);
+    const result = getWeightFlowData(clubs);
+    expect(result).toHaveLength(1);
+    expect(result[0].weight).toBeNull();
   });
 });

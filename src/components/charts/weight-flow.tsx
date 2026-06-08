@@ -22,7 +22,8 @@ function CustomDot(props: any) {
 }
 
 export function WeightFlow({ data }: Props) {
-  if (data.length === 0) {
+  const hasAnyWeight = data.some((d) => d.weight != null);
+  if (!hasAnyWeight) {
     return (
       <p className="py-8 text-center text-sm text-[#8b8b8b]">
         詳細スペックで重量を入力するとグラフが表示されます
@@ -46,6 +47,7 @@ export function WeightFlow({ data }: Props) {
           stroke="#006728"
           strokeWidth={2}
           dot={<CustomDot />}
+          connectNulls
         />
       </LineChart>
     </ResponsiveContainer>

@@ -43,13 +43,13 @@ export function analyzeGaps(clubs: Club[]): GapResult {
 
 export interface DistanceStaircaseItem {
   club_number: string;
-  distance: number;
+  distance: number | null;
   hasGap: boolean;
 }
 
 export interface WeightFlowItem {
   club_number: string;
-  weight: number;
+  weight: number | null;
   isFlowCorrect: boolean;
 }
 
@@ -57,13 +57,12 @@ export interface WeightFlowItem {
 
 export function getDistanceStaircaseData(clubs: (Club & { latest_avg_distance?: number | null })[]): DistanceStaircaseItem[] {
   const getDistance = (c: Club & { latest_avg_distance?: number | null }) => c.latest_avg_distance ?? c.distance;
-  const withDistance = clubs.filter((c) => getDistance(c) != null);
-  const sorted = [...withDistance].sort((a, b) => a.sort_order - b.sort_order);
+  const sorted = [...clubs].sort((a, b) => a.sort_order - b.sort_order);
 
   return sorted.map((club, i) => {
-    const dist = getDistance(club)!;
-    const next = sorted[i + 1];
-    const hasGap = next != null && dist - getDistance(next)! > GAP_THRESHOLD_YD;
+    const dist = getDistance(club);
+    const next = sorted.slice(i + 1).find((c) => getDistance(c) != null);
+    const hasGap = dist != null && next != null && dist - getDistance(next)! > GAP_THRESHOLD_YD;
     return {
       club_number: club.club_number,
       distance: dist,
@@ -73,15 +72,15 @@ export function getDistanceStaircaseData(clubs: (Club & { latest_avg_distance?: 
 }
 
 export function getWeightFlowData(clubs: Club[]): WeightFlowItem[] {
-  const withWeight = clubs.filter((c) => c.weight != null);
-  const sorted = [...withWeight].sort((a, b) => a.sort_order - b.sort_order);
+  const sorted = [...clubs].sort((a, b) => a.sort_order - b.sort_order);
 
-  return sorted.map((club, i) => {
-    const prev = sorted[i - 1];
-    const isFlowCorrect = prev == null || club.weight! >= prev.weight!;
+  let lastWeight: number | null = null;
+  return sorted.map((club) => {
+    const isFlowCorrect = club.weight == null || lastWeight == null || club.weight >= lastWeight;
+    if (club.weight != null) lastWeight = club.weight;
     return {
       club_number: club.club_number,
-      weight: club.weight!,
+      weight: club.weight,
       isFlowCorrect,
     };
   });
