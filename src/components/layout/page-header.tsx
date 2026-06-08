@@ -26,7 +26,7 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
   }
 
   return (
-    <div className={`sticky top-0 z-10 flex items-center gap-2 px-1 py-2 ${isDark ? "bg-[#139847]/80 backdrop-blur-sm" : "bg-[#ebf1eb]"}`}>
+    <div className={`sticky top-0 z-10 flex items-center gap-2 -mx-2 px-3 py-1 ${isDark ? "bg-[#139847]/80 backdrop-blur-sm" : "bg-[#ebf1eb]"}`}>
       {showBack && (
         <button onClick={handleBack} className="shrink-0 -ml-1 p-1">
           <ChevronLeft className={`h-5 w-5 ${isDark ? "text-white" : "text-[#006728]"}`} />
