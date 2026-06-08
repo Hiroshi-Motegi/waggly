@@ -292,9 +292,6 @@ export default function BagPage() {
               >
                 重量フロー
               </button>
-              <div className="ml-auto">
-                <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />
-              </div>
             </div>
             {chartTab === "distance" ? (
               <>
@@ -307,6 +304,11 @@ export default function BagPage() {
                 <ChartInsights insights={weightInsights} />
               </>
             )}
+          </div>
+        )}
+        {showCharts && !isReordering && (
+          <div className="flex justify-center">
+            <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />
           </div>
         )}
 
