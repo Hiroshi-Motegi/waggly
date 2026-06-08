@@ -59,15 +59,35 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
 
       <div className="flex flex-col gap-3 rounded-lg bg-white p-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-[#8b8b8b]">
-            {formatDate(memo.created_at.split("T")[0])}
-          </span>
+          <div className="flex items-center gap-2">
+            {memo.condition && (
+              <span className="text-xl">{memo.condition === "good" ? "😊" : memo.condition === "bad" ? "😣" : "😐"}</span>
+            )}
+            <span className="text-sm text-[#8b8b8b]">
+              {formatDate(memo.created_at.split("T")[0])}
+            </span>
+          </div>
           {memo.distance && (
             <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs font-medium text-black">
               {memo.distance} yd
             </span>
           )}
         </div>
+
+        {/* Tags */}
+        {[...(memo.symptom_tags ?? []), ...(memo.feeling_tags ?? []), ...(memo.gear_tags ?? [])].length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {(memo.symptom_tags ?? []).map((tag) => (
+              <span key={tag} className="rounded-full bg-[#f0f0f0] px-2.5 py-0.5 text-xs text-[#333]">{tag}</span>
+            ))}
+            {(memo.feeling_tags ?? []).map((tag) => (
+              <span key={tag} className="rounded-full bg-[#fff8e1] px-2.5 py-0.5 text-xs text-[#333]">{tag}</span>
+            ))}
+            {(memo.gear_tags ?? []).map((tag) => (
+              <span key={tag} className="rounded-full bg-[#e8f4fd] px-2.5 py-0.5 text-xs text-[#333]">{tag}</span>
+            ))}
+          </div>
+        )}
 
         {memo.memo && (
           <div className="border-t border-[#dfdfdf] pt-3">
