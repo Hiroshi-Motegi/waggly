@@ -142,11 +142,15 @@
   animation: bounce 0.8s ease-in-out infinite;
 }
 .loading-shadow {
-  width: 40px;
-  height: 8px;
+  width: 28px;
+  height: 6px;
   border-radius: 50%;
   background: rgba(0, 103, 40, 0.15);
   animation: shadow 0.8s ease-in-out infinite;
+}
+.loading-wave {
+  display: inline-block;
+  animation: wave 1.2s ease-in-out infinite;
 }
 @keyframes bounce {
   0%, 100% {
@@ -156,10 +160,21 @@
     transform: translateY(0) scaleX(1.1) scaleY(0.85);
   }
   50% {
-    transform: translateY(-30px) scaleX(0.95) scaleY(1.05);
+    transform: translateY(-20px) scaleX(0.95) scaleY(1.05);
   }
   85% {
     transform: translateY(0) scaleX(1.1) scaleY(0.85);
+  }
+}
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+  60% {
+    transform: translateY(0);
   }
 }
 @keyframes shadow {
