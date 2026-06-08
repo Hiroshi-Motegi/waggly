@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { useClubs, updateClub } from "@/hooks/use-clubs";
 import type { ClubStatus, ClubWithImages } from "@/types/database";
+import { ShareWitbButton } from "@/components/bag/share-witb-button";
 import { getDistanceStaircaseData, getWeightFlowData, getDistanceInsights, getWeightInsights } from "@/lib/gap-analysis";
 import { DistanceStaircase } from "@/components/charts/distance-staircase";
 import { WeightFlow } from "@/components/charts/weight-flow";
@@ -220,6 +221,7 @@ export default function BagPage() {
         variant="dark"
       >
         <div className="flex gap-2">
+          {isBagView && <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />}
           {isBagView && !isReordering && clubs.length > 1 && (
             <button
               onClick={startReorder}
