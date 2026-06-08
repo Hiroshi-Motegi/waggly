@@ -24,25 +24,23 @@ function PlanItem({ item, showSeparator }: { item: any; showSeparator: boolean }
   return (
     <div>
       {showSeparator && <Separator className="mb-4" />}
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">{item.club?.club_number ?? "?"}</Badge>
-            <span className="text-sm font-medium">{item.balls}球</span>
-          </div>
+      <div className="space-y-2">
+        <p className="text-base font-bold">{item.focus}</p>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline">{item.club?.club_number ?? "?"}</Badge>
+          <span className="text-sm">{item.balls}球</span>
         </div>
-        <p className="text-sm font-medium">{item.focus}</p>
         {hasDetail && (
           <>
             <button
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-1 text-xs text-primary hover:underline"
+              className="flex items-center gap-1 text-sm text-primary hover:underline"
             >
-              {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {open ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
               {open ? "閉じる" : "詳細を見る"}
             </button>
             {open && (
-              <p className="text-xs text-muted-foreground leading-relaxed pl-1 border-l-2 border-primary/20 ml-1 py-1">
+              <p className="text-sm text-muted-foreground leading-relaxed pl-3 border-l-2 border-primary/20">
                 {item.detail}
               </p>
             )}
