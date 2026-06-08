@@ -15,7 +15,7 @@ export function Header() {
 
   return (
     <header className="shrink-0 z-50 flex h-14 items-center justify-center relative px-4">
-      <Image src="/icons/waggly-logo.svg" alt="Waggly" width={112} height={37} priority />
+      <Image src="/icons/waggly-logo.svg" alt="Waggly β" width={130} height={37} priority />
       {user && (
         <Link href="/settings" className="absolute right-4">
           <Avatar className="h-8 w-8">
