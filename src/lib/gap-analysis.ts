@@ -58,7 +58,7 @@ export interface WeightFlowItem {
 export function getDistanceStaircaseData(clubs: (Club & { latest_avg_distance?: number | null })[]): DistanceStaircaseItem[] {
   const getDistance = (c: Club & { latest_avg_distance?: number | null }) => c.latest_avg_distance ?? c.distance;
   const withDistance = clubs.filter((c) => getDistance(c) != null);
-  const sorted = [...withDistance].sort((a, b) => getDistance(b)! - getDistance(a)!);
+  const sorted = [...withDistance].sort((a, b) => a.sort_order - b.sort_order);
 
   return sorted.map((club, i) => {
     const dist = getDistance(club)!;

@@ -39,7 +39,7 @@ function makeClub(overrides: Partial<Club>): Club {
 }
 
 describe("getDistanceStaircaseData", () => {
-  it("returns clubs sorted by distance descending with gap flags", () => {
+  it("returns clubs sorted by sort_order with gap flags", () => {
     const clubs = [
       makeClub({ id: "1", club_number: "7I", distance: 150, sort_order: 4 }),
       makeClub({ id: "2", club_number: "Dr", distance: 230, sort_order: 1, category: "driver" }),
@@ -48,13 +48,20 @@ describe("getDistanceStaircaseData", () => {
     ];
     const result = getDistanceStaircaseData(clubs);
     expect(result).toHaveLength(4);
+    // Sorted by sort_order (club order in bag)
     expect(result[0].club_number).toBe("Dr");
     expect(result[0].distance).toBe(230);
     expect(result[1].club_number).toBe("5W");
     expect(result[1].distance).toBe(200);
+    expect(result[2].club_number).toBe("7I");
+    expect(result[3].club_number).toBe("PW");
+    // Gap: Dr(230) → 5W(200) = 30 > 20
     expect(result[0].hasGap).toBe(true);
+    // Gap: 5W(200) → 7I(150) = 50 > 20
     expect(result[1].hasGap).toBe(true);
+    // Gap: 7I(150) → PW(120) = 30 > 20
     expect(result[2].hasGap).toBe(true);
+    // Last item
     expect(result[3].hasGap).toBe(false);
   });
 
