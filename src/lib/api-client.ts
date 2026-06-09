@@ -379,9 +379,14 @@ async function routeLocal(
 
   // ---- Accessories ----
 
-  // GET /api/accessories
+  // GET /api/accessories?status=active
   if (path.match(/^\/api\/accessories(\?|$)/) && method === "GET") {
-    return q("SELECT * FROM accessories ORDER BY created_at DESC");
+    const params = new URLSearchParams(path.split("?")[1] ?? "");
+    const status = params.get("status");
+    let sql = "SELECT * FROM accessories";
+    if (status) sql += ` WHERE status = '${status}'`;
+    sql += " ORDER BY created_at DESC";
+    return q(sql);
   }
 
   // POST /api/accessories
