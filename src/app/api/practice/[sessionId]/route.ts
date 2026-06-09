@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
+export function generateStaticParams() {
+  return [{ sessionId: "_" }];
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }

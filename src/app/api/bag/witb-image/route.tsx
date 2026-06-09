@@ -3,6 +3,8 @@ import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
 import { readFile } from "fs/promises";
 import { join } from "path";
+
+export const dynamic = "force-static";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
 async function loadImageBase64(path: string, mime: string): Promise<string> {

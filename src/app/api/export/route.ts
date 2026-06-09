@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
+export const dynamic = "force-static";
+
 function escapeCsv(value: unknown): string {
   if (value == null) return "";
   const str = String(value);

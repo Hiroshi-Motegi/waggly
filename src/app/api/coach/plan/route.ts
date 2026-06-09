@@ -3,6 +3,8 @@ import { generateText } from "ai";
 import { NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { buildSystemPrompt } from "@/lib/ai/system-prompt";
+
+export const dynamic = "force-static";
 import { analyzeGaps } from "@/lib/gap-analysis";
 import { parsePlanResponse } from "@/lib/ai/plan-parser";
 import { checkUsageLimit } from "@/lib/ai/usage-limit";

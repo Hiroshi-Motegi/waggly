@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { getApiAuth } from "@/lib/supabase/api";
 import { runAutoCollectPipeline } from "@/lib/knowledge/pipeline";
 
+export const dynamic = "force-static";
+
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
+export function generateStaticParams() {
+  return [{ clubId: "_" }];
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ clubId: string }> }

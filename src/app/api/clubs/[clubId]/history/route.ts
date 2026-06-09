@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
+export function generateStaticParams() {
+  return [{ clubId: "_" }];
+}
+
 /**
  * Returns a unified activity timeline (memos + practice + maintenance) for a club,
  * sorted by date descending.

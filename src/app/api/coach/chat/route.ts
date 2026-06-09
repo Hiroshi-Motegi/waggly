@@ -3,6 +3,8 @@ import { streamText, convertToModelMessages } from "ai";
 import { getApiAuth } from "@/lib/supabase/api";
 import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 import { analyzeGaps } from "@/lib/gap-analysis";
+
+export const dynamic = "force-static";
 import { checkUsageLimit } from "@/lib/ai/usage-limit";
 
 export async function POST(request: Request) {
