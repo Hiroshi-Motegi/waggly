@@ -13,7 +13,8 @@ export default function NewPracticePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const planId = searchParams.get("planId");
-  const { clubs } = useClubs("bag");
+  const { clubs } = useClubs("bag", 1);
+  const { clubs: bag2Clubs } = useClubs("bag", 2);
   const { clubs: reserveClubs } = useClubs("reserve");
   const [pastLocations, setPastLocations] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -162,7 +163,7 @@ export default function NewPracticePage() {
         </div>
       )}
 
-      <SessionForm clubs={clubs} reserveClubs={reserveClubs} pastLocations={pastLocations} onSubmit={handleSubmit} isSubmitting={isSubmitting} showCancel onCancel={() => router.back()} />
+      <SessionForm clubs={clubs} bag2Clubs={bag2Clubs} reserveClubs={reserveClubs} pastLocations={pastLocations} onSubmit={handleSubmit} isSubmitting={isSubmitting} showCancel onCancel={() => router.back()} />
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ type BallsTab = "total" | "per_club";
 
 interface SessionFormProps {
   clubs: Club[];
+  bag2Clubs?: Club[];
   reserveClubs?: Club[];
   pastLocations?: string[];
   initialData?: {
@@ -33,7 +34,7 @@ interface SessionFormProps {
   onCancel?: () => void;
 }
 
-export function SessionForm({ clubs, reserveClubs, pastLocations, initialData, showRating, onSubmit, isSubmitting, showCancel, onCancel }: SessionFormProps) {
+export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, initialData, showRating, onSubmit, isSubmitting, showCancel, onCancel }: SessionFormProps) {
   const now = new Date();
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   const today = jst.toISOString().split("T")[0];
@@ -152,7 +153,7 @@ export function SessionForm({ clubs, reserveClubs, pastLocations, initialData, s
           </div>
         ) : (
           <div className="py-2">
-            <ClubBallsInput clubs={clubs} reserveClubs={reserveClubs} value={clubBalls} onChange={setClubBalls} />
+            <ClubBallsInput clubs={clubs} bag2Clubs={bag2Clubs} reserveClubs={reserveClubs} value={clubBalls} onChange={setClubBalls} />
             {clubBalls.length > 0 && (
               <p className="text-sm text-[#8b8b8b] pt-2">
                 合計: {clubBalls.reduce((s, c) => s + c.balls, 0)}球

@@ -15,7 +15,8 @@ export default function EditPracticePage() {
   const router = useRouter();
   const { sessionId } = useParams<{ sessionId: string }>();
   const { user, isLoading: authLoading } = useAuth();
-  const { clubs } = useClubs("bag");
+  const { clubs } = useClubs("bag", 1);
+  const { clubs: bag2Clubs } = useClubs("bag", 2);
   const { clubs: reserveClubs } = useClubs("reserve");
 
   const [pastLocations, setPastLocations] = useState<string[]>([]);
@@ -89,7 +90,7 @@ export default function EditPracticePage() {
   }
 
   if (authLoading || isFetching) {
-    return <Loading />;
+    return <Loading variant="light" />;
   }
 
   if (!session) {
@@ -163,6 +164,7 @@ export default function EditPracticePage() {
 
       <SessionForm
         clubs={clubs}
+        bag2Clubs={bag2Clubs}
         reserveClubs={reserveClubs}
         pastLocations={pastLocations}
         initialData={initialData}
