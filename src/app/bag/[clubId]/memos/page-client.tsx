@@ -62,13 +62,16 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
   const isAddMode = searchParams.get("add") === "1";
   const { club, isLoading } = useClub(clubId);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [activityLoading, setActivityLoading] = useState(true);
   const [showMemoForm, setShowMemoForm] = useState(isAddMode);
 
   function fetchHistory() {
+    setActivityLoading(true);
     apiFetch(`/api/clubs/${clubId}/history`)
       .then((res) => (res.ok ? res.json() : []))
       .then(setActivity)
-      .catch(() => setActivity([]));
+      .catch(() => setActivity([]))
+      .finally(() => setActivityLoading(false));
   }
 
   useEffect(() => {
@@ -151,7 +154,19 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
       )}
 
       <div className="flex flex-col rounded-lg bg-white p-3">
-        {activity.length === 0 ? (
+        {activityLoading ? (
+          <div className="flex flex-col gap-3 py-2 animate-pulse">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex flex-col gap-1.5">
+                <div className="flex gap-2">
+                  <div className="h-4 w-10 rounded-full bg-gray-200" />
+                  <div className="h-4 w-20 rounded bg-gray-200" />
+                </div>
+                <div className="h-4 w-3/4 rounded bg-gray-100" />
+              </div>
+            ))}
+          </div>
+        ) : activity.length === 0 ? (
           <p className="py-4 text-center text-sm text-[#8b8b8b]">記録なし</p>
         ) : (
           <div className="flex flex-col">

@@ -39,6 +39,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
   const isAddMode = searchParams.get("add") === "1";
   const { club, isLoading } = useClub(clubId);
   const [items, setItems] = useState<Maintenance[]>([]);
+  const [itemsLoading, setItemsLoading] = useState(true);
   const [showForm, setShowForm] = useState(isAddMode);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -51,10 +52,12 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
 
   useEffect(() => {
     if (!club || isAddMode) return;
+    setItemsLoading(true);
     apiFetch(`/api/clubs/${clubId}/maintenances`)
       .then((res) => (res.ok ? res.json() : []))
       .then(setItems)
-      .catch(() => setItems([]));
+      .catch(() => setItems([]))
+      .finally(() => setItemsLoading(false));
   }, [clubId, club]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -231,7 +234,19 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
       )}
 
       <div className="flex flex-col rounded-lg bg-white p-3">
-        {items.length === 0 ? (
+        {itemsLoading ? (
+          <div className="flex flex-col gap-3 py-2 animate-pulse">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex flex-col gap-1.5">
+                <div className="flex gap-2">
+                  <div className="h-4 w-16 rounded-full bg-gray-200" />
+                  <div className="h-4 w-24 rounded bg-gray-200" />
+                </div>
+                <div className="h-4 w-1/2 rounded bg-gray-100" />
+              </div>
+            ))}
+          </div>
+        ) : items.length === 0 ? (
           <p className="py-4 text-center text-sm text-[#8b8b8b]">記録なし</p>
         ) : (
           <div className="flex flex-col">
