@@ -45,12 +45,17 @@ function groupByCategory(clubs: Club[]): { label: string; clubs: Club[] }[] {
     .map((cat) => ({ label: categoryLabels[cat] ?? cat, clubs: groups[cat] }));
 }
 
-function MemoToggle({ hasMemo, memoValue, onMemoChange }: {
+function MemoToggle({ hasMemo, memoValue, onMemoChange, parentOpen }: {
   hasMemo: boolean;
   memoValue: InlineClubMemoValue | null;
   onMemoChange: (value: InlineClubMemoValue | null) => void;
+  parentOpen: boolean;
 }) {
   const [open, setOpen] = useState(hasMemo);
+
+  useEffect(() => {
+    if (!parentOpen) setOpen(false);
+  }, [parentOpen]);
 
   return (
     <div className="pt-1">
@@ -176,6 +181,7 @@ function ClubAccordion({ club, entry, onUpdate, isLast, open, onToggle }: {
             hasMemo={entry?.memo != null}
             memoValue={entry?.memo ?? null}
             onMemoChange={(memo) => onUpdate(club.id, { memo })}
+            parentOpen={open}
           />
         </div>
       )}
