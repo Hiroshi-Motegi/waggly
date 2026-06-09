@@ -105,6 +105,13 @@ export default function EditPracticePage() {
       club_id: pc.club_id,
       balls: pc.balls,
       avg_distance: pc.avg_distance,
+      memo: pc.memo ? {
+        condition: pc.memo.condition!,
+        symptom_tags: pc.memo.symptom_tags,
+        feeling_tags: pc.memo.feeling_tags,
+        gear_tags: pc.memo.gear_tags,
+        memo: pc.memo.memo,
+      } : null,
     })),
   };
 
