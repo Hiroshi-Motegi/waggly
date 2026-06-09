@@ -17,11 +17,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "今月のAI利用上限に達しました" }, { status: 429 });
   }
 
-  const { source, duration, selectedClubs, focus, location, notes, referPracticeMonths } = await request.json();
+  const { source, duration, selectedClubs, focus, location, notes, referPractice, referPracticeMonths } = await request.json();
 
   // Calculate practice record date range
+  const isLastOnly = referPractice === "last";
   const months = referPracticeMonths ?? 3;
-  const practiceFromDate = months > 0
+  const practiceFromDate = !isLastOnly && months > 0
     ? new Date(Date.now() - months * 30 * 24 * 60 * 60 * 1000).toISOString()
     : null;
 
@@ -30,16 +31,21 @@ export async function POST(request: Request) {
     .from("practice_sessions")
     .select("*, practice_clubs(*, club:clubs(club_number))")
     .eq("user_id", userId)
-    .order("practiced_at", { ascending: false })
-    .limit(20);
+    .order("practiced_at", { ascending: false });
 
-  if (practiceFromDate) {
-    sessionsQuery = sessionsQuery.gte("practiced_at", practiceFromDate.split("T")[0]);
+  if (isLastOnly) {
+    sessionsQuery = sessionsQuery.limit(1);
+  } else if (practiceFromDate) {
+    sessionsQuery = sessionsQuery.gte("practiced_at", practiceFromDate.split("T")[0]).limit(20);
+  } else {
+    sessionsQuery = sessionsQuery.limit(20);
   }
+
+  const shouldFetchSessions = isLastOnly || !!practiceFromDate;
 
   const [clubsRes, sessionsRes, plansRes, accessoriesRes, knowledgeRes] = await Promise.all([
     supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
-    practiceFromDate ? sessionsQuery : Promise.resolve({ data: [] }),
+    shouldFetchSessions ? sessionsQuery : Promise.resolve({ data: [] }),
     supabase.from("practice_plans")
       .select("title, status, rating, memo, created_at, practice_plan_items(focus)")
       .eq("user_id", userId)

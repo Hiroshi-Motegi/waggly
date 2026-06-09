@@ -16,7 +16,7 @@ export default function NewPlanPage() {
   const [focus, setFocus] = useState("");
   const [location, setLocation] = useState("練習場");
   const [notes, setNotes] = useState("");
-  const [referPractice, setReferPractice] = useState("3months");
+  const [referPractice, setReferPractice] = useState("last");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
 
@@ -44,7 +44,8 @@ export default function NewPlanPage() {
         focus,
         location,
         notes,
-        referPracticeMonths: referPractice === "none" ? 0 : parseInt(referPractice),
+        referPractice,
+        referPracticeMonths: referPractice === "none" ? 0 : referPractice === "last" ? 0 : parseInt(referPractice),
       }),
     }).catch(() => {});
 
@@ -112,6 +113,7 @@ export default function NewPlanPage() {
                 onChange={(e) => setReferPractice(e.target.value)}
                 className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
+                <option value="last">前回の練習記録から</option>
                 <option value="1">直近1ヶ月</option>
                 <option value="3">直近3ヶ月</option>
                 <option value="6">直近6ヶ月</option>
