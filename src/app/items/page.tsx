@@ -80,8 +80,9 @@ export default function ItemsPage() {
     async function load() {
       setIsLoading(true);
       try {
+        const { apiFetch } = await import("@/lib/api-client");
         const url = filter === "all" ? "/api/accessories" : `/api/accessories?status=${filter}`;
-        const res = await fetch(url);
+        const res = await apiFetch(url);
         if (!res.ok) throw new Error("Failed to fetch");
         setAccessories(await res.json());
       } catch {
