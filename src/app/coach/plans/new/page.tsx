@@ -157,9 +157,9 @@ export default function NewPlanPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="columns-2 gap-2">
                 {clubs.map((club) => (
-                  <label key={club.id} className="flex items-center gap-2 cursor-pointer">
+                  <label key={club.id} className="flex items-center gap-2 cursor-pointer py-1 break-inside-avoid">
                     <input
                       type="checkbox"
                       checked={selectedClubs.includes(club.club_number)}
