@@ -26,7 +26,18 @@ export function ClubUsageSummary({ clubId }: Props) {
     fetchSummary();
   }, [clubId]);
 
-  if (isLoading) return <div className="py-4 text-center text-xs text-[#8b8b8b]">読み込み中...</div>;
+  if (isLoading) return (
+    <div className="flex flex-col gap-3 animate-pulse">
+      <div className="grid grid-cols-3 gap-2 text-center">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+            <div className="h-6 w-10 rounded bg-gray-200" />
+            <div className="h-3 w-14 rounded bg-gray-100" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
   if (!data || (data.totalBalls === 0 && data.memoCount === 0)) return null;
 
   return (

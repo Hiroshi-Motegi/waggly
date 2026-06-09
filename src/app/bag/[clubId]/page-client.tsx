@@ -71,6 +71,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
   const { club, isLoading } = useClub(clubId);
   const router = useRouter();
   const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [activityLoading, setActivityLoading] = useState(true);
   const [activityCount, setActivityCount] = useState(0);
   const [latestDistance, setLatestDistance] = useState<number | null>(null);
 
@@ -90,7 +91,8 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
           setLatestDistance(dist.type === "memo" ? dist.distance! : dist.avg_distance!);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setActivityLoading(false));
   }, [clubId, club]);
 
   async function handleStatusChange(newStatus: string, bagNumber?: number) {
@@ -288,7 +290,19 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 
       {/* Activity card */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
-        {activity.length > 0 ? (
+        {activityLoading ? (
+          <div className="flex flex-col gap-3 py-2 animate-pulse">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex flex-col gap-1.5">
+                <div className="flex gap-2">
+                  <div className="h-4 w-10 rounded-full bg-gray-200" />
+                  <div className="h-4 w-20 rounded bg-gray-200" />
+                </div>
+                <div className="h-4 w-3/4 rounded bg-gray-100" />
+              </div>
+            ))}
+          </div>
+        ) : activity.length > 0 ? (
           <div className="flex flex-col">
             {activity.map((item, i) => (
               <ActivityRow key={`${item.type}-${item.id}`} item={item} clubId={clubId} isLast={i === activity.length - 1} />
