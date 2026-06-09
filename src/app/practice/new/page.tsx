@@ -20,8 +20,6 @@ export default function NewPracticePage() {
   const [pastLocations, setPastLocations] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [planGenerated, setPlanGenerated] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [planOpen, setPlanOpen] = useState(false);
 
@@ -65,22 +63,6 @@ export default function NewPracticePage() {
     }
   }
 
-  async function handleGeneratePlan() {
-    setIsGenerating(true);
-    try {
-      const res = await apiFetch("/api/coach/plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source: "auto" }),
-      });
-      if (res.ok) setPlanGenerated(true);
-    } catch (error) {
-      console.error("Failed to generate plan:", error);
-    } finally {
-      setIsGenerating(false);
-    }
-  }
-
   if (saved) {
     return (
       <div className="relative flex flex-col items-center justify-center px-6 space-y-4 text-center bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
@@ -89,41 +71,25 @@ export default function NewPracticePage() {
           <h2 className="text-lg font-bold text-white">練習お疲れさまでした！</h2>
           <p className="text-sm text-white/70">記録を保存しました</p>
 
-          {planId ? (
-            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+          <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+            {planId ? (
               <Link href={`/coach/plans/${planId}`} className="w-full">
                 <button className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728]">
                   練習メニューを見る
                 </button>
               </Link>
-              <Link href="/practice">
-                <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
-              </Link>
-            </div>
-          ) : planGenerated ? (
-            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-              <p className="text-sm font-bold text-white">練習メニューを作成しました！</p>
-              <Link href="/coach/plans" className="w-full">
+            ) : (
+              <Link href="/coach/plans/new" className="w-full">
                 <button className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728]">
-                  提案を見る
+                  AIに次の練習メニューを提案してもらう
                 </button>
               </Link>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-              <button
-                onClick={handleGeneratePlan}
-                disabled={isGenerating}
-                className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728] disabled:opacity-50"
-              >
-                {isGenerating ? "メニュー作成中..." : "AIに次の練習メニューを提案してもらう"}
-              </button>
-              <p className="text-xs text-white/60">練習データをもとにAIが最適な練習メニューを提案します</p>
-              <Link href="/practice">
-                <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
-              </Link>
-            </div>
-          )}
+            )}
+            <p className="text-xs text-white/60">練習データをもとにAIが最適な練習メニューを提案します</p>
+            <Link href="/practice">
+              <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
+            </Link>
+          </div>
         </div>
       </div>
     );
