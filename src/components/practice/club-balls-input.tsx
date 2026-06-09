@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { MessageSquarePlus, ChevronUp } from "lucide-react";
 import type { Club } from "@/types/database";
+import { InlineClubMemo, type InlineClubMemoValue } from "@/components/club/inline-club-memo";
 
 export interface ClubBallsValue {
   club_id: string;
   balls: number;
   avg_distance?: number | null;
+  memo?: InlineClubMemoValue | null;
 }
 
 interface ClubBallsInputProps {
@@ -39,6 +42,31 @@ function groupByCategory(clubs: Club[]): { label: string; clubs: Club[] }[] {
     .map((cat) => ({ label: categoryLabels[cat] ?? cat, clubs: groups[cat] }));
 }
 
+function MemoToggle({ hasMemo, memoValue, onMemoChange }: {
+  hasMemo: boolean;
+  memoValue: InlineClubMemoValue | null;
+  onMemoChange: (value: InlineClubMemoValue | null) => void;
+}) {
+  const [open, setOpen] = useState(hasMemo);
+
+  return (
+    <div className="pt-1">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 text-[11px] text-[#006728] font-bold"
+      >
+        {open ? <ChevronUp className="h-3 w-3" /> : <MessageSquarePlus className="h-3 w-3" />}
+        {hasMemo ? (memoValue?.condition === "good" ? "😊" : memoValue?.condition === "bad" ? "😣" : "😐") : "メモを追加"}
+        {hasMemo && !open && <span className="text-[10px] text-[#8b8b8b] font-normal ml-1">タップで展開</span>}
+      </button>
+      {open && (
+        <InlineClubMemo value={memoValue} onChange={onMemoChange} />
+      )}
+    </div>
+  );
+}
+
 export function ClubBallsInput({ clubs, reserveClubs, value, onChange }: ClubBallsInputProps) {
   const [showReserve, setShowReserve] = useState(false);
   const displayClubs = showReserve ? (reserveClubs ?? []) : clubs;
@@ -48,9 +76,9 @@ export function ClubBallsInput({ clubs, reserveClubs, value, onChange }: ClubBal
 
   function update(clubId: string, patch: Partial<ClubBallsValue>) {
     const existing = value.filter((v) => v.club_id !== clubId);
-    const current = getEntry(clubId) ?? { club_id: clubId, balls: 0, avg_distance: null };
+    const current = getEntry(clubId) ?? { club_id: clubId, balls: 0, avg_distance: null, memo: null };
     const updated = { ...current, ...patch };
-    if (updated.balls > 0 || (updated.avg_distance != null && updated.avg_distance > 0)) {
+    if (updated.balls > 0 || (updated.avg_distance != null && updated.avg_distance > 0) || updated.memo != null) {
       onChange([...existing, updated]);
     } else {
       onChange(existing);
@@ -150,6 +178,13 @@ export function ClubBallsInput({ clubs, reserveClubs, value, onChange }: ClubBal
                       <span className="text-xs">球</span>
                     </div>
                   </div>
+
+                  {/* Row 3: memo toggle */}
+                  <MemoToggle
+                    hasMemo={entry?.memo != null}
+                    memoValue={entry?.memo ?? null}
+                    onMemoChange={(memo) => update(club.id, { memo })}
+                  />
                 </div>
               );
             })}
