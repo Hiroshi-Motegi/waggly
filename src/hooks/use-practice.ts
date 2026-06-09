@@ -27,6 +27,7 @@ interface CreateSessionData {
   location: string;
   total_balls: number;
   memo: string;
+  rating: number | null;
   clubs: { club_id: string; balls: number; avg_distance?: number | null; memo?: InlineClubMemoValue | null }[];
 }
 
