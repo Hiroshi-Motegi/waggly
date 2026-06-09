@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { MessageSquarePlus, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import type { Club } from "@/types/database";
-import { InlineClubMemo, type InlineClubMemoValue } from "@/components/club/inline-club-memo";
+import { InlineClubMemo, type InlineClubMemoValue, getConditionImage, getConditionLabel } from "@/components/club/inline-club-memo";
 
 export interface ClubBallsValue {
   club_id: string;
@@ -54,10 +54,20 @@ function MemoToggle({ hasMemo, memoValue, onMemoChange }: {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-xs text-[#006728] font-bold"
+        className="flex items-center gap-[7px] text-sm font-bold"
       >
-        {open ? <ChevronUp className="h-3.5 w-3.5" /> : <MessageSquarePlus className="h-3.5 w-3.5" />}
-        {hasMemo ? (memoValue?.condition === "good" ? "😊" : memoValue?.condition === "bad" ? "😣" : "😐") : "調子を記録する"}
+        {open ? <ChevronUp className="h-3 w-3 text-[#8b8b8b]" /> : <ChevronDown className="h-3 w-3 text-[#8b8b8b]" />}
+        {hasMemo && memoValue?.condition ? (
+          <>
+            <img src={getConditionImage(memoValue.condition)} alt="" className="w-[22px] h-[22px]" />
+            <span>{getConditionLabel(memoValue.condition)}</span>
+          </>
+        ) : (
+          <>
+            <img src="/images/face-ok.png" alt="" className="w-[22px] h-[22px] opacity-50" />
+            <span>調子を入力</span>
+          </>
+        )}
       </button>
       {open && (
         <InlineClubMemo value={memoValue} onChange={onMemoChange} />
@@ -129,9 +139,9 @@ export function ClubBallsInput({ clubs, reserveClubs, value, onChange }: ClubBal
                 <div key={club.id} className={`flex flex-col gap-1 py-3 ${i < group.clubs.length - 1 ? "border-b border-[#e8e8e8]" : ""}`}>
                   {/* Row 1: club name + yd input */}
                   <div className="flex items-center">
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm font-bold">{club.club_number}</span>
-                      {subLabel && <span className="ml-1.5 text-xs text-[#8b8b8b] truncate">{subLabel}</span>}
+                    <div className="flex-1 min-w-0 flex items-center gap-1">
+                      <span className="bg-[#006728] text-white text-sm rounded-full px-2.5 shrink-0">{club.club_number}</span>
+                      {subLabel && <span className="text-sm text-[#6c6c6c] truncate">{subLabel}</span>}
                     </div>
                     <div className="flex items-center gap-1 w-[72px] shrink-0">
                       <input

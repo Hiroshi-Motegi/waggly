@@ -7,7 +7,8 @@ import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
-import type { PracticeSessionWithClubs } from "@/types/database";
+import { getConditionImage } from "@/components/club/inline-club-memo";
+import type { PracticeSessionWithClubs, MemoCondition } from "@/types/database";
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
@@ -96,7 +97,7 @@ export default function PracticeDetailPage() {
                   <div className="min-w-0 flex items-center gap-1.5">
                     <span className="font-bold">{pc.club?.club_number ?? "?"}</span>
                     {pc.memo?.condition && (
-                      <span className="text-base">{pc.memo.condition === "good" ? "😊" : pc.memo.condition === "bad" ? "😣" : "😐"}</span>
+                      <img src={getConditionImage(pc.memo.condition as MemoCondition)} alt="" className="w-5 h-5" />
                     )}
                     {(pc.club?.maker || pc.club?.model) && (
                       <span className="text-xs text-[#8b8b8b]">
