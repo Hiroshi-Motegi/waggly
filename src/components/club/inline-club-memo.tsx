@@ -71,7 +71,8 @@ export function InlineClubMemo({ value, onChange }: Props) {
             className={`flex-1 flex flex-col gap-[7px] items-center rounded p-2 border ${
               condition === opt.value
                 ? opt.value === "good" ? "border-[#ffc107] bg-[#fff4d2]"
-                  : "border-[#bebebe] bg-white"
+                  : opt.value === "bad" ? "border-[#e74c3c] bg-[#ffeaea]"
+                  : "border-[#f39c12] bg-[#fff8e1]"
                 : "border-[#bebebe] bg-white"
             }`}
           >

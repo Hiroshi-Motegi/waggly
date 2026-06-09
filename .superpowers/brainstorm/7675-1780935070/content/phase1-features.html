@@ -1,0 +1,121 @@
+<h2>Phase 1: ギア管理 + AIギア相談</h2>
+<p class="subtitle">「登録したクラブに、AIが答えてくれる」を実現する最小機能セット</p>
+
+<div class="section">
+  <h3>1. ギア管理強化（ギアマネ踏襲+α）</h3>
+  <div class="mockup">
+    <div class="mockup-header">既存 → 強化ポイント</div>
+    <div class="mockup-body" style="padding:20px;">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr style="border-bottom:2px solid #333;">
+          <th style="text-align:left;padding:8px;">機能</th>
+          <th style="text-align:left;padding:8px;">現状</th>
+          <th style="text-align:left;padding:8px;">Phase 1</th>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:8px;">WITBビジュアル</td>
+          <td style="padding:8px;">リスト表示のみ</td>
+          <td style="padding:8px;color:#006728;font-weight:bold;">カード型ビジュアル + SNSシェア画像生成</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:8px;">飛距離階段グラフ</td>
+          <td style="padding:8px;">ギャップ分析（テキスト）</td>
+          <td style="padding:8px;color:#006728;font-weight:bold;">ビジュアルグラフ化 + ギャップ可視化</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:8px;">重量フロー</td>
+          <td style="padding:8px;">なし</td>
+          <td style="padding:8px;color:#006728;font-weight:bold;">クラブ重量の流れを可視化</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:8px;">メンテ履歴</td>
+          <td style="padding:8px;">あり（グリップ交換等）</td>
+          <td style="padding:8px;">✅ そのまま活用</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:8px;">購入〜売却ライフサイクル</td>
+          <td style="padding:8px;">status(bag/reserve/sold)あり</td>
+          <td style="padding:8px;color:#006728;font-weight:bold;">タイムライン表示 + 売却時アフィリエイト導線（将来）</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. 練習記録 → ギア使用ログとして再定義</h3>
+  <div class="mockup">
+    <div class="mockup-header">ギア起点の練習データ</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:250px;">
+          <h4 style="margin:0 0 8px;">今の見え方（練習起点）</h4>
+          <div style="background:#f5f5f5;padding:12px;border-radius:8px;font-size:13px;">
+            <p style="margin:0 0 4px;font-weight:bold;">6/8 練習 120球</p>
+            <p style="margin:0;color:#666;">7I: 40球 / PW: 30球 / Dr: 50球</p>
+            <p style="margin:4px 0 0;color:#666;">メモ: 7Iが右に出る</p>
+          </div>
+        </div>
+        <div style="font-size:24px;display:flex;align-items:center;">→</div>
+        <div style="flex:1;min-width:250px;">
+          <h4 style="margin:0 0 8px;">新しい見え方（ギア起点）</h4>
+          <div style="background:#ebf1eb;padding:12px;border-radius:8px;font-size:13px;">
+            <p style="margin:0 0 4px;font-weight:bold;">7I（PING i230）の履歴</p>
+            <p style="margin:0;color:#006728;">直近30日: 計180球</p>
+            <p style="margin:4px 0 0;color:#006728;">メモ: 「右に出る」「シャフト硬いかも」</p>
+            <p style="margin:4px 0 0;color:#006728;">平均飛距離: 155yd → 158yd 推移</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. AIギア相談（既存AIコーチの拡張）</h3>
+  <div class="mockup">
+    <div class="mockup-header">AIができること</div>
+    <div class="mockup-body" style="padding:20px;font-size:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="background:#ebf1eb;padding:12px;border-radius:8px;">
+          <p style="margin:0 0 4px;font-weight:bold;color:#006728;">セッティング診断</p>
+          <p style="margin:0;font-size:13px;">ギャップ分析 + 重量フロー + 使用頻度から「このセッティングの課題」を指摘</p>
+        </div>
+        <div style="background:#ebf1eb;padding:12px;border-radius:8px;">
+          <p style="margin:0 0 4px;font-weight:bold;color:#006728;">買い替え提案</p>
+          <p style="margin:0;font-size:13px;">「150yd付近にギャップがある → 5Uか7Wの追加を検討」</p>
+        </div>
+        <div style="background:#ebf1eb;padding:12px;border-radius:8px;">
+          <p style="margin:0 0 4px;font-weight:bold;color:#006728;">メモ×履歴の振り返り</p>
+          <p style="margin:0;font-size:13px;">「7Iで右に出る記録が3回 → シャフトのフレックス見直しを提案」</p>
+        </div>
+        <div style="background:#ebf1eb;padding:12px;border-radius:8px;">
+          <p style="margin:0 0 4px;font-weight:bold;color:#006728;">練習メニュー（既存機能）</p>
+          <p style="margin:0;font-size:13px;">ギア使用ログを元に「このクラブをもっと活かす」視点で提案</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 2 以降（参考）</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:14px;">
+    <div style="background:#f5f5f5;padding:12px;border-radius:8px;">
+      <p style="margin:0 0 4px;font-weight:bold;">Phase 2: シェア</p>
+      <ul style="margin:4px 0 0;padding-left:20px;font-size:13px;">
+        <li>ゴルファーカード（QR名刺）</li>
+        <li>友達のバッグ閲覧</li>
+        <li>LINE内でシェア</li>
+      </ul>
+    </div>
+    <div style="background:#f5f5f5;padding:12px;border-radius:8px;">
+      <p style="margin:0 0 4px;font-weight:bold;">Phase 3: 収益化+連携</p>
+      <ul style="margin:4px 0 0;padding-left:20px;font-size:13px;">
+        <li>アフィリエイト（売却→EC送客）</li>
+        <li>プレミアム課金</li>
+        <li>外部API連携（トラックマン等）</li>
+      </ul>
+    </div>
+  </div>
+</div>

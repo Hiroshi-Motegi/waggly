@@ -64,7 +64,7 @@ function MemoToggle({ hasMemo, memoValue, onMemoChange }: {
           </>
         ) : (
           <>
-            <img src="/images/face-ok.png" alt="" className="w-[22px] h-[22px] opacity-50" />
+            <img src="/images/face-none.png" alt="" className="w-[22px] h-[22px]" />
             <span>調子を入力</span>
           </>
         )}

@@ -23,9 +23,29 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   const prevPathname = useRef(pathname);
   const [animClass, setAnimClass] = useState("opacity-0");
 
+  // Disable browser's automatic scroll restoration
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+  }, []);
+
   useEffect(() => {
     const prev = prevPathname.current;
     prevPathname.current = pathname;
+
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+    };
+
+    if (prev !== pathname) {
+      scrollToTop();
+      // Beat Next.js router scroll restoration with multiple delayed attempts
+      requestAnimationFrame(scrollToTop);
+      setTimeout(scrollToTop, 50);
+      setTimeout(scrollToTop, 150);
+    }
 
     if (shouldSlide(prev, pathname)) {
       const dir = getDirection(prev, pathname);

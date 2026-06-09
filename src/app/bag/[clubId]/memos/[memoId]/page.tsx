@@ -4,7 +4,7 @@ import { Loading } from "@/components/loading";
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Pencil, Trash2 } from "lucide-react";
+import { ChevronLeft, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useClub } from "@/hooks/use-clubs";
 import type { ClubMemo } from "@/types/database";
@@ -43,9 +43,14 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
       <div className="flex items-center justify-between px-1">
-        <div>
-          <span className="text-xs font-bold text-white">{club?.club_number}</span>
-          <h2 className="text-lg font-bold text-white">メモ</h2>
+        <div className="flex items-center gap-1">
+          <button onClick={() => router.back()} className="text-white p-1 -ml-1">
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <div>
+            <span className="text-xs font-bold text-white">{club?.club_number}</span>
+            <h2 className="text-lg font-bold text-white">メモ</h2>
+          </div>
         </div>
         <div className="flex gap-1">
           <Link href={`/bag/${clubId}/memos/${memoId}/edit`}>
@@ -61,7 +66,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {memo.condition && (
-              <span className="text-xl">{memo.condition === "good" ? "😊" : memo.condition === "bad" ? "😣" : "😐"}</span>
+              <img src={`/images/face-${memo.condition === "normal" ? "ok" : memo.condition}.png`} alt="" className="w-6 h-6" />
             )}
             <span className="text-sm text-[#8b8b8b]">
               {formatDate(memo.created_at.split("T")[0])}

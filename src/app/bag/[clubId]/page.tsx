@@ -349,7 +349,7 @@ function ActivityRow({ item, clubId, isLast }: { item: ActivityItem; clubId: str
               {badgeLabels[item.type]}
             </span>
             {item.condition && (
-              <span className="text-sm">{item.condition === "good" ? "😊" : item.condition === "bad" ? "😣" : "😐"}</span>
+              <img src={`/images/face-${item.condition === "normal" ? "ok" : item.condition}.png`} alt="" className="w-4 h-4" />
             )}
             {summary && (
               <span className="text-[10px] font-medium text-[#8b8b8b]">{summary}</span>

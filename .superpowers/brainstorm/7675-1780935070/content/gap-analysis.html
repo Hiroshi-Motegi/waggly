@@ -1,0 +1,197 @@
+<h2>ギア管理「本気」のギャップ分析</h2>
+<p class="subtitle">Waggly現状 vs ギアマネ vs 業界ベストプラクティス</p>
+
+<div class="section">
+  <h3>クラブ管理: Waggly vs ギアマネ</h3>
+  <div class="mockup">
+    <div class="mockup-header">機能比較</div>
+    <div class="mockup-body" style="padding:16px;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr style="border-bottom:2px solid #333;">
+          <th style="text-align:left;padding:6px;">機能</th>
+          <th style="text-align:center;padding:6px;width:100px;">Waggly</th>
+          <th style="text-align:center;padding:6px;width:100px;">ギアマネ</th>
+          <th style="text-align:left;padding:6px;">差分</th>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">クラブ基本情報登録</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="padding:6px;color:#888;">同等</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">ヘッド・シャフト分離管理</td>
+          <td style="text-align:center;color:#e74c3c;">❌</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="padding:6px;color:#e74c3c;font-weight:bold;">ギアマネはヘッドとシャフトを別登録→組み合わせ。リシャフト時に便利</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">クラブ重量登録</td>
+          <td style="text-align:center;color:#e74c3c;">❌</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="padding:6px;color:#e74c3c;font-weight:bold;">重量フローの前提データ。Wagglyにはフィールドがない</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">重量フローグラフ</td>
+          <td style="text-align:center;color:#e74c3c;">❌</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="padding:6px;color:#e74c3c;font-weight:bold;">セッティング最適化の基本指標</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">飛距離階段グラフ</td>
+          <td style="text-align:center;color:#f39c12;">△</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="padding:6px;color:#f39c12;">Wagglyはテキストのギャップ分析のみ。ビジュアル化されていない</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">セッティング画像生成</td>
+          <td style="text-align:center;color:#e74c3c;">❌</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="padding:6px;color:#e74c3c;font-weight:bold;">SNSシェア用。自慢の核</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">フリマ出品テンプレート</td>
+          <td style="text-align:center;color:#e74c3c;">❌</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="padding:6px;color:#e74c3c;font-weight:bold;">売却時の実用機能。商品説明を自動生成</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">売却・購入履歴一覧</td>
+          <td style="text-align:center;color:#f39c12;">△</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="padding:6px;color:#f39c12;">Wagglyはstatus管理のみ。金額の一覧表示なし</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#f9f9f9;">
+          <td style="padding:6px;">写真管理（複数枚）</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="text-align:center;color:#f39c12;">△</td>
+          <td style="padding:6px;color:#27ae60;">Wagglyが上</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#f9f9f9;">
+          <td style="padding:6px;">メンテナンス履歴</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="text-align:center;color:#e74c3c;">❌</td>
+          <td style="padding:6px;color:#27ae60;">Wagglyが上</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#f9f9f9;">
+          <td style="padding:6px;">練習記録との連携</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="text-align:center;color:#e74c3c;">❌</td>
+          <td style="padding:6px;color:#27ae60;">Wagglyが上</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#f9f9f9;">
+          <td style="padding:6px;">AIチャット</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="text-align:center;color:#e74c3c;">❌</td>
+          <td style="padding:6px;color:#27ae60;">Wagglyが上</td>
+        </tr>
+        <tr style="background:#f9f9f9;">
+          <td style="padding:6px;">マルチバッグ</td>
+          <td style="text-align:center;color:#27ae60;">✅</td>
+          <td style="text-align:center;color:#f39c12;">?</td>
+          <td style="padding:6px;color:#27ae60;">Wagglyはバッグ1/バッグ2対応済み</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 1で埋めるべきギャップ（優先度順）</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="weight" onclick="toggleSelect(this)">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>クラブ重量 + 重量フローグラフ</h3>
+        <p>セッティング最適化の基本。ギアマネの看板機能。DBにweightフィールド追加 + rechartsでグラフ化。</p>
+        <p style="color:#e74c3c;font-size:12px;">優先度: 高 — ギアマネに並ぶ最低条件</p>
+      </div>
+    </div>
+    <div class="option" data-choice="distance-graph" onclick="toggleSelect(this)">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>飛距離階段グラフ</h3>
+        <p>既存のギャップ分析をビジュアル化。データは既にある。表示の問題。</p>
+        <p style="color:#e74c3c;font-size:12px;">優先度: 高 — 実装コスト低い（データあり）</p>
+      </div>
+    </div>
+    <div class="option" data-choice="witb-image" onclick="toggleSelect(this)">
+      <div class="letter">3</div>
+      <div class="content">
+        <h3>セッティング画像生成（WITB画像）</h3>
+        <p>SNSシェア用のセッティングカード。自慢の核。Phase 2（シェア）への布石にもなる。</p>
+        <p style="color:#f39c12;font-size:12px;">優先度: 中〜高 — シェアの前提条件</p>
+      </div>
+    </div>
+    <div class="option" data-choice="head-shaft" onclick="toggleSelect(this)">
+      <div class="letter">4</div>
+      <div class="content">
+        <h3>ヘッド・シャフト分離管理</h3>
+        <p>リシャフト時に同じヘッドに別シャフトを付け替え可能。ギア好きの実運用にフィット。DB設計変更が必要。</p>
+        <p style="color:#f39c12;font-size:12px;">優先度: 中 — ギア好きには刺さるが開発重め</p>
+      </div>
+    </div>
+    <div class="option" data-choice="flea-market" onclick="toggleSelect(this)">
+      <div class="letter">5</div>
+      <div class="content">
+        <h3>フリマ出品テンプレート</h3>
+        <p>売却ステータス変更時に、メルカリ等で使える商品説明文を自動生成。将来のアフィリエイト導線にもなる。</p>
+        <p style="color:#f39c12;font-size:12px;">優先度: 中 — 実用的だが収益化Phase向き</p>
+      </div>
+    </div>
+    <div class="option" data-choice="purchase-history" onclick="toggleSelect(this)">
+      <div class="letter">6</div>
+      <div class="content">
+        <h3>購入・売却金額の一覧/サマリー</h3>
+        <p>「総投資額」「売却総額」「実質コスト」を可視化。ギアへの投資を振り返る楽しさ。データは既にある。</p>
+        <p style="color:#888;font-size:12px;">優先度: 低〜中 — 表示の改善で対応可能</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>ギアマネにない＋業界にもない（Wagglyだけの価値）</h3>
+  <div class="mockup">
+    <div class="mockup-header">Waggly独自の強み（既存 + 新規）</div>
+    <div class="mockup-body" style="padding:16px;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr style="border-bottom:2px solid #333;">
+          <th style="text-align:left;padding:6px;">機能</th>
+          <th style="text-align:center;padding:6px;">既存?</th>
+          <th style="text-align:left;padding:6px;">ユニークな価値</th>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">構造化メモ（症状タグ + 感覚タグ + ギアの気づき）</td>
+          <td style="text-align:center;color:#f39c12;">Phase 1で新規</td>
+          <td style="padding:6px;">メモが蓄積するとクラブの傾向が見える。誰もやっていない</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">クラブ別プロフィール（使用サマリー + 傾向）</td>
+          <td style="text-align:center;color:#f39c12;">Phase 1で新規</td>
+          <td style="padding:6px;">クラブごとに「履歴書」が育つ体験</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">AIチャット（ギアコンテキスト付き）</td>
+          <td style="text-align:center;color:#27ae60;">既存</td>
+          <td style="padding:6px;">登録データを踏まえた相談ができる</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">メンテナンス履歴</td>
+          <td style="text-align:center;color:#27ae60;">既存</td>
+          <td style="padding:6px;">カーチューンの整備記録的。ギアマネにはない</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:6px;">練習記録 × クラブデータ連携</td>
+          <td style="text-align:center;color:#27ae60;">既存</td>
+          <td style="padding:6px;">クラブの「使われ方」がわかる</td>
+        </tr>
+        <tr>
+          <td style="padding:6px;">ビッグデータ × AI ナレッジ還元</td>
+          <td style="text-align:center;color:#27ae60;">パイプライン既存</td>
+          <td style="padding:6px;">症状タグに対する一般的原因の参考表示</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

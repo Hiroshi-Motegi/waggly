@@ -43,10 +43,10 @@ const badgeLabels: Record<string, string> = {
   maintenance: "メンテナンス",
 };
 
-const conditionEmoji: Record<string, string> = {
-  bad: "😣",
-  normal: "😐",
-  good: "😊",
+const conditionImage: Record<string, string> = {
+  bad: "/images/face-bad.png",
+  normal: "/images/face-ok.png",
+  good: "/images/face-good.png",
 };
 
 function formatDate(dateStr: string): string {
@@ -194,7 +194,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
                           {badgeLabels[item.type]}
                         </span>
                         {item.type === "memo" && item.condition && (
-                          <span className="text-sm">{conditionEmoji[item.condition]}</span>
+                          <img src={conditionImage[item.condition]} alt="" className="w-4 h-4" />
                         )}
                         {summary && (
                           <span className="text-[10px] font-medium text-[#8b8b8b]">{summary}</span>

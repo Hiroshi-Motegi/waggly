@@ -1,0 +1,70 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - main [ref=e24]:
+      - generic [ref=e414]:
+        - generic [ref=e416]:
+          - heading "マイバッグ (0/14)" [level=2] [ref=e418]
+          - link "追加" [ref=e420] [cursor=pointer]:
+            - /url: /bag/new
+            - button "追加" [ref=e421]:
+              - img [ref=e422]
+              - text: 追加
+        - generic [ref=e423]:
+          - generic [ref=e424]:
+            - button "すべて" [ref=e425]:
+              - generic [ref=e426]: すべて
+            - button "マイバッグ" [ref=e428]:
+              - generic [ref=e429]: マイバッグ
+            - button "予備バッグ" [ref=e431]:
+              - generic [ref=e432]: 予備バッグ
+            - button "予備" [ref=e434]:
+              - generic [ref=e435]: 予備
+            - button "アーカイブ" [ref=e437]:
+              - generic [ref=e438]: アーカイブ
+          - generic [ref=e440]:
+            - generic [ref=e441]:
+              - button "飛距離階段" [ref=e442]
+              - button "重量フロー" [ref=e443]
+            - paragraph [ref=e444]: 飛距離を入力するとグラフが表示されます
+          - button "WITB画像" [ref=e446]:
+            - img [ref=e447]
+            - text: WITB画像
+          - generic [ref=e456]:
+            - generic [ref=e457]: 読
+            - generic [ref=e458]: み
+            - generic [ref=e459]: 込
+            - generic [ref=e460]: み
+            - generic [ref=e461]: 中
+            - generic [ref=e462]: .
+            - generic [ref=e463]: .
+            - generic [ref=e464]: .
+    - navigation [ref=e256]:
+      - link "ホーム ホーム" [ref=e257] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e259]:
+          - img "ホーム" [ref=e260]
+          - generic [ref=e261]: ホーム
+      - link "マイバッグ マイバッグ" [ref=e262] [cursor=pointer]:
+        - /url: /bag
+        - generic [ref=e264]:
+          - img "マイバッグ" [ref=e265]
+          - generic [ref=e266]: マイバッグ
+      - link "アイテム アイテム" [ref=e267] [cursor=pointer]:
+        - /url: /items
+        - generic [ref=e269]:
+          - img "アイテム" [ref=e270]
+          - generic [ref=e271]: アイテム
+      - link "練習記録 練習記録" [ref=e272] [cursor=pointer]:
+        - /url: /practice
+        - generic [ref=e274]:
+          - img "練習記録" [ref=e275]
+          - generic [ref=e276]: 練習記録
+      - link "AIに相談 AIに相談" [ref=e277] [cursor=pointer]:
+        - /url: /coach
+        - generic [ref=e279]:
+          - img "AIに相談" [ref=e280]
+          - generic [ref=e281]: AIに相談
+  - button "Open Next.js Dev Tools" [ref=e20] [cursor=pointer]:
+    - img [ref=e21]
+  - alert [ref=e282]
+  - generic [ref=e283]: "0"

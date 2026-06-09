@@ -8,10 +8,10 @@ import { PageHeader } from "@/components/layout/page-header";
 import type { ClubMemo, MemoCondition } from "@/types/database";
 import { SYMPTOM_TAGS, FEELING_TAGS, GEAR_TAGS, GOOD_TAGS, getTagsByCondition } from "@/lib/memo-tags";
 
-const conditionOptions: { value: MemoCondition; emoji: string; label: string }[] = [
-  { value: "bad", emoji: "😣", label: "悩み" },
-  { value: "normal", emoji: "😐", label: "普通" },
-  { value: "good", emoji: "😊", label: "好調" },
+const conditionOptions: { value: MemoCondition; image: string; label: string }[] = [
+  { value: "bad", image: "/images/face-bad.png", label: "Bad..." },
+  { value: "normal", image: "/images/face-ok.png", label: "OK" },
+  { value: "good", image: "/images/face-good.png", label: "Good!" },
 ];
 
 export default function MemoEditPage({ params }: { params: Promise<{ clubId: string; memoId: string }> }) {
@@ -111,7 +111,7 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
                       : "border-[#ddd] bg-white"
                   }`}
                 >
-                  <div className="text-xl">{opt.emoji}</div>
+                  <img src={opt.image} alt={opt.label} className="w-8 h-8" />
                   <div className="text-xs mt-0.5">{opt.label}</div>
                 </button>
               ))}

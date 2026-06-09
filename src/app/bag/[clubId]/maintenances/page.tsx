@@ -5,7 +5,7 @@ import { use, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Plus } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -99,11 +99,16 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative z-10 flex flex-col space-y-2">
           <form onSubmit={handleSubmit} className="flex flex-col" style={{ minHeight: "calc(100dvh - var(--bottom-nav-height))" }}>
-            <div className="px-1 pb-2">
-              <span className="text-xs font-bold text-white">
-                {club.club_number}{club.maker ? ` / ${club.maker}` : ""}{club.model ? ` ${club.model}` : ""}
-              </span>
-              <h2 className="text-lg font-bold text-white">メンテナンス記録の追加</h2>
+            <div className="flex items-center gap-1 px-1 pb-2">
+              <button type="button" onClick={() => router.back()} className="text-white p-1 -ml-1">
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <div>
+                <span className="text-xs font-bold text-white">
+                  {club.club_number}{club.maker ? ` / ${club.maker}` : ""}{club.model ? ` ${club.model}` : ""}
+                </span>
+                <h2 className="text-lg font-bold text-white">メンテナンス記録の追加</h2>
+              </div>
             </div>
             <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
               <div className="flex flex-col gap-0.5 py-1">
