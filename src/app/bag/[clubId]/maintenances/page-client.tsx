@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
+import { nativeHref } from "@/lib/native-routes";
 
 const maintenanceTypeLabels: Record<string, string> = {
   grip_change: "グリップ交換",
@@ -77,7 +78,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
       });
       if (!res.ok) throw new Error("Failed");
       if (isAddMode) {
-        router.push(`/bag/${clubId}`);
+        router.push(nativeHref(`/bag/${clubId}`));
         return;
       }
       const newItem = await res.json();
@@ -251,7 +252,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
         ) : (
           <div className="flex flex-col">
             {items.map((m, i) => (
-              <Link key={m.id} href={`/bag/${clubId}/maintenances/${m.id}`}>
+              <Link key={m.id} href={nativeHref(`/bag/${clubId}/maintenances/${m.id}`)}>
                 <div
                   className={`flex items-center gap-2.5 py-2 ${
                     i < items.length - 1 ? "border-b border-[#dfdfdf]" : ""

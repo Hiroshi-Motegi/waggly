@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
+import { nativeHref } from "@/lib/native-routes";
 
 const maintenanceTypes = [
   { value: "grip_change", label: "グリップ交換" },
@@ -68,7 +69,7 @@ export default function MaintenanceEditPage({
           done_at: form.done_at,
         }),
       });
-      if (res.ok) router.push(`/bag/${clubId}/maintenances/${maintenanceId}`);
+      if (res.ok) router.push(nativeHref(`/bag/${clubId}/maintenances/${maintenanceId}`));
     } catch (error) {
       console.error("Failed to update maintenance:", error);
     } finally {

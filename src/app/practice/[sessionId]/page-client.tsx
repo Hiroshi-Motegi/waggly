@@ -11,6 +11,7 @@ import { apiFetch } from "@/lib/api-client";
 import { deletePracticeSession } from "@/hooks/use-practice";
 import { getConditionImage } from "@/components/club/inline-club-memo";
 import type { PracticeSessionWithClubs, MemoCondition } from "@/types/database";
+import { nativeHref } from "@/lib/native-routes";
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
@@ -68,7 +69,7 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="練習記録" backHref="/practice" variant="dark">
-        <Link href={`/practice/${sessionId}/edit`}>
+        <Link href={nativeHref(`/practice/${sessionId}/edit`)}>
           <button className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-xs font-bold text-white">
             <Pencil className="h-4 w-4" />
             編集

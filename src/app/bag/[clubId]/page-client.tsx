@@ -11,6 +11,7 @@ import { apiFetch } from "@/lib/api-client";
 import { ClubUsageSummary } from "@/components/club/club-usage-summary";
 import { useAuth } from "@/hooks/use-auth";
 import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
+import { nativeHref } from "@/lib/native-routes";
 
 const statusLabels: Record<string, string> = {
   bag: "マイバッグ",
@@ -129,7 +130,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         variant="dark"
       >
         <div className="flex gap-1 shrink-0">
-          <Link href={`/bag/${clubId}/edit`}>
+          <Link href={nativeHref(`/bag/${clubId}/edit`)}>
             <button className="flex items-center justify-center rounded-full bg-white p-2">
               <Pencil className="h-4 w-4 text-[#006728]" />
             </button>
@@ -282,14 +283,14 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       <div className="flex items-center gap-2 px-1 pt-4">
         <h3 className="flex-1 text-base font-bold text-white">アクティビティ</h3>
         <Link
-          href={`/bag/${clubId}/memos?add=1`}
+          href={nativeHref(`/bag/${clubId}/memos?add=1`)}
           className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]"
         >
           <Plus className="h-3 w-3" />
           メモ
         </Link>
         <Link
-          href={`/bag/${clubId}/maintenances?add=1`}
+          href={nativeHref(`/bag/${clubId}/maintenances?add=1`)}
           className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]"
         >
           <Plus className="h-3 w-3" />
@@ -323,7 +324,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 
         <div className="flex justify-center pt-1">
           <Link
-            href={`/bag/${clubId}/memos`}
+            href={nativeHref(`/bag/${clubId}/memos`)}
             className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]"
           >
             すべて見る
@@ -336,11 +337,11 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 }
 
 function ActivityRow({ item, clubId, isLast }: { item: ActivityItem; clubId: string; isLast: boolean }) {
-  const href = item.type === "memo"
+  const href = nativeHref(item.type === "memo"
     ? `/bag/${clubId}/memos/${item.id}`
     : item.type === "practice"
       ? `/practice/${item.session_id}`
-      : `/bag/${clubId}/maintenances/${item.id}`;
+      : `/bag/${clubId}/maintenances/${item.id}`);
 
   const dateStr = item.type === "practice" && item.practiced_at
     ? formatDate(item.practiced_at)

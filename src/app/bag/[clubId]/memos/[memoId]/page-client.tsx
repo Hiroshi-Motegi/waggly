@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { ClubMemo } from "@/types/database";
+import { nativeHref } from "@/lib/native-routes";
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
@@ -33,7 +34,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
   async function handleDelete() {
     if (!confirm("このメモを削除しますか？")) return;
     const res = await apiFetch(`/api/clubs/${clubId}/memos/${memoId}`, { method: "DELETE" });
-    if (res.ok) router.push(`/bag/${clubId}/memos`);
+    if (res.ok) router.push(nativeHref(`/bag/${clubId}/memos`));
   }
 
   if (isFetching) return <Loading variant="light" />;
@@ -54,7 +55,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
           </div>
         </div>
         <div className="flex gap-1">
-          <Link href={`/bag/${clubId}/memos/${memoId}/edit`}>
+          <Link href={nativeHref(`/bag/${clubId}/memos/${memoId}/edit`)}>
             <Button size="sm" variant="outline" className="gap-1 border-white text-white bg-transparent">
               <Pencil className="h-4 w-4" />
               編集

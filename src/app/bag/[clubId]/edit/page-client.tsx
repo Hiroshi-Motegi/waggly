@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ClubImageGallery } from "@/components/club/club-image-gallery";
 import { useClub, updateClub } from "@/hooks/use-clubs";
 import type { Club, ClubImage } from "@/types/database";
+import { nativeHref } from "@/lib/native-routes";
 
 export default function EditClubPageClient({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
@@ -19,7 +20,7 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
     setIsSubmitting(true);
     try {
       await updateClub(clubId, data);
-      router.push(`/bag/${clubId}`);
+      router.push(nativeHref(`/bag/${clubId}`));
     } catch (error) {
       console.error("Failed to update club:", error);
     } finally {

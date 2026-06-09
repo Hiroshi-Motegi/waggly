@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { MemoCondition } from "@/types/database";
+import { nativeHref } from "@/lib/native-routes";
 
 interface ActivityItem {
   type: "memo" | "practice" | "maintenance";
@@ -92,7 +93,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
           <PageHeader
             title="メモの追加"
             subtitle={`${club.club_number}${club.maker ? ` / ${club.maker}` : ""}${club.model ? ` ${club.model}` : ""}`}
-            backHref={`/bag/${clubId}`}
+            backHref={nativeHref(`/bag/${clubId}`)}
             variant="dark"
           />
           <div className="rounded-lg bg-white p-3">
@@ -101,7 +102,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
               clubNumber={club.club_number}
               clubModel={club.model}
               defaultDistance={club.distance}
-              onSaved={() => router.push(`/bag/${clubId}`)}
+              onSaved={() => router.push(nativeHref(`/bag/${clubId}`))}
               onCancel={() => router.back()}
             />
           </div>
@@ -129,7 +130,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
             メモ
           </button>
           <Link
-            href={`/bag/${clubId}/maintenances?add=1`}
+            href={nativeHref(`/bag/${clubId}/maintenances?add=1`)}
             className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#006728]"
           >
             <Plus className="h-3 w-3" />
@@ -172,11 +173,11 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
         ) : (
           <div className="flex flex-col">
             {activity.map((item, i) => {
-              const href = item.type === "memo"
+              const href = nativeHref(item.type === "memo"
                 ? `/bag/${clubId}/memos/${item.id}`
                 : item.type === "practice"
                   ? `/practice/${item.session_id}`
-                  : `/bag/${clubId}/maintenances/${item.id}`;
+                  : `/bag/${clubId}/maintenances/${item.id}`);
 
               const dateStr = item.type === "practice" && item.practiced_at
                 ? formatDate(item.practiced_at)

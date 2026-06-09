@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import type { ClubMemo, MemoCondition } from "@/types/database";
 import { SYMPTOM_TAGS, FEELING_TAGS, GEAR_TAGS, GOOD_TAGS, getTagsByCondition } from "@/lib/memo-tags";
 import { conditionOptions } from "@/components/club/inline-club-memo";
+import { nativeHref } from "@/lib/native-routes";
 
 export default function MemoEditPage({ params }: { params: Promise<{ clubId: string; memoId: string }> }) {
   const { clubId, memoId } = use(params);
@@ -60,7 +61,7 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
           gear_tags: condition === "good" ? [] : gearTags,
         }),
       });
-      if (res.ok) router.push(`/bag/${clubId}/memos/${memoId}`);
+      if (res.ok) router.push(nativeHref(`/bag/${clubId}/memos/${memoId}`));
     } catch (error) {
       console.error("Failed to update memo:", error);
     } finally {

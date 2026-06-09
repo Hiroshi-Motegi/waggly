@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
+import { nativeHref } from "@/lib/native-routes";
 
 const maintenanceTypeLabels: Record<string, string> = {
   grip_change: "グリップ交換",
@@ -44,7 +45,7 @@ export default function MaintenanceDetailPage({
   async function handleDelete() {
     if (!confirm("このメンテナンス記録を削除しますか？")) return;
     const res = await apiFetch(`/api/clubs/${clubId}/maintenances/${maintenanceId}`, { method: "DELETE" });
-    if (res.ok) router.push(`/bag/${clubId}/maintenances`);
+    if (res.ok) router.push(nativeHref(`/bag/${clubId}/maintenances`));
   }
 
   if (isFetching) return <Loading variant="light" />;
@@ -59,7 +60,7 @@ export default function MaintenanceDetailPage({
           <span className="text-xs font-bold text-white">{club?.club_number}</span>
           <h2 className="text-lg font-bold text-white">メンテナンス</h2>
         </div>
-        <Link href={`/bag/${clubId}/maintenances/${maintenanceId}/edit`}>
+        <Link href={nativeHref(`/bag/${clubId}/maintenances/${maintenanceId}/edit`)}>
           <Button size="sm" variant="outline" className="gap-1 border-white text-white bg-transparent">
             <Pencil className="h-4 w-4" />
             編集
