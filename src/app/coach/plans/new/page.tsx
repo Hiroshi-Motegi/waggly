@@ -12,7 +12,8 @@ export default function NewPlanPage() {
   const router = useRouter();
   const { clubs: bag1 } = useClubs("bag", 1);
   const { clubs: bag2 } = useClubs("bag", 2);
-  const clubs = [...bag1, ...bag2];
+  const { clubs: reserveClubs } = useClubs("reserve");
+  const clubs = [...bag1, ...bag2, ...reserveClubs];
   const [duration, setDuration] = useState("1時間");
   const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
   const [focus, setFocus] = useState("");
@@ -158,20 +159,16 @@ export default function NewPlanPage() {
                 </button>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="columns-2 gap-2">
-                {clubs.map((club) => (
-                  <label key={club.id} className="flex items-center gap-2 cursor-pointer py-1 break-inside-avoid">
-                    <input
-                      type="checkbox"
-                      checked={selectedClubs.includes(club.club_number)}
-                      onChange={() => toggleClub(club.club_number)}
-                      className="h-4 w-4 rounded border-input"
-                    />
-                    <span className="text-sm">{club.club_number}</span>
-                  </label>
-                ))}
-              </div>
+            <CardContent className="space-y-3">
+              {bag1.length > 0 && (
+                <ClubCheckboxGroup label="マイバッグ" clubs={bag1} selectedClubs={selectedClubs} onToggle={toggleClub} />
+              )}
+              {bag2.length > 0 && (
+                <ClubCheckboxGroup label="予備バッグ" clubs={bag2} selectedClubs={selectedClubs} onToggle={toggleClub} />
+              )}
+              {reserveClubs.length > 0 && (
+                <ClubCheckboxGroup label="予備" clubs={reserveClubs} selectedClubs={selectedClubs} onToggle={toggleClub} />
+              )}
             </CardContent>
           </Card>
         )}
@@ -184,6 +181,32 @@ export default function NewPlanPage() {
           {isGenerating ? "生成中..." : "メニューを生成"}
         </Button>
       </form>
+      </div>
+    </div>
+  );
+}
+
+function ClubCheckboxGroup({ label, clubs, selectedClubs, onToggle }: {
+  label: string;
+  clubs: { id: string; club_number: string }[];
+  selectedClubs: string[];
+  onToggle: (clubNumber: string) => void;
+}) {
+  return (
+    <div>
+      <p className="text-xs font-medium text-muted-foreground mb-1">{label}</p>
+      <div className="columns-2 gap-2">
+        {clubs.map((club) => (
+          <label key={club.id} className="flex items-center gap-2 cursor-pointer py-1 break-inside-avoid">
+            <input
+              type="checkbox"
+              checked={selectedClubs.includes(club.club_number)}
+              onChange={() => onToggle(club.club_number)}
+              className="h-4 w-4 rounded border-input"
+            />
+            <span className="text-sm">{club.club_number}</span>
+          </label>
+        ))}
       </div>
     </div>
   );
