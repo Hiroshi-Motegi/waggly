@@ -109,6 +109,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Login page: no header/nav
+  if (pathname === "/login") {
+    return (
+      <div className="mx-auto max-w-md min-h-dvh shadow-sm relative animate-fade-in">
+        {children}
+      </div>
+    );
+  }
+
   // Normal app
   return (
     <div className="mx-auto max-w-md min-h-dvh shadow-sm relative animate-fade-in bg-[#ebf1eb]">
