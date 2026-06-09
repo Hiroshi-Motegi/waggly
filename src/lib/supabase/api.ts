@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createRawClient } from "@supabase/supabase-js";
+import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 const DEV_EMAIL = "dev@waggly.local";
@@ -83,6 +84,24 @@ export async function getApiAuth(): Promise<{
 
     cachedDevUserId = authUserId;
     return { supabase, userId: authUserId };
+  }
+
+  // Native app: Bearer token auth
+  const headersList = await headers();
+  const authHeader = headersList.get("authorization");
+
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const supabase = createRawClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
+    if (error || !user) return null;
+    return { supabase, userId: user.id };
   }
 
   // Production: cookie-based auth
