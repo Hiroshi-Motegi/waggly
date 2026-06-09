@@ -249,15 +249,15 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             </select>
           </div>
 
-          {/* ブランド */}
+          {/* ブランド・メーカー */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">ブランド</span>
+            <span className="text-xs">ブランド・メーカー</span>
             <input value={editForm.brand ?? ""} onChange={(e) => updateEdit("brand", e.target.value)} placeholder="例: Titleist" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
-          {/* モデル */}
+          {/* 商品名・モデル */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">モデル</span>
+            <span className="text-xs">商品名・モデル</span>
             <input value={editForm.model ?? ""} onChange={(e) => updateEdit("model", e.target.value)} placeholder="例: Pro V1" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
@@ -368,13 +368,13 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           </div>
           {item.brand && (
             <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
-              <span className="shrink-0">ブランド</span>
+              <span className="shrink-0">ブランド・メーカー</span>
               <span className="flex-1 text-right">{item.brand}</span>
             </div>
           )}
           {item.model && (
             <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
-              <span className="shrink-0">モデル</span>
+              <span className="shrink-0">商品名・モデル</span>
               <span className="flex-1 text-right">{item.model}</span>
             </div>
           )}

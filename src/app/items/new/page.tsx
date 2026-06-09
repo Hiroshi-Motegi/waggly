@@ -151,12 +151,12 @@ export default function NewItemPage() {
         </div>
 
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">ブランド</span>
+          <span className="text-xs">ブランド・メーカー</span>
           <input value={form.brand} onChange={(e) => update("brand", e.target.value)} placeholder="例: Titleist" className={inputClass} />
         </div>
 
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">モデル</span>
+          <span className="text-xs">商品名・モデル</span>
           <input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="例: Pro V1" className={inputClass} />
         </div>
 
