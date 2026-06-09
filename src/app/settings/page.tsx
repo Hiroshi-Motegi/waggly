@@ -33,11 +33,12 @@ interface SubscriptionData {
 export default function SettingsPage() {
   const { user, setUser } = useAuth();
   const [usage, setUsage] = useState<UsageData | null>(null);
+  const [usageLoaded, setUsageLoaded] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
 
   useEffect(() => {
     if (!user) return;
-    apiFetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch(() => {});
+    apiFetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch(() => {}).finally(() => setUsageLoaded(true));
     apiFetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch(() => {});
   }, [user]);
 
@@ -156,8 +157,10 @@ export default function SettingsPage() {
               </p>
             )}
           </div>
+        ) : usageLoaded ? (
+          <p className="text-center text-sm text-[#8b8b8b] py-2">利用データなし</p>
         ) : (
-          <Loading variant="light" />
+          <div className="py-2 animate-pulse"><div className="h-4 w-3/4 mx-auto rounded bg-gray-200" /></div>
         )}
       </div>
 
