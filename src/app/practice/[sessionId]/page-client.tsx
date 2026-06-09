@@ -12,6 +12,7 @@ import { deletePracticeSession } from "@/hooks/use-practice";
 import { getConditionImage } from "@/components/club/inline-club-memo";
 import type { PracticeSessionWithClubs, MemoCondition } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
+import { isNative } from "@/lib/platform";
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
@@ -37,7 +38,8 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
   }
 
   useEffect(() => {
-    if (authLoading || !user) return;
+    if (authLoading) return;
+    if (!user && !isNative()) return;
 
     async function fetchSession() {
       setIsFetching(true);

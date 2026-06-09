@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { isNative } from "@/lib/platform";
 import { SessionForm } from "@/components/practice/session-form";
 import { useClubs } from "@/hooks/use-clubs";
 import { updatePracticeSession, deletePracticeSession } from "@/hooks/use-practice";
@@ -37,7 +38,8 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
   }, []);
 
   useEffect(() => {
-    if (authLoading || !user) return;
+    if (authLoading) return;
+    if (!user && !isNative()) return;
 
     async function fetchSession() {
       setIsFetching(true);
