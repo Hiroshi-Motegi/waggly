@@ -126,7 +126,6 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       <PageHeader
         title={club.model || "—"}
         subtitle={`${club.club_number}${club.maker ? ` / ${club.maker}` : ""}`}
-        backHref="/bag"
         variant="dark"
       >
         <div className="flex gap-1 shrink-0">
