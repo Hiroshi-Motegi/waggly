@@ -1,5 +1,5 @@
 export type ClubCategory = "driver" | "fairway_wood" | "utility" | "iron" | "wedge" | "putter";
-export type AccessoryCategory = "ball" | "glove" | "tee" | "other";
+export type AccessoryCategory = "ball" | "glove" | "tee" | "apparel" | "bag" | "rangefinder" | "grip" | "shaft" | "other";
 export type AccessoryStatus = "active" | "past";
 export type ClubStatus = "bag" | "reserve" | "sold";
 export type MaintenanceType = "grip_change" | "reshaft" | "loft_adjust" | "other";

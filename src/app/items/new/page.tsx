@@ -9,6 +9,11 @@ const categories: { value: AccessoryCategory; label: string }[] = [
   { value: "ball", label: "ボール" },
   { value: "glove", label: "グローブ" },
   { value: "tee", label: "ティー" },
+  { value: "apparel", label: "アパレル" },
+  { value: "bag", label: "バッグ" },
+  { value: "rangefinder", label: "距離計" },
+  { value: "grip", label: "グリップ" },
+  { value: "shaft", label: "シャフト" },
   { value: "other", label: "その他" },
 ];
 

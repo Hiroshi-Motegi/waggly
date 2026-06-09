@@ -13,6 +13,11 @@ const categoryLabels: Record<AccessoryCategory, string> = {
   ball: "ボール",
   glove: "グローブ",
   tee: "ティー",
+  apparel: "アパレル",
+  bag: "バッグ",
+  rangefinder: "距離計",
+  grip: "グリップ",
+  shaft: "シャフト",
   other: "その他",
 };
 
@@ -20,6 +25,11 @@ const categoryIcons: Record<AccessoryCategory, string> = {
   ball: "/icons/cat-ball.svg",
   glove: "/icons/cat-glove.svg",
   tee: "/icons/cat-tee.svg",
+  apparel: "/icons/cat-apparel.svg",
+  bag: "/icons/cat-bag.svg",
+  rangefinder: "/icons/cat-rangefinder.svg",
+  grip: "/icons/cat-grip.svg",
+  shaft: "/icons/cat-shaft.svg",
   other: "/icons/cat-other.svg",
 };
 
