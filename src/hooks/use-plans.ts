@@ -1,27 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR, { mutate } from "swr";
 import { apiFetch } from "@/lib/api-client";
 import type { PracticePlanWithItems } from "@/types/database";
 
+async function fetcher(url: string) {
+  const res = await apiFetch(url);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
 export function usePlans() {
-  const [plans, setPlans] = useState<PracticePlanWithItems[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading, mutate: refetch } = useSWR<PracticePlanWithItems[]>("/api/coach/plans", fetcher);
 
-  const fetchPlans = useCallback(async () => {
-    setIsLoading(true);
-    const res = await apiFetch("/api/coach/plans");
-    if (res.ok) {
-      setPlans(await res.json());
-    }
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    fetchPlans();
-  }, [fetchPlans]);
-
-  return { plans, isLoading, refetch: fetchPlans };
+  return { plans: data ?? [], isLoading, refetch };
 }
 
 export async function generatePlan(source: "auto" | "chat" = "auto") {
@@ -31,6 +23,7 @@ export async function generatePlan(source: "auto" | "chat" = "auto") {
     body: JSON.stringify({ source }),
   });
   if (!res.ok) throw new Error("Failed to generate plan");
+  mutate((key) => typeof key === "string" && key.startsWith("/api/coach/plan"));
   return res.json();
 }
 
@@ -41,5 +34,6 @@ export async function updatePlan(planId: string, data: { status?: string; memo?:
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to update plan");
+  mutate((key) => typeof key === "string" && key.startsWith("/api/coach/plan"));
   return res.json();
 }

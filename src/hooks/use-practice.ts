@@ -1,31 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR, { mutate } from "swr";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
 import type { PracticeSessionWithClubs } from "@/types/database";
 import type { InlineClubMemoValue } from "@/components/club/inline-club-memo";
 
+async function fetcher(url: string) {
+  const res = await apiFetch(url);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
 export function usePracticeSessions() {
   const { user } = useAuth();
-  const [sessions, setSessions] = useState<PracticeSessionWithClubs[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const key = user ? "/api/practice" : null;
 
-  const fetchSessions = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-    const res = await apiFetch("/api/practice");
-    if (res.ok) {
-      setSessions(await res.json());
-    }
-    setIsLoading(false);
-  }, [user]);
+  const { data, isLoading, mutate: refetch } = useSWR<PracticeSessionWithClubs[]>(key, fetcher);
 
-  useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
-
-  return { sessions, isLoading, refetch: fetchSessions };
+  return { sessions: data ?? [], isLoading, refetch };
 }
 
 interface CreateSessionData {
@@ -43,6 +36,7 @@ export async function createPracticeSession(data: CreateSessionData) {
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to create practice session");
+  mutate((key) => typeof key === "string" && key.startsWith("/api/practice"));
   return res.json();
 }
 
@@ -53,10 +47,12 @@ export async function updatePracticeSession(sessionId: string, data: any) {
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to update practice session");
+  mutate((key) => typeof key === "string" && key.startsWith("/api/practice"));
   return res.json();
 }
 
 export async function deletePracticeSession(sessionId: string) {
   const res = await apiFetch(`/api/practice/${sessionId}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete practice session");
+  mutate((key) => typeof key === "string" && key.startsWith("/api/practice"));
 }

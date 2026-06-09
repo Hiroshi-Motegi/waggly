@@ -1,54 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR, { mutate } from "swr";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
 import type { Club, ClubWithImages, ClubStatus } from "@/types/database";
 
+async function fetcher(url: string) {
+  const res = await apiFetch(url);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
 export function useClubs(status?: ClubStatus, bagNumber?: number) {
   const { user } = useAuth();
-  const [clubs, setClubs] = useState<ClubWithImages[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  if (bagNumber != null) params.set("bag_number", String(bagNumber));
+  const qs = params.toString();
+  const key = user ? `/api/clubs${qs ? `?${qs}` : ""}` : null;
 
-  const fetchClubs = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-    const params = new URLSearchParams();
-    if (status) params.set("status", status);
-    if (bagNumber != null) params.set("bag_number", String(bagNumber));
-    const qs = params.toString();
-    const res = await apiFetch(`/api/clubs${qs ? `?${qs}` : ""}`);
-    if (res.ok) {
-      setClubs(await res.json());
-    }
-    setIsLoading(false);
-  }, [status, bagNumber, user]);
+  const { data, error, isLoading, mutate: refetch } = useSWR<ClubWithImages[]>(key, fetcher);
 
-  useEffect(() => {
-    fetchClubs();
-  }, [fetchClubs]);
-
-  return { clubs, isLoading, refetch: fetchClubs };
+  return { clubs: data ?? [], isLoading, refetch };
 }
 
 export function useClub(clubId: string) {
   const { user } = useAuth();
-  const [club, setClub] = useState<ClubWithImages & { maintenances: any[] } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const key = user ? `/api/clubs/${clubId}` : null;
 
-  useEffect(() => {
-    async function fetchClub() {
-      if (!user) return;
-      const res = await apiFetch(`/api/clubs/${clubId}`);
-      if (res.ok) {
-        setClub(await res.json());
-      }
-      setIsLoading(false);
-    }
-    fetchClub();
-  }, [clubId, user]);
+  const { data, isLoading } = useSWR<ClubWithImages & { maintenances: any[] }>(key, fetcher);
 
-  return { club, isLoading };
+  return { club: data ?? null, isLoading };
 }
 
 export async function createClub(data: Partial<Club>): Promise<Club> {
@@ -58,6 +40,7 @@ export async function createClub(data: Partial<Club>): Promise<Club> {
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to create club");
+  mutate((key) => typeof key === "string" && key.startsWith("/api/clubs"));
   return res.json();
 }
 
@@ -68,10 +51,12 @@ export async function updateClub(clubId: string, data: Partial<Club>): Promise<C
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to update club");
+  mutate((key) => typeof key === "string" && key.startsWith("/api/clubs"));
   return res.json();
 }
 
 export async function deleteClub(clubId: string): Promise<void> {
   const res = await apiFetch(`/api/clubs/${clubId}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete club");
+  mutate((key) => typeof key === "string" && key.startsWith("/api/clubs"));
 }
