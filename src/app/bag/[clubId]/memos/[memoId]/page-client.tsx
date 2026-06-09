@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { ClubMemo } from "@/types/database";
 
@@ -22,7 +23,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/clubs/${clubId}/memos/${memoId}`)
+    apiFetch(`/api/clubs/${clubId}/memos/${memoId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then(setMemo)
       .catch(() => setMemo(null))
@@ -31,7 +32,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
 
   async function handleDelete() {
     if (!confirm("このメモを削除しますか？")) return;
-    const res = await fetch(`/api/clubs/${clubId}/memos/${memoId}`, { method: "DELETE" });
+    const res = await apiFetch(`/api/clubs/${clubId}/memos/${memoId}`, { method: "DELETE" });
     if (res.ok) router.push(`/bag/${clubId}/memos`);
   }
 

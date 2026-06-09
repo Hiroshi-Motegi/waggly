@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { apiFetch } from "@/lib/api-client";
 import type { PracticeSessionWithClubs } from "@/types/database";
 import type { InlineClubMemoValue } from "@/components/club/inline-club-memo";
 
@@ -13,7 +14,7 @@ export function usePracticeSessions() {
   const fetchSessions = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
-    const res = await fetch("/api/practice");
+    const res = await apiFetch("/api/practice");
     if (res.ok) {
       setSessions(await res.json());
     }
@@ -36,7 +37,7 @@ interface CreateSessionData {
 }
 
 export async function createPracticeSession(data: CreateSessionData) {
-  const res = await fetch("/api/practice", {
+  const res = await apiFetch("/api/practice", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -46,7 +47,7 @@ export async function createPracticeSession(data: CreateSessionData) {
 }
 
 export async function updatePracticeSession(sessionId: string, data: any) {
-  const res = await fetch(`/api/practice/${sessionId}`, {
+  const res = await apiFetch(`/api/practice/${sessionId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -56,6 +57,6 @@ export async function updatePracticeSession(sessionId: string, data: any) {
 }
 
 export async function deletePracticeSession(sessionId: string) {
-  const res = await fetch(`/api/practice/${sessionId}`, { method: "DELETE" });
+  const res = await apiFetch(`/api/practice/${sessionId}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete practice session");
 }

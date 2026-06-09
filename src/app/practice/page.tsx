@@ -28,46 +28,48 @@ export default function PracticePage() {
         </Link>
       </PageHeader>
 
-      {isLoading ? (
-        <Loading variant="light" />
-      ) : sessions.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">
-          まだ練習記録がありません
-        </p>
-      ) : (
-        <div className="flex flex-col rounded-lg bg-white p-3">
-          {sessions.map((s, i) => (
-            <Link key={s.id} href={`/practice/${s.id}`}>
-              <div
-                className={`flex items-center gap-2.5 py-2 ${
-                  i < sessions.length - 1 ? "border-b border-[#dfdfdf]" : ""
-                }`}
-              >
-                <div className="flex flex-1 flex-col gap-px">
-                  <span className="text-xs font-medium text-[#8b8b8b]">
-                    {formatDate(s.practiced_at)}
-                  </span>
-                  <span className="text-sm font-bold text-black">
-                    {s.location || "場所未入力"}
-                  </span>
+      <div className="flex flex-col rounded-lg bg-white p-3">
+        {isLoading ? (
+          <Loading />
+        ) : sessions.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            まだ練習記録がありません
+          </p>
+        ) : (
+          <div className="flex flex-col">
+            {sessions.map((s, i) => (
+              <Link key={s.id} href={`/practice/${s.id}`}>
+                <div
+                  className={`flex items-center gap-2.5 py-2 ${
+                    i < sessions.length - 1 ? "border-b border-[#dfdfdf]" : ""
+                  }`}
+                >
+                  <div className="flex flex-1 flex-col gap-px">
+                    <span className="text-xs font-medium text-[#8b8b8b]">
+                      {formatDate(s.practiced_at)}
+                    </span>
+                    <span className="text-sm font-bold text-black">
+                      {s.location || "場所未入力"}
+                    </span>
+                  </div>
+                  {s.total_balls && (
+                    <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
+                      {s.total_balls}球
+                    </span>
+                  )}
+                  <Image
+                    src="/icons/chevron-right.svg"
+                    alt=""
+                    width={6}
+                    height={10}
+                    className="opacity-60"
+                  />
                 </div>
-                {s.total_balls && (
-                  <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
-                    {s.total_balls}球
-                  </span>
-                )}
-                <Image
-                  src="/icons/chevron-right.svg"
-                  alt=""
-                  width={6}
-                  height={10}
-                  className="opacity-60"
-                />
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
       </div>
     </div>
   );

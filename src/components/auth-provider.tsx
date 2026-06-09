@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/hooks/use-auth";
+import { apiFetch } from "@/lib/api-client";
 import { initLiff, getLiffProfile } from "@/lib/liff";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@/types/database";
@@ -60,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // No session — do full LIFF auth flow
         const { profile } = await getLiffProfile();
 
-        const res = await fetch("/api/auth/line", {
+        const res = await apiFetch("/api/auth/line", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

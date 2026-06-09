@@ -10,6 +10,7 @@ import { ChatMessages } from "@/components/coach/chat-messages";
 import { ChatInput } from "@/components/coach/chat-input";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
+import { apiFetch } from "@/lib/api-client";
 
 type ConversationItem = {
   id: string;
@@ -181,7 +182,7 @@ export default function CoachPage() {
 
     async function loadHistory() {
       try {
-        const res = await fetch("/api/coach/chat/history");
+        const res = await apiFetch("/api/coach/chat/history");
         if (!res.ok) throw new Error("Failed to load history");
         const data = await res.json();
 
@@ -220,7 +221,7 @@ export default function CoachPage() {
     setShowHistory(true);
     setHistoryFetching(true);
     try {
-      const res = await fetch("/api/coach/chat/history?list=true");
+      const res = await apiFetch("/api/coach/chat/history?list=true");
       if (!res.ok) throw new Error("Failed to load conversation list");
       const data: ConversationItem[] = await res.json();
       setConversations(data);
@@ -234,7 +235,7 @@ export default function CoachPage() {
 
   async function handleDeleteConversation(id: string) {
     try {
-      const res = await fetch(`/api/coach/chat/history?conversationId=${id}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/coach/chat/history?conversationId=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete conversation");
       setConversations((prev) => prev.filter((c) => c.id !== id));
       if (id === conversationId) {
@@ -249,7 +250,7 @@ export default function CoachPage() {
 
   async function handleSelectConversation(id: string) {
     try {
-      const res = await fetch(`/api/coach/chat/history?conversationId=${id}`);
+      const res = await apiFetch(`/api/coach/chat/history?conversationId=${id}`);
       if (!res.ok) throw new Error("Failed to load conversation");
       const data = await res.json();
 

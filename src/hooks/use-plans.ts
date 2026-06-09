@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api-client";
 import type { PracticePlanWithItems } from "@/types/database";
 
 export function usePlans() {
@@ -9,7 +10,7 @@ export function usePlans() {
 
   const fetchPlans = useCallback(async () => {
     setIsLoading(true);
-    const res = await fetch("/api/coach/plans");
+    const res = await apiFetch("/api/coach/plans");
     if (res.ok) {
       setPlans(await res.json());
     }
@@ -24,7 +25,7 @@ export function usePlans() {
 }
 
 export async function generatePlan(source: "auto" | "chat" = "auto") {
-  const res = await fetch("/api/coach/plan", {
+  const res = await apiFetch("/api/coach/plan", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ source }),
@@ -34,7 +35,7 @@ export async function generatePlan(source: "auto" | "chat" = "auto") {
 }
 
 export async function updatePlan(planId: string, data: { status?: string; memo?: string; rating?: number | null }) {
-  const res = await fetch(`/api/coach/plan/${planId}`, {
+  const res = await apiFetch(`/api/coach/plan/${planId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

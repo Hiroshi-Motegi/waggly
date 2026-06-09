@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { apiFetch } from "@/lib/api-client";
 
 const categories = [
   { value: "swing_basics", label: "スイング基礎" },
@@ -43,7 +44,7 @@ export default function KnowledgeEditPage() {
 
   useEffect(() => {
     if (isNew) return;
-    fetch(`/api/admin/knowledge/${id}`)
+    apiFetch(`/api/admin/knowledge/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setForm({
@@ -76,13 +77,13 @@ export default function KnowledgeEditPage() {
     };
 
     if (isNew) {
-      await fetch("/api/admin/knowledge", {
+      await apiFetch("/api/admin/knowledge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...body, status: "active" }),
       });
     } else {
-      await fetch(`/api/admin/knowledge/${id}`, {
+      await apiFetch(`/api/admin/knowledge/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -93,7 +94,7 @@ export default function KnowledgeEditPage() {
   }
 
   async function handleApprove() {
-    await fetch(`/api/admin/knowledge/${id}`, {
+    await apiFetch(`/api/admin/knowledge/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "active" }),
@@ -102,7 +103,7 @@ export default function KnowledgeEditPage() {
   }
 
   async function handleReject() {
-    await fetch(`/api/admin/knowledge/${id}`, {
+    await apiFetch(`/api/admin/knowledge/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "rejected" }),

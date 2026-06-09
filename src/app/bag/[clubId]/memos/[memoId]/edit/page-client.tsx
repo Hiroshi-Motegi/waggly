@@ -4,6 +4,7 @@ import { Loading } from "@/components/loading";
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useClub } from "@/hooks/use-clubs";
+import { apiFetch } from "@/lib/api-client";
 import { PageHeader } from "@/components/layout/page-header";
 import type { ClubMemo, MemoCondition } from "@/types/database";
 import { SYMPTOM_TAGS, FEELING_TAGS, GEAR_TAGS, GOOD_TAGS, getTagsByCondition } from "@/lib/memo-tags";
@@ -23,7 +24,7 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/clubs/${clubId}/memos/${memoId}`)
+    apiFetch(`/api/clubs/${clubId}/memos/${memoId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data: ClubMemo | null) => {
         if (data) {
@@ -47,7 +48,7 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/clubs/${clubId}/memos/${memoId}`, {
+      const res = await apiFetch(`/api/clubs/${clubId}/memos/${memoId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

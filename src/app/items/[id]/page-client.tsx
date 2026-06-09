@@ -5,6 +5,7 @@ import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { apiFetch } from "@/lib/api-client";
 import { toAffiliateUrl, getUrlPlatform } from "@/lib/affiliate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,7 +83,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/accessories/${id}`);
+        const res = await apiFetch(`/api/accessories/${id}`);
         if (!res.ok) throw new Error("Not found");
         const data = await res.json();
         setItem(data);
@@ -107,13 +108,13 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     try {
       // Handle image delete
       if (deleteImage) {
-        await fetch(`/api/accessories/${id}/image`, { method: "DELETE" });
+        await apiFetch(`/api/accessories/${id}/image`, { method: "DELETE" });
       }
       // Handle image upload
       if (pendingFile) {
         const formData = new FormData();
         formData.append("file", pendingFile);
-        await fetch(`/api/accessories/${id}/image`, { method: "POST", body: formData });
+        await apiFetch(`/api/accessories/${id}/image`, { method: "POST", body: formData });
       }
       // Save form data
       const body = {
@@ -125,14 +126,14 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         status: editForm.status,
         purchase_url: editForm.purchase_url || null,
       };
-      const res = await fetch(`/api/accessories/${id}`, {
+      const res = await apiFetch(`/api/accessories/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error("Failed to update");
       // Reload latest data
-      const refetchRes = await fetch(`/api/accessories/${id}`);
+      const refetchRes = await apiFetch(`/api/accessories/${id}`);
       const updated = await refetchRes.json();
       setItem(updated);
       setEditForm(updated);
@@ -154,14 +155,14 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
   async function handleDelete() {
     if (!confirm("このアイテムを削除しますか？")) return;
-    const res = await fetch(`/api/accessories/${id}`, { method: "DELETE" });
+    const res = await apiFetch(`/api/accessories/${id}`, { method: "DELETE" });
     if (res.ok) {
       router.push("/items");
     }
   }
 
   async function handleStatusChange(newStatus: AccessoryStatus) {
-    const res = await fetch(`/api/accessories/${id}`, {
+    const res = await apiFetch(`/api/accessories/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),

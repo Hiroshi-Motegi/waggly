@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { apiFetch } from "@/lib/api-client";
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { PageTransition } from "@/components/layout/page-transition";
@@ -40,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Onboarding
           isReagreement={!!user.agreed_terms_at}
           onComplete={async () => {
-            await fetch("/api/auth/agree", { method: "POST" });
+            await apiFetch("/api/auth/agree", { method: "POST" });
             setOnboardingDone(true);
           }}
         />

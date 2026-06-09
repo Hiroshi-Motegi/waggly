@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
 
@@ -33,7 +34,7 @@ export default function MaintenanceDetailPage({
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/clubs/${clubId}/maintenances/${maintenanceId}`)
+    apiFetch(`/api/clubs/${clubId}/maintenances/${maintenanceId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then(setItem)
       .catch(() => setItem(null))
@@ -42,7 +43,7 @@ export default function MaintenanceDetailPage({
 
   async function handleDelete() {
     if (!confirm("このメンテナンス記録を削除しますか？")) return;
-    const res = await fetch(`/api/clubs/${clubId}/maintenances/${maintenanceId}`, { method: "DELETE" });
+    const res = await apiFetch(`/api/clubs/${clubId}/maintenances/${maintenanceId}`, { method: "DELETE" });
     if (res.ok) router.push(`/bag/${clubId}/maintenances`);
   }
 

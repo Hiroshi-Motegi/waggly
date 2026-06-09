@@ -3,6 +3,7 @@ import { Loading } from "@/components/loading";
 
 import { useEffect, useState, use } from "react";
 import Image from "next/image";
+import { apiFetch } from "@/lib/api-client";
 import { PageHeader } from "@/components/layout/page-header";
 
 interface CourseDetail {
@@ -118,7 +119,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/courses/${courseId}`);
+        const res = await apiFetch(`/api/courses/${courseId}`);
         if (!res.ok) throw new Error("コース情報の取得に失敗しました");
         const data: ApiResponse = await res.json();
         setCourse(data.Item);

@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SessionForm } from "@/components/practice/session-form";
 import { useClubs } from "@/hooks/use-clubs";
 import { createPracticeSession } from "@/hooks/use-practice";
+import { apiFetch } from "@/lib/api-client";
 
 export default function NewPracticePage() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function NewPracticePage() {
   const [planOpen, setPlanOpen] = useState(false);
 
   useEffect(() => {
-    fetch("/api/practice/locations")
+    apiFetch("/api/practice/locations")
       .then((r) => r.ok ? r.json() : [])
       .then(setPastLocations)
       .catch(() => {});
@@ -33,7 +34,7 @@ export default function NewPracticePage() {
 
   useEffect(() => {
     if (!planId) return;
-    fetch(`/api/coach/plans?id=${planId}`)
+    apiFetch(`/api/coach/plans?id=${planId}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (Array.isArray(data)) {
@@ -50,7 +51,7 @@ export default function NewPracticePage() {
     try {
       await createPracticeSession({ ...data, plan_id: planId ?? undefined });
       if (planId) {
-        await fetch(`/api/coach/plan/${planId}`, {
+        await apiFetch(`/api/coach/plan/${planId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: "done" }),
@@ -67,7 +68,7 @@ export default function NewPracticePage() {
   async function handleGeneratePlan() {
     setIsGenerating(true);
     try {
-      const res = await fetch("/api/coach/plan", {
+      const res = await apiFetch("/api/coach/plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ source: "auto" }),

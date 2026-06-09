@@ -9,6 +9,7 @@ import { SessionForm } from "@/components/practice/session-form";
 import { useClubs } from "@/hooks/use-clubs";
 import { updatePracticeSession, deletePracticeSession } from "@/hooks/use-practice";
 import { useAuth } from "@/hooks/use-auth";
+import { apiFetch } from "@/lib/api-client";
 import type { PracticeSessionWithClubs } from "@/types/database";
 
 export default function EditPracticePage() {
@@ -28,7 +29,7 @@ export default function EditPracticePage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    fetch("/api/practice/locations")
+    apiFetch("/api/practice/locations")
       .then((r) => r.ok ? r.json() : [])
       .then(setPastLocations)
       .catch(() => {});
@@ -40,12 +41,12 @@ export default function EditPracticePage() {
     async function fetchSession() {
       setIsFetching(true);
       try {
-        const res = await fetch(`/api/practice/${sessionId}`);
+        const res = await apiFetch(`/api/practice/${sessionId}`);
         if (res.ok) {
           const data = await res.json();
           setSession(data);
           if (data.plan_id) {
-            const planRes = await fetch(`/api/coach/plans?id=${data.plan_id}`);
+            const planRes = await apiFetch(`/api/coach/plans?id=${data.plan_id}`);
             if (planRes.ok) {
               const plans = await planRes.json();
               if (Array.isArray(plans)) {

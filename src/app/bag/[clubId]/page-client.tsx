@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { apiFetch } from "@/lib/api-client";
 import { ClubUsageSummary } from "@/components/club/club-usage-summary";
 import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
 
@@ -75,7 +76,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 
   useEffect(() => {
     if (!club) return;
-    fetch(`/api/clubs/${clubId}/history`)
+    apiFetch(`/api/clubs/${clubId}/history`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data: ActivityItem[]) => {
         setActivityCount(data.length);

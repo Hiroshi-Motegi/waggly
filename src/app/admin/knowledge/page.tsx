@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { apiFetch } from "@/lib/api-client";
 
 interface KnowledgeItem {
   id: string;
@@ -77,13 +78,13 @@ export default function KnowledgePage() {
     if (filterCategory) params.set("category", filterCategory);
     if (filterStatus) params.set("status", filterStatus);
     const qs = params.toString();
-    const res = await fetch(`/api/admin/knowledge${qs ? `?${qs}` : ""}`);
+    const res = await apiFetch(`/api/admin/knowledge${qs ? `?${qs}` : ""}`);
     if (res.ok) setItems(await res.json());
     setIsLoading(false);
   }
 
   async function fetchLatestRun() {
-    const res = await fetch("/api/admin/knowledge/runs");
+    const res = await apiFetch("/api/admin/knowledge/runs");
     if (res.ok) {
       const runs = await res.json();
       setLatestRun(runs[0] ?? null);
@@ -94,7 +95,7 @@ export default function KnowledgePage() {
   useEffect(() => { fetchLatestRun(); }, []);
 
   async function handleStatusChange(id: string, newStatus: string) {
-    await fetch(`/api/admin/knowledge/${id}`, {
+    await apiFetch(`/api/admin/knowledge/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),
@@ -104,14 +105,14 @@ export default function KnowledgePage() {
 
   async function handleDelete(id: string) {
     if (!confirm("削除しますか？")) return;
-    await fetch(`/api/admin/knowledge/${id}`, { method: "DELETE" });
+    await apiFetch(`/api/admin/knowledge/${id}`, { method: "DELETE" });
     fetchItems();
   }
 
   async function handleManualCollect() {
     setIsCollecting(true);
     try {
-      await fetch("/api/admin/knowledge/auto-collect", { method: "POST" });
+      await apiFetch("/api/admin/knowledge/auto-collect", { method: "POST" });
       await Promise.all([fetchItems(), fetchLatestRun()]);
     } finally {
       setIsCollecting(false);

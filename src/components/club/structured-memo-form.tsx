@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { apiFetch } from "@/lib/api-client";
 import type { MemoCondition } from "@/types/database";
 import { getTagsByCondition } from "@/lib/memo-tags";
 import { conditionOptions } from "@/components/club/inline-club-memo";
@@ -31,7 +32,7 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
     if (!condition) return;
     setIsSaving(true);
     try {
-      await fetch(`/api/clubs/${clubId}/memos`, {
+      await apiFetch(`/api/clubs/${clubId}/memos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

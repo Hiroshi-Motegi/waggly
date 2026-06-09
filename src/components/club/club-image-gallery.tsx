@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
+import { apiFetch } from "@/lib/api-client";
 import type { ClubImage } from "@/types/database";
 
 interface ClubImageGalleryProps {
@@ -23,7 +24,7 @@ export function ClubImageGallery({ clubId, images, onUpload }: ClubImageGalleryP
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch(`/api/clubs/${clubId}/images`, {
+      const res = await apiFetch(`/api/clubs/${clubId}/images`, {
         method: "POST",
         body: formData,
       });

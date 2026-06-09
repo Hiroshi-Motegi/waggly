@@ -8,6 +8,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { updatePlan } from "@/hooks/use-plans";
 import { useAuth } from "@/hooks/use-auth";
+import { apiFetch } from "@/lib/api-client";
 
 const statusLabels: Record<string, string> = {
   new: "未実行",
@@ -67,7 +68,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
 
   useEffect(() => {
     if (!user) return;
-    fetch(`/api/coach/plans?id=${planId}`)
+    apiFetch(`/api/coach/plans?id=${planId}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (Array.isArray(data)) {
@@ -91,7 +92,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
 
   async function handleDelete() {
     if (!confirm("この練習メニューを削除しますか？")) return;
-    await fetch(`/api/coach/plan/${planId}`, { method: "DELETE" });
+    await apiFetch(`/api/coach/plan/${planId}`, { method: "DELETE" });
     router.push("/coach/plans");
   }
 

@@ -131,7 +131,7 @@ export default function ItemsPage() {
 
         {/* List */}
         {isLoading ? (
-          <Loading variant="light" />
+          <Loading />
         ) : accessories.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             アイテムが登録されていません

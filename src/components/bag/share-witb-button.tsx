@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Share2, Download, X } from "lucide-react";
+import { apiFetch } from "@/lib/api-client";
 
 interface Props {
   bagNumber: number;
@@ -16,7 +17,7 @@ export function ShareWitbButton({ bagNumber }: Props) {
     setIsLoading(true);
     setIsOpen(true);
     try {
-      const res = await fetch(`/api/bag/witb-image?bag=${bagNumber}`);
+      const res = await apiFetch(`/api/bag/witb-image?bag=${bagNumber}`);
       if (!res.ok) throw new Error("Failed to generate image");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);

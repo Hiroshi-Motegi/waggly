@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useClubs } from "@/hooks/use-clubs";
+import { apiFetch } from "@/lib/api-client";
 
 export default function NewPlanPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function NewPlanPage() {
     setError("");
 
     // Fire and navigate - generation continues in background
-    fetch("/api/coach/plan", {
+    apiFetch("/api/coach/plan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

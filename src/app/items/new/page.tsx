@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X, Loader2 } from "lucide-react";
+import { apiFetch } from "@/lib/api-client";
 import type { AccessoryCategory, AccessoryStatus } from "@/types/database";
 
 const categories: { value: AccessoryCategory; label: string }[] = [
@@ -73,7 +74,7 @@ export default function NewItemPage() {
         status: form.status,
         purchase_url: form.purchase_url || null,
       };
-      const res = await fetch("/api/accessories", {
+      const res = await apiFetch("/api/accessories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -85,7 +86,7 @@ export default function NewItemPage() {
       if (pendingFile) {
         const formData = new FormData();
         formData.append("file", pendingFile);
-        await fetch(`/api/accessories/${created.id}/image`, {
+        await apiFetch(`/api/accessories/${created.id}/image`, {
           method: "POST",
           body: formData,
         });

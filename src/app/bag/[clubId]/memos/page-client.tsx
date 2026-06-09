@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Plus } from "lucide-react";
+import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { MemoCondition } from "@/types/database";
 
@@ -64,7 +65,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
   const [showMemoForm, setShowMemoForm] = useState(isAddMode);
 
   function fetchHistory() {
-    fetch(`/api/clubs/${clubId}/history`)
+    apiFetch(`/api/clubs/${clubId}/history`)
       .then((res) => (res.ok ? res.json() : []))
       .then(setActivity)
       .catch(() => setActivity([]));

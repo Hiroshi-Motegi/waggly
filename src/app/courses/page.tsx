@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import Image from "next/image";
+import { apiFetch } from "@/lib/api-client";
 
 const STORAGE_KEY = "courses-search-state";
 
@@ -93,7 +94,7 @@ export default function CoursesPage() {
       const params = new URLSearchParams({ page: String(page) });
       if (kw) params.set("keyword", kw);
       if (area) params.set("areaCode", area);
-      const res = await fetch(`/api/courses?${params}`);
+      const res = await apiFetch(`/api/courses?${params}`);
       if (!res.ok) throw new Error("検索に失敗しました");
       const data = await res.json();
       setResults(data);

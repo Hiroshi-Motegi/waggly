@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api-client";
 interface SummaryData {
   totalBalls: number;
   avgDistance: number | null;
@@ -18,7 +19,7 @@ export function ClubUsageSummary({ clubId }: Props) {
 
   useEffect(() => {
     async function fetchSummary() {
-      const res = await fetch(`/api/clubs/${clubId}/summary`);
+      const res = await apiFetch(`/api/clubs/${clubId}/summary`);
       if (res.ok) setData(await res.json());
       setIsLoading(false);
     }

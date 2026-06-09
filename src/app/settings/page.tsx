@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Download, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { apiFetch } from "@/lib/api-client";
 import { liffLogout } from "@/lib/liff";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/layout/page-header";
@@ -34,8 +35,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!user) return;
-    fetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch(() => {});
-    fetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch(() => {});
+    apiFetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch(() => {});
+    apiFetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch(() => {});
   }, [user]);
 
   if (!user) return null;
@@ -153,7 +154,7 @@ function ExportSection() {
   async function handleExport(type: string, label: string) {
     setDownloading(type);
     try {
-      const res = await fetch(`/api/export?type=${type}`);
+      const res = await apiFetch(`/api/export?type=${type}`);
       if (!res.ok) throw new Error("Failed to export");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);

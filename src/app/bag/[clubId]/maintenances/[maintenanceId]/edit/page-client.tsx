@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
 
@@ -35,7 +36,7 @@ export default function MaintenanceEditPage({
   });
 
   useEffect(() => {
-    fetch(`/api/clubs/${clubId}/maintenances/${maintenanceId}`)
+    apiFetch(`/api/clubs/${clubId}/maintenances/${maintenanceId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data: Maintenance | null) => {
         if (data) {
@@ -56,7 +57,7 @@ export default function MaintenanceEditPage({
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/clubs/${clubId}/maintenances/${maintenanceId}`, {
+      const res = await apiFetch(`/api/clubs/${clubId}/maintenances/${maintenanceId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

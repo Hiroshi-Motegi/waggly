@@ -247,24 +247,26 @@ export default function BagPage() {
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* Tabs */}
         {!isReordering && (
-          <div className="flex items-end gap-0.5">
-            {filterTabs.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setStatusFilter(tab.value)}
-                className="flex flex-col items-center gap-0.5 pt-1"
-              >
-                <span className="px-2 py-0.5 text-sm font-bold text-[#006728]">
-                  {tab.label}
-                </span>
-                <div
-                  className={`h-0.5 w-full ${
-                    statusFilter === tab.value ? "bg-[#006728]" : "bg-[#a5cbb4]"
-                  }`}
-                />
-              </button>
-            ))}
-            <div className="h-0.5 flex-1 bg-[#ececec]" />
+          <div className="relative">
+            <div className="flex items-end gap-0.5 overflow-x-auto scrollbar-hide">
+              {filterTabs.map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => setStatusFilter(tab.value)}
+                  className="flex shrink-0 flex-col items-center gap-0.5 pt-1"
+                >
+                  <span className="px-3 py-0.5 text-sm font-bold text-[#006728] whitespace-nowrap">
+                    {tab.label}
+                  </span>
+                  <div
+                    className={`h-0.5 w-full ${
+                      statusFilter === tab.value ? "bg-[#006728]" : "bg-[#a5cbb4]"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ececec] -z-[1]" />
           </div>
         )}
 
@@ -348,7 +350,7 @@ export default function BagPage() {
             </div>
           </>
         ) : isLoading ? (
-          <Loading variant="light" />
+          <Loading />
         ) : clubs.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             クラブが登録されていません

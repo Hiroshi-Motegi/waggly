@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { apiFetch } from "@/lib/api-client";
 import type { Club, ClubCategory } from "@/types/database";
 import { ClubDetailSpecs } from "@/components/club/club-detail-specs";
 
@@ -86,7 +87,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
   async function handleAutofill() {
     setIsSearching(true);
     try {
-      const res = await fetch("/api/clubs/autofill", {
+      const res = await apiFetch("/api/clubs/autofill", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
+import { apiFetch } from "@/lib/api-client";
 import { deletePracticeSession } from "@/hooks/use-practice";
 import { getConditionImage } from "@/components/club/inline-club-memo";
 import type { PracticeSessionWithClubs, MemoCondition } from "@/types/database";
@@ -39,7 +40,7 @@ export default function PracticeDetailPage() {
     async function fetchSession() {
       setIsFetching(true);
       try {
-        const res = await fetch(`/api/practice/${sessionId}`);
+        const res = await apiFetch(`/api/practice/${sessionId}`);
         if (res.ok) {
           setSession(await res.json());
         }
