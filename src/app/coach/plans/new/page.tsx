@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/hooks/use-auth";
+import { isNative } from "@/lib/platform";
 import { useClubs } from "@/hooks/use-clubs";
 import { apiFetch } from "@/lib/api-client";
 
@@ -12,6 +14,22 @@ type ClubTab = "bag" | "bag2" | "reserve";
 
 export default function NewPlanPage() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  if (!user && isNative()) {
+    return (
+      <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <div className="relative z-10 flex flex-col space-y-2">
+          <div className="rounded-lg bg-white p-6 text-center mt-4">
+            <p className="text-sm font-bold mb-2">AI練習メニューを利用するにはサインインが必要です</p>
+            <p className="text-xs text-[#8b8b8b] mb-4">設定画面からGoogleアカウントでサインインしてください</p>
+            <a href="/settings" className="inline-block rounded-full bg-[#006728] px-6 py-2 text-sm font-bold text-white">設定へ</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const { clubs: bag1 } = useClubs("bag", 1);
   const { clubs: bag2 } = useClubs("bag", 2);
   const { clubs: reserveClubs } = useClubs("reserve");
