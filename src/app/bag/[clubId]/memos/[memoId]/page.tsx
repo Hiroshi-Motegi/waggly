@@ -35,7 +35,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
     if (res.ok) router.push(`/bag/${clubId}/memos`);
   }
 
-  if (isFetching) return <Loading />;
+  if (isFetching) return <Loading variant="light" />;
   if (!memo) return <p className="p-4 text-center text-muted-foreground">メモが見つかりません</p>;
 
   return (
