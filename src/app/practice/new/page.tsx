@@ -83,45 +83,48 @@ export default function NewPracticePage() {
 
   if (saved) {
     return (
-      <div className="flex flex-col items-center justify-center px-6 py-16 space-y-4 text-center">
-        <h2 className="text-lg font-bold text-white">練習お疲れさまでした！</h2>
-        <p className="text-sm text-[#8b8b8b]">記録を保存しました</p>
+      <div className="relative flex flex-col items-center justify-center px-6 space-y-4 text-center bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <div className="relative z-10 flex flex-col items-center space-y-4 w-full">
+          <h2 className="text-lg font-bold text-white">練習お疲れさまでした！</h2>
+          <p className="text-sm text-white/70">記録を保存しました</p>
 
-        {planId ? (
-          <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-            <Link href={`/coach/plans/${planId}`} className="w-full">
-              <button className="w-full rounded-full bg-[#006728] border border-[#006728] py-2 text-sm font-bold text-white">
-                練習メニューを見る
+          {planId ? (
+            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+              <Link href={`/coach/plans/${planId}`} className="w-full">
+                <button className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728]">
+                  練習メニューを見る
+                </button>
+              </Link>
+              <Link href="/practice">
+                <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
+              </Link>
+            </div>
+          ) : planGenerated ? (
+            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+              <p className="text-sm font-bold text-white">練習メニューを作成しました！</p>
+              <Link href="/coach/plans" className="w-full">
+                <button className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728]">
+                  提案を見る
+                </button>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+              <button
+                onClick={handleGeneratePlan}
+                disabled={isGenerating}
+                className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728] disabled:opacity-50"
+              >
+                {isGenerating ? "メニュー作成中..." : "AIに次の練習メニューを提案してもらう"}
               </button>
-            </Link>
-            <Link href="/practice">
-              <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
-            </Link>
-          </div>
-        ) : planGenerated ? (
-          <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-            <p className="text-sm font-bold text-white">練習メニューを作成しました！</p>
-            <Link href="/coach/plans" className="w-full">
-              <button className="w-full rounded-full bg-[#006728] border border-[#006728] py-2 text-sm font-bold text-white">
-                提案を見る
-              </button>
-            </Link>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-            <button
-              onClick={handleGeneratePlan}
-              disabled={isGenerating}
-              className="w-full rounded-full bg-[#006728] border border-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50"
-            >
-              {isGenerating ? "メニュー作成中..." : "AIに次の練習メニューを提案してもらう"}
-            </button>
-            <p className="text-xs text-[#8b8b8b]">練習データをもとにAIが最適な練習メニューを提案します</p>
-            <Link href="/practice">
-              <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
-            </Link>
-          </div>
-        )}
+              <p className="text-xs text-white/60">練習データをもとにAIが最適な練習メニューを提案します</p>
+              <Link href="/practice">
+                <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
