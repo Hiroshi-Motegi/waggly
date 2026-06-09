@@ -19,13 +19,18 @@ export async function getDb(): Promise<SQLiteDBConnection> {
   if (isConsistent && isConnected) {
     db = await connection.retrieveConnection(DB_NAME, false);
   } else {
-    db = await connection.createConnection(
-      DB_NAME,
-      false,
-      "no-encryption",
-      1,
-      false
-    );
+    try {
+      db = await connection.createConnection(
+        DB_NAME,
+        false,
+        "no-encryption",
+        1,
+        false
+      );
+    } catch {
+      // Connection may already exist in native layer — retrieve it
+      db = await connection.retrieveConnection(DB_NAME, false);
+    }
   }
 
   await db.open();
