@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { usePracticeSessions } from "@/hooks/use-practice";
+import { isNative } from "@/lib/platform";
 import { RecentPractice } from "@/components/home/recent-practice";
 
 const featureCards = [
@@ -40,7 +41,7 @@ export default function HomePage() {
     return <Loading variant="light" />;
   }
 
-  if (!user) {
+  if (!user && !isNative()) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <p className="text-muted-foreground">LINEでログインしてください</p>
@@ -68,11 +69,11 @@ export default function HomePage() {
             className="brightness-0 invert"
           />
           <Link href="/settings" className="absolute right-2">
-            {user.avatar_url ? (
+            {user?.avatar_url ? (
               <img src={user.avatar_url} alt="" className="h-8 w-8 rounded-full" />
             ) : (
               <div className="h-8 w-8 rounded-full bg-white/30 flex items-center justify-center text-white text-sm font-bold">
-                {user.display_name[0]}
+                {user?.display_name?.[0] ?? "G"}
               </div>
             )}
           </Link>
@@ -80,7 +81,7 @@ export default function HomePage() {
 
         {/* Greeting */}
         <p className="text-lg font-medium text-white text-center mt-2">
-          こんにちは、{user.display_name}さん
+          こんにちは{user ? `、${user.display_name}さん` : ""}
         </p>
 
         {/* Feature cards */}
