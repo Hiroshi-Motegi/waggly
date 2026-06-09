@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { apiFetch } from "@/lib/api-client";
+import { useAuth } from "@/hooks/use-auth";
 import type { Club, ClubCategory } from "@/types/database";
 import { ClubDetailSpecs } from "@/components/club/club-detail-specs";
 
@@ -58,6 +59,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     head_weight: undefined,
     ...initialData,
   });
+  const { user } = useAuth();
 
   const [useCustomNumber, setUseCustomNumber] = useState(() => {
     if (!initialData?.club_number || !initialData?.category) return false;
@@ -238,20 +240,22 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       {/* Section 2: スペック */}
       <h3 className="px-1 pt-2 text-base font-bold text-white">スペック</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
-        {/* 自動入力 */}
-        <div className="flex flex-col items-center gap-1 rounded bg-[#ebf1eb] p-3">
-          <p className="text-[10px] text-black w-full">
-            公開情報からスペックを自動入力します。内容に誤りがある場合があります。
-          </p>
-          <button
-            type="button"
-            disabled={isSearching || (!form.maker && !form.model)}
-            onClick={handleAutofill}
-            className="rounded-full border border-[#006728] bg-white px-5 py-1 text-[10px] font-bold text-[#006728] disabled:opacity-50"
-          >
-            {isSearching ? "検索中..." : "スペック自動入力"}
-          </button>
-        </div>
+        {/* 自動入力（サインイン時のみ） */}
+        {user && (
+          <div className="flex flex-col items-center gap-1 rounded bg-[#ebf1eb] p-3">
+            <p className="text-[10px] text-black w-full">
+              公開情報からスペックを自動入力します。内容に誤りがある場合があります。
+            </p>
+            <button
+              type="button"
+              disabled={isSearching || (!form.maker && !form.model)}
+              onClick={handleAutofill}
+              className="rounded-full border border-[#006728] bg-white px-5 py-1 text-[10px] font-bold text-[#006728] disabled:opacity-50"
+            >
+              {isSearching ? "検索中..." : "スペック自動入力"}
+            </button>
+          </div>
+        )}
 
         {/* Inline spec rows */}
         <div className="flex items-center gap-0.5 pt-2.5">

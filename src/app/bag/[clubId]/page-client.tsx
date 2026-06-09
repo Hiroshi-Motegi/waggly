@@ -9,6 +9,7 @@ import { Pencil, Trash2, Plus } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { apiFetch } from "@/lib/api-client";
 import { ClubUsageSummary } from "@/components/club/club-usage-summary";
+import { useAuth } from "@/hooks/use-auth";
 import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
 
 const statusLabels: Record<string, string> = {
@@ -75,14 +76,20 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
   const [activityCount, setActivityCount] = useState(0);
   const [latestDistance, setLatestDistance] = useState<number | null>(null);
 
+  const { user } = useAuth();
+
   useEffect(() => {
     if (!club) return;
+    if (!user) {
+      // Local mode: no history API available
+      setActivityLoading(false);
+      return;
+    }
     apiFetch(`/api/clubs/${clubId}/history`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data: ActivityItem[]) => {
         setActivityCount(data.length);
         setActivity(data.slice(0, 4));
-        // Find latest distance from memo or practice
         const dist = data.find((d) =>
           (d.type === "memo" && d.distance != null) ||
           (d.type === "practice" && d.avg_distance != null)
@@ -93,7 +100,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       })
       .catch(() => {})
       .finally(() => setActivityLoading(false));
-  }, [clubId, club]);
+  }, [clubId, club, user]);
 
   async function handleStatusChange(newStatus: string, bagNumber?: number) {
     const update: any = { status: newStatus };
@@ -263,11 +270,13 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         </div>
       </div>
 
-      {/* 使用サマリー */}
-      <div className="rounded-lg bg-white p-3">
-        <h3 className="text-sm font-bold mb-2">使用サマリー（3ヶ月）</h3>
-        <ClubUsageSummary clubId={clubId} />
-      </div>
+      {/* 使用サマリー（サインイン時のみ） */}
+      {user && (
+        <div className="rounded-lg bg-white p-3">
+          <h3 className="text-sm font-bold mb-2">使用サマリー（3ヶ月）</h3>
+          <ClubUsageSummary clubId={clubId} />
+        </div>
+      )}
 
       {/* Activity header */}
       <div className="flex items-center gap-2 px-1 pt-4">
