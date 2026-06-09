@@ -42,7 +42,7 @@ export default function PracticeDetailPage() {
   }, [sessionId, user, authLoading]);
 
   if (authLoading || isFetching) {
-    return <Loading />;
+    return <Loading variant="light" />;
   }
 
   if (!session) {

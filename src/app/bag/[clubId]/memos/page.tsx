@@ -75,7 +75,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
     fetchHistory();
   }, [clubId, club, isAddMode]);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading variant="light" />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   // Add mode: dedicated form page

@@ -134,7 +134,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loading />
+        <Loading variant="light" />
       </div>
     );
   }

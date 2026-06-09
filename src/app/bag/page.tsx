@@ -348,7 +348,7 @@ export default function BagPage() {
             </div>
           </>
         ) : isLoading ? (
-          <Loading />
+          <Loading variant="light" />
         ) : clubs.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             クラブが登録されていません

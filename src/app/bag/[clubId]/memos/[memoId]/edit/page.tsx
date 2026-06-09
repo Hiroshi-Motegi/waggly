@@ -72,7 +72,7 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
     }
   }
 
-  if (isFetching) return <Loading />;
+  if (isFetching) return <Loading variant="light" />;
 
   const tagSet = condition ? getTagsByCondition(condition) : null;
 

@@ -168,7 +168,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading variant="light" />;
   if (!item) return <p className="p-4 text-center text-muted-foreground">アイテムが見つかりません</p>;
 
   function handleImageDelete() {

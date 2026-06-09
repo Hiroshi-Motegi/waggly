@@ -108,7 +108,7 @@ export default function SettingsPage() {
             )}
           </div>
         ) : (
-          <Loading />
+          <Loading variant="light" />
         )}
       </div>
 

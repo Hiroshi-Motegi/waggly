@@ -46,7 +46,7 @@ export default function MaintenanceDetailPage({
     if (res.ok) router.push(`/bag/${clubId}/maintenances`);
   }
 
-  if (isFetching) return <Loading />;
+  if (isFetching) return <Loading variant="light" />;
   if (!item) return <p className="p-4 text-center text-muted-foreground">記録が見つかりません</p>;
 
   return (

@@ -29,7 +29,7 @@ export default function PracticePage() {
       </PageHeader>
 
       {isLoading ? (
-        <Loading />
+        <Loading variant="light" />
       ) : sessions.length === 0 ? (
         <p className="text-center text-muted-foreground py-8">
           まだ練習記録がありません

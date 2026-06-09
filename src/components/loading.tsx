@@ -6,14 +6,11 @@ export function Loading({ variant = "default" }: { variant?: "default" | "light"
   const isLight = variant === "light";
   const textColor = isLight ? "text-white" : "text-[#006728]";
 
-  return (
-    <div
-      className="flex flex-col items-center justify-center gap-0 py-12"
-      style={isLight ? { "--fill-0": "white" } as React.CSSProperties : undefined}
-    >
+  const content = (
+    <div className="flex flex-col items-center justify-center gap-0 py-12">
       <div className="loading-bounce">
         <img
-          src="/icons/loading-ball.svg"
+          src={isLight ? "/icons/loading-ball-white.svg" : "/icons/loading-ball.svg"}
           alt=""
           className="h-10 w-10"
         />
@@ -32,4 +29,15 @@ export function Loading({ variant = "default" }: { variant?: "default" | "light"
       </div>
     </div>
   );
+
+  if (isLight) {
+    return (
+      <div className="relative flex items-center justify-center bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <div className="relative z-10">{content}</div>
+      </div>
+    );
+  }
+
+  return content;
 }

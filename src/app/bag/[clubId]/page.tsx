@@ -105,7 +105,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
     router.push("/bag");
   }
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading variant="light" />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   return (
