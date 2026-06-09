@@ -70,8 +70,8 @@ export function InlineClubMemo({ value, onChange }: Props) {
                   : "border-[#ddd] bg-white"
               }`}
             >
-              <div className="text-lg">{opt.emoji}</div>
-              <div className="text-[10px] mt-0.5">{opt.label}</div>
+              <div className="text-xl">{opt.emoji}</div>
+              <div className="text-xs mt-0.5">{opt.label}</div>
             </button>
           ))}
         </div>
@@ -89,7 +89,7 @@ export function InlineClubMemo({ value, onChange }: Props) {
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag, value?.symptom_tags ?? [], "symptom_tags")}
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] ${
+                    className={`rounded-full px-3 py-1 text-xs ${
                       value?.symptom_tags.includes(tag)
                         ? "bg-[#27ae60] text-white"
                         : "border border-[#ddd] bg-white text-[#333]"
@@ -107,14 +107,14 @@ export function InlineClubMemo({ value, onChange }: Props) {
               <p className="text-xs font-bold mb-1.5">何が起きた？</p>
               {tagSet.symptomTags.map((cat) => (
                 <div key={cat.label} className="mb-1.5">
-                  <p className="text-[11px] text-[#8b8b8b] mb-1">{cat.label}</p>
+                  <p className="text-xs text-[#8b8b8b] mb-1">{cat.label}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {cat.tags.map((tag) => (
                       <button
                         key={tag}
                         type="button"
                         onClick={() => toggleTag(tag, value?.symptom_tags ?? [], "symptom_tags")}
-                        className={`rounded-full px-2.5 py-0.5 text-[11px] ${
+                        className={`rounded-full px-3 py-1 text-xs ${
                           value?.symptom_tags.includes(tag)
                             ? "bg-[#006728] text-white"
                             : "border border-[#ddd] bg-white text-[#333]"
@@ -138,7 +138,7 @@ export function InlineClubMemo({ value, onChange }: Props) {
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag, value?.feeling_tags ?? [], "feeling_tags")}
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] ${
+                    className={`rounded-full px-3 py-1 text-xs ${
                       value?.feeling_tags.includes(tag)
                         ? "bg-[#006728] text-white"
                         : "border border-[#ddd] bg-white text-[#333]"
@@ -160,7 +160,7 @@ export function InlineClubMemo({ value, onChange }: Props) {
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag, value?.gear_tags ?? [], "gear_tags")}
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] ${
+                    className={`rounded-full px-3 py-1 text-xs ${
                       value?.gear_tags.includes(tag)
                         ? "bg-[#006728] text-white"
                         : "border border-[#ddd] bg-white text-[#333]"
@@ -193,7 +193,7 @@ export function InlineClubMemo({ value, onChange }: Props) {
         <button
           type="button"
           onClick={handleClear}
-          className="self-start text-[11px] text-[#8b8b8b] underline"
+          className="self-start text-xs text-[#8b8b8b] underline"
         >
           メモをクリア
         </button>
