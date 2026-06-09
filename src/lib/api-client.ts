@@ -186,8 +186,25 @@ async function routeLocal(
   match = path.match(/^\/api\/clubs\/([^/]+)\/history$/);
   if (match && method === "GET") {
     const clubId = match[1];
-    const memos = await q("SELECT *, 'memo' as type, created_at as date FROM club_memos WHERE club_id = ? ORDER BY created_at DESC", [clubId]);
-    return memos;
+    const memos = await q("SELECT *, 'memo' as type, created_at as date FROM club_memos WHERE club_id = ?", [clubId]);
+    for (const m of memos) {
+      m.symptom_tags = JSON.parse(m.symptom_tags || "[]");
+      m.feeling_tags = JSON.parse(m.feeling_tags || "[]");
+      m.gear_tags = JSON.parse(m.gear_tags || "[]");
+    }
+    const practices = await q(
+      `SELECT pc.*, ps.practiced_at, ps.location, ps.memo as session_memo, 'practice' as type, ps.practiced_at as date, ps.id as session_id
+       FROM practice_clubs pc
+       JOIN practice_sessions ps ON pc.session_id = ps.id
+       WHERE pc.club_id = ?`, [clubId]
+    );
+    const maintenances = await q(
+      `SELECT *, 'maintenance' as type, done_at as date, type as maintenance_type FROM maintenances WHERE club_id = ?`, [clubId]
+    );
+    const all = [...memos, ...practices, ...maintenances].sort((a: any, b: any) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    return all;
   }
 
   // GET /api/clubs/:id/summary
@@ -201,7 +218,13 @@ async function routeLocal(
   // GET /api/clubs/:id/memos
   match = path.match(/^\/api\/clubs\/([^/]+)\/memos$/);
   if (match && method === "GET") {
-    return q("SELECT * FROM club_memos WHERE club_id = ? ORDER BY created_at DESC", [match[1]]);
+    const rows = await q("SELECT * FROM club_memos WHERE club_id = ? ORDER BY created_at DESC", [match[1]]);
+    for (const r of rows) {
+      r.symptom_tags = JSON.parse(r.symptom_tags || "[]");
+      r.feeling_tags = JSON.parse(r.feeling_tags || "[]");
+      r.gear_tags = JSON.parse(r.gear_tags || "[]");
+    }
+    return rows;
   }
 
   // POST /api/clubs/:id/memos
@@ -221,7 +244,13 @@ async function routeLocal(
   match = path.match(/^\/api\/clubs\/([^/]+)\/memos\/([^/]+)$/);
   if (match && method === "GET") {
     const rows = await q("SELECT * FROM club_memos WHERE id = ? AND club_id = ?", [match[2], match[1]]);
-    return rows[0] ?? null;
+    const row = rows[0] ?? null;
+    if (row) {
+      row.symptom_tags = JSON.parse(row.symptom_tags || "[]");
+      row.feeling_tags = JSON.parse(row.feeling_tags || "[]");
+      row.gear_tags = JSON.parse(row.gear_tags || "[]");
+    }
+    return row;
   }
 
   // PATCH /api/clubs/:clubId/memos/:memoId

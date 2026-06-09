@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  const { clubs: clubBalls, rating, ...sessionData } = await request.json();
+  const { clubs: clubBalls, ...sessionData } = await request.json();
 
   // Create session
   const { data: session, error: sessionError } = await supabase

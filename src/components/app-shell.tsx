@@ -119,8 +119,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   // Normal app
+  const native = isNative();
   return (
-    <div className="mx-auto max-w-md min-h-dvh shadow-sm relative animate-fade-in bg-[#ebf1eb]">
+    <div className={`min-h-dvh relative animate-fade-in bg-[#ebf1eb] ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-md shadow-sm"}`}>
       <Header />
       <main style={{ paddingBottom: pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>

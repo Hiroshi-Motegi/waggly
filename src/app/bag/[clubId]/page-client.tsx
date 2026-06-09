@@ -81,11 +81,6 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 
   useEffect(() => {
     if (!club) return;
-    if (!user) {
-      // Local mode: no history API available
-      setActivityLoading(false);
-      return;
-    }
     apiFetch(`/api/clubs/${clubId}/history`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data: ActivityItem[]) => {
@@ -101,7 +96,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       })
       .catch(() => {})
       .finally(() => setActivityLoading(false));
-  }, [clubId, club, user]);
+  }, [clubId, club]);
 
   async function handleStatusChange(newStatus: string, bagNumber?: number) {
     const update: any = { status: newStatus };
