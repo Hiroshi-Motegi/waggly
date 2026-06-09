@@ -164,7 +164,7 @@ export default function ItemsPage() {
                     <StarRating rating={item.rating} />
                   </div>
                   {item.status === "past" && (
-                    <span className="shrink-0 rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-xs font-medium text-black">
+                    <span className="shrink-0 rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
                       アーカイブ
                     </span>
                   )}

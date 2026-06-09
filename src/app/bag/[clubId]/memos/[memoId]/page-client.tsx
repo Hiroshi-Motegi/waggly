@@ -75,7 +75,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
             </span>
           </div>
           {memo.distance && (
-            <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-sm font-medium text-black">
+            <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">
               {memo.distance} yd
             </span>
           )}

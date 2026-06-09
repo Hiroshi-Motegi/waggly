@@ -70,7 +70,7 @@ export default function MaintenanceDetailPage({
 
       <div className="flex flex-col gap-3 rounded-lg bg-white p-4">
         <div className="flex items-center justify-between">
-          <span className="rounded-full bg-[#c7e2ca] px-2.5 py-0.5 text-sm font-medium text-black">
+          <span className="rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
             {maintenanceTypeLabels[item.type]}
           </span>
           <span className="text-base text-[#8b8b8b]">{formatDate(item.done_at)}</span>

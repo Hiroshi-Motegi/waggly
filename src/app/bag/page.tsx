@@ -109,20 +109,20 @@ function ClubRow({
           <Image src="/icons/cat-club.svg" alt="" width={30} height={30} className="opacity-50" />
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-px min-w-0">
-        <span className="text-sm font-medium text-[#8b8b8b]">
-          {club.club_number}
-        </span>
-        <span className="text-base font-bold text-black truncate">
-          {club.model ?? "—"}
-        </span>
-        <span className="text-sm text-[#8b8b8b] truncate">
-          {club.maker ?? "—"}
-          {(club.latest_avg_distance ?? club.distance) != null && ` · ${club.latest_avg_distance ?? club.distance} yd`}
-        </span>
+      <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="shrink-0 bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5">
+            {club.club_number}
+          </span>
+          <span className="text-base font-bold text-black truncate">{club.model ?? "—"}</span>
+          {(club.latest_avg_distance ?? club.distance) != null && (
+            <span className="text-sm text-[#8b8b8b] shrink-0 ml-auto">{club.latest_avg_distance ?? club.distance} yd</span>
+          )}
+        </div>
+        <span className="text-sm text-[#8b8b8b] truncate pl-0.5">{club.maker ?? "—"}</span>
       </div>
       {showStatus && bagLabel && (
-        <span className="shrink-0 rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-xs font-medium text-black">
+        <span className="shrink-0 rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
           {bagLabel}
         </span>
       )}

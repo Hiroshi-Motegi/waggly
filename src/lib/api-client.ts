@@ -198,6 +198,17 @@ async function routeLocal(
        JOIN practice_sessions ps ON pc.session_id = ps.id
        WHERE pc.club_id = ?`, [clubId]
     );
+    for (const p of practices) {
+      const clubMemos = await q("SELECT * FROM club_memos WHERE club_id = ? AND practice_session_id = ?", [clubId, p.session_id]);
+      const cm = clubMemos[0];
+      if (cm) {
+        p.condition = cm.condition;
+        p.memo = cm.memo;
+        p.symptom_tags = JSON.parse(cm.symptom_tags || "[]");
+        p.feeling_tags = JSON.parse(cm.feeling_tags || "[]");
+        p.gear_tags = JSON.parse(cm.gear_tags || "[]");
+      }
+    }
     const maintenances = await q(
       `SELECT *, 'maintenance' as type, done_at as date, type as maintenance_type FROM maintenances WHERE club_id = ?`, [clubId]
     );

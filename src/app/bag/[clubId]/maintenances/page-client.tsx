@@ -260,7 +260,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
                 >
                   <div className="flex flex-1 flex-col gap-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs font-medium text-black">
+                      <span className="rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
                         {maintenanceTypeLabels[m.type]}
                       </span>
                       <span className="text-sm text-[#8b8b8b]">{formatDate(m.done_at)}</span>

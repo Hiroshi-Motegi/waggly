@@ -37,9 +37,16 @@ export async function GET(
   // Fetch practice records
   const { data: practiceClubs } = await supabase
     .from("practice_clubs")
-    .select("id, balls, avg_distance, session:practice_sessions(id, practiced_at, location, created_at)")
+    .select("id, balls, avg_distance, session:practice_sessions(id, practiced_at, location, memo, created_at)")
     .eq("club_id", clubId)
     .order("id", { ascending: false });
+
+  // Fetch club memos linked to practice sessions for this club
+  const { data: practiceMemos } = await supabase
+    .from("club_memos")
+    .select("practice_session_id, memo, condition, symptom_tags, feeling_tags, gear_tags, distance")
+    .eq("club_id", clubId)
+    .not("practice_session_id", "is", null);
 
   // Fetch maintenances
   const { data: maintenances } = await supabase
@@ -75,9 +82,11 @@ export async function GET(
   }
 
   if (practiceClubs) {
+    const memoBySession = new Map((practiceMemos ?? []).map((m: any) => [m.practice_session_id, m]));
     for (const pc of practiceClubs) {
       const session = pc.session as any;
       if (!session) continue;
+      const clubMemo = memoBySession.get(session.id);
       timeline.push({
         type: "practice",
         id: pc.id,
@@ -85,8 +94,14 @@ export async function GET(
         date: session.created_at ?? session.practiced_at,
         practiced_at: session.practiced_at,
         location: session.location,
+        session_memo: session.memo,
         balls: pc.balls,
         avg_distance: pc.avg_distance,
+        condition: clubMemo?.condition ?? null,
+        symptom_tags: clubMemo?.symptom_tags ?? [],
+        feeling_tags: clubMemo?.feeling_tags ?? [],
+        gear_tags: clubMemo?.gear_tags ?? [],
+        memo: clubMemo?.memo ?? null,
       });
     }
   }

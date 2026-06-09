@@ -58,8 +58,8 @@ function formatDate(dateStr: string): string {
 
 const badgeColors: Record<string, string> = {
   memo: "bg-[#c7e2ca]",
-  practice: "bg-[#c7e2e2]",
-  maintenance: "bg-[#c7e2e2]",
+  practice: "bg-[#c7d2e2]",
+  maintenance: "bg-[#e2dac7]",
 };
 
 const badgeLabels: Record<string, string> = {
@@ -265,10 +265,10 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         </div>
       </div>
 
-      {/* 使用サマリー（サインイン時のみ） */}
+      {/* 使用感サマリー */}
       {user && (
-        <div className="rounded-lg bg-white p-3">
-          <h3 className="text-base font-bold mb-2">使用サマリー（3ヶ月）</h3>
+        <div className="flex flex-col gap-2 pt-4">
+          <h3 className="text-base font-bold text-white px-1">使用感サマリー</h3>
           <ClubUsageSummary clubId={clubId} />
         </div>
       )}
@@ -278,14 +278,14 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         <h3 className="flex-1 text-base font-bold text-white">アクティビティ</h3>
         <Link
           href={nativeHref(`/bag/${clubId}/memos?add=1`)}
-          className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]"
+          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
         >
           <Plus className="h-3 w-3" />
           メモ
         </Link>
         <Link
           href={nativeHref(`/bag/${clubId}/maintenances?add=1`)}
-          className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]"
+          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
         >
           <Plus className="h-3 w-3" />
           メンテナンス記録
@@ -343,47 +343,54 @@ function ActivityRow({ item, clubId, isLast }: { item: ActivityItem; clubId: str
       ? formatDate(item.done_at)
       : formatDate(item.date.split("T")[0]);
 
-  // Summary text for the badge row
-  let summary = "";
-  if (item.type === "memo" && item.distance) summary = `${item.distance} yd`;
-  if (item.type === "practice") {
-    const parts: string[] = [];
-    if (item.avg_distance) parts.push(`${item.avg_distance}yd`);
-    if (item.balls) parts.push(`${item.balls}球`);
-    summary = parts.join(" ");
-  }
+  // Title line (location or maintenance label)
+  let title = "";
+  if (item.type === "practice" && item.location) title = item.location;
+  if (item.type === "maintenance") title = item.maintenance_label ?? "";
 
-  // Second line
-  let detail = "";
-  if (item.type === "memo" && item.memo) detail = item.memo;
-  if (item.type === "practice" && item.location) detail = item.location;
-  if (item.type === "maintenance") detail = item.maintenance_label ?? "";
+  // Memo text
+  let memoText = item.memo ?? "";
+
+  const allTags = [...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])];
 
   return (
     <Link href={href}>
-      <div className={`flex items-center gap-2.5 py-3 ${!isLast ? "border-b border-[#dfdfdf]" : ""}`}>
-        <div className="flex flex-1 flex-col gap-1 min-w-0">
+      <div className={`flex items-center gap-2.5 py-2 ${!isLast ? "border-b border-[#dfdfdf]" : ""}`}>
+        <div className="flex flex-1 flex-col gap-px min-w-0">
+          {/* Row 1: badge + date */}
           <div className="flex items-center gap-1.5">
-            <span className={`rounded-full px-2 py-0.5 text-sm font-medium text-black ${badgeColors[item.type]}`}>
+            <span className={`rounded-full px-2.5 py-1 text-xs font-bold text-black ${badgeColors[item.type]}`}>
               {badgeLabels[item.type]}
             </span>
-            {item.condition && (
-              <img src={`/images/face-${item.condition === "normal" ? "ok" : item.condition}.png`} alt="" className="w-5 h-5" />
-            )}
-            {summary && (
-              <span className="text-sm font-medium text-[#8b8b8b]">{summary}</span>
-            )}
-            <span className="text-sm font-medium text-[#8b8b8b] ml-auto shrink-0">{dateStr}</span>
+            <span className="text-sm font-medium text-[#8b8b8b]">{dateStr}</span>
           </div>
-          {[...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])].length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-0.5">
-              {[...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])].map((tag) => (
-                <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-xs text-[#333]">{tag}</span>
+          {/* Row 2: title (bold) */}
+          {title && (
+            <p className="text-sm font-bold text-black pt-1 pb-0.5">{title}</p>
+          )}
+          {/* Row 3: condition + yd/球 badges + tags */}
+          {(item.condition || item.distance || item.avg_distance || item.balls || allTags.length > 0) && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
+              {item.condition && (
+                <img src={`/images/face-${item.condition === "normal" ? "ok" : item.condition}.png`} alt="" className="w-5 h-5" />
+              )}
+              {(item.type === "memo" && item.distance) && (
+                <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.distance}yd</span>
+              )}
+              {(item.type === "practice" && item.avg_distance) && (
+                <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.avg_distance}yd</span>
+              )}
+              {(item.type === "practice" && item.balls) && (
+                <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.balls}球</span>
+              )}
+              {allTags.map((tag) => (
+                <span key={tag} className="rounded-full bg-[#f0f0f0] p-1.5 text-xs font-medium text-black">{tag}</span>
               ))}
             </div>
           )}
-          {detail && (
-            <p className="text-base font-bold text-black truncate line-clamp-2">{detail}</p>
+          {/* Row 4: memo text */}
+          {memoText && (
+            <p className="text-sm text-black pt-1.5 line-clamp-2 overflow-hidden">{memoText}</p>
           )}
         </div>
         <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" />

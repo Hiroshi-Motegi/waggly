@@ -146,10 +146,10 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
               {plan.practice_plan_items?.map((item: any, index: number) => (
                 <div key={item.id} className={index > 0 ? "border-t border-[#dfdfdf] pt-2" : ""}>
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs font-medium text-black">
+                    <span className="rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
                       {item.club?.club_number ?? "?"}
                     </span>
-                    <span className="text-sm text-[#8b8b8b]">{item.balls}球</span>
+                    <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.balls}球</span>
                   </div>
                   <p className="text-sm font-bold mt-0.5">{item.focus}</p>
                 </div>

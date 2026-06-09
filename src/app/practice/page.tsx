@@ -54,7 +54,7 @@ export default function PracticePage() {
                     </span>
                   </div>
                   {s.total_balls && (
-                    <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-xs font-medium text-black">
+                    <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">
                       {s.total_balls}球
                     </span>
                   )}

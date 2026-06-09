@@ -36,8 +36,8 @@ interface ActivityItem {
 
 const badgeColors: Record<string, string> = {
   memo: "bg-[#c7e2ca]",
-  practice: "bg-[#c7e2e2]",
-  maintenance: "bg-[#c7e2e2]",
+  practice: "bg-[#c7d2e2]",
+  maintenance: "bg-[#e2dac7]",
 };
 
 const badgeLabels: Record<string, string> = {
@@ -185,19 +185,12 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
                   ? formatDate(item.done_at)
                   : formatDate(item.date.split("T")[0]);
 
-              let summary = "";
-              if (item.type === "memo" && item.distance) summary = `${item.distance} yd`;
-              if (item.type === "practice") {
-                const parts: string[] = [];
-                if (item.avg_distance) parts.push(`${item.avg_distance}yd`);
-                if (item.balls) parts.push(`${item.balls}球`);
-                summary = parts.join(" ");
-              }
+              // Title line
+              let title = "";
+              if (item.type === "practice" && item.location) title = item.location;
+              if (item.type === "maintenance") title = item.maintenance_label ?? "";
 
-              let detail = "";
-              if (item.type === "memo" && item.memo) detail = item.memo;
-              if (item.type === "practice" && item.location) detail = item.location;
-              if (item.type === "maintenance") detail = item.maintenance_label ?? "";
+              const memoText = item.memo ?? "";
 
               const allTags = [
                 ...(item.symptom_tags ?? []),
@@ -207,31 +200,42 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
 
               return (
                 <Link key={`${item.type}-${item.id}`} href={href}>
-                  <div className={`flex items-center gap-2.5 py-3 ${i < activity.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                    <div className="flex flex-1 flex-col gap-1 min-w-0">
+                  <div className={`flex items-center gap-2.5 py-2 ${i < activity.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                    <div className="flex flex-1 flex-col gap-px min-w-0">
+                      {/* Row 1: badge + date */}
                       <div className="flex items-center gap-1.5">
-                        <span className={`rounded-full px-2 py-0.5 text-sm font-medium text-black ${badgeColors[item.type]}`}>
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-bold text-black ${badgeColors[item.type]}`}>
                           {badgeLabels[item.type]}
                         </span>
-                        {item.type === "memo" && item.condition && (
-                          <img src={conditionImage[item.condition]} alt="" className="w-5 h-5" />
-                        )}
-                        {summary && (
-                          <span className="text-sm font-medium text-[#8b8b8b]">{summary}</span>
-                        )}
-                        <span className="text-sm font-medium text-[#8b8b8b] ml-auto shrink-0">{dateStr}</span>
+                        <span className="text-sm font-medium text-[#8b8b8b]">{dateStr}</span>
                       </div>
-                      {detail && (
-                        <p className="text-base font-bold text-black truncate">{detail}</p>
+                      {/* Row 2: title (bold) */}
+                      {title && (
+                        <p className="text-sm font-bold text-black pt-1 pb-0.5">{title}</p>
                       )}
-                      {item.type === "memo" && allTags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-0.5">
+                      {/* Row 3: condition + yd/球 badges + tags */}
+                      {(item.condition || item.distance || item.avg_distance || item.balls || allTags.length > 0) && (
+                        <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
+                          {item.condition && (
+                            <img src={conditionImage[item.condition]} alt="" className="w-5 h-5" />
+                          )}
+                          {(item.type === "memo" && item.distance) && (
+                            <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.distance}yd</span>
+                          )}
+                          {(item.type === "practice" && item.avg_distance) && (
+                            <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.avg_distance}yd</span>
+                          )}
+                          {(item.type === "practice" && item.balls) && (
+                            <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.balls}球</span>
+                          )}
                           {allTags.map((tag) => (
-                            <span key={tag} className="rounded-full bg-[#f0f0f0] px-1.5 py-0.5 text-xs text-[#666]">
-                              {tag}
-                            </span>
+                            <span key={tag} className="rounded-full bg-[#f0f0f0] p-1.5 text-xs font-medium text-black">{tag}</span>
                           ))}
                         </div>
+                      )}
+                      {/* Row 4: memo text */}
+                      {memoText && (
+                        <p className="text-sm text-black pt-1.5 line-clamp-2 overflow-hidden">{memoText}</p>
                       )}
                     </div>
                     <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" />

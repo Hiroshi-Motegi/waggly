@@ -57,7 +57,7 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <span className="bg-[#006728] text-white text-base rounded-full px-2.5">{clubNumber}</span>
+        <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5">{clubNumber}</span>
         {clubModel && <span className="text-base text-[#6c6c6c]">{clubModel}</span>}
       </div>
 

@@ -6,6 +6,7 @@ interface SummaryData {
   totalBalls: number;
   avgDistance: number | null;
   memoCount: number;
+  practiceCount?: number;
   topTags: { tag: string; count: number }[];
 }
 
@@ -41,32 +42,33 @@ export function ClubUsageSummary({ clubId }: Props) {
   if (!data || (data.totalBalls === 0 && data.memoCount === 0)) return null;
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div>
-          <p className="text-lg font-bold text-[#006728]">{data.totalBalls}</p>
-          <p className="text-xs text-[#8b8b8b]">球（3ヶ月）</p>
+    <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="flex items-center rounded-lg bg-[#f7f7f7] p-3">
+          <span className="flex-1 text-xs text-[#9c9c9c]">平均飛距離</span>
+          <span className="text-[#006728] font-bold"><span className="text-base">{data.avgDistance ?? "—"}</span><span className="text-sm">yd</span></span>
         </div>
-        <div>
-          <p className="text-lg font-bold text-[#006728]">{data.avgDistance ?? "—"}</p>
-          <p className="text-xs text-[#8b8b8b]">平均飛距離(yd)</p>
+        <div className="flex items-center rounded-lg bg-[#f7f7f7] p-3">
+          <span className="flex-1 text-xs text-[#9c9c9c]">練習回数</span>
+          <span className="text-[#006728] font-bold"><span className="text-base">{data.practiceCount ?? 0}</span><span className="text-sm">回</span></span>
         </div>
-        <div>
-          <p className="text-lg font-bold text-[#006728]">{data.memoCount}</p>
-          <p className="text-xs text-[#8b8b8b]">メモ数</p>
+        <div className="flex items-center rounded-lg bg-[#f7f7f7] p-3">
+          <span className="flex-1 text-xs text-[#9c9c9c]">メモ</span>
+          <span className="text-[#006728] font-bold"><span className="text-base">{data.memoCount}</span><span className="text-sm">件</span></span>
+        </div>
+        <div className="flex items-center rounded-lg bg-[#f7f7f7] p-3">
+          <span className="flex-1 text-xs text-[#9c9c9c]">打数</span>
+          <span className="text-[#006728] font-bold"><span className="text-base">{data.totalBalls}</span><span className="text-sm">球</span></span>
         </div>
       </div>
 
       {data.topTags.length > 0 && (
-        <div>
-          <p className="text-sm font-bold mb-1">よく出るキーワード</p>
-          <div className="flex flex-wrap gap-1.5">
-            {data.topTags.map(({ tag, count }) => (
-              <span key={tag} className="rounded-full bg-[#f0f0f0] px-2.5 py-0.5 text-sm text-[#333]">
-                {tag} ×{count}
-              </span>
-            ))}
-          </div>
+        <div className="rounded-lg bg-white p-3 flex flex-wrap gap-2">
+          {data.topTags.map(({ tag, count }) => (
+            <span key={tag} className="rounded-full bg-[#dcdcdc] px-2 py-1 text-xs font-medium text-black">
+              {tag} x {count}
+            </span>
+          ))}
         </div>
       )}
     </div>

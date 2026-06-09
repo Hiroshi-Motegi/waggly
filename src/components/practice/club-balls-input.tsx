@@ -115,7 +115,7 @@ function ClubAccordion({ club, entry, onUpdate, isLast, open, onToggle }: {
         onClick={onToggle}
         className="flex items-center gap-2 py-3 w-full text-left scroll-mt-[56px]"
       >
-        <span className="bg-[#006728] text-white text-base rounded-full px-2.5 shrink-0">{club.club_number}</span>
+        <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 shrink-0">{club.club_number}</span>
         <span className="flex-1 text-base text-[#6c6c6c] truncate">{subLabel || "—"}</span>
         {!open && hasData && <span className="w-2 h-2 rounded-full bg-[#006728] shrink-0" />}
         <ChevronDown className={`h-4 w-4 text-[#8b8b8b] shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />

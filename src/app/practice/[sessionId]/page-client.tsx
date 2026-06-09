@@ -85,7 +85,7 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
             {formatDate(session.practiced_at)}
           </span>
           {session.total_balls && (
-            <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs font-medium text-black">
+            <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">
               {session.total_balls}球
             </span>
           )}
@@ -120,43 +120,42 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
           <p className="text-base font-bold text-white px-1 pt-4">クラブ別</p>
           <div className="flex flex-col rounded-lg bg-white p-3">
             {session.practice_clubs.map((pc, i) => (
-              <div key={pc.club_id} className={`flex flex-col gap-1.5 py-2 ${i < session.practice_clubs.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                <div className="flex items-center justify-between text-base">
-                  <div className="min-w-0 flex items-center gap-1.5">
-                    <span className="font-bold">{pc.club?.club_number ?? "?"}</span>
-                    {pc.memo?.condition && (
-                      <img src={getConditionImage(pc.memo.condition as MemoCondition)} alt="" className="w-5 h-5" />
-                    )}
-                    {(pc.club?.maker || pc.club?.model) && (
-                      <span className="text-sm text-[#8b8b8b]">
-                        {[pc.club?.maker, pc.club?.model].filter(Boolean).join(" ")}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {pc.avg_distance != null && (
-                      <span className="text-sm text-[#8b8b8b]">{pc.avg_distance} yd</span>
-                    )}
-                    <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-sm">
-                      {pc.balls}球
+              <div key={pc.club_id} className={`flex flex-col py-2 ${i < session.practice_clubs.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                {/* Row 1: badge + maker/model */}
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5">{pc.club?.club_number ?? "?"}</span>
+                  {(pc.club?.maker || pc.club?.model) && (
+                    <span className="text-sm text-[#8b8b8b] truncate">
+                      {[pc.club?.maker, pc.club?.model].filter(Boolean).join(" ")}
                     </span>
-                  </div>
+                  )}
                 </div>
-                {pc.memo && (
-                  <div className="flex flex-wrap gap-1 pl-1">
-                    {pc.memo.symptom_tags.map((tag: string) => (
-                      <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-xs text-[#555]">{tag}</span>
-                    ))}
-                    {pc.memo.feeling_tags.map((tag: string) => (
-                      <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-xs text-[#555]">{tag}</span>
-                    ))}
-                    {pc.memo.gear_tags.map((tag: string) => (
-                      <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-xs text-[#555]">{tag}</span>
-                    ))}
-                    {pc.memo.memo && (
-                      <p className="w-full text-sm text-[#666] mt-0.5">{pc.memo.memo}</p>
-                    )}
-                  </div>
+                {/* Row 2: condition + yd/球 badges + tags */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
+                  {pc.memo?.condition && (
+                    <img src={getConditionImage(pc.memo.condition as MemoCondition)} alt="" className="w-5 h-5" />
+                  )}
+                  {pc.avg_distance != null && (
+                    <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{pc.avg_distance}yd</span>
+                  )}
+                  <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{pc.balls}球</span>
+                  {pc.memo && (
+                    <>
+                      {pc.memo.symptom_tags.map((tag: string) => (
+                        <span key={tag} className="rounded-full bg-[#f0f0f0] p-1.5 text-xs font-medium text-black">{tag}</span>
+                      ))}
+                      {pc.memo.feeling_tags.map((tag: string) => (
+                        <span key={tag} className="rounded-full bg-[#f0f0f0] p-1.5 text-xs font-medium text-black">{tag}</span>
+                      ))}
+                      {pc.memo.gear_tags.map((tag: string) => (
+                        <span key={tag} className="rounded-full bg-[#f0f0f0] p-1.5 text-xs font-medium text-black">{tag}</span>
+                      ))}
+                    </>
+                  )}
+                </div>
+                {/* Row 3: memo text */}
+                {pc.memo?.memo && (
+                  <p className="text-sm text-black pt-1.5 line-clamp-2 overflow-hidden">{pc.memo.memo}</p>
                 )}
               </div>
             ))}

@@ -36,7 +36,7 @@ function PlanItem({ item, isLast }: { item: any; isLast: boolean }) {
         <div className="flex flex-1 flex-col gap-1 min-w-0">
           <p className="text-base font-bold text-[#006728]">{item.focus}</p>
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-xs font-medium text-black">
+            <span className="rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
               {item.club?.club_number ?? "?"}
             </span>
             <span className="text-sm text-[#5c5c5c]">{item.balls}球</span>

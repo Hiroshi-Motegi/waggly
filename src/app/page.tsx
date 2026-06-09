@@ -88,7 +88,7 @@ export default function HomePage() {
         <div className="grid grid-cols-2 gap-2 w-full mt-4">
           {featureCards.map((card) => (
             <Link key={card.href} href={card.href}>
-              <div className="flex flex-col items-center gap-[5px] rounded-lg border border-[#72937f] bg-white p-5 h-[121px] drop-shadow-[2px_2px_0px_#72937f]">
+              <div className="flex flex-col items-center justify-center gap-[5px] rounded-lg border border-[#72937f] bg-white p-5 h-[121px] drop-shadow-[2px_2px_0px_#72937f]">
                 <Image src={card.icon} alt={card.label} width={48} height={48} />
                 <div className="flex flex-col items-center gap-[2px] text-center">
                   <span className="text-base font-bold text-[#006728]">{card.label}</span>
