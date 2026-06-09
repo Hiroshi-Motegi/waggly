@@ -27,7 +27,7 @@ describe("apiUrl", () => {
   it("prepends production URL on native", async () => {
     vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
     const { apiUrl } = await import("@/lib/api-client");
-    expect(apiUrl("/api/clubs")).toBe("https://waggly.jp/api/clubs");
+    expect(apiUrl("/api/clubs")).toBe("https://www.waggly.jp/api/clubs");
   });
 });
 
@@ -71,7 +71,7 @@ describe("apiFetch", () => {
     await apiFetch("/api/clubs");
 
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://waggly.jp/api/clubs",
+      "https://www.waggly.jp/api/clubs",
       expect.objectContaining({
         headers: expect.any(Headers),
       })
@@ -81,7 +81,7 @@ describe("apiFetch", () => {
     expect(calledHeaders.get("Authorization")).toBe("Bearer test-jwt-token");
   });
 
-  it("calls fetch without auth header on native when no session", async () => {
+  it("uses local mode on native when no session (does not call fetch)", async () => {
     vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
 
     const mockSupabase = {
@@ -95,17 +95,11 @@ describe("apiFetch", () => {
 
     const { apiFetch } = await import("@/lib/api-client");
 
-    await apiFetch("/api/clubs");
+    const res = await apiFetch("/api/clubs");
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      "https://waggly.jp/api/clubs",
-      expect.objectContaining({
-        headers: expect.any(Headers),
-      })
-    );
-
-    const calledHeaders = mockFetch.mock.calls[0][1].headers;
-    expect(calledHeaders.has("Authorization")).toBe(false);
+    // Local mode: fetch is NOT called, response is handled locally
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(res).toBeInstanceOf(Response);
   });
 
   it("preserves existing headers from caller", async () => {
