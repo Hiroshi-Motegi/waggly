@@ -1,18 +1,26 @@
 import type { NextConfig } from "next";
 
+const isAppExport = process.env.NEXT_OUTPUT === "export";
+
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**.rakuten.co.jp",
-      },
-      {
-        protocol: "https",
-        hostname: "**.gora.golf.rakuten.co.jp",
-      },
-    ],
-  },
+  ...(isAppExport && {
+    output: "export",
+    images: { unoptimized: true },
+  }),
+  ...(!isAppExport && {
+    images: {
+      remotePatterns: [
+        {
+          protocol: "https",
+          hostname: "**.rakuten.co.jp",
+        },
+        {
+          protocol: "https",
+          hostname: "**.gora.golf.rakuten.co.jp",
+        },
+      ],
+    },
+  }),
 };
 
 export default nextConfig;
