@@ -4,6 +4,7 @@ import { Loading } from "@/components/loading";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { nativeHref } from "@/lib/native-routes";
 import { useSearchParams } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -72,7 +73,7 @@ export default function PlansPage() {
       ) : (
         <div className="flex flex-col rounded-lg bg-white p-3">
           {plans.map((plan, i) => (
-            <Link key={plan.id} href={`/coach/plans/${plan.id}`}>
+            <Link key={plan.id} href={nativeHref(`/coach/plans/${plan.id}`)}>
               <div className={`flex items-center gap-2.5 py-2 ${i < plans.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
                 <div className="flex flex-1 flex-col gap-1 min-w-0">
                   <div className="flex items-center gap-2">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
+import { nativeHref } from "@/lib/native-routes";
 import Image from "next/image";
 import { apiFetch } from "@/lib/api-client";
 
@@ -167,7 +168,7 @@ export default function CoursesPage() {
           ) : (
             <div className="flex flex-col gap-2">
               {results.Items.map((course) => (
-                <Link key={course.golfCourseId} href={`/courses/${course.golfCourseId}`}>
+                <Link key={course.golfCourseId} href={nativeHref(`/courses/${course.golfCourseId}`)}>
                   <div className="rounded-lg bg-white p-3">
                     <div className="flex gap-3">
                       {course.golfCourseImageUrl ? (

@@ -3,6 +3,7 @@ import { Loading } from "@/components/loading";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { nativeHref } from "@/lib/native-routes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -233,7 +234,7 @@ export default function KnowledgePage() {
 
                 <Separator />
                 <div className="flex gap-2 text-xs flex-wrap">
-                  <button onClick={() => router.push(`/admin/knowledge/${item.id}`)} className="text-primary hover:underline">
+                  <button onClick={() => router.push(nativeHref(`/admin/knowledge/${item.id}`))} className="text-primary hover:underline">
                     編集
                   </button>
                   {item.status === "draft" && (

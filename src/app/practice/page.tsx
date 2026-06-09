@@ -4,6 +4,7 @@ import { Loading } from "@/components/loading";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { nativeHref } from "@/lib/native-routes";
 import { PageHeader } from "@/components/layout/page-header";
 import { usePracticeSessions } from "@/hooks/use-practice";
 
@@ -38,7 +39,7 @@ export default function PracticePage() {
         ) : (
           <div className="flex flex-col">
             {sessions.map((s, i) => (
-              <Link key={s.id} href={`/practice/${s.id}`}>
+              <Link key={s.id} href={nativeHref(`/practice/${s.id}`)}>
                 <div
                   className={`flex items-center gap-2.5 py-2 ${
                     i < sessions.length - 1 ? "border-b border-[#dfdfdf]" : ""

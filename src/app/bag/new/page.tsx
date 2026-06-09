@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { nativeHref } from "@/lib/native-routes";
 import { PageHeader } from "@/components/layout/page-header";
 import { ClubForm } from "@/components/club/club-form";
 import { createClub } from "@/hooks/use-clubs";
@@ -15,7 +16,7 @@ export default function NewClubPage() {
     setIsSubmitting(true);
     try {
       const club = await createClub({ status: "bag", ...data });
-      router.push(`/bag/${club.id}`);
+      router.push(nativeHref(`/bag/${club.id}`));
     } catch (error) {
       console.error("Failed to create club:", error);
     } finally {

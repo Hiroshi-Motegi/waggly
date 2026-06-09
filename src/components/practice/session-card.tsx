@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
+import { nativeHref } from "@/lib/native-routes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { PracticeSessionWithClubs } from "@/types/database";
@@ -10,7 +11,7 @@ interface SessionCardProps {
 
 export function SessionCard({ session }: SessionCardProps) {
   return (
-    <Link href={`/practice/${session.id}`}>
+    <Link href={nativeHref(`/practice/${session.id}`)}>
     <Card>
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
@@ -41,7 +42,7 @@ export function SessionCard({ session }: SessionCardProps) {
         )}
         {session.plan_id && (
           <Link
-            href={`/coach/plans/${session.plan_id}`}
+            href={nativeHref(`/coach/plans/${session.plan_id}`)}
             onClick={(e) => e.stopPropagation()}
             className="mt-2 inline-flex items-center gap-1 text-xs text-primary hover:underline"
           >

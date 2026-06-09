@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { PracticeSessionWithClubs } from "@/types/database";
+import { nativeHref } from "@/lib/native-routes";
 
 interface RecentPracticeProps {
   sessions: PracticeSessionWithClubs[];
@@ -22,7 +23,7 @@ export function RecentPractice({ sessions }: RecentPracticeProps) {
         ) : (
           <div className="flex flex-col">
             {sessions.slice(0, 3).map((s, i) => (
-              <Link key={s.id} href={`/practice/${s.id}`}>
+              <Link key={s.id} href={nativeHref(`/practice/${s.id}`)}>
                 <div
                   className={`flex items-center gap-2.5 py-2 ${
                     i < Math.min(sessions.length, 3) - 1 ? "border-b border-[#dfdfdf]" : ""

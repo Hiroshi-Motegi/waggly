@@ -5,6 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { nativeHref } from "@/lib/native-routes";
 import { Plus, ArrowUp, ArrowDown, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -138,7 +139,7 @@ function ClubRow({
   );
 
   if (isReordering) return content;
-  return <Link href={`/bag/${club.id}`}>{content}</Link>;
+  return <Link href={nativeHref(`/bag/${club.id}`)}>{content}</Link>;
 }
 
 const validTabs: FilterTab[] = ["all", "bag1", "bag2", "reserve", "sold"];

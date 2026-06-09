@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { nativeHref } from "@/lib/native-routes";
 import { PageHeader } from "@/components/layout/page-header";
 import { SessionForm } from "@/components/practice/session-form";
 import { useClubs } from "@/hooks/use-clubs";
@@ -73,7 +74,7 @@ export default function NewPracticePage() {
 
           <div className="flex flex-col items-center gap-2 w-full max-w-xs">
             {planId ? (
-              <Link href={`/coach/plans/${planId}`} className="w-full">
+              <Link href={nativeHref(`/coach/plans/${planId}`)} className="w-full">
                 <button className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728]">
                   練習メニューを見る
                 </button>

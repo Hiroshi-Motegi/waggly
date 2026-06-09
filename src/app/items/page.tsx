@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { nativeHref } from "@/lib/native-routes";
 import { PageHeader } from "@/components/layout/page-header";
 import { Plus } from "lucide-react";
 import type { Accessory, AccessoryCategory, AccessoryStatus } from "@/types/database";
@@ -139,7 +140,7 @@ export default function ItemsPage() {
         ) : (
           <div className="flex flex-col">
             {accessories.map((item, i) => (
-              <Link key={item.id} href={`/items/${item.id}`}>
+              <Link key={item.id} href={nativeHref(`/items/${item.id}`)}>
                 <div
                   className={`flex items-center gap-2.5 py-2 ${
                     i < accessories.length - 1 ? "border-b border-[#dfdfdf]" : ""

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { nativeHref } from "@/lib/native-routes";
 import { Badge } from "@/components/ui/badge";
 import type { ClubWithImages } from "@/types/database";
 
@@ -22,7 +23,7 @@ export function ClubCard({ club }: ClubCardProps) {
   const primaryImage = club.club_images?.find((img) => img.is_primary) ?? club.club_images?.[0];
 
   return (
-    <Link href={`/bag/${club.id}`}>
+    <Link href={nativeHref(`/bag/${club.id}`)}>
       <Card className="overflow-hidden">
         <CardContent className="flex items-center gap-3 p-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-muted text-sm text-muted-foreground">
