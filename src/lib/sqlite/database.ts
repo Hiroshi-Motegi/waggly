@@ -45,7 +45,13 @@ export async function closeDb(): Promise<void> {
 
 export async function execute(sql: string, values?: any[]): Promise<void> {
   const database = await getDb();
-  await database.execute(sql);
+  if (values && values.length > 0) {
+    // Parameterized DML (INSERT, UPDATE, DELETE) uses run()
+    await database.run(sql, values);
+  } else {
+    // DDL or non-parameterized statements use execute()
+    await database.execute(sql);
+  }
 }
 
 export async function query<T = any>(
