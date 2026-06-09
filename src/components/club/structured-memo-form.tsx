@@ -182,15 +182,28 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, onSaved, onC
 
       {/* Distance */}
       <div className="flex items-center gap-2">
-        <span className="text-xs">飛距離</span>
-        <input
-          type="number"
-          value={distance}
-          onChange={(e) => setDistance(e.target.value)}
-          placeholder=""
-          className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none"
-        />
-        <span className="text-xs">yd</span>
+        <div className="flex-1">
+          <input
+            type="range"
+            min={0}
+            max={300}
+            step={5}
+            value={distance ? Number(distance) : 0}
+            onChange={(e) => setDistance(e.target.value === "0" ? "" : e.target.value)}
+            className="club-balls-slider w-full"
+          />
+        </div>
+        <div className="flex items-center gap-1 w-[72px] shrink-0">
+          <input
+            type="number"
+            inputMode="decimal"
+            value={distance}
+            onChange={(e) => setDistance(e.target.value)}
+            placeholder="—"
+            className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+          />
+          <span className="text-xs">yd</span>
+        </div>
       </div>
 
       {/* Memo text */}
