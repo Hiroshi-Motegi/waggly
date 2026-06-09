@@ -8,12 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useClubs } from "@/hooks/use-clubs";
 import { apiFetch } from "@/lib/api-client";
 
+type ClubTab = "bag" | "bag2" | "reserve";
+
 export default function NewPlanPage() {
   const router = useRouter();
   const { clubs: bag1 } = useClubs("bag", 1);
   const { clubs: bag2 } = useClubs("bag", 2);
   const { clubs: reserveClubs } = useClubs("reserve");
   const clubs = [...bag1, ...bag2, ...reserveClubs];
+  const [clubTab, setClubTab] = useState<ClubTab>("bag");
   const [duration, setDuration] = useState("1時間");
   const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
   const [focus, setFocus] = useState("");
@@ -140,38 +143,72 @@ export default function NewPlanPage() {
         </Card>
 
         {/* Club selection */}
-        {clubs.length > 0 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
+        {clubs.length > 0 && (() => {
+          const allTabs: { value: ClubTab; label: string; clubs: typeof bag1 }[] = [
+            { value: "bag", label: "マイバッグ", clubs: bag1 },
+            { value: "bag2", label: "予備バッグ", clubs: bag2 },
+            { value: "reserve", label: "予備", clubs: reserveClubs },
+          ];
+          const tabItems = allTabs.filter((t) => t.clubs.length > 0);
+          const displayClubs = tabItems.find((t) => t.value === clubTab)?.clubs ?? bag1;
+          const allSelected = displayClubs.every((c) => selectedClubs.includes(c.club_number));
+
+          return (
+            <Card>
+              <CardHeader>
                 <CardTitle className="text-base">利用するクラブ</CardTitle>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const allNumbers = clubs.map((c) => c.club_number);
-                    setSelectedClubs((prev) =>
-                      prev.length === allNumbers.length ? [] : allNumbers
-                    );
-                  }}
-                  className="text-xs text-primary hover:underline"
-                >
-                  {selectedClubs.length === clubs.length ? "すべて解除" : "すべて追加"}
-                </button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {bag1.length > 0 && (
-                <ClubCheckboxGroup label="マイバッグ" clubs={bag1} selectedClubs={selectedClubs} onToggle={toggleClub} />
-              )}
-              {bag2.length > 0 && (
-                <ClubCheckboxGroup label="予備バッグ" clubs={bag2} selectedClubs={selectedClubs} onToggle={toggleClub} />
-              )}
-              {reserveClubs.length > 0 && (
-                <ClubCheckboxGroup label="予備" clubs={reserveClubs} selectedClubs={selectedClubs} onToggle={toggleClub} />
-              )}
-            </CardContent>
-          </Card>
-        )}
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {tabItems.length > 1 && (
+                  <div className="flex gap-1">
+                    {tabItems.map((t) => (
+                      <button
+                        key={t.value}
+                        type="button"
+                        onClick={() => setClubTab(t.value)}
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          clubTab === t.value ? "bg-[#006728] text-white" : "border border-[#c4c4c4] text-[#8b8b8b]"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{selectedClubs.filter((cn) => displayClubs.some((c) => c.club_number === cn)).length}/{displayClubs.length}本選択</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nums = displayClubs.map((c) => c.club_number);
+                      setSelectedClubs((prev) =>
+                        allSelected
+                          ? prev.filter((cn) => !nums.includes(cn))
+                          : [...prev.filter((cn) => !nums.includes(cn)), ...nums]
+                      );
+                    }}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {allSelected ? "すべて解除" : "すべて追加"}
+                  </button>
+                </div>
+                <div className="columns-2 gap-2">
+                  {displayClubs.map((club) => (
+                    <label key={club.id} className="flex items-center gap-2 cursor-pointer py-1 break-inside-avoid">
+                      <input
+                        type="checkbox"
+                        checked={selectedClubs.includes(club.club_number)}
+                        onChange={() => toggleClub(club.club_number)}
+                        className="h-4 w-4 rounded border-input"
+                      />
+                      <span className="text-sm">{club.club_number}</span>
+                    </label>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {error && (
           <p className="text-sm text-destructive text-center">{error}</p>
@@ -186,28 +223,3 @@ export default function NewPlanPage() {
   );
 }
 
-function ClubCheckboxGroup({ label, clubs, selectedClubs, onToggle }: {
-  label: string;
-  clubs: { id: string; club_number: string }[];
-  selectedClubs: string[];
-  onToggle: (clubNumber: string) => void;
-}) {
-  return (
-    <div>
-      <p className="text-xs font-medium text-muted-foreground mb-1">{label}</p>
-      <div className="columns-2 gap-2">
-        {clubs.map((club) => (
-          <label key={club.id} className="flex items-center gap-2 cursor-pointer py-1 break-inside-avoid">
-            <input
-              type="checkbox"
-              checked={selectedClubs.includes(club.club_number)}
-              onChange={() => onToggle(club.club_number)}
-              className="h-4 w-4 rounded border-input"
-            />
-            <span className="text-sm">{club.club_number}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-  );
-}
