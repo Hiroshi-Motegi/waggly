@@ -95,6 +95,17 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
           <p className="text-base font-bold">{session.location || "場所未入力"}</p>
         </div>
 
+        {session.rating != null && (
+          <div className="border-t border-[#dfdfdf] pt-3">
+            <p className="text-sm font-medium text-[#8b8b8b] mb-1">評価</p>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span key={star} className={`text-xl ${star <= session.rating! ? "text-amber-400" : "text-gray-300"}`}>★</span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {session.memo && (
           <div className="border-t border-[#dfdfdf] pt-3">
             <p className="text-sm font-medium text-[#8b8b8b] mb-1">メモ</p>
