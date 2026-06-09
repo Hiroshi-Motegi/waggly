@@ -7,8 +7,6 @@ import { analyzeGaps } from "@/lib/gap-analysis";
 import { parsePlanResponse } from "@/lib/ai/plan-parser";
 import { checkUsageLimit } from "@/lib/ai/usage-limit";
 
-export const dynamic = "force-static";
-
 export async function POST(request: Request) {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();

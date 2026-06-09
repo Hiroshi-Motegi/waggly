@@ -5,8 +5,6 @@ import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 import { analyzeGaps } from "@/lib/gap-analysis";
 import { checkUsageLimit } from "@/lib/ai/usage-limit";
 
-export const dynamic = "force-static";
-
 export async function POST(request: Request) {
   try {
   const auth = await getApiAuth();

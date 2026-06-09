@@ -5,8 +5,6 @@ import { readFile } from "fs/promises";
 import { join } from "path";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
-export const dynamic = "force-static";
-
 async function loadImageBase64(path: string, mime: string): Promise<string> {
   const buf = await readFile(join(process.cwd(), path));
   return `data:${mime};base64,${buf.toString("base64")}`;
