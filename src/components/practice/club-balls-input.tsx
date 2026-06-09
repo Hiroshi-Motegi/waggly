@@ -57,8 +57,7 @@ function MemoToggle({ hasMemo, memoValue, onMemoChange }: {
         className="flex items-center gap-1 text-xs text-[#006728] font-bold"
       >
         {open ? <ChevronUp className="h-3.5 w-3.5" /> : <MessageSquarePlus className="h-3.5 w-3.5" />}
-        {hasMemo ? (memoValue?.condition === "good" ? "😊" : memoValue?.condition === "bad" ? "😣" : "😐") : "メモを追加"}
-        {hasMemo && !open && <span className="text-xs text-[#8b8b8b] font-normal ml-1">タップで展開</span>}
+        {hasMemo ? (memoValue?.condition === "good" ? "😊" : memoValue?.condition === "bad" ? "😣" : "😐") : "調子を記録する"}
       </button>
       {open && (
         <InlineClubMemo value={memoValue} onChange={onMemoChange} />
