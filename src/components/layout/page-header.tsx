@@ -36,7 +36,7 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
   }
 
   return (
-    <div className={`sticky top-0 z-10 -mx-2 -mt-2 px-3 py-2 overflow-hidden transition-all duration-200 ${isDark ? (scrolled ? "shadow-sm" : "") : "bg-[#ebf1eb]"}`}>
+    <div className={`sticky top-0 z-10 -mx-2 -mt-2 px-3 pt-4 pb-2 overflow-hidden transition-all duration-200 ${isDark ? (scrolled ? "shadow-sm" : "") : "bg-[#ebf1eb]"}`}>
       {isDark && scrolled && (
         <>
           <div className="absolute inset-0 bg-[#139847]/80" />
