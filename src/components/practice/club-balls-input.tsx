@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import type { Club } from "@/types/database";
 import { InlineClubMemo, type InlineClubMemoValue, getConditionImage, getConditionLabel } from "@/components/club/inline-club-memo";
@@ -91,11 +91,21 @@ function ClubAccordion({ club, entry, onUpdate, isLast, open, onToggle }: {
   const currentDistance = entry?.avg_distance ?? club.distance ?? 0;
   const subLabel = [club.maker, club.model].filter(Boolean).join(" ");
   const hasData = currentBalls > 0 || entry?.memo != null;
+  const headerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (open && headerRef.current) {
+      setTimeout(() => {
+        headerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    }
+  }, [open]);
 
   return (
     <div className={`flex flex-col ${!isLast ? "border-b border-[#e8e8e8]" : ""}`}>
       {/* Collapsed header */}
       <button
+        ref={headerRef}
         type="button"
         onClick={onToggle}
         className="flex items-center gap-2 py-3 w-full text-left"
