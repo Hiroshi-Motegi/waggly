@@ -10,7 +10,9 @@ import { apiFetch } from "@/lib/api-client";
 
 export default function NewPlanPage() {
   const router = useRouter();
-  const { clubs } = useClubs("bag");
+  const { clubs: bag1 } = useClubs("bag", 1);
+  const { clubs: bag2 } = useClubs("bag", 2);
+  const clubs = [...bag1, ...bag2];
   const [duration, setDuration] = useState("1時間");
   const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
   const [focus, setFocus] = useState("");
