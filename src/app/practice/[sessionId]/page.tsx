@@ -2,11 +2,12 @@
 import { Loading } from "@/components/loading";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
+import { deletePracticeSession } from "@/hooks/use-practice";
 import { getConditionImage } from "@/components/club/inline-club-memo";
 import type { PracticeSessionWithClubs, MemoCondition } from "@/types/database";
 
@@ -17,9 +18,20 @@ function formatDate(dateStr: string): string {
 
 export default function PracticeDetailPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [session, setSession] = useState<PracticeSessionWithClubs | null>(null);
   const [isFetching, setIsFetching] = useState(true);
+
+  async function handleDelete() {
+    if (!confirm("この練習記録を削除しますか？")) return;
+    try {
+      await deletePracticeSession(sessionId);
+      router.push("/practice");
+    } catch (error) {
+      console.error("Failed to delete:", error);
+    }
+  }
 
   useEffect(() => {
     if (authLoading || !user) return;
@@ -135,6 +147,12 @@ export default function PracticeDetailPage() {
           </div>
         </>
       )}
+
+      <div className="flex justify-center pt-2">
+        <button onClick={handleDelete} className="text-sm font-bold text-red-300">
+          この記録を削除
+        </button>
+      </div>
       </div>
     </div>
   );

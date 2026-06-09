@@ -120,15 +120,7 @@ export default function EditPracticePage() {
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
-      <PageHeader title="練習記録を編集" variant="dark">
-        <button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="text-sm font-bold text-white disabled:opacity-50"
-        >
-          {isDeleting ? "削除中..." : "削除"}
-        </button>
-      </PageHeader>
+      <PageHeader title="練習記録を編集" variant="dark" />
 
       {/* Plan card */}
       {plan && (
@@ -173,6 +165,15 @@ export default function EditPracticePage() {
         showCancel
         onCancel={() => router.back()}
       />
+      <div className="flex justify-center py-2">
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="text-sm font-bold text-red-300 disabled:opacity-50"
+        >
+          {isDeleting ? "削除中..." : "この記録を削除"}
+        </button>
+      </div>
       </div>
     </div>
   );
