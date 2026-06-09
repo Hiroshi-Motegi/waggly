@@ -124,6 +124,7 @@ export interface ClubMemo {
   symptom_tags: string[];
   feeling_tags: string[];
   gear_tags: string[];
+  practice_session_id: string | null;
   created_at: string;
 }
 
@@ -148,7 +149,7 @@ export interface ClubWithImages extends Club {
 }
 
 export interface PracticeSessionWithClubs extends PracticeSession {
-  practice_clubs: (PracticeClub & { club: Club })[];
+  practice_clubs: (PracticeClub & { club: Club; memo: ClubMemo | null })[];
 }
 
 export interface PracticePlanWithItems extends PracticePlan {
