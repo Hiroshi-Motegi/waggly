@@ -457,7 +457,9 @@ async function handleLocalImageUpload(path: string, method: string, formData: Fo
       recursive: true,
     });
 
-    const localUri = result.uri;
+    // Convert file:// URI to webview-loadable URL
+    const { Capacitor } = await import("@capacitor/core");
+    const localUri = Capacitor.convertFileSrc(result.uri);
 
     // /api/clubs/:clubId/images
     let match = path.match(/^\/api\/clubs\/([^/]+)\/images$/);
