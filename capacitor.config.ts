@@ -12,7 +12,8 @@ const config: CapacitorConfig = {
       enabled: true, // Proxy all fetch() through native HTTP — bypasses CORS
     },
     SplashScreen: {
-      launchAutoHide: false,
+      launchAutoHide: true,
+      launchShowDuration: 2000,
       backgroundColor: "#15803d",
     },
     StatusBar: {
