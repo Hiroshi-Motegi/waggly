@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
@@ -10,11 +10,71 @@ import { PageTransition } from "@/components/layout/page-transition";
 import { Onboarding } from "@/components/onboarding";
 import { Loading } from "@/components/loading";
 import { TERMS_UPDATED_AT } from "@/lib/constants";
+import { isNative } from "@/lib/platform";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const pathname = usePathname();
   const [onboardingDone, setOnboardingDone] = useState(false);
+
+  useEffect(() => {
+    if (!isNative()) return;
+
+    let removeNetworkListener: (() => void) | undefined;
+    let removeAppListener: (() => void) | undefined;
+
+    (async () => {
+      const { runMigrations } = await import("@/lib/sqlite/migrations");
+      const { fullSync } = await import("@/lib/sync");
+
+      // Run SQLite migrations on startup
+      await runMigrations();
+
+      // Initial sync
+      try {
+        await fullSync();
+      } catch (e) {
+        console.error("Initial sync failed:", e);
+      }
+
+      // Sync on network recovery
+      const { Network } = await import("@capacitor/network");
+      const networkHandle = await Network.addListener(
+        "networkStatusChange",
+        async (status) => {
+          if (status.connected) {
+            try {
+              await fullSync();
+            } catch (e) {
+              console.error("Sync on network recovery failed:", e);
+            }
+          }
+        }
+      );
+      removeNetworkListener = () => networkHandle.remove();
+
+      // Sync on app resume
+      const { App } = await import("@capacitor/app");
+      const appHandle = await App.addListener("appStateChange", async (state) => {
+        if (state.isActive) {
+          const networkStatus = await Network.getStatus();
+          if (networkStatus.connected) {
+            try {
+              await fullSync();
+            } catch (e) {
+              console.error("Sync on resume failed:", e);
+            }
+          }
+        }
+      });
+      removeAppListener = () => appHandle.remove();
+    })();
+
+    return () => {
+      removeNetworkListener?.();
+      removeAppListener?.();
+    };
+  }, []);
 
   // Skip onboarding for admin pages
   if (pathname?.startsWith("/admin")) {
