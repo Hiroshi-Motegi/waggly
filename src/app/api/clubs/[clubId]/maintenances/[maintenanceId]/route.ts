@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
+export const dynamic = "force-static";
+export function generateStaticParams() {
+  return [{ clubId: "_", maintenanceId: "_" }];
+}
+
+
 async function verifyClubOwnership(supabase: any, clubId: string, userId: string) {
   const { data } = await supabase
     .from("clubs")

@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-static";
+export function generateStaticParams() {
+  return [{ courseId: "_" }];
+}
+
+
 const RAKUTEN_APP_ID = process.env.RAKUTEN_APP_ID;
 const RAKUTEN_ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY;
 const RAKUTEN_AFFILIATE_ID = process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID;

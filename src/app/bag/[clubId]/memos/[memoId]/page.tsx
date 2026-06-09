@@ -1,7 +1,7 @@
 import ClientPage from "./page-client";
 
 export function generateStaticParams() {
-  return [];
+  return [{ clubId: "_", memoId: "_" }];
 }
 
 export default function Page(props: { params: Promise<{ clubId: string; memoId: string }> }) {

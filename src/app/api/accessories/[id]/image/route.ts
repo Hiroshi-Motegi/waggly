@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
+export const dynamic = "force-static";
+export function generateStaticParams() {
+  return [{ id: "_" }];
+}
+
+export async function GET() {
+  return new Response(null, { status: 405 });
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

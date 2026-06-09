@@ -1,7 +1,7 @@
 import ClientPage from "./page-client";
 
 export function generateStaticParams() {
-  return [];
+  return [{ sessionId: "_" }];
 }
 
 export default function Page(props: { params: Promise<{ sessionId: string }> }) {
