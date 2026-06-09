@@ -57,10 +57,10 @@ interface ApiResponse {
 function StarDisplay({ rating, label }: { rating: number; label: string }) {
   return (
     <div className="flex items-center justify-between py-1">
-      <span className="text-sm">{label}</span>
+      <span className="text-base">{label}</span>
       <div className="flex items-center gap-1">
-        <span className="text-amber-500 text-sm">{"★".repeat(Math.round(rating))}{"☆".repeat(5 - Math.round(rating))}</span>
-        <span className="text-sm text-[#8b8b8b]">{rating.toFixed(1)}</span>
+        <span className="text-amber-500 text-base">{"★".repeat(Math.round(rating))}{"☆".repeat(5 - Math.round(rating))}</span>
+        <span className="text-base text-[#8b8b8b]">{rating.toFixed(1)}</span>
       </div>
     </div>
   );
@@ -70,8 +70,8 @@ function InfoRow({ label, value }: { label: string; value: string | number | nul
   if (!value) return null;
   return (
     <div className="flex justify-between items-center border-b border-[#c4c4c4] py-2 last:border-b-0">
-      <span className="text-sm">{label}</span>
-      <span className="text-sm text-right max-w-[60%]">{value}</span>
+      <span className="text-base">{label}</span>
+      <span className="text-base text-right max-w-[60%]">{value}</span>
     </div>
   );
 }
@@ -82,14 +82,14 @@ function LinkButtons({ layoutUrl, routeMapUrl }: { layoutUrl?: string; routeMapU
     <div className="flex gap-2">
       {layoutUrl && (
         <a href={layoutUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-          <button className="w-full rounded-full border border-white py-2 text-sm font-bold text-white">
+          <button className="w-full rounded-full border border-white py-2 text-base font-bold text-white">
             コースレイアウト
           </button>
         </a>
       )}
       {routeMapUrl && (
         <a href={routeMapUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-          <button className="w-full rounded-full border border-white py-2 text-sm font-bold text-white">
+          <button className="w-full rounded-full border border-white py-2 text-base font-bold text-white">
             アクセスマップ
           </button>
         </a>
@@ -102,7 +102,7 @@ function ReserveButton({ url }: { url?: string }) {
   if (!url) return null;
   return (
     <a href={url} target="_blank" rel="noopener noreferrer">
-      <button className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728]">
+      <button className="w-full rounded-full bg-white py-2 text-base font-bold text-[#006728]">
         予約する
       </button>
     </a>
@@ -143,7 +143,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   if (error || !course) {
     return (
       <div className="flex flex-col items-center gap-4 py-20 px-4">
-        <p className="text-sm text-red-500">{error ?? "コースが見つかりませんでした"}</p>
+        <p className="text-base text-red-500">{error ?? "コースが見つかりませんでした"}</p>
       </div>
     );
   }
@@ -200,7 +200,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       {/* Introduction */}
       {course.introduction && (
         <div className="rounded-lg bg-white p-3">
-          <p className="text-sm leading-relaxed whitespace-pre-line">{course.introduction}</p>
+          <p className="text-base leading-relaxed whitespace-pre-line">{course.introduction}</p>
         </div>
       )}
 
@@ -238,7 +238,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl font-bold">{course.evaluation?.toFixed(1) ?? "—"}</span>
               <span className="text-amber-500 text-lg">★</span>
-              {course.reviewCount != null && <span className="text-sm text-[#8b8b8b]">({course.reviewCount.toLocaleString()}件)</span>}
+              {course.reviewCount != null && <span className="text-base text-[#8b8b8b]">({course.reviewCount.toLocaleString()}件)</span>}
             </div>
             <div className="border-t border-[#c4c4c4] pt-2">
               {course.evaluationStaff != null && course.evaluationStaff > 0 && <StarDisplay rating={course.evaluationStaff} label="スタッフ" />}

@@ -11,7 +11,7 @@ export function DistanceStaircase({ data }: Props) {
   const hasAnyDistance = data.some((d) => d.distance != null);
   if (!hasAnyDistance) {
     return (
-      <p className="py-8 text-center text-sm text-[#8b8b8b]">
+      <p className="py-8 text-center text-base text-[#8b8b8b]">
         飛距離を入力するとグラフが表示されます
       </p>
     );

@@ -52,7 +52,7 @@ function StarDisplay({ rating }: { rating: number }) {
   const half = rating - full >= 0.5;
   const empty = 5 - full - (half ? 1 : 0);
   return (
-    <span className="text-amber-500 text-sm">
+    <span className="text-amber-500 text-base">
       {"★".repeat(full)}
       {half ? "½" : ""}
       {"☆".repeat(empty)}
@@ -130,12 +130,12 @@ export default function CoursesPage() {
             placeholder="コース名・キーワード"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2.5 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           />
           <select
             value={areaCode}
             onChange={(e) => setAreaCode(e.target.value)}
-            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2.5 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           >
             {AREA_CODES.map((area) => (
               <option key={area.code} value={area.code}>{area.label}</option>
@@ -144,7 +144,7 @@ export default function CoursesPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-full bg-[#006728] py-2.5 text-sm font-bold text-white disabled:opacity-50"
+            className="w-full rounded-full bg-[#006728] py-2.5 text-base font-bold text-white disabled:opacity-50"
           >
             {isLoading ? "検索中..." : "検索する"}
           </button>
@@ -152,17 +152,17 @@ export default function CoursesPage() {
       </div>
 
       {error && (
-        <p className="text-sm text-red-500 text-center">{error}</p>
+        <p className="text-base text-red-500 text-center">{error}</p>
       )}
 
       {results && (
         <>
-          <p className="px-1 text-xs text-white">
+          <p className="px-1 text-sm text-white">
             {results.count.toLocaleString()}件のコース
           </p>
 
           {results.Items.length === 0 ? (
-            <p className="text-center text-sm text-[#8b8b8b] py-8">
+            <p className="text-center text-base text-[#8b8b8b] py-8">
               コースが見つかりませんでした
             </p>
           ) : (
@@ -183,23 +183,23 @@ export default function CoursesPage() {
                         </div>
                       ) : (
                         <div className="h-20 w-28 flex-shrink-0 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
-                          <span className="text-xs text-[#8b8b8b]">No Image</span>
+                          <span className="text-sm text-[#8b8b8b]">No Image</span>
                         </div>
                       )}
                       <div className="flex flex-col gap-1 min-w-0">
-                        <p className="font-bold text-sm leading-tight line-clamp-2">
+                        <p className="font-bold text-base leading-tight line-clamp-2">
                           {course.golfCourseName}
                         </p>
-                        <p className="text-xs text-[#8b8b8b] line-clamp-1">
+                        <p className="text-sm text-[#8b8b8b] line-clamp-1">
                           {course.address}
                         </p>
                         <div className="flex items-center gap-1">
                           <StarDisplay rating={course.evaluation} />
-                          <span className="text-xs text-[#8b8b8b]">
+                          <span className="text-sm text-[#8b8b8b]">
                             {course.evaluation?.toFixed(1) ?? "—"}{course.reviewCount ? ` (${course.reviewCount.toLocaleString()}件)` : ""}
                           </span>
                         </div>
-                        <div className="text-xs text-[#8b8b8b] space-y-0.5">
+                        <div className="text-sm text-[#8b8b8b] space-y-0.5">
                           {course.weekdayMinPrice != null && course.weekdayMinPrice > 0 && (
                             <p>平日 ¥{course.weekdayMinPrice.toLocaleString()}〜</p>
                           )}
@@ -220,17 +220,17 @@ export default function CoursesPage() {
               <button
                 disabled={currentPage <= 1 || isLoading}
                 onClick={() => handlePageChange(currentPage - 1)}
-                className="rounded-full border border-white px-4 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                className="rounded-full border border-white px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
               >
                 前へ
               </button>
-              <span className="text-xs text-[#8b8b8b]">
+              <span className="text-sm text-[#8b8b8b]">
                 {currentPage} / {results.pageCount}
               </span>
               <button
                 disabled={currentPage >= results.pageCount || isLoading}
                 onClick={() => handlePageChange(currentPage + 1)}
-                className="rounded-full border border-white px-4 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                className="rounded-full border border-white px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
               >
                 次へ
               </button>

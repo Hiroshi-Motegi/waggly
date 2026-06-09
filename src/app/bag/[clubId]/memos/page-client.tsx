@@ -118,20 +118,20 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
       <div className="relative z-10 flex flex-col space-y-2">
       <div className="flex items-center justify-between px-1">
         <div>
-          <span className="text-xs font-bold text-white">{club.club_number}</span>
+          <span className="text-sm font-bold text-white">{club.club_number}</span>
           <h2 className="text-lg font-bold text-white">アクティビティ</h2>
         </div>
         <div className="flex gap-1">
           <button
             onClick={() => setShowMemoForm(!showMemoForm)}
-            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#006728]"
+            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-[#006728]"
           >
             <Plus className="h-3 w-3" />
             メモ
           </button>
           <Link
             href={nativeHref(`/bag/${clubId}/maintenances?add=1`)}
-            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#006728]"
+            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-[#006728]"
           >
             <Plus className="h-3 w-3" />
             メンテナンス
@@ -169,7 +169,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
             ))}
           </div>
         ) : activity.length === 0 ? (
-          <p className="py-4 text-center text-sm text-[#8b8b8b]">記録なし</p>
+          <p className="py-4 text-center text-base text-[#8b8b8b]">記録なし</p>
         ) : (
           <div className="flex flex-col">
             {activity.map((item, i) => {
@@ -207,27 +207,27 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
 
               return (
                 <Link key={`${item.type}-${item.id}`} href={href}>
-                  <div className={`flex items-center gap-2.5 py-2 ${i < activity.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                    <div className="flex flex-1 flex-col gap-px min-w-0">
-                      <div className="flex items-center gap-[5px]">
-                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium text-black ${badgeColors[item.type]}`}>
+                  <div className={`flex items-center gap-2.5 py-3 ${i < activity.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                    <div className="flex flex-1 flex-col gap-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`rounded-full px-2 py-0.5 text-sm font-medium text-black ${badgeColors[item.type]}`}>
                           {badgeLabels[item.type]}
                         </span>
                         {item.type === "memo" && item.condition && (
-                          <img src={conditionImage[item.condition]} alt="" className="w-4 h-4" />
+                          <img src={conditionImage[item.condition]} alt="" className="w-5 h-5" />
                         )}
                         {summary && (
-                          <span className="text-[10px] font-medium text-[#8b8b8b]">{summary}</span>
+                          <span className="text-sm font-medium text-[#8b8b8b]">{summary}</span>
                         )}
-                        <span className="text-[10px] font-medium text-[#8b8b8b] ml-auto shrink-0">{dateStr}</span>
+                        <span className="text-sm font-medium text-[#8b8b8b] ml-auto shrink-0">{dateStr}</span>
                       </div>
                       {detail && (
-                        <p className="text-sm font-bold text-black truncate">{detail}</p>
+                        <p className="text-base font-bold text-black truncate">{detail}</p>
                       )}
                       {item.type === "memo" && allTags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-0.5">
                           {allTags.map((tag) => (
-                            <span key={tag} className="rounded-full bg-[#f0f0f0] px-1.5 py-0.5 text-[10px] text-[#666]">
+                            <span key={tag} className="rounded-full bg-[#f0f0f0] px-1.5 py-0.5 text-xs text-[#666]">
                               {tag}
                             </span>
                           ))}

@@ -57,8 +57,8 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <span className="bg-[#006728] text-white text-sm rounded-full px-2.5">{clubNumber}</span>
-        {clubModel && <span className="text-sm text-[#6c6c6c]">{clubModel}</span>}
+        <span className="bg-[#006728] text-white text-base rounded-full px-2.5">{clubNumber}</span>
+        {clubModel && <span className="text-base text-[#6c6c6c]">{clubModel}</span>}
       </div>
 
       {/* Condition selector */}
@@ -82,7 +82,7 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
             }`}
           >
             <img src={opt.image} alt={opt.label} className="w-8 h-8" />
-            <span className="text-sm font-bold">{opt.label}</span>
+            <span className="text-base font-bold">{opt.label}</span>
           </button>
         ))}
       </div>
@@ -92,14 +92,14 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
         <>
           {tagSet.goodTags && condition === "good" && (
             <div className="flex flex-col gap-1 py-0.5">
-              <p className="text-xs">球筋</p>
+              <p className="text-sm">球筋</p>
               <div className="flex flex-wrap gap-1">
                 {tagSet.goodTags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag, symptomTags, setSymptomTags)}
-                    className={`rounded-full px-[13px] py-1 text-xs font-bold ${
+                    className={`rounded-full px-[13px] py-1 text-sm font-bold ${
                       symptomTags.includes(tag)
                         ? "bg-[#006728] text-white border border-[#006728]"
                         : "border border-[#999] text-[#414141]"
@@ -116,14 +116,14 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
             <>
               {tagSet.symptomTags.map((cat) => (
                 <div key={cat.label} className="flex flex-col gap-1 py-0.5">
-                  <p className="text-xs">{cat.label}</p>
+                  <p className="text-sm">{cat.label}</p>
                   <div className="flex flex-wrap gap-1">
                     {cat.tags.map((tag) => (
                       <button
                         key={tag}
                         type="button"
                         onClick={() => toggleTag(tag, symptomTags, setSymptomTags)}
-                        className={`rounded-full px-[13px] py-1 text-xs font-bold ${
+                        className={`rounded-full px-[13px] py-1 text-sm font-bold ${
                           symptomTags.includes(tag)
                             ? "bg-[#006728] text-white border border-[#006728]"
                             : "border border-[#999] text-[#414141]"
@@ -140,14 +140,14 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
 
           {tagSet.feelingTags && condition !== "good" && (
             <div className="flex flex-col gap-1 py-0.5">
-              <p className="text-xs">体の感覚</p>
+              <p className="text-sm">体の感覚</p>
               <div className="flex flex-wrap gap-1">
                 {tagSet.feelingTags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag, feelingTags, setFeelingTags)}
-                    className={`rounded-full px-[13px] py-1 text-xs font-bold ${
+                    className={`rounded-full px-[13px] py-1 text-sm font-bold ${
                       feelingTags.includes(tag)
                         ? "bg-[#006728] text-white border border-[#006728]"
                         : "border border-[#999] text-[#414141]"
@@ -162,14 +162,14 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
 
           {tagSet.gearTags && condition !== "good" && (
             <div className="flex flex-col gap-1 py-0.5">
-              <p className="text-xs">ギアの気づき</p>
+              <p className="text-sm">ギアの気づき</p>
               <div className="flex flex-wrap gap-1">
                 {tagSet.gearTags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag, gearTags, setGearTags)}
-                    className={`rounded-full px-[13px] py-1 text-xs font-bold ${
+                    className={`rounded-full px-[13px] py-1 text-sm font-bold ${
                       gearTags.includes(tag)
                         ? "bg-[#006728] text-white border border-[#006728]"
                         : "border border-[#999] text-[#414141]"
@@ -204,32 +204,32 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
             value={distance}
             onChange={(e) => setDistance(e.target.value)}
             placeholder="—"
-            className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+            className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-sm text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           />
-          <span className="text-xs">yd</span>
+          <span className="text-sm">yd</span>
         </div>
       </div>
 
       {/* Memo text */}
       <div className="flex flex-col gap-0.5 py-1">
-        <p className="text-xs">所感・メモ</p>
+        <p className="text-sm">所感・メモ</p>
         <textarea
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
           rows={3}
-          className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+          className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
         />
       </div>
 
       {/* Buttons */}
       <div className="flex gap-2">
-        <button onClick={onCancel} className="flex-1 rounded-full border border-[#c4c4c4] py-2 text-sm font-bold text-[#666]">
+        <button onClick={onCancel} className="flex-1 rounded-full border border-[#c4c4c4] py-2 text-base font-bold text-[#666]">
           キャンセル
         </button>
         <button
           onClick={handleSubmit}
           disabled={!hasContent || isSaving}
-          className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50"
+          className="flex-1 rounded-full bg-[#006728] py-2 text-base font-bold text-white disabled:opacity-50"
         >
           {isSaving ? "保存中..." : "保存"}
         </button>

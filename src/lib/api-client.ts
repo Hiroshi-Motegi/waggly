@@ -502,9 +502,14 @@ async function handleLocalImageUpload(path: string, method: string, formData: Fo
   try {
     const { Filesystem, Directory } = await import("@capacitor/filesystem");
 
-    // Convert file to base64
+    // Convert file to base64 (chunked to avoid stack overflow on large images)
     const buffer = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += 8192) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+    }
+    const base64 = btoa(binary);
     const ext = file.name.split(".").pop() ?? "jpg";
     const fileName = `${crypto.randomUUID()}.${ext}`;
 

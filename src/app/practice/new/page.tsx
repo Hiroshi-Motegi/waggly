@@ -70,25 +70,25 @@ export default function NewPracticePage() {
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative z-10 flex flex-col items-center space-y-4 w-full">
           <h2 className="text-lg font-bold text-white">練習お疲れさまでした！</h2>
-          <p className="text-sm text-white/70">記録を保存しました</p>
+          <p className="text-base text-white/70">記録を保存しました</p>
 
           <div className="flex flex-col items-center gap-2 w-full max-w-xs">
             {planId ? (
               <Link href={nativeHref(`/coach/plans/${planId}`)} className="w-full">
-                <button className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728]">
+                <button className="w-full rounded-full bg-white py-2 text-base font-bold text-[#006728]">
                   練習メニューを見る
                 </button>
               </Link>
             ) : (
               <Link href="/coach/plans/new" className="w-full">
-                <button className="w-full rounded-full bg-white py-2 text-sm font-bold text-[#006728]">
+                <button className="w-full rounded-full bg-white py-2 text-base font-bold text-[#006728]">
                   AIに次の練習メニューを提案してもらう
                 </button>
               </Link>
             )}
-            <p className="text-xs text-white/60">練習データをもとにAIが最適な練習メニューを提案します</p>
+            <p className="text-sm text-white/60">練習データをもとにAIが最適な練習メニューを提案します</p>
             <Link href="/practice">
-              <button className="px-5 py-1 text-sm font-bold text-white">練習記録に戻る</button>
+              <button className="px-5 py-1 text-base font-bold text-white">練習記録に戻る</button>
             </Link>
           </div>
         </div>
@@ -110,23 +110,23 @@ export default function NewPracticePage() {
             className="w-full flex items-center justify-between text-left"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold truncate">{plan.title}</p>
-              <p className="text-xs text-[#8b8b8b]">練習メニュー</p>
+              <p className="text-base font-bold truncate">{plan.title}</p>
+              <p className="text-sm text-[#8b8b8b]">練習メニュー</p>
             </div>
             {planOpen ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
           </button>
           {planOpen && (
             <div className="mt-2 pt-2 border-t border-[#dfdfdf] flex flex-col gap-2">
-              <p className="text-xs text-[#8b8b8b]">{plan.summary}</p>
+              <p className="text-sm text-[#8b8b8b]">{plan.summary}</p>
               {plan.practice_plan_items?.map((item: any, index: number) => (
                 <div key={item.id} className={index > 0 ? "border-t border-[#dfdfdf] pt-2" : ""}>
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-[10px] font-medium text-black">
+                    <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs font-medium text-black">
                       {item.club?.club_number ?? "?"}
                     </span>
-                    <span className="text-xs text-[#8b8b8b]">{item.balls}球</span>
+                    <span className="text-sm text-[#8b8b8b]">{item.balls}球</span>
                   </div>
-                  <p className="text-xs font-bold mt-0.5">{item.focus}</p>
+                  <p className="text-sm font-bold mt-0.5">{item.focus}</p>
                 </div>
               ))}
             </div>

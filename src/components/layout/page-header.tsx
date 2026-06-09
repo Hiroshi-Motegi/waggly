@@ -36,7 +36,7 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
   }
 
   return (
-    <div className={`sticky top-0 z-10 -mx-2 -mt-2 px-3 pt-4 pb-2 overflow-hidden transition-all duration-200 ${isDark ? (scrolled ? "shadow-sm" : "") : "bg-[#ebf1eb]"}`}>
+    <div className={`sticky top-0 z-10 -mx-2 -mt-2 px-3 pb-2 overflow-hidden transition-all duration-200 ${isDark ? (scrolled ? "shadow-sm" : "") : "bg-[#ebf1eb]"}`} style={{ paddingTop: "calc(1rem + env(safe-area-inset-top))" }}>
       {isDark && scrolled && (
         <>
           <div className="absolute inset-0 bg-[#139847]/80" />
@@ -51,7 +51,7 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
         )}
         <div className="flex flex-1 flex-col min-w-0">
           {subtitle && (
-            <span className={`text-xs font-bold truncate ${isDark ? "text-white/80" : "text-[#1e944c]"}`}>{subtitle}</span>
+            <span className={`text-sm font-bold truncate ${isDark ? "text-white/80" : "text-[#1e944c]"}`}>{subtitle}</span>
           )}
           <h2 className={`text-lg font-bold truncate ${isDark ? "text-white" : "text-[#006728]"}`}>{title}</h2>
         </div>

@@ -36,10 +36,10 @@ function PlanItem({ item, isLast }: { item: any; isLast: boolean }) {
         <div className="flex flex-1 flex-col gap-1 min-w-0">
           <p className="text-base font-bold text-[#006728]">{item.focus}</p>
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
+            <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-xs font-medium text-black">
               {item.club?.club_number ?? "?"}
             </span>
-            <span className="text-xs text-[#5c5c5c]">{item.balls}球</span>
+            <span className="text-sm text-[#5c5c5c]">{item.balls}球</span>
           </div>
         </div>
         {hasDetail && (
@@ -50,7 +50,7 @@ function PlanItem({ item, isLast }: { item: any; isLast: boolean }) {
       </button>
       {open && hasDetail && (
         <div className={`pb-3 ${!isLast ? "border-b border-[#dfdfdf]" : ""}`}>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+          <p className="text-base leading-relaxed whitespace-pre-wrap">
             {item.detail}
           </p>
         </div>
@@ -109,7 +109,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="練習メニュー" backHref="/coach/plans" variant="dark">
-        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${statusColors[plan.status]}`}>
+        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[plan.status]}`}>
           {statusLabels[plan.status]}
         </span>
       </PageHeader>
@@ -118,11 +118,11 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold text-[#006728]">{plan.title}</h3>
-          <span className="text-xs text-[#8b8b8b]">
+          <span className="text-sm text-[#8b8b8b]">
             {new Date(plan.created_at).toLocaleDateString("ja-JP")}
           </span>
         </div>
-        <p className="text-sm text-[#8b8b8b]">{plan.summary}</p>
+        <p className="text-base text-[#8b8b8b]">{plan.summary}</p>
       </div>
 
       {/* Items */}
@@ -137,13 +137,13 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
         <button
           onClick={handleDone}
-          className="w-full rounded-full bg-white border border-white py-2 text-sm font-bold text-[#006728]"
+          className="w-full rounded-full bg-white border border-white py-2 text-base font-bold text-[#006728]"
         >
           この内容で練習を記録する
         </button>
         <button
           onClick={handleDelete}
-          className="px-5 py-1 text-sm font-bold text-white"
+          className="px-5 py-1 text-base font-bold text-white"
         >
           削除
         </button>

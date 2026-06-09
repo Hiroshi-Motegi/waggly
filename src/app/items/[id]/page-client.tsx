@@ -55,11 +55,11 @@ const statuses: { value: AccessoryStatus; label: string }[] = [
 ];
 
 function StarRating({ rating }: { rating: number | null }) {
-  if (rating == null) return <span className="text-sm text-[#8b8b8b]">未評価</span>;
+  if (rating == null) return <span className="text-base text-[#8b8b8b]">未評価</span>;
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className={`text-xs ${i <= rating ? "text-amber-400" : "text-gray-300"}`}>
+        <span key={i} className={`text-sm ${i <= rating ? "text-amber-400" : "text-gray-300"}`}>
           ★
         </span>
       ))}
@@ -203,7 +203,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         <form onSubmit={handleSave} className="flex flex-col rounded-lg bg-white p-3">
           {/* 画像 */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">画像</span>
+            <span className="text-sm">画像</span>
             {(() => {
               const displayUrl = deleteImage ? null : (previewUrl ?? item?.image_url);
               return (
@@ -214,17 +214,17 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="h-32 w-full rounded border-2 border-dashed border-[#c4c4c4] flex items-center justify-center text-sm text-[#8b8b8b]"
+                      className="h-32 w-full rounded border-2 border-dashed border-[#c4c4c4] flex items-center justify-center text-base text-[#8b8b8b]"
                     >
                       写真を追加
                     </button>
                   )}
                   {displayUrl && (
                     <div className="flex gap-2.5">
-                      <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-full border border-[#006728] px-5 py-1 text-xs font-bold text-[#006728]">
+                      <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]">
                         変更する
                       </button>
-                      <button type="button" onClick={handleImageDelete} className="rounded-full border border-[#006728] px-5 py-1 text-xs font-bold text-[#006728]">
+                      <button type="button" onClick={handleImageDelete} className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]">
                         削除する
                       </button>
                     </div>
@@ -237,12 +237,12 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
           {/* カテゴリ */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">カテゴリ</span>
+            <span className="text-sm">カテゴリ</span>
             <select
               value={editForm.category ?? ""}
               onChange={(e) => updateEdit("category", e.target.value)}
               required
-              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
             >
               {categories.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
@@ -252,25 +252,25 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
           {/* ブランド・メーカー */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">ブランド・メーカー</span>
-            <input value={editForm.brand ?? ""} onChange={(e) => updateEdit("brand", e.target.value)} placeholder="例: Titleist" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+            <span className="text-sm">ブランド・メーカー</span>
+            <input value={editForm.brand ?? ""} onChange={(e) => updateEdit("brand", e.target.value)} placeholder="例: Titleist" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
           {/* 商品名・モデル */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">商品名・モデル</span>
-            <input value={editForm.model ?? ""} onChange={(e) => updateEdit("model", e.target.value)} placeholder="例: Pro V1" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+            <span className="text-sm">商品名・モデル</span>
+            <input value={editForm.model ?? ""} onChange={(e) => updateEdit("model", e.target.value)} placeholder="例: Pro V1" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
           {/* メモ */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">メモ</span>
-            <textarea value={editForm.memo ?? ""} onChange={(e) => updateEdit("memo", e.target.value)} placeholder="使用感など..." rows={5} className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+            <span className="text-sm">メモ</span>
+            <textarea value={editForm.memo ?? ""} onChange={(e) => updateEdit("memo", e.target.value)} placeholder="使用感など..." rows={5} className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
           {/* 評価 */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">評価</span>
+            <span className="text-sm">評価</span>
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -289,17 +289,17 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
           {/* 購入URL */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">購入URL</span>
-            <input type="url" value={editForm.purchase_url ?? ""} onChange={(e) => updateEdit("purchase_url", e.target.value)} placeholder="https://..." className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+            <span className="text-sm">購入URL</span>
+            <input type="url" value={editForm.purchase_url ?? ""} onChange={(e) => updateEdit("purchase_url", e.target.value)} placeholder="https://..." className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
           {/* ステータス */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">ステータス</span>
+            <span className="text-sm">ステータス</span>
             <select
               value={editForm.status ?? "active"}
               onChange={(e) => updateEdit("status", e.target.value)}
-              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
             >
               {statuses.map((s) => (
                 <option key={s.value} value={s.value}>{s.label}</option>
@@ -310,10 +310,10 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
         {/* Buttons outside card */}
         <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
-          <button onClick={(e) => { e.preventDefault(); handleSave(e); }} disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-sm font-bold text-[#006728] disabled:opacity-50">
+          <button onClick={(e) => { e.preventDefault(); handleSave(e); }} disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50">
             {isSubmitting ? "保存中..." : "保存する"}
           </button>
-          <button type="button" onClick={() => { resetImageState(); setIsEditing(false); }} className="text-sm font-bold text-white">
+          <button type="button" onClick={() => { resetImageState(); setIsEditing(false); }} className="text-base font-bold text-white">
             キャンセル
           </button>
         </div>
@@ -362,23 +362,23 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
         {/* Detail rows */}
         <div className="flex flex-col">
-          <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+          <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
             <span className="shrink-0">ステータス</span>
             <span className="flex-1 text-right">{statusLabel}</span>
           </div>
           {item.brand && (
-            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
               <span className="shrink-0">ブランド・メーカー</span>
               <span className="flex-1 text-right">{item.brand}</span>
             </div>
           )}
           {item.model && (
-            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
               <span className="shrink-0">商品名・モデル</span>
               <span className="flex-1 text-right">{item.model}</span>
             </div>
           )}
-          <div className="flex items-center gap-2.5 py-2 text-sm">
+          <div className="flex items-center gap-2.5 py-2 text-base">
             <span className="flex-1">評価</span>
             <StarRating rating={item.rating} />
           </div>
@@ -387,8 +387,8 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         {/* Memo */}
         {item.memo && (
           <div className="border-t border-[#dfdfdf] pt-2">
-            <p className="text-xs font-medium text-[#8b8b8b] mb-1">メモ</p>
-            <p className="text-sm whitespace-pre-wrap">{item.memo}</p>
+            <p className="text-sm font-medium text-[#8b8b8b] mb-1">メモ</p>
+            <p className="text-base whitespace-pre-wrap">{item.memo}</p>
           </div>
         )}
       </div>
@@ -404,7 +404,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
               href={affiliateUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-white bg-transparent px-5 py-1 text-sm font-bold text-white"
+              className="rounded-full border border-white bg-transparent px-5 py-1 text-base font-bold text-white"
             >
               {platformLabel}
             </a>
@@ -417,14 +417,14 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         {item.status === "active" ? (
           <button
             onClick={() => handleStatusChange("past")}
-            className="text-sm font-bold text-white"
+            className="text-base font-bold text-white"
           >
             アーカイブに移動
           </button>
         ) : (
           <button
             onClick={() => handleStatusChange("active")}
-            className="text-sm font-bold text-white"
+            className="text-base font-bold text-white"
           >
             使用中に戻す
           </button>

@@ -27,84 +27,84 @@ export function ClubDetailSpecs({ form, onChange }: Props) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center gap-0.5 pt-2 text-xs text-[#8b8b8b]"
+        className="flex w-full items-center gap-0.5 pt-2 text-sm text-[#8b8b8b]"
       >
-        <span className="flex-1 text-left">詳細スペック（任意）</span>
+        <span className="flex-1 text-left text-base">詳細スペック（任意）</span>
         {isOpen ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
       </button>
 
       {isOpen && (
         <>
-          <div className="flex items-center gap-0.5 pt-2">
-            <span className="flex-1 text-xs">総重量</span>
+          <div className="flex items-center gap-0.5 py-2.5">
+            <span className="flex-1 text-base">総重量</span>
             <input
               type="number"
               step="0.1"
               value={form.weight ?? ""}
               onChange={(e) => onChange("weight", e.target.value ? Number(e.target.value) : undefined)}
               placeholder=""
-              className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none"
+              className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none"
             />
-            <span className="w-[30px] text-xs">g</span>
+            <span className="w-[30px] text-sm">g</span>
           </div>
-          <div className="flex items-center gap-0.5">
-            <span className="flex-1 text-xs">バランス</span>
+          <div className="flex items-center gap-0.5 py-2.5">
+            <span className="flex-1 text-base">バランス</span>
             <input
               type="text"
               value={form.swing_weight ?? ""}
               onChange={(e) => onChange("swing_weight", e.target.value || undefined)}
               placeholder="D2"
-              className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none"
+              className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none"
             />
-            <span className="w-[30px] text-xs"></span>
+            <span className="w-[30px] text-sm"></span>
           </div>
-          <div className="flex items-center gap-0.5">
-            <span className="flex-1 text-xs">振動数</span>
+          <div className="flex items-center gap-0.5 py-2.5">
+            <span className="flex-1 text-base">振動数</span>
             <input
               type="number"
               value={form.frequency ?? ""}
               onChange={(e) => onChange("frequency", e.target.value ? Number(e.target.value) : undefined)}
               placeholder=""
-              className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none"
+              className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none"
             />
-            <span className="w-[30px] text-xs">cpm</span>
+            <span className="w-[30px] text-sm">cpm</span>
           </div>
-          <div className="flex items-center gap-0.5">
-            <span className="flex-1 text-xs">キックポイント</span>
+          <div className="flex items-center gap-0.5 py-2.5">
+            <span className="flex-1 text-base">キックポイント</span>
             <select
               value={form.kick_point ?? ""}
               onChange={(e) => onChange("kick_point", e.target.value || undefined)}
-              className="w-[77px] border-b border-[#c4c4c4] bg-white px-1 py-1 text-center text-sm focus-visible:outline-none"
+              className="w-[100px] border-b border-[#c4c4c4] bg-white px-1 py-1 text-center text-base focus-visible:outline-none"
             >
               <option value="">—</option>
               {kickPointOptions.map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
-            <span className="w-[30px] text-xs"></span>
+            <span className="w-[30px] text-sm"></span>
           </div>
-          <div className="flex items-center gap-0.5">
-            <span className="flex-1 text-xs">ヘッド体積</span>
+          <div className="flex items-center gap-0.5 py-2.5">
+            <span className="flex-1 text-base">ヘッド体積</span>
             <input
               type="number"
               value={form.head_volume ?? ""}
               onChange={(e) => onChange("head_volume", e.target.value ? Number(e.target.value) : undefined)}
               placeholder=""
-              className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none"
+              className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none"
             />
-            <span className="w-[30px] text-xs">cc</span>
+            <span className="w-[30px] text-sm">cc</span>
           </div>
-          <div className="flex items-center gap-0.5">
-            <span className="flex-1 text-xs">ヘッド重量</span>
+          <div className="flex items-center gap-0.5 py-2.5">
+            <span className="flex-1 text-base">ヘッド重量</span>
             <input
               type="number"
               step="0.1"
               value={form.head_weight ?? ""}
               onChange={(e) => onChange("head_weight", e.target.value ? Number(e.target.value) : undefined)}
               placeholder=""
-              className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none"
+              className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none"
             />
-            <span className="w-[30px] text-xs">g</span>
+            <span className="w-[30px] text-sm">g</span>
           </div>
         </>
       )}

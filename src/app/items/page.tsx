@@ -39,7 +39,7 @@ function StarRating({ rating }: { rating: number | null }) {
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className={`text-xs ${i <= rating ? "text-amber-400" : "text-gray-300"}`}>
+        <span key={i} className={`text-sm ${i <= rating ? "text-amber-400" : "text-gray-300"}`}>
           ★
         </span>
       ))}
@@ -100,7 +100,7 @@ export default function ItemsPage() {
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="アイテム" showBack={false} variant="dark">
         <Link href="/items/new">
-          <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]">
+          <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
             <Plus className="h-4 w-4" />
             追加
           </button>
@@ -117,7 +117,7 @@ export default function ItemsPage() {
               className="flex flex-col items-center gap-0.5 pt-1"
             >
               <span
-                className={`px-2 py-0.5 text-sm font-bold text-[#006728]`}
+                className={`px-2 py-0.5 text-base font-bold text-[#006728]`}
               >
                 {tab.label}
               </span>
@@ -135,7 +135,7 @@ export default function ItemsPage() {
         {isLoading ? (
           <Loading />
         ) : accessories.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
+          <p className="py-8 text-center text-base text-muted-foreground">
             アイテムが登録されていません
           </p>
         ) : (
@@ -155,16 +155,16 @@ export default function ItemsPage() {
                     )}
                   </div>
                   <div className="flex flex-1 flex-col gap-px min-w-0">
-                    <span className="text-xs font-medium text-[#8b8b8b]">
+                    <span className="text-sm font-medium text-[#8b8b8b]">
                       {categoryLabels[item.category]}
                     </span>
-                    <span className="text-sm font-bold text-black truncate">
+                    <span className="text-base font-bold text-black truncate">
                       {[item.brand, item.model].filter(Boolean).join(" ") || "—"}
                     </span>
                     <StarRating rating={item.rating} />
                   </div>
                   {item.status === "past" && (
-                    <span className="shrink-0 rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
+                    <span className="shrink-0 rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-xs font-medium text-black">
                       アーカイブ
                     </span>
                   )}

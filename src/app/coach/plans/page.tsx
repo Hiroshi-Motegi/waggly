@@ -56,7 +56,7 @@ export default function PlansPage() {
       <PageHeader title="練習メニュー" showBack={false} variant="dark">
         {user && (
           <Link href="/coach/plans/new">
-            <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]">
+            <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
               <Plus className="h-4 w-4" />
               新規作成
             </button>
@@ -66,22 +66,22 @@ export default function PlansPage() {
 
       {!user && isNative() ? (
         <div className="rounded-lg bg-white p-6 text-center">
-          <p className="text-sm font-bold mb-2">AI練習メニューを利用するにはサインインが必要です</p>
-          <p className="text-xs text-[#8b8b8b] mb-4">設定画面からGoogleアカウントでサインインしてください</p>
-          <a href="/settings" className="inline-block rounded-full bg-[#006728] px-6 py-2 text-sm font-bold text-white">
+          <p className="text-base font-bold mb-2">AI練習メニューを利用するにはサインインが必要です</p>
+          <p className="text-sm text-[#8b8b8b] mb-4">設定画面からGoogleアカウントでサインインしてください</p>
+          <Link href="/settings" className="inline-block rounded-full bg-[#006728] px-6 py-2 text-base font-bold text-white">
             設定へ
-          </a>
+          </Link>
         </div>
       ) : generating ? (
         <div className="flex items-center gap-3 rounded-lg bg-white p-3">
           <Loader2 className="h-4 w-4 animate-spin text-[#006728]" />
-          <p className="text-sm text-[#8b8b8b]">練習メニューを生成中...</p>
+          <p className="text-base text-[#8b8b8b]">練習メニューを生成中...</p>
         </div>
       ) : isLoading ? (
         <Loading variant="light" />
       ) : plans.length === 0 ? (
         <div className="rounded-lg bg-white p-3">
-          <p className="text-center text-sm text-[#8b8b8b] py-4">まだ練習メニューがありません</p>
+          <p className="text-center text-base text-[#8b8b8b] py-4">まだ練習メニューがありません</p>
         </div>
       ) : (
         <div className="flex flex-col rounded-lg bg-white p-3">
@@ -90,14 +90,14 @@ export default function PlansPage() {
               <div className={`flex items-center gap-2.5 py-2 ${i < plans.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
                 <div className="flex flex-1 flex-col gap-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${statusColors[plan.status]}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[plan.status]}`}>
                       {statusLabels[plan.status]}
                     </span>
-                    <span className="text-xs text-[#8b8b8b]">
+                    <span className="text-sm text-[#8b8b8b]">
                       {new Date(plan.created_at).toLocaleDateString("ja-JP")}
                     </span>
                   </div>
-                  <p className="text-sm font-bold truncate">{plan.title}</p>
+                  <p className="text-base font-bold truncate">{plan.title}</p>
                 </div>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" />
               </div>

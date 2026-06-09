@@ -40,7 +40,7 @@ export function BottomNav() {
                   width={28}
                   height={28}
                 />
-                <span className="text-[10px] font-medium tracking-tight text-black">
+                <span className="text-xs font-medium tracking-tight text-black">
                   {tab.label}
                 </span>
               </div>

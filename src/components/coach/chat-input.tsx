@@ -40,7 +40,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
         onCompositionStart={() => { composingRef.current = true; }}
         onCompositionEnd={() => { composingRef.current = false; }}
         placeholder="メッセージを入力..."
-        className="flex-1 rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+        className="flex-1 rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
       />
       <button
         type="submit"

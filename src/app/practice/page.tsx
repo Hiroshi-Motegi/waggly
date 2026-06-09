@@ -22,7 +22,7 @@ export default function PracticePage() {
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="練習記録" showBack={false} variant="dark">
         <Link href="/practice/new">
-          <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]">
+          <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
             <Plus className="h-4 w-4" />
             記録する
           </button>
@@ -33,7 +33,7 @@ export default function PracticePage() {
         {isLoading ? (
           <Loading />
         ) : sessions.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
+          <p className="py-8 text-center text-base text-muted-foreground">
             まだ練習記録がありません
           </p>
         ) : (
@@ -46,15 +46,15 @@ export default function PracticePage() {
                   }`}
                 >
                   <div className="flex flex-1 flex-col gap-px">
-                    <span className="text-xs font-medium text-[#8b8b8b]">
+                    <span className="text-sm font-medium text-[#8b8b8b]">
                       {formatDate(s.practiced_at)}
                     </span>
-                    <span className="text-sm font-bold text-black">
+                    <span className="text-base font-bold text-black">
                       {s.location || "場所未入力"}
                     </span>
                   </div>
                   {s.total_balls && (
-                    <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
+                    <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-xs font-medium text-black">
                       {s.total_balls}球
                     </span>
                   )}

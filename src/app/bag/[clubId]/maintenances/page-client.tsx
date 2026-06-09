@@ -95,7 +95,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
   if (isLoading) return <Loading variant="light" />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
-  const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
+  const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 
   // Add mode: dedicated form page
   if (isAddMode) {
@@ -109,7 +109,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
                 <ChevronLeft className="h-6 w-6" />
               </button>
               <div>
-                <span className="text-xs font-bold text-white">
+                <span className="text-sm font-bold text-white">
                   {club.club_number}{club.maker ? ` / ${club.maker}` : ""}{club.model ? ` ${club.model}` : ""}
                 </span>
                 <h2 className="text-lg font-bold text-white">メンテナンス記録の追加</h2>
@@ -117,7 +117,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
             </div>
             <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
               <div className="flex flex-col gap-0.5 py-1">
-                <span className="text-xs">種別</span>
+                <span className="text-sm">種別</span>
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
@@ -129,19 +129,19 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
                 </select>
               </div>
               <div className="flex flex-col gap-0.5 py-1">
-                <span className="text-xs">実施日</span>
+                <span className="text-sm">実施日</span>
                 <input type="date" value={form.done_at} onChange={(e) => setForm({ ...form, done_at: e.target.value })} className={inputClass} />
               </div>
               <div className="flex flex-col gap-0.5 py-1">
-                <span className="text-xs">実施店舗</span>
+                <span className="text-sm">実施店舗</span>
                 <input value={form.shop} onChange={(e) => setForm({ ...form, shop: e.target.value })} placeholder="例: ゴルフ5 新宿店" className={inputClass} />
               </div>
               <div className="flex flex-col gap-0.5 py-1">
-                <span className="text-xs">費用（円）</span>
+                <span className="text-sm">費用（円）</span>
                 <input type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} placeholder="3000" className={inputClass} />
               </div>
               <div className="flex flex-col gap-0.5 py-1">
-                <span className="text-xs">メモ</span>
+                <span className="text-sm">メモ</span>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -156,14 +156,14 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full rounded-full bg-white border border-white py-2 text-sm font-bold text-[#006728] disabled:opacity-50"
+                className="w-full rounded-full bg-white border border-white py-2 text-base font-bold text-[#006728] disabled:opacity-50"
               >
                 {submitting ? "保存中..." : "保存する"}
               </button>
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-5 py-1 text-sm font-bold text-white"
+                className="px-5 py-1 text-base font-bold text-white"
               >
                 キャンセル
               </button>
@@ -181,12 +181,12 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
       <div className="relative z-10 flex flex-col space-y-2">
       <div className="flex items-center justify-between px-1">
         <div>
-          <span className="text-xs font-bold text-white">{club.club_number}</span>
+          <span className="text-sm font-bold text-white">{club.club_number}</span>
           <h2 className="text-lg font-bold text-white">メンテナンス履歴</h2>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#006728]"
+          className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-[#006728]"
         >
           <Plus className="h-3 w-3" />
           追加
@@ -196,7 +196,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
       {showForm && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-lg bg-white p-3">
           <div className="space-y-1">
-            <span className="text-xs">種別</span>
+            <span className="text-sm">種別</span>
             <select
               value={form.type}
               onChange={(e) => setForm({ ...form, type: e.target.value })}
@@ -208,26 +208,26 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
             </select>
           </div>
           <div className="space-y-1">
-            <span className="text-xs">実施日</span>
+            <span className="text-sm">実施日</span>
             <input type="date" value={form.done_at} onChange={(e) => setForm({ ...form, done_at: e.target.value })} className={inputClass} />
           </div>
           <div className="space-y-1">
-            <span className="text-xs">実施店舗</span>
+            <span className="text-sm">実施店舗</span>
             <input value={form.shop} onChange={(e) => setForm({ ...form, shop: e.target.value })} placeholder="例: ゴルフ5 新宿店" className={inputClass} />
           </div>
           <div className="space-y-1">
-            <span className="text-xs">費用（円）</span>
+            <span className="text-sm">費用（円）</span>
             <input type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} placeholder="3000" className={inputClass} />
           </div>
           <div className="space-y-1">
-            <span className="text-xs">メモ</span>
+            <span className="text-sm">メモ</span>
             <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="詳細メモ..." rows={3} className={inputClass} />
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setShowForm(false)} className="flex-1 rounded-full border border-white py-2 text-sm font-bold text-white">
+            <button type="button" onClick={() => setShowForm(false)} className="flex-1 rounded-full border border-white py-2 text-base font-bold text-white">
               キャンセル
             </button>
-            <button type="submit" disabled={submitting} className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50">
+            <button type="submit" disabled={submitting} className="flex-1 rounded-full bg-[#006728] py-2 text-base font-bold text-white disabled:opacity-50">
               {submitting ? "保存中..." : "保存"}
             </button>
           </div>
@@ -248,7 +248,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
             ))}
           </div>
         ) : items.length === 0 ? (
-          <p className="py-4 text-center text-sm text-[#8b8b8b]">記録なし</p>
+          <p className="py-4 text-center text-base text-[#8b8b8b]">記録なし</p>
         ) : (
           <div className="flex flex-col">
             {items.map((m, i) => (
@@ -260,13 +260,13 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
                 >
                   <div className="flex flex-1 flex-col gap-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-[10px] font-medium text-black">
+                      <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs font-medium text-black">
                         {maintenanceTypeLabels[m.type]}
                       </span>
-                      <span className="text-xs text-[#8b8b8b]">{formatDate(m.done_at)}</span>
+                      <span className="text-sm text-[#8b8b8b]">{formatDate(m.done_at)}</span>
                     </div>
-                    {m.description && <p className="text-sm truncate">{m.description}</p>}
-                    <div className="flex gap-4 text-xs text-[#8b8b8b]">
+                    {m.description && <p className="text-base truncate">{m.description}</p>}
+                    <div className="flex gap-4 text-sm text-[#8b8b8b]">
                       {m.shop && <span>{m.shop}</span>}
                       {m.cost != null && <span>{m.cost.toLocaleString()}円</span>}
                     </div>

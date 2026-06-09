@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,9 +23,9 @@ export default function NewPlanPage() {
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative z-10 flex flex-col space-y-2">
           <div className="rounded-lg bg-white p-6 text-center mt-4">
-            <p className="text-sm font-bold mb-2">AI練習メニューを利用するにはサインインが必要です</p>
-            <p className="text-xs text-[#8b8b8b] mb-4">設定画面からGoogleアカウントでサインインしてください</p>
-            <a href="/settings" className="inline-block rounded-full bg-[#006728] px-6 py-2 text-sm font-bold text-white">設定へ</a>
+            <p className="text-base font-bold mb-2">AI練習メニューを利用するにはサインインが必要です</p>
+            <p className="text-sm text-[#8b8b8b] mb-4">設定画面からGoogleアカウントでサインインしてください</p>
+            <Link href="/settings" className="inline-block rounded-full bg-[#006728] px-6 py-2 text-base font-bold text-white">設定へ</Link>
           </div>
         </div>
       </div>
@@ -89,11 +90,11 @@ export default function NewPlanPage() {
           <CardContent className="space-y-4">
             {/* Duration */}
             <div className="space-y-1">
-              <label className="text-sm font-medium">練習時間</label>
+              <label className="text-base font-medium">練習時間</label>
               <select
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
               >
                 <option value="30分">30分</option>
                 <option value="1時間">1時間</option>
@@ -104,11 +105,11 @@ export default function NewPlanPage() {
 
             {/* Location */}
             <div className="space-y-1">
-              <label className="text-sm font-medium">練習場所</label>
+              <label className="text-base font-medium">練習場所</label>
               <select
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
               >
                 <option value="練習場">練習場（屋外）</option>
                 <option value="インドア">インドア練習場</option>
@@ -119,7 +120,7 @@ export default function NewPlanPage() {
 
             {/* Focus */}
             <div className="space-y-1">
-              <label className="text-sm font-medium">重点的に練習したいこと</label>
+              <label className="text-base font-medium">重点的に練習したいこと</label>
               <Textarea
                 value={focus}
                 onChange={(e) => setFocus(e.target.value)}
@@ -131,11 +132,11 @@ export default function NewPlanPage() {
 
             {/* Refer practice records */}
             <div className="space-y-1">
-              <label className="text-sm font-medium">過去の練習記録を参考にする</label>
+              <label className="text-base font-medium">過去の練習記録を参考にする</label>
               <select
                 value={referPractice}
                 onChange={(e) => setReferPractice(e.target.value)}
-                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
               >
                 <option value="last">前回の練習記録から</option>
                 <option value="1">直近1ヶ月</option>
@@ -143,12 +144,12 @@ export default function NewPlanPage() {
                 <option value="6">直近6ヶ月</option>
                 <option value="none">参考にしない</option>
               </select>
-              <p className="text-xs text-muted-foreground">練習の傾向やメモをAIが分析して提案に活かします</p>
+              <p className="text-sm text-muted-foreground">練習の傾向やメモをAIが分析して提案に活かします</p>
             </div>
 
             {/* Notes */}
             <div className="space-y-1">
-              <label className="text-sm font-medium">その他の要望</label>
+              <label className="text-base font-medium">その他の要望</label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -184,7 +185,7 @@ export default function NewPlanPage() {
                         key={t.value}
                         type="button"
                         onClick={() => setClubTab(t.value)}
-                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                        className={`rounded-full px-3 py-1 text-sm font-bold ${
                           clubTab === t.value ? "bg-[#006728] text-white" : "border border-[#c4c4c4] text-[#8b8b8b]"
                         }`}
                       >
@@ -194,7 +195,7 @@ export default function NewPlanPage() {
                   </div>
                 )}
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">{selectedClubs.filter((cn) => displayClubs.some((c) => c.club_number === cn)).length}/{displayClubs.length}本選択</span>
+                  <span className="text-sm text-muted-foreground">{selectedClubs.filter((cn) => displayClubs.some((c) => c.club_number === cn)).length}/{displayClubs.length}本選択</span>
                   <button
                     type="button"
                     onClick={() => {
@@ -205,7 +206,7 @@ export default function NewPlanPage() {
                           : [...prev.filter((cn) => !nums.includes(cn)), ...nums]
                       );
                     }}
-                    className="text-xs text-primary hover:underline"
+                    className="text-sm text-primary hover:underline"
                   >
                     {allSelected ? "すべて解除" : "すべて追加"}
                   </button>
@@ -219,7 +220,7 @@ export default function NewPlanPage() {
                         onChange={() => toggleClub(club.club_number)}
                         className="h-4 w-4 rounded border-input"
                       />
-                      <span className="text-sm">{club.club_number}</span>
+                      <span className="text-base">{club.club_number}</span>
                     </label>
                   ))}
                 </div>
@@ -229,7 +230,7 @@ export default function NewPlanPage() {
         })()}
 
         {error && (
-          <p className="text-sm text-destructive text-center">{error}</p>
+          <p className="text-base text-destructive text-center">{error}</p>
         )}
 
         <Button type="submit" className="w-full h-11" disabled={isGenerating}>

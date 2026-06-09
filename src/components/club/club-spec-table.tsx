@@ -20,7 +20,7 @@ export function ClubSpecTable({ club }: ClubSpecTableProps) {
         const value = club[spec.key];
         if (value == null || value === "") return null;
         return (
-          <div key={spec.key} className="flex justify-between text-sm">
+          <div key={spec.key} className="flex justify-between text-base">
             <span className="text-muted-foreground">{spec.label}</span>
             <span className="font-medium">
               {String(value)}{spec.suffix ? ` ${spec.suffix}` : ""}

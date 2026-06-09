@@ -70,22 +70,22 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
       {/* Card 1: Date & Location */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">日付</span>
+          <span className="text-sm">日付</span>
           <input
             type="date"
             value={practicedAt}
             onChange={(e) => setPracticedAt(e.target.value)}
-            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           />
         </div>
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">練習場</span>
+          <span className="text-sm">練習場</span>
           <input
             list="past-locations"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="練習場名を入力"
-            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           />
           {pastLocations && pastLocations.length > 0 && (
             <datalist id="past-locations">
@@ -109,7 +109,7 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
             onClick={() => setBallsTab("total")}
             className="flex flex-col items-center gap-0.5 pt-1"
           >
-            <span className="px-2 py-0.5 text-sm font-bold text-[#006728]">総球数のみ</span>
+            <span className="px-2 py-0.5 text-base font-bold text-[#006728]">総球数のみ</span>
             <div className={`h-0.5 w-full ${ballsTab === "total" ? "bg-[#006728]" : "bg-[#a5cbb4]"}`} />
           </button>
           <button
@@ -117,7 +117,7 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
             onClick={() => setBallsTab("per_club")}
             className="flex flex-col items-center gap-0.5 pt-1"
           >
-            <span className="px-2 py-0.5 text-sm font-bold text-[#006728]">番手別球数・飛距離</span>
+            <span className="px-2 py-0.5 text-base font-bold text-[#006728]">番手別球数・飛距離</span>
             <div className={`h-0.5 w-full ${ballsTab === "per_club" ? "bg-[#006728]" : "bg-[#a5cbb4]"}`} />
           </button>
           <div className="h-0.5 flex-1 bg-[#ececec]" />
@@ -145,9 +145,9 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
                   value={totalBalls || ""}
                   onChange={(e) => setTotalBalls(e.target.value ? Number(e.target.value) : 0)}
                   placeholder="—"
-                  className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+                  className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-sm text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
                 />
-                <span className="text-xs">球</span>
+                <span className="text-sm">球</span>
               </div>
             </div>
           </div>
@@ -155,7 +155,7 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
           <div className="py-2">
             <ClubBallsInput clubs={clubs} bag2Clubs={bag2Clubs} reserveClubs={reserveClubs} value={clubBalls} onChange={setClubBalls} />
             {clubBalls.length > 0 && (
-              <p className="text-sm text-[#8b8b8b] pt-2">
+              <p className="text-base text-[#8b8b8b] pt-2">
                 合計: {clubBalls.reduce((s, c) => s + c.balls, 0)}球
               </p>
             )}
@@ -164,13 +164,13 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
       </div>
 
       {/* Section title: 気づき・メモ */}
-      <h3 className="px-1 pt-4 text-base font-bold text-white">気づき・メモ</h3>
+      <h3 className="px-1 pt-4 text-lg font-bold text-white">気づき・メモ</h3>
 
       {/* Card 3: Rating & Memo */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {showRating !== false && (
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-xs">練習の評価</span>
+            <span className="text-sm">練習の評価</span>
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -188,13 +188,13 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
           </div>
         )}
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">所感・メモ</span>
+          <span className="text-sm">所感・メモ</span>
           <textarea
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
             placeholder="今日の気づきや感覚をメモ..."
             rows={4}
-            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           />
         </div>
       </div>
@@ -204,7 +204,7 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-full bg-white border border-white py-2 text-sm font-bold text-[#006728] disabled:opacity-50"
+          className="w-full rounded-full bg-white border border-white py-2 text-base font-bold text-[#006728] disabled:opacity-50"
         >
           {isSubmitting ? "保存中..." : "保存する"}
         </button>
@@ -212,7 +212,7 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
           <button
             type="button"
             onClick={onCancel}
-            className="px-5 py-1 text-sm font-bold text-white"
+            className="px-5 py-1 text-base font-bold text-white"
           >
             キャンセル
           </button>

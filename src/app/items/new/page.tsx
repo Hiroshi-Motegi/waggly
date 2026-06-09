@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
+import { useAuth } from "@/hooks/use-auth";
+import { isNative } from "@/lib/platform";
 import type { AccessoryCategory, AccessoryStatus } from "@/types/database";
 
 const categories: { value: AccessoryCategory; label: string }[] = [
@@ -23,7 +25,7 @@ const statuses: { value: AccessoryStatus; label: string }[] = [
   { value: "past", label: "アーカイブ" },
 ];
 
-const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
+const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 
 export default function NewItemPage() {
   const router = useRouter();
@@ -108,7 +110,7 @@ export default function NewItemPage() {
       <form onSubmit={handleSubmit} className="flex flex-col rounded-lg bg-white p-3">
         {/* 画像 */}
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">画像</span>
+          <span className="text-sm">画像</span>
           <div className="flex gap-2">
             {previewUrl && (
               <div className="relative h-20 w-20 shrink-0">
@@ -142,7 +144,7 @@ export default function NewItemPage() {
         </div>
 
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">カテゴリ</span>
+          <span className="text-sm">カテゴリ</span>
           <select value={form.category} onChange={(e) => update("category", e.target.value)} required className={inputClass}>
             <option value="">選択してください</option>
             {categories.map((c) => (
@@ -152,22 +154,22 @@ export default function NewItemPage() {
         </div>
 
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">ブランド・メーカー</span>
+          <span className="text-sm">ブランド・メーカー</span>
           <input value={form.brand} onChange={(e) => update("brand", e.target.value)} placeholder="例: Titleist" className={inputClass} />
         </div>
 
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">商品名・モデル</span>
+          <span className="text-sm">商品名・モデル</span>
           <input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="例: Pro V1" className={inputClass} />
         </div>
 
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">メモ</span>
+          <span className="text-sm">メモ</span>
           <textarea value={form.memo} onChange={(e) => update("memo", e.target.value)} placeholder="使用感など..." rows={5} className={inputClass} />
         </div>
 
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">評価</span>
+          <span className="text-sm">評価</span>
           <div className="flex gap-1.5">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -185,12 +187,12 @@ export default function NewItemPage() {
         </div>
 
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">購入URL</span>
+          <span className="text-sm">購入URL</span>
           <input type="url" value={form.purchase_url} onChange={(e) => update("purchase_url", e.target.value)} placeholder="https://..." className={inputClass} />
         </div>
 
         <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-xs">ステータス</span>
+          <span className="text-sm">ステータス</span>
           <select value={form.status} onChange={(e) => update("status", e.target.value)} className={inputClass}>
             {statuses.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
@@ -200,7 +202,7 @@ export default function NewItemPage() {
       </form>
 
       <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
-        <button onClick={(e) => handleSubmit(e)} disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-sm font-bold text-[#006728] disabled:opacity-50">
+        <button onClick={(e) => handleSubmit(e)} disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50">
           {isSubmitting ? (
             <span className="flex items-center justify-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -208,7 +210,7 @@ export default function NewItemPage() {
             </span>
           ) : "保存する"}
         </button>
-        <button type="button" onClick={() => router.back()} className="text-sm font-bold text-white">
+        <button type="button" onClick={() => router.back()} className="text-base font-bold text-white">
           キャンセル
         </button>
       </div>

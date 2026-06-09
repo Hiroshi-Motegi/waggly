@@ -53,7 +53,7 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
         <PageHeader title="クラブを編集" variant="dark" />
         <div className="px-3 pt-3">
           <div className="rounded-lg bg-white p-3">
-            <span className="text-xs">写真</span>
+            <span className="text-sm">写真</span>
             <ClubImageGallery
               clubId={clubId}
               images={clubImages}
@@ -63,7 +63,7 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
         </div>
         <ClubForm initialData={editableData} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
         <div className="flex justify-center pb-8 -mt-2">
-          <button onClick={() => router.back()} className="text-sm font-bold text-white">
+          <button onClick={() => router.back()} className="text-base font-bold text-white">
             キャンセル
           </button>
         </div>

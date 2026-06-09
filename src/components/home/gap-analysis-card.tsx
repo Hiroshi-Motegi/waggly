@@ -18,15 +18,15 @@ export function GapAnalysisCard({ result }: GapAnalysisCardProps) {
       </CardHeader>
       <CardContent className="space-y-3">
         {result.gaps.map((gap, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm">
-            <Badge variant="destructive" className="text-xs">GAP</Badge>
+          <div key={i} className="flex items-center gap-2 text-base">
+            <Badge variant="destructive" className="text-sm">GAP</Badge>
             <span>
               {gap.between[0]} と {gap.between[1]} の間に {gap.difference}yd の差があります
             </span>
           </div>
         ))}
         {result.missingDistance.length > 0 && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             飛距離未入力: {result.missingDistance.join(", ")}
           </p>
         )}

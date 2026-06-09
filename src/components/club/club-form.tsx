@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Plus, X } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/hooks/use-auth";
 import type { Club, ClubCategory } from "@/types/database";
@@ -26,15 +27,16 @@ const clubNumbersByCategory: Record<string, string[]> = {
 
 interface ClubFormProps {
   initialData?: Partial<Club>;
-  onSubmit: (data: Partial<Club>) => void;
+  onSubmit: (data: Partial<Club>, pendingImage?: File) => void;
   isSubmitting?: boolean;
+  showImagePicker?: boolean;
 }
 
-const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
+const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 const selectClass = inputClass;
-const labelClass = "text-xs";
+const labelClass = "text-sm";
 
-export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps) {
+export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker }: ClubFormProps) {
   const [form, setForm] = useState<Partial<Club>>({
     category: undefined,
     club_number: "",
@@ -60,6 +62,9 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     ...initialData,
   });
   const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const [useCustomNumber, setUseCustomNumber] = useState(() => {
     if (!initialData?.club_number || !initialData?.category) return false;
@@ -73,7 +78,22 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     const cleaned = Object.fromEntries(
       Object.entries(form).map(([k, v]) => [k, v === "" ? null : v])
     );
-    onSubmit(cleaned);
+    onSubmit(cleaned, pendingFile ?? undefined);
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPendingFile(file);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(URL.createObjectURL(file));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function removeImage() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPendingFile(null);
+    setPreviewUrl(null);
   }
 
   const steelFlexes = ["X100", "S400", "S300", "S200", "R400", "R300", "R200"];
@@ -129,6 +149,43 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       {/* Section 1: クラブ詳細 */}
       <h3 className="px-1 pt-2 text-base font-bold text-white">クラブ詳細</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+        {/* 写真 */}
+        {showImagePicker && (
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className={labelClass}>写真</span>
+            <div className="flex gap-2">
+              {previewUrl && (
+                <div className="relative h-20 w-20 shrink-0">
+                  <img src={previewUrl} alt="Preview" className="h-20 w-20 rounded-lg object-cover" />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+              {!previewUrl && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]"
+                >
+                  <Plus className="h-6 w-6" />
+                </button>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+          </div>
+        )}
+
         {/* 種類 */}
         <div className="flex flex-col gap-0.5 py-1">
           <span className={labelClass}>種類</span>
@@ -157,7 +214,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
                   key={num}
                   type="button"
                   onClick={() => { setUseCustomNumber(false); update("club_number", num); }}
-                  className={`rounded-full border px-2.5 py-1.5 text-xs font-bold ${
+                  className={`rounded-full border px-2.5 py-1.5 text-sm font-bold ${
                     !useCustomNumber && form.club_number === num
                       ? "border-[#006728] bg-[#006728] text-white"
                       : "border-[#c6c6c6] bg-white text-black"
@@ -171,7 +228,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
               <button
                 type="button"
                 onClick={() => setUseCustomNumber(true)}
-                className={`rounded-l-lg border border-[#c6c6c6] px-2.5 py-1.5 text-xs font-bold shrink-0 ${
+                className={`rounded-l-lg border border-[#c6c6c6] px-2.5 py-1.5 text-sm font-bold shrink-0 ${
                   useCustomNumber ? "bg-[#006728] text-white border-[#006728]" : "bg-white text-black"
                 }`}
               >
@@ -181,7 +238,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
                 value={useCustomNumber ? (form.club_number ?? "") : ""}
                 onChange={(e) => { setUseCustomNumber(true); update("club_number", e.target.value); }}
                 placeholder=""
-                className="flex-1 rounded-r-lg border border-l-0 border-[#c4c4c4] bg-white px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+                className="flex-1 rounded-r-lg border border-l-0 border-[#c4c4c4] bg-white px-3 py-1.5 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
               />
             </div>
           </div>
@@ -243,14 +300,14 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         {/* 自動入力（サインイン時のみ） */}
         {user && (
           <div className="flex flex-col items-center gap-1 rounded bg-[#ebf1eb] p-3">
-            <p className="text-[10px] text-black w-full">
+            <p className="text-sm text-black w-full">
               公開情報からスペックを自動入力します。内容に誤りがある場合があります。
             </p>
             <button
               type="button"
               disabled={isSearching || (!form.maker && !form.model)}
               onClick={handleAutofill}
-              className="rounded-full border border-[#006728] bg-white px-5 py-1 text-[10px] font-bold text-[#006728] disabled:opacity-50"
+              className="rounded-full border border-[#006728] bg-white px-5 py-1 text-xs font-bold text-[#006728] disabled:opacity-50"
             >
               {isSearching ? "検索中..." : "スペック自動入力"}
             </button>
@@ -258,20 +315,20 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         )}
 
         {/* Inline spec rows */}
-        <div className="flex items-center gap-0.5 pt-2.5">
-          <span className="flex-1 text-xs">ロフト角</span>
-          <input type="number" step="0.5" value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none" />
-          <span className="w-[30px] text-xs">°</span>
+        <div className="flex items-center gap-0.5 py-2.5">
+          <span className="flex-1 text-base">ロフト角</span>
+          <input type="number" step="0.5" value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none" />
+          <span className="w-[30px] text-sm">°</span>
         </div>
-        <div className="flex items-center gap-0.5">
-          <span className="flex-1 text-xs">ライ角</span>
-          <input type="number" step="0.5" value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none" />
-          <span className="w-[30px] text-xs">°</span>
+        <div className="flex items-center gap-0.5 py-2.5">
+          <span className="flex-1 text-base">ライ角</span>
+          <input type="number" step="0.5" value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none" />
+          <span className="w-[30px] text-sm">°</span>
         </div>
-        <div className="flex items-center gap-0.5">
-          <span className="flex-1 text-xs">長さ</span>
-          <input type="number" step="0.25" value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none" />
-          <span className="w-[30px] text-xs">inch</span>
+        <div className="flex items-center gap-0.5 py-2.5">
+          <span className="flex-1 text-base">長さ</span>
+          <input type="number" step="0.25" value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none" />
+          <span className="w-[30px] text-sm">inch</span>
         </div>
         <ClubDetailSpecs form={form} onChange={update} />
       </div>
@@ -295,7 +352,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
 
       {/* Buttons */}
       <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
-        <button type="submit" disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-sm font-bold text-[#006728] disabled:opacity-50">
+        <button type="submit" disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50">
           {isSubmitting ? "保存中..." : "保存する"}
         </button>
       </div>

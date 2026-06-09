@@ -164,7 +164,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
               <span className="flex-1 text-right font-bold text-lg">{latestDistance} yd</span>
             </div>
           )}
-          <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+          <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
             <span className="shrink-0">ステータス</span>
             <span className="flex-1 text-right">{statusLabels[club.status]}</span>
           </div>
@@ -172,7 +172,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             const value = (club as any)[spec.key];
             if (value == null || value === "") return null;
             return (
-              <div key={spec.key} className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+              <div key={spec.key} className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
                 <span className="shrink-0">{spec.label}</span>
                 <span className="flex-1 text-right">
                   {String(value)}{spec.suffix ? ` ${spec.suffix}` : ""}
@@ -181,19 +181,19 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             );
           })}
           {club.purchase_date && (
-            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
               <span className="shrink-0">購入日</span>
               <span className="flex-1 text-right">{formatDate(club.purchase_date)}</span>
             </div>
           )}
           {club.purchase_shop && (
-            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-sm">
+            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
               <span className="shrink-0">購入店</span>
               <span className="flex-1 text-right">{club.purchase_shop}</span>
             </div>
           )}
           {club.purchase_price != null && (
-            <div className="flex items-center gap-2.5 py-2 text-sm">
+            <div className="flex items-center gap-2.5 py-2 text-base">
               <span className="shrink-0">価格</span>
               <span className="flex-1 text-right font-medium">{club.purchase_price.toLocaleString()}円</span>
             </div>
@@ -202,41 +202,41 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
           {/* 詳細スペック（入力済みの場合のみ表示） */}
           {(club.weight != null || club.swing_weight || club.frequency != null || club.kick_point || club.head_volume != null || club.head_weight != null) && (
             <div className="border-t border-[#e8e8e8] pt-3 mt-3">
-              <p className="text-xs text-[#8b8b8b] mb-2">詳細スペック</p>
-              <div className="grid grid-cols-3 gap-2 text-sm">
+              <p className="text-sm text-[#8b8b8b] mb-2">詳細スペック</p>
+              <div className="grid grid-cols-3 gap-2 text-base">
                 {club.weight != null && (
                   <div>
-                    <span className="text-xs text-[#8b8b8b]">重量</span>
+                    <span className="text-sm text-[#8b8b8b]">重量</span>
                     <p className="font-medium">{club.weight}g</p>
                   </div>
                 )}
                 {club.swing_weight && (
                   <div>
-                    <span className="text-xs text-[#8b8b8b]">バランス</span>
+                    <span className="text-sm text-[#8b8b8b]">バランス</span>
                     <p className="font-medium">{club.swing_weight}</p>
                   </div>
                 )}
                 {club.frequency != null && (
                   <div>
-                    <span className="text-xs text-[#8b8b8b]">振動数</span>
+                    <span className="text-sm text-[#8b8b8b]">振動数</span>
                     <p className="font-medium">{club.frequency}cpm</p>
                   </div>
                 )}
                 {club.kick_point && (
                   <div>
-                    <span className="text-xs text-[#8b8b8b]">キックポイント</span>
+                    <span className="text-sm text-[#8b8b8b]">キックポイント</span>
                     <p className="font-medium">{club.kick_point}</p>
                   </div>
                 )}
                 {club.head_volume != null && (
                   <div>
-                    <span className="text-xs text-[#8b8b8b]">ヘッド体積</span>
+                    <span className="text-sm text-[#8b8b8b]">ヘッド体積</span>
                     <p className="font-medium">{club.head_volume}cc</p>
                   </div>
                 )}
                 {club.head_weight != null && (
                   <div>
-                    <span className="text-xs text-[#8b8b8b]">ヘッド重量</span>
+                    <span className="text-sm text-[#8b8b8b]">ヘッド重量</span>
                     <p className="font-medium">{club.head_weight}g</p>
                   </div>
                 )}
@@ -248,22 +248,22 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         {/* Status change buttons inside card */}
         <div className="flex flex-wrap items-center justify-center gap-2 py-5">
           {!(club.status === "bag" && club.bag_number === 1) && (
-            <button onClick={() => handleStatusChange("bag", 1)} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-sm font-bold text-[#006728]">
+            <button onClick={() => handleStatusChange("bag", 1)} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-base font-bold text-[#006728]">
               マイバッグに入れる
             </button>
           )}
           {!(club.status === "bag" && club.bag_number === 2) && (
-            <button onClick={() => handleStatusChange("bag", 2)} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-sm font-bold text-[#006728]">
+            <button onClick={() => handleStatusChange("bag", 2)} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-base font-bold text-[#006728]">
               予備バッグに入れる
             </button>
           )}
           {club.status !== "reserve" && (
-            <button onClick={() => handleStatusChange("reserve")} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-sm font-bold text-[#006728]">
+            <button onClick={() => handleStatusChange("reserve")} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-base font-bold text-[#006728]">
               予備にする
             </button>
           )}
           {club.status !== "sold" && (
-            <button onClick={() => handleStatusChange("sold")} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-sm font-bold text-[#006728]">
+            <button onClick={() => handleStatusChange("sold")} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-base font-bold text-[#006728]">
               アーカイブする
             </button>
           )}
@@ -273,7 +273,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       {/* 使用サマリー（サインイン時のみ） */}
       {user && (
         <div className="rounded-lg bg-white p-3">
-          <h3 className="text-sm font-bold mb-2">使用サマリー（3ヶ月）</h3>
+          <h3 className="text-base font-bold mb-2">使用サマリー（3ヶ月）</h3>
           <ClubUsageSummary clubId={clubId} />
         </div>
       )}
@@ -283,14 +283,14 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         <h3 className="flex-1 text-base font-bold text-white">アクティビティ</h3>
         <Link
           href={nativeHref(`/bag/${clubId}/memos?add=1`)}
-          className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]"
+          className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]"
         >
           <Plus className="h-3 w-3" />
           メモ
         </Link>
         <Link
           href={nativeHref(`/bag/${clubId}/maintenances?add=1`)}
-          className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]"
+          className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]"
         >
           <Plus className="h-3 w-3" />
           メンテナンス記録
@@ -318,13 +318,13 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             ))}
           </div>
         ) : (
-          <p className="py-2 text-sm text-[#8b8b8b]">記録なし</p>
+          <p className="py-2 text-base text-[#8b8b8b]">記録なし</p>
         )}
 
         <div className="flex justify-center pt-1">
           <Link
             href={nativeHref(`/bag/${clubId}/memos`)}
-            className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]"
+            className="rounded-full border border-[#006728] px-5 py-1 text-base font-bold text-[#006728]"
           >
             すべて見る
           </Link>
@@ -366,29 +366,29 @@ function ActivityRow({ item, clubId, isLast }: { item: ActivityItem; clubId: str
 
   return (
     <Link href={href}>
-      <div className={`flex items-center gap-2.5 py-2 ${!isLast ? "border-b border-[#dfdfdf]" : ""}`}>
-        <div className="flex flex-1 flex-col gap-px min-w-0">
-          <div className="flex items-center gap-[5px]">
-            <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium text-black ${badgeColors[item.type]}`}>
+      <div className={`flex items-center gap-2.5 py-3 ${!isLast ? "border-b border-[#dfdfdf]" : ""}`}>
+        <div className="flex flex-1 flex-col gap-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className={`rounded-full px-2 py-0.5 text-sm font-medium text-black ${badgeColors[item.type]}`}>
               {badgeLabels[item.type]}
             </span>
             {item.condition && (
-              <img src={`/images/face-${item.condition === "normal" ? "ok" : item.condition}.png`} alt="" className="w-4 h-4" />
+              <img src={`/images/face-${item.condition === "normal" ? "ok" : item.condition}.png`} alt="" className="w-5 h-5" />
             )}
             {summary && (
-              <span className="text-[10px] font-medium text-[#8b8b8b]">{summary}</span>
+              <span className="text-sm font-medium text-[#8b8b8b]">{summary}</span>
             )}
-            <span className="text-[10px] font-medium text-[#8b8b8b] ml-auto shrink-0">{dateStr}</span>
+            <span className="text-sm font-medium text-[#8b8b8b] ml-auto shrink-0">{dateStr}</span>
           </div>
           {[...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])].length > 0 && (
             <div className="flex flex-wrap gap-1 mt-0.5">
               {[...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])].map((tag) => (
-                <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#333]">{tag}</span>
+                <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-xs text-[#333]">{tag}</span>
               ))}
             </div>
           )}
           {detail && (
-            <p className="text-sm font-bold text-black truncate line-clamp-2">{detail}</p>
+            <p className="text-base font-bold text-black truncate line-clamp-2">{detail}</p>
           )}
         </div>
         <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" />

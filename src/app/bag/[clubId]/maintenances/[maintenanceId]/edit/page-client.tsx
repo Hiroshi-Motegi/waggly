@@ -84,18 +84,18 @@ export default function MaintenanceEditPage({
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
       <div className="px-1">
-        <span className="text-xs font-bold text-white">{club?.club_number}</span>
+        <span className="text-sm font-bold text-white">{club?.club_number}</span>
         <h2 className="text-lg font-bold text-white">メンテナンスを編集</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-lg bg-white p-4">
         <div className="space-y-1">
-          <Label htmlFor="m-type" className="text-xs">種別</Label>
+          <Label htmlFor="m-type" className="text-sm">種別</Label>
           <select
             id="m-type"
             value={form.type}
             onChange={(e) => setForm({ ...form, type: e.target.value })}
-            className="flex h-10 w-full rounded-md border border-[#72937f] bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+            className="flex h-10 w-full rounded-md border border-[#72937f] bg-transparent px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           >
             {maintenanceTypes.map((t) => (
               <option key={t.value} value={t.value}>{t.label}</option>
@@ -103,33 +103,33 @@ export default function MaintenanceEditPage({
           </select>
         </div>
         <div className="space-y-1">
-          <Label htmlFor="m-done_at" className="text-xs">実施日</Label>
+          <Label htmlFor="m-done_at" className="text-sm">実施日</Label>
           <Input id="m-done_at" type="date" value={form.done_at} onChange={(e) => setForm({ ...form, done_at: e.target.value })} />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="m-shop" className="text-xs">実施店舗</Label>
+          <Label htmlFor="m-shop" className="text-sm">実施店舗</Label>
           <Input id="m-shop" value={form.shop} onChange={(e) => setForm({ ...form, shop: e.target.value })} placeholder="例: ゴルフ5 新宿店" />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="m-cost" className="text-xs">費用 (円)</Label>
+          <Label htmlFor="m-cost" className="text-sm">費用 (円)</Label>
           <Input id="m-cost" type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} placeholder="3000" />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="m-desc" className="text-xs">メモ</Label>
+          <Label htmlFor="m-desc" className="text-sm">メモ</Label>
           <Textarea id="m-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="詳細メモ..." rows={3} />
         </div>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex-1 rounded-full border border-white py-2 text-sm font-bold text-white"
+            className="flex-1 rounded-full border border-white py-2 text-base font-bold text-white"
           >
             キャンセル
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 rounded-full bg-white py-2 text-sm font-bold text-[#006728] disabled:opacity-50"
+            className="flex-1 rounded-full bg-white py-2 text-base font-bold text-[#006728] disabled:opacity-50"
           >
             {submitting ? "保存中..." : "保存"}
           </button>

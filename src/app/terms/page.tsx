@@ -10,7 +10,7 @@ export default function TermsPage() {
       <PageHeader title="利用規約" variant="dark" />
 
       <div className="rounded-lg bg-white p-4 space-y-5 leading-relaxed">
-        <p className="text-[10px] text-[#8b8b8b]">最終更新日: 2026年6月8日</p>
+        <p className="text-xs text-[#8b8b8b]">最終更新日: 2026年6月8日</p>
 
         <section className="space-y-1">
           <h3 className="text-base font-bold text-[#006728]">第1条（サービス内容）</h3>

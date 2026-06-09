@@ -50,7 +50,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
             <ChevronLeft className="h-6 w-6" />
           </button>
           <div>
-            <span className="text-xs font-bold text-white">{club?.club_number}</span>
+            <span className="text-sm font-bold text-white">{club?.club_number}</span>
             <h2 className="text-lg font-bold text-white">メモ</h2>
           </div>
         </div>
@@ -70,12 +70,12 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
             {memo.condition && (
               <img src={`/images/face-${memo.condition === "normal" ? "ok" : memo.condition}.png`} alt="" className="w-6 h-6" />
             )}
-            <span className="text-sm text-[#8b8b8b]">
+            <span className="text-base text-[#8b8b8b]">
               {formatDate(memo.created_at.split("T")[0])}
             </span>
           </div>
           {memo.distance && (
-            <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs font-medium text-black">
+            <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-sm font-medium text-black">
               {memo.distance} yd
             </span>
           )}
@@ -85,26 +85,26 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
         {[...(memo.symptom_tags ?? []), ...(memo.feeling_tags ?? []), ...(memo.gear_tags ?? [])].length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {(memo.symptom_tags ?? []).map((tag) => (
-              <span key={tag} className="rounded-full bg-[#f0f0f0] px-2.5 py-0.5 text-xs text-[#333]">{tag}</span>
+              <span key={tag} className="rounded-full bg-[#f0f0f0] px-2.5 py-0.5 text-sm text-[#333]">{tag}</span>
             ))}
             {(memo.feeling_tags ?? []).map((tag) => (
-              <span key={tag} className="rounded-full bg-[#fff8e1] px-2.5 py-0.5 text-xs text-[#333]">{tag}</span>
+              <span key={tag} className="rounded-full bg-[#fff8e1] px-2.5 py-0.5 text-sm text-[#333]">{tag}</span>
             ))}
             {(memo.gear_tags ?? []).map((tag) => (
-              <span key={tag} className="rounded-full bg-[#e8f4fd] px-2.5 py-0.5 text-xs text-[#333]">{tag}</span>
+              <span key={tag} className="rounded-full bg-[#e8f4fd] px-2.5 py-0.5 text-sm text-[#333]">{tag}</span>
             ))}
           </div>
         )}
 
         {memo.memo && (
           <div className="border-t border-[#dfdfdf] pt-3">
-            <p className="text-sm whitespace-pre-wrap">{memo.memo}</p>
+            <p className="text-base whitespace-pre-wrap">{memo.memo}</p>
           </div>
         )}
       </div>
 
       <div className="flex justify-center">
-        <button onClick={handleDelete} className="text-sm font-bold text-white">
+        <button onClick={handleDelete} className="text-base font-bold text-white">
           このメモを削除
         </button>
       </div>

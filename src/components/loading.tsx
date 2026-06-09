@@ -20,7 +20,7 @@ export function Loading({ variant = "default" }: { variant?: "default" | "light"
         {text.split("").map((char, i) => (
           <span
             key={i}
-            className={`loading-wave text-sm font-bold ${textColor}`}
+            className={`loading-wave text-base font-bold ${textColor}`}
             style={{ animationDelay: `${i * 0.08}s` }}
           >
             {char}

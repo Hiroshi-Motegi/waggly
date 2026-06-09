@@ -44,11 +44,11 @@ export function PlanCard({ plan, onUpdate }: PlanCardProps) {
           <CardTitle className="text-base">{plan.title}</CardTitle>
           <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
         </div>
-        <p className="text-sm text-muted-foreground">{plan.summary}</p>
+        <p className="text-base text-muted-foreground">{plan.summary}</p>
       </CardHeader>
       <CardContent className="space-y-2">
         {plan.practice_plan_items?.map((item) => (
-          <div key={item.id} className="flex items-center justify-between text-sm">
+          <div key={item.id} className="flex items-center justify-between text-base">
             <div className="flex items-center gap-2">
               <Badge variant="outline">{item.club?.club_number ?? "?"}</Badge>
               <span>{item.focus}</span>
@@ -60,9 +60,9 @@ export function PlanCard({ plan, onUpdate }: PlanCardProps) {
         {/* Feedback form (shown when "実行した" is tapped) */}
         {showFeedback && (
           <div className="space-y-3 pt-2 border-t mt-2">
-            <p className="text-sm font-medium">練習の振り返り</p>
+            <p className="text-base font-medium">練習の振り返り</p>
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">評価</p>
+              <p className="text-sm text-muted-foreground">評価</p>
               <div className="flex gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -79,7 +79,7 @@ export function PlanCard({ plan, onUpdate }: PlanCardProps) {
               </div>
             </div>
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">メモ</p>
+              <p className="text-sm text-muted-foreground">メモ</p>
               <Textarea
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
@@ -114,10 +114,10 @@ export function PlanCard({ plan, onUpdate }: PlanCardProps) {
         {plan.status === "done" && (plan.rating != null || plan.memo) && (
           <div className="pt-2 border-t mt-2 space-y-1">
             {plan.rating != null && (
-              <span className="text-amber-500 text-sm">{"★".repeat(plan.rating)}{"☆".repeat(5 - plan.rating)}</span>
+              <span className="text-amber-500 text-base">{"★".repeat(plan.rating)}{"☆".repeat(5 - plan.rating)}</span>
             )}
             {plan.memo && (
-              <p className="text-xs text-muted-foreground">{plan.memo}</p>
+              <p className="text-sm text-muted-foreground">{plan.memo}</p>
             )}
           </div>
         )}

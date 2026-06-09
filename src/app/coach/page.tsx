@@ -5,6 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
+import Link from "next/link";
 import { Plus, Clock } from "lucide-react";
 import { ChatMessages } from "@/components/coach/chat-messages";
 import { ChatInput } from "@/components/coach/chat-input";
@@ -62,14 +63,14 @@ function ChatView({
         <div className="flex gap-1">
           <button
             onClick={onShowHistory}
-            className="flex items-center gap-1 rounded-full border border-white px-4 py-1.5 text-xs font-bold text-white"
+            className="flex items-center gap-1 rounded-full border border-white px-4 py-1.5 text-sm font-bold text-white"
           >
             <Clock className="h-4 w-4" />
             履歴
           </button>
           <button
             onClick={onNewChat}
-            className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728]"
+            className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]"
           >
             <Plus className="h-4 w-4" />
             新しい会話
@@ -119,7 +120,7 @@ function HistoryPanel({
       <PageHeader title="会話履歴" showBack={false} variant="dark">
         <button
           onClick={onClose}
-          className="rounded-full border border-white px-4 py-1 text-xs font-bold text-white"
+          className="rounded-full border border-white px-4 py-1 text-sm font-bold text-white"
         >
           閉じる
         </button>
@@ -128,7 +129,7 @@ function HistoryPanel({
         {isLoading ? (
           <Loading variant="light" />
         ) : conversations.length === 0 ? (
-          <p className="py-4 text-center text-sm text-[#8b8b8b]">会話履歴がありません</p>
+          <p className="py-4 text-center text-base text-[#8b8b8b]">会話履歴がありません</p>
         ) : (
           <div className="flex flex-col">
             {conversations.map((conv, i) => (
@@ -142,8 +143,8 @@ function HistoryPanel({
                   onClick={() => onSelect(conv.id)}
                   className="flex flex-1 items-center justify-between text-left min-w-0"
                 >
-                  <span className="text-sm font-medium truncate flex-1 mr-3">{conv.title}</span>
-                  <span className="text-xs text-[#8b8b8b] shrink-0">
+                  <span className="text-base font-medium truncate flex-1 mr-3">{conv.title}</span>
+                  <span className="text-sm text-[#8b8b8b] shrink-0">
                     {formatDate(conv.created_at)}
                   </span>
                 </button>
@@ -152,7 +153,7 @@ function HistoryPanel({
                     e.stopPropagation();
                     if (confirm("この会話を削除しますか？")) onDelete(conv.id);
                   }}
-                  className="shrink-0 text-xs text-[#8b8b8b] hover:text-red-500"
+                  className="shrink-0 text-sm text-[#8b8b8b] hover:text-red-500"
                 >
                   削除
                 </button>
@@ -177,11 +178,11 @@ export default function CoachPage() {
         <div className="relative z-10 flex flex-col space-y-2">
           <PageHeader title="AIに相談" showBack={false} variant="dark" />
           <div className="rounded-lg bg-white p-6 text-center">
-            <p className="text-sm font-bold mb-2">AI機能を利用するにはサインインが必要です</p>
-            <p className="text-xs text-[#8b8b8b] mb-4">設定画面からGoogleアカウントでサインインしてください</p>
-            <a href="/settings" className="inline-block rounded-full bg-[#006728] px-6 py-2 text-sm font-bold text-white">
+            <p className="text-base font-bold mb-2">AI機能を利用するにはサインインが必要です</p>
+            <p className="text-sm text-[#8b8b8b] mb-4">設定画面からGoogleアカウントでサインインしてください</p>
+            <Link href="/settings" className="inline-block rounded-full bg-[#006728] px-6 py-2 text-base font-bold text-white">
               設定へ
-            </a>
+            </Link>
           </div>
         </div>
       </div>

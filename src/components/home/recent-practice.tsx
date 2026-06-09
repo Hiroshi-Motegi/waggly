@@ -19,7 +19,7 @@ export function RecentPractice({ sessions }: RecentPracticeProps) {
     <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
       <div className="flex flex-col gap-1.5">
         {sessions.length === 0 ? (
-          <p className="py-2 text-sm text-muted-foreground">まだ記録がありません</p>
+          <p className="py-2 text-base text-muted-foreground">まだ記録がありません</p>
         ) : (
           <div className="flex flex-col">
             {sessions.slice(0, 3).map((s, i) => (
@@ -30,15 +30,15 @@ export function RecentPractice({ sessions }: RecentPracticeProps) {
                   }`}
                 >
                   <div className="flex flex-1 flex-col gap-px">
-                    <span className="text-xs font-medium text-[#8b8b8b]">
+                    <span className="text-sm font-medium text-[#8b8b8b]">
                       {formatDate(s.practiced_at)}
                     </span>
-                    <span className="text-sm font-bold text-black">
+                    <span className="text-base font-bold text-black">
                       {s.location || "場所未入力"}
                     </span>
                   </div>
                   {s.total_balls && (
-                    <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
+                    <span className="rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-xs font-medium text-black">
                       {s.total_balls}球
                     </span>
                   )}
@@ -57,7 +57,7 @@ export function RecentPractice({ sessions }: RecentPracticeProps) {
         <div className="flex flex-col items-center pt-1">
           <Link
             href="/practice"
-            className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]"
+            className="rounded-full border border-[#006728] px-5 py-1 text-base font-bold text-[#006728]"
           >
             すべて見る
           </Link>

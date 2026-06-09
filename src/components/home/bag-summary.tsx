@@ -22,12 +22,12 @@ export function BagSummary({ clubs }: BagSummaryProps) {
           <div className="flex justify-between">
             <div>
               <p className="text-2xl font-bold">{activeClubs.length}</p>
-              <p className="text-xs text-muted-foreground">本</p>
+              <p className="text-sm text-muted-foreground">本</p>
             </div>
             {totalInvestment > 0 && (
               <div className="text-right">
                 <p className="text-2xl font-bold">{totalInvestment.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">円</p>
+                <p className="text-sm text-muted-foreground">円</p>
               </div>
             )}
           </div>

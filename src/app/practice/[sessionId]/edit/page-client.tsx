@@ -98,7 +98,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
   }
 
   if (!session) {
-    return <p className="p-4 text-center text-sm text-[#8b8b8b]">記録が見つかりません</p>;
+    return <p className="p-4 text-center text-base text-[#8b8b8b]">記録が見つかりません</p>;
   }
 
   const initialData = {
@@ -134,23 +134,23 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
             className="w-full flex items-center justify-between text-left"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold truncate">{plan.title}</p>
-              <p className="text-xs text-[#8b8b8b]">練習メニュー</p>
+              <p className="text-base font-bold truncate">{plan.title}</p>
+              <p className="text-sm text-[#8b8b8b]">練習メニュー</p>
             </div>
             {planOpen ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
           </button>
           {planOpen && (
             <div className="mt-2 pt-2 border-t border-[#dfdfdf] flex flex-col gap-2">
-              <p className="text-xs text-[#8b8b8b]">{plan.summary}</p>
+              <p className="text-sm text-[#8b8b8b]">{plan.summary}</p>
               {plan.practice_plan_items?.map((item: any, index: number) => (
                 <div key={item.id} className={index > 0 ? "border-t border-[#dfdfdf] pt-2" : ""}>
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-[10px] font-medium text-black">
+                    <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs font-medium text-black">
                       {item.club?.club_number ?? "?"}
                     </span>
-                    <span className="text-xs text-[#8b8b8b]">{item.balls}球</span>
+                    <span className="text-sm text-[#8b8b8b]">{item.balls}球</span>
                   </div>
-                  <p className="text-xs font-bold mt-0.5">{item.focus}</p>
+                  <p className="text-sm font-bold mt-0.5">{item.focus}</p>
                 </div>
               ))}
             </div>
@@ -173,7 +173,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="text-sm font-bold text-white disabled:opacity-50"
+          className="text-base font-bold text-white disabled:opacity-50"
         >
           {isDeleting ? "削除中..." : "この記録を削除"}
         </button>

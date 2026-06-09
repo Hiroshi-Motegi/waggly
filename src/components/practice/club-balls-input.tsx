@@ -62,7 +62,7 @@ function MemoToggle({ hasMemo, memoValue, onMemoChange, parentOpen }: {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-[7px] text-sm font-bold"
+        className="flex items-center gap-[7px] text-base font-bold"
       >
         <ChevronDown className={`h-3 w-3 text-[#8b8b8b] transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
         {hasMemo && memoValue?.condition ? (
@@ -115,8 +115,8 @@ function ClubAccordion({ club, entry, onUpdate, isLast, open, onToggle }: {
         onClick={onToggle}
         className="flex items-center gap-2 py-3 w-full text-left scroll-mt-[56px]"
       >
-        <span className="bg-[#006728] text-white text-sm rounded-full px-2.5 shrink-0">{club.club_number}</span>
-        <span className="flex-1 text-sm text-[#6c6c6c] truncate">{subLabel || "—"}</span>
+        <span className="bg-[#006728] text-white text-base rounded-full px-2.5 shrink-0">{club.club_number}</span>
+        <span className="flex-1 text-base text-[#6c6c6c] truncate">{subLabel || "—"}</span>
         {!open && hasData && <span className="w-2 h-2 rounded-full bg-[#006728] shrink-0" />}
         <ChevronDown className={`h-4 w-4 text-[#8b8b8b] shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
@@ -144,9 +144,9 @@ function ClubAccordion({ club, entry, onUpdate, isLast, open, onToggle }: {
                 value={entry?.avg_distance ?? ""}
                 onChange={(e) => onUpdate(club.id, { avg_distance: e.target.value ? Number(e.target.value) : null })}
                 placeholder="—"
-                className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+                className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-sm text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
               />
-              <span className="text-xs">yd</span>
+              <span className="text-sm">yd</span>
             </div>
           </div>
 
@@ -170,9 +170,9 @@ function ClubAccordion({ club, entry, onUpdate, isLast, open, onToggle }: {
                 value={currentBalls || ""}
                 onChange={(e) => onUpdate(club.id, { balls: e.target.value ? Number(e.target.value) : 0 })}
                 placeholder="—"
-                className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+                className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-sm text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
               />
-              <span className="text-xs">球</span>
+              <span className="text-sm">球</span>
             </div>
           </div>
 
@@ -225,7 +225,7 @@ export function ClubBallsInput({ clubs, bag2Clubs, reserveClubs, value, onChange
               key={t.value}
               type="button"
               onClick={() => setActiveTab(t.value)}
-              className={`rounded-full px-3 py-1 text-xs font-bold ${
+              className={`rounded-full px-3 py-1 text-sm font-bold ${
                 activeTab === t.value ? "bg-[#006728] text-white" : "border border-[#c4c4c4] text-[#8b8b8b]"
               }`}
             >
@@ -236,14 +236,14 @@ export function ClubBallsInput({ clubs, bag2Clubs, reserveClubs, value, onChange
       )}
 
       {displayClubs.length === 0 && (
-        <p className="text-xs text-[#8b8b8b] py-2">
+        <p className="text-sm text-[#8b8b8b] py-2">
           {activeTab === "bag" ? "マイバッグにクラブが登録されていません" : activeTab === "bag2" ? "予備バッグにクラブが登録されていません" : "予備クラブが登録されていません"}
         </p>
       )}
 
       {groupByCategory(displayClubs).map((group) => (
         <div key={group.label}>
-          <p className="text-xs font-bold text-[#006728] pb-1.5 pt-1">{group.label}</p>
+          <p className="text-sm font-bold text-[#006728] pb-1.5 pt-1">{group.label}</p>
           <div className="flex flex-col rounded-lg bg-[#f8faf8] px-3">
             {group.clubs.map((club, i) => (
               <ClubAccordion

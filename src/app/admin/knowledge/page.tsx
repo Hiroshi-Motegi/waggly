@@ -127,11 +127,11 @@ export default function KnowledgePage() {
       {/* Latest run summary */}
       {latestRun && (
         <Card>
-          <CardContent className="p-3 text-sm">
+          <CardContent className="p-3 text-base">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">最新の自動収集</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {new Date(latestRun.ran_at).toLocaleDateString("ja-JP")} —
                   {latestRun.status === "success"
                     ? ` ${latestRun.topics_generated}件生成（${latestRun.total_sessions}練習, ${latestRun.total_plans}プラン分析）`
@@ -140,7 +140,7 @@ export default function KnowledgePage() {
                       : ` エラー: ${latestRun.error_message}`}
                 </p>
                 {latestRun.status === "success" && (
-                  <p className="text-xs mt-1">{latestRun.summary}</p>
+                  <p className="text-sm mt-1">{latestRun.summary}</p>
                 )}
               </div>
               <Button size="sm" variant="outline" onClick={handleManualCollect} disabled={isCollecting}>
@@ -161,7 +161,7 @@ export default function KnowledgePage() {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="h-11 rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="h-11 rounded-md border border-input bg-background px-3 py-2 text-base"
         >
           {statusFilters.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
@@ -170,7 +170,7 @@ export default function KnowledgePage() {
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
-          className="h-11 rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="h-11 rounded-md border border-input bg-background px-3 py-2 text-base"
         >
           <option value="">すべてのカテゴリ</option>
           {categories.map((c) => (
@@ -180,7 +180,7 @@ export default function KnowledgePage() {
         <Button onClick={() => router.push("/admin/knowledge/new")}>＋ 追加</Button>
       </div>
 
-      <p className="text-sm text-muted-foreground">{items.length}件</p>
+      <p className="text-base text-muted-foreground">{items.length}件</p>
 
       {isLoading ? (
         <Loading />
@@ -193,33 +193,33 @@ export default function KnowledgePage() {
                   <Badge variant="secondary">
                     {categories.find((c) => c.value === item.category)?.label ?? item.category}
                   </Badge>
-                  <span className="text-sm font-medium">{item.title}</span>
+                  <span className="text-base font-medium">{item.title}</span>
                   {statusBadge(item.status)}
                   {item.source === "auto-collected" && (
-                    <Badge variant="outline" className="text-xs">自動生成</Badge>
+                    <Badge variant="outline" className="text-sm">自動生成</Badge>
                   )}
                 </div>
 
                 {/* Analysis summary for drafts */}
                 {item.status === "draft" && item.analysis_summary && (
-                  <p className="text-xs text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 rounded p-2">
+                  <p className="text-sm text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 rounded p-2">
                     分析理由: {item.analysis_summary}
                   </p>
                 )}
 
-                <p className="text-xs text-muted-foreground whitespace-pre-wrap">{item.content}</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{item.content}</p>
 
                 {item.tags && item.tags.length > 0 && (
                   <div className="flex gap-1 flex-wrap">
                     {item.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                      <Badge key={tag} variant="outline" className="text-sm">{tag}</Badge>
                     ))}
                   </div>
                 )}
 
                 {/* Search sources for auto-generated */}
                 {item.search_sources && item.search_sources.length > 0 && (
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-sm text-muted-foreground">
                     参照: {item.search_sources.map((url, i) => (
                       <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline mr-2">
                         [{i + 1}]
@@ -229,11 +229,11 @@ export default function KnowledgePage() {
                 )}
 
                 {item.source && item.source !== "auto-collected" && (
-                  <p className="text-xs text-muted-foreground">出典: {item.source}</p>
+                  <p className="text-sm text-muted-foreground">出典: {item.source}</p>
                 )}
 
                 <Separator />
-                <div className="flex gap-2 text-xs flex-wrap">
+                <div className="flex gap-2 text-sm flex-wrap">
                   <button onClick={() => router.push(nativeHref(`/admin/knowledge/${item.id}`))} className="text-primary hover:underline">
                     編集
                   </button>

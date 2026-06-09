@@ -49,8 +49,8 @@ export default function SettingsPage() {
         <div className="relative z-10 flex flex-col space-y-2">
           <PageHeader title="設定" variant="dark" />
           <div className="rounded-lg bg-white p-4">
-            <h3 className="text-sm font-bold mb-2">アカウント</h3>
-            <p className="text-xs text-[#8b8b8b] mb-3">サインインするとデータのバックアップ、AI機能、Web版との同期が使えます。</p>
+            <h3 className="text-base font-bold mb-2">アカウント</h3>
+            <p className="text-sm text-[#8b8b8b] mb-3">サインインするとデータのバックアップ、AI機能、Web版との同期が使えます。</p>
             <button
               onClick={async () => {
                 const { signInWithGoogle } = await import("@/lib/native-auth");
@@ -60,7 +60,7 @@ export default function SettingsPage() {
                   window.location.reload();
                 }
               }}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#006728] text-white text-sm font-bold"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#006728] text-white text-base font-bold"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -74,11 +74,11 @@ export default function SettingsPage() {
           <div className="rounded-lg bg-white p-3">
             <div className="flex flex-col gap-2">
               <Link href="/terms" className="flex items-center justify-between py-2 border-b border-[#dfdfdf]">
-                <span className="text-sm">利用規約</span>
+                <span className="text-base">利用規約</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
               </Link>
               <Link href="/privacy" className="flex items-center justify-between py-2">
-                <span className="text-sm">プライバシーポリシー</span>
+                <span className="text-base">プライバシーポリシー</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
               </Link>
             </div>
@@ -108,8 +108,8 @@ export default function SettingsPage() {
             <AvatarFallback className="text-lg">{user.display_name[0]}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-bold">{user.display_name}</p>
-            <p className="text-xs text-[#8b8b8b]">LINE連携済み</p>
+            <p className="text-base font-bold">{user.display_name}</p>
+            <p className="text-sm text-[#8b8b8b]">LINE連携済み</p>
           </div>
         </div>
       </div>
@@ -118,12 +118,12 @@ export default function SettingsPage() {
       <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
       <div className="rounded-lg bg-white p-3">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-bold">ベータ版</span>
-          <span className="rounded-full bg-[#ebf1eb] px-2.5 py-0.5 text-xs font-bold text-[#006728]">
+          <span className="text-base font-bold">ベータ版</span>
+          <span className="rounded-full bg-[#ebf1eb] px-2.5 py-0.5 text-sm font-bold text-[#006728]">
             無料提供中
           </span>
         </div>
-        <p className="text-xs text-[#8b8b8b]">
+        <p className="text-sm text-[#8b8b8b]">
           現在ベータ版として全機能を無料で提供しています。正式リリース時にプラン体系が変更される場合があります。
         </p>
       </div>
@@ -133,7 +133,7 @@ export default function SettingsPage() {
       <div className="rounded-lg bg-white p-3">
         {usage ? (
           <div className="space-y-2">
-            <div className="flex justify-between text-xs">
+            <div className="flex justify-between text-sm">
               <span className="text-[#8b8b8b]">{usage.month}月</span>
               <span className="font-medium">
                 {usage.totalTokens.toLocaleString()} / {usage.limit.toLocaleString()} トークン
@@ -147,18 +147,18 @@ export default function SettingsPage() {
                 style={{ width: `${usagePercent}%` }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-[#8b8b8b]">
+            <div className="flex justify-between text-xs text-[#8b8b8b]">
               <span>使用率 {usagePercent}%</span>
               <span>残り {usage.remaining.toLocaleString()} トークン</span>
             </div>
             {usage.limitReached && (
-              <p className="text-xs text-red-500 font-medium">
+              <p className="text-sm text-red-500 font-medium">
                 今月の利用上限に達しました。来月リセットされます。
               </p>
             )}
           </div>
         ) : usageLoaded ? (
-          <p className="text-center text-sm text-[#8b8b8b] py-2">利用データなし</p>
+          <p className="text-center text-base text-[#8b8b8b] py-2">利用データなし</p>
         ) : (
           <div className="py-2 animate-pulse"><div className="h-4 w-3/4 mx-auto rounded bg-gray-200" /></div>
         )}
@@ -177,7 +177,7 @@ export default function SettingsPage() {
           ].map((item, i, arr) => (
             <Link key={item.href} href={item.href}>
               <div className={`flex items-center gap-2.5 py-2.5 ${i < arr.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                <span className="flex-1 text-sm font-bold">{item.label}</span>
+                <span className="flex-1 text-base font-bold">{item.label}</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
               </div>
             </Link>
@@ -189,7 +189,7 @@ export default function SettingsPage() {
       <div className="flex flex-col items-center pt-4">
         <button
           onClick={liffLogout}
-          className="w-full max-w-xs rounded-full border border-white py-2.5 text-sm font-bold text-white"
+          className="w-full max-w-xs rounded-full border border-white py-2.5 text-base font-bold text-white"
         >
           ログアウト
         </button>
@@ -229,7 +229,7 @@ function ExportSection() {
 
   return (
     <div className="rounded-lg bg-white p-3">
-      <p className="text-xs text-[#8b8b8b] mb-2">登録データをCSVファイルでダウンロードできます。</p>
+      <p className="text-sm text-[#8b8b8b] mb-2">登録データをCSVファイルでダウンロードできます。</p>
       <div className="flex flex-col">
         {items.map((item, i) => (
           <button
@@ -243,8 +243,8 @@ function ExportSection() {
             ) : (
               <Download className="h-4 w-4 text-[#006728] shrink-0" />
             )}
-            <span className="flex-1 text-sm font-bold">{item.label}</span>
-            <span className="text-xs text-[#8b8b8b]">CSV</span>
+            <span className="flex-1 text-base font-bold">{item.label}</span>
+            <span className="text-sm text-[#8b8b8b]">CSV</span>
           </button>
         ))}
       </div>

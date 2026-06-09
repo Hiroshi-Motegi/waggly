@@ -72,7 +72,7 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="練習記録" backHref="/practice" variant="dark">
         <Link href={nativeHref(`/practice/${sessionId}/edit`)}>
-          <button className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-xs font-bold text-white">
+          <button className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-sm font-bold text-white">
             <Pencil className="h-4 w-4" />
             編集
           </button>
@@ -81,11 +81,11 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
 
       <div className="flex flex-col gap-3 rounded-lg bg-white p-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-[#8b8b8b]">
+          <span className="text-base font-medium text-[#8b8b8b]">
             {formatDate(session.practiced_at)}
           </span>
           {session.total_balls && (
-            <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-[10px] font-medium text-black">
+            <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs font-medium text-black">
               {session.total_balls}球
             </span>
           )}
@@ -97,8 +97,8 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
 
         {session.memo && (
           <div className="border-t border-[#dfdfdf] pt-3">
-            <p className="text-xs font-medium text-[#8b8b8b] mb-1">メモ</p>
-            <p className="text-sm whitespace-pre-wrap">{session.memo}</p>
+            <p className="text-sm font-medium text-[#8b8b8b] mb-1">メモ</p>
+            <p className="text-base whitespace-pre-wrap">{session.memo}</p>
           </div>
         )}
 
@@ -110,23 +110,23 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
           <div className="flex flex-col rounded-lg bg-white p-3">
             {session.practice_clubs.map((pc, i) => (
               <div key={pc.club_id} className={`flex flex-col gap-1.5 py-2 ${i < session.practice_clubs.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-base">
                   <div className="min-w-0 flex items-center gap-1.5">
                     <span className="font-bold">{pc.club?.club_number ?? "?"}</span>
                     {pc.memo?.condition && (
                       <img src={getConditionImage(pc.memo.condition as MemoCondition)} alt="" className="w-5 h-5" />
                     )}
                     {(pc.club?.maker || pc.club?.model) && (
-                      <span className="text-xs text-[#8b8b8b]">
+                      <span className="text-sm text-[#8b8b8b]">
                         {[pc.club?.maker, pc.club?.model].filter(Boolean).join(" ")}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {pc.avg_distance != null && (
-                      <span className="text-xs text-[#8b8b8b]">{pc.avg_distance} yd</span>
+                      <span className="text-sm text-[#8b8b8b]">{pc.avg_distance} yd</span>
                     )}
-                    <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-xs">
+                    <span className="rounded-full bg-[#c7e2ca] px-2 py-0.5 text-sm">
                       {pc.balls}球
                     </span>
                   </div>
@@ -134,16 +134,16 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
                 {pc.memo && (
                   <div className="flex flex-wrap gap-1 pl-1">
                     {pc.memo.symptom_tags.map((tag: string) => (
-                      <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#555]">{tag}</span>
+                      <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-xs text-[#555]">{tag}</span>
                     ))}
                     {pc.memo.feeling_tags.map((tag: string) => (
-                      <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#555]">{tag}</span>
+                      <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-xs text-[#555]">{tag}</span>
                     ))}
                     {pc.memo.gear_tags.map((tag: string) => (
-                      <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#555]">{tag}</span>
+                      <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-xs text-[#555]">{tag}</span>
                     ))}
                     {pc.memo.memo && (
-                      <p className="w-full text-xs text-[#666] mt-0.5">{pc.memo.memo}</p>
+                      <p className="w-full text-sm text-[#666] mt-0.5">{pc.memo.memo}</p>
                     )}
                   </div>
                 )}
@@ -154,7 +154,7 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
       )}
 
       <div className="flex justify-center pt-2">
-        <button onClick={handleDelete} className="text-sm font-bold text-white">
+        <button onClick={handleDelete} className="text-base font-bold text-white">
           この記録を削除
         </button>
       </div>

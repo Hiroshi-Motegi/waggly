@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import type { UIMessage } from "ai";
+import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -39,15 +40,15 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
       {messages.length === 0 && (
         <div className="py-6 text-center">
           <p className="text-base font-bold text-[#006728]">AIに相談</p>
-          <p className="mt-2 text-sm text-[#8b8b8b]">クラブや練習のことなんでも聞いてください</p>
-          <div className="mt-4 space-y-2 text-xs text-[#8b8b8b]">
+          <p className="mt-2 text-base text-[#8b8b8b]">クラブや練習のことなんでも聞いてください</p>
+          <div className="mt-4 space-y-2 text-sm text-[#8b8b8b]">
             <p>例: 「最近スライスが多いんだけど」</p>
             <p>例: 「練習メニューを作って」</p>
             <p>例: 「7番アイアンの飛距離を伸ばすには？」</p>
           </div>
-          <div className="mt-6 mx-2 p-3 rounded-lg bg-[#ebf1eb] text-xs text-[#8b8b8b] text-left space-y-1">
+          <div className="mt-6 mx-2 p-3 rounded-lg bg-[#ebf1eb] text-sm text-[#8b8b8b] text-left space-y-1">
             <p>AIコーチはベータ版につき無料公開中です。コーチ内容は誤りがある場合があります。</p>
-            <p>会話の利用上限は<a href="/settings" className="underline text-[#006728]">設定画面</a>で確認できます。</p>
+            <p>会話の利用上限は<Link href="/settings" className="underline text-[#006728]">設定画面</Link>で確認できます。</p>
           </div>
         </div>
       )}
@@ -76,7 +77,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
           lastDateLabel = dateLabel;
           dateSeparator = (
             <div className="flex items-center justify-center py-1">
-              <span className="text-[10px] text-[#8b8b8b] bg-[#ebf1eb] px-2 py-0.5 rounded-full">{dateLabel}</span>
+              <span className="text-xs text-[#8b8b8b] bg-[#ebf1eb] px-2 py-0.5 rounded-full">{dateLabel}</span>
             </div>
           );
         }
@@ -94,16 +95,16 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
                 <img src="/icons/ai-coach.svg" alt="AI" className="h-8 w-8 shrink-0" />
               )}
               <div className={`flex flex-col ${isUser ? "items-end" : "items-start"} max-w-[80%]`}>
-                <div className="rounded-lg border border-[#c5c5c5] px-3 py-2 text-xs font-medium">
+                <div className="rounded-lg border border-[#c5c5c5] px-3 py-2 text-sm font-medium">
                   {message.role === "assistant" ? (
-                    <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_hr]:my-2 text-xs">
+                    <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_hr]:my-2 text-sm">
                       <ReactMarkdown>{textContent}</ReactMarkdown>
                     </div>
                   ) : (
                     <p className="whitespace-pre-wrap">{textContent}</p>
                   )}
                 </div>
-                <span className="text-[9px] text-[#8b8b8b] mt-0.5 px-1">{formatTime(timestamp)}</span>
+                <span className="text-[10px] text-[#8b8b8b] mt-0.5 px-1">{formatTime(timestamp)}</span>
               </div>
             </div>
           </div>
@@ -112,7 +113,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
       {isLoading && (
         <div className="flex gap-2 items-start">
           <img src="/icons/ai-coach.svg" alt="AI" className="h-8 w-8 shrink-0" />
-          <div className="rounded-lg border border-[#c5c5c5] px-3 py-2 text-xs text-[#8b8b8b]">
+          <div className="rounded-lg border border-[#c5c5c5] px-3 py-2 text-sm text-[#8b8b8b]">
             考え中...
           </div>
         </div>

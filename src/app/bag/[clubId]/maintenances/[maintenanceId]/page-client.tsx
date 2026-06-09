@@ -57,7 +57,7 @@ export default function MaintenanceDetailPage({
       <div className="relative z-10 flex flex-col space-y-2">
       <div className="flex items-center justify-between px-1">
         <div>
-          <span className="text-xs font-bold text-white">{club?.club_number}</span>
+          <span className="text-sm font-bold text-white">{club?.club_number}</span>
           <h2 className="text-lg font-bold text-white">メンテナンス</h2>
         </div>
         <Link href={nativeHref(`/bag/${clubId}/maintenances/${maintenanceId}/edit`)}>
@@ -70,28 +70,28 @@ export default function MaintenanceDetailPage({
 
       <div className="flex flex-col gap-3 rounded-lg bg-white p-4">
         <div className="flex items-center justify-between">
-          <span className="rounded-full bg-[#c7e2ca] px-2.5 py-0.5 text-xs font-medium text-black">
+          <span className="rounded-full bg-[#c7e2ca] px-2.5 py-0.5 text-sm font-medium text-black">
             {maintenanceTypeLabels[item.type]}
           </span>
-          <span className="text-sm text-[#8b8b8b]">{formatDate(item.done_at)}</span>
+          <span className="text-base text-[#8b8b8b]">{formatDate(item.done_at)}</span>
         </div>
 
         {item.description && (
           <div className="border-t border-[#dfdfdf] pt-3">
-            <p className="text-xs font-medium text-[#8b8b8b] mb-1">メモ</p>
-            <p className="text-sm whitespace-pre-wrap">{item.description}</p>
+            <p className="text-sm font-medium text-[#8b8b8b] mb-1">メモ</p>
+            <p className="text-base whitespace-pre-wrap">{item.description}</p>
           </div>
         )}
 
         <div className="border-t border-[#dfdfdf] pt-3 flex flex-col gap-1">
           {item.shop && (
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-base">
               <span className="text-[#8b8b8b]">実施店舗</span>
               <span>{item.shop}</span>
             </div>
           )}
           {item.cost != null && (
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-base">
               <span className="text-[#8b8b8b]">費用</span>
               <span className="font-medium">{item.cost.toLocaleString()}円</span>
             </div>
@@ -100,7 +100,7 @@ export default function MaintenanceDetailPage({
       </div>
 
       <div className="flex justify-center">
-        <button onClick={handleDelete} className="text-sm font-bold text-white">
+        <button onClick={handleDelete} className="text-base font-bold text-white">
           この記録を削除
         </button>
       </div>

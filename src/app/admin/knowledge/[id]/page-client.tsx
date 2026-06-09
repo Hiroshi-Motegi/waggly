@@ -132,21 +132,21 @@ export default function KnowledgeEditPage({ overrideId }: { overrideId?: string 
             <div className="flex items-center gap-2">
               <Badge variant="default">レビュー待ち</Badge>
               {meta.generated_at && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                   {new Date(meta.generated_at).toLocaleDateString("ja-JP")} 自動生成
                 </span>
               )}
             </div>
             {meta.analysis_summary && (
-              <p className="text-sm"><span className="font-medium">分析理由:</span> {meta.analysis_summary}</p>
+              <p className="text-base"><span className="font-medium">分析理由:</span> {meta.analysis_summary}</p>
             )}
             {meta.search_sources && meta.search_sources.length > 0 && (
-              <div className="text-sm">
+              <div className="text-base">
                 <span className="font-medium">参照URL:</span>
                 <ul className="list-disc list-inside mt-1">
                   {meta.search_sources.map((url, i) => (
                     <li key={i}>
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs break-all">
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm break-all">
                         {url}
                       </a>
                     </li>
@@ -170,7 +170,7 @@ export default function KnowledgeEditPage({ overrideId }: { overrideId?: string 
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
               >
                 {categories.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>

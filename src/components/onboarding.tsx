@@ -65,16 +65,16 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
     return (
       <div className="flex flex-col min-h-dvh bg-background">
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <span className="text-sm font-semibold">利用規約</span>
+          <span className="text-base font-semibold">利用規約</span>
           <button
             onClick={() => setShowTerms(false)}
-            className="text-sm text-primary"
+            className="text-base text-primary"
           >
             戻る
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 text-sm">
-          <p className="text-xs text-muted-foreground">最終更新日: 2026年6月8日</p>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 text-base">
+          <p className="text-sm text-muted-foreground">最終更新日: 2026年6月8日</p>
           {termsContent.map((section, i) => (
             <div key={i} className="space-y-1">
               <h3 className="font-semibold">{section.title}</h3>
@@ -94,13 +94,13 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
           <>
             <span className="text-6xl mb-6">📋</span>
             <h2 className="text-2xl font-bold mb-3">利用規約が更新されました</h2>
-            <p className="text-muted-foreground text-sm leading-relaxed">引き続きご利用いただくには、更新された利用規約への同意が必要です。</p>
+            <p className="text-muted-foreground text-base leading-relaxed">引き続きご利用いただくには、更新された利用規約への同意が必要です。</p>
           </>
         ) : (
           <>
             <span className="text-6xl mb-6">{slide.icon}</span>
             <h2 className="text-2xl font-bold mb-3">{slide.title}</h2>
-            <p className="text-muted-foreground text-sm leading-relaxed">{slide.description}</p>
+            <p className="text-muted-foreground text-base leading-relaxed">{slide.description}</p>
           </>
         )}
       </div>
@@ -123,7 +123,7 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
       <div className="w-full max-w-sm space-y-4">
         {isLastSlide ? (
           <>
-            <label className="flex items-start gap-3 text-sm cursor-pointer">
+            <label className="flex items-start gap-3 text-base cursor-pointer">
               <input
                 type="checkbox"
                 checked={agreed}

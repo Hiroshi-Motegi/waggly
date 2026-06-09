@@ -77,7 +77,7 @@ export function InlineClubMemo({ value, onChange }: Props) {
             }`}
           >
             <img src={opt.image} alt={opt.label} className="w-8 h-8" />
-            <span className="text-sm font-bold">{opt.label}</span>
+            <span className="text-base font-bold">{opt.label}</span>
           </button>
         ))}
       </div>
@@ -87,14 +87,14 @@ export function InlineClubMemo({ value, onChange }: Props) {
         <>
           {tagSet.goodTags && condition === "good" && (
             <div className="flex flex-col gap-1 py-0.5">
-              <p className="text-xs">球筋</p>
+              <p className="text-sm">球筋</p>
               <div className="flex flex-wrap gap-1">
                 {tagSet.goodTags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag, value?.symptom_tags ?? [], "symptom_tags")}
-                    className={`rounded-full px-[13px] py-1 text-xs font-bold ${
+                    className={`rounded-full px-[13px] py-1 text-sm font-bold ${
                       value?.symptom_tags.includes(tag)
                         ? "bg-[#006728] text-white border border-[#006728]"
                         : "border border-[#999] text-[#414141]"
@@ -111,14 +111,14 @@ export function InlineClubMemo({ value, onChange }: Props) {
             <>
               {tagSet.symptomTags.map((cat) => (
                 <div key={cat.label} className="flex flex-col gap-1 py-0.5">
-                  <p className="text-xs">{cat.label}</p>
+                  <p className="text-sm">{cat.label}</p>
                   <div className="flex flex-wrap gap-1">
                     {cat.tags.map((tag) => (
                       <button
                         key={tag}
                         type="button"
                         onClick={() => toggleTag(tag, value?.symptom_tags ?? [], "symptom_tags")}
-                        className={`rounded-full px-[13px] py-1 text-xs font-bold ${
+                        className={`rounded-full px-[13px] py-1 text-sm font-bold ${
                           value?.symptom_tags.includes(tag)
                             ? "bg-[#006728] text-white border border-[#006728]"
                             : "border border-[#999] text-[#414141]"
@@ -135,14 +135,14 @@ export function InlineClubMemo({ value, onChange }: Props) {
 
           {tagSet.feelingTags && condition !== "good" && (
             <div className="flex flex-col gap-1 py-0.5">
-              <p className="text-xs">体の感覚</p>
+              <p className="text-sm">体の感覚</p>
               <div className="flex flex-wrap gap-1">
                 {tagSet.feelingTags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag, value?.feeling_tags ?? [], "feeling_tags")}
-                    className={`rounded-full px-[13px] py-1 text-xs font-bold ${
+                    className={`rounded-full px-[13px] py-1 text-sm font-bold ${
                       value?.feeling_tags.includes(tag)
                         ? "bg-[#006728] text-white border border-[#006728]"
                         : "border border-[#999] text-[#414141]"
@@ -157,14 +157,14 @@ export function InlineClubMemo({ value, onChange }: Props) {
 
           {tagSet.gearTags && condition !== "good" && (
             <div className="flex flex-col gap-1 py-0.5">
-              <p className="text-xs">ギアの気づき</p>
+              <p className="text-sm">ギアの気づき</p>
               <div className="flex flex-wrap gap-1">
                 {tagSet.gearTags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag, value?.gear_tags ?? [], "gear_tags")}
-                    className={`rounded-full px-[13px] py-1 text-xs font-bold ${
+                    className={`rounded-full px-[13px] py-1 text-sm font-bold ${
                       value?.gear_tags.includes(tag)
                         ? "bg-[#006728] text-white border border-[#006728]"
                         : "border border-[#999] text-[#414141]"
@@ -182,12 +182,12 @@ export function InlineClubMemo({ value, onChange }: Props) {
       {/* Memo text */}
       {condition && (
         <div className="flex flex-col gap-0.5 py-1">
-          <p className="text-xs">所感・メモ</p>
+          <p className="text-sm">所感・メモ</p>
           <textarea
             value={value?.memo ?? ""}
             onChange={(e) => setMemo(e.target.value)}
             rows={3}
-            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           />
         </div>
       )}
@@ -197,7 +197,7 @@ export function InlineClubMemo({ value, onChange }: Props) {
         <button
           type="button"
           onClick={handleClear}
-          className="self-start text-xs text-[#8b8b8b] underline"
+          className="self-start text-sm text-[#8b8b8b] underline"
         >
           メモをクリア
         </button>

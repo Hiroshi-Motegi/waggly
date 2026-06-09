@@ -57,7 +57,7 @@ export default function HomePage() {
         alt=""
         className="absolute inset-0 w-full h-full object-cover opacity-40"
       />
-      <div className="relative z-10 flex flex-col px-2 pt-2 pb-4">
+      <div className="relative z-10 flex flex-col px-2 pb-4" style={{ paddingTop: "calc(0.5rem + env(safe-area-inset-top))" }}>
         {/* Logo */}
         <div className="flex items-center justify-center w-full relative h-14">
           <Image
@@ -72,7 +72,7 @@ export default function HomePage() {
             {user?.avatar_url ? (
               <img src={user.avatar_url} alt="" className="h-8 w-8 rounded-full" />
             ) : (
-              <div className="h-8 w-8 rounded-full bg-white/30 flex items-center justify-center text-white text-sm font-bold">
+              <div className="h-8 w-8 rounded-full bg-white/30 flex items-center justify-center text-white text-base font-bold">
                 {user?.display_name?.[0] ?? "G"}
               </div>
             )}
@@ -91,9 +91,9 @@ export default function HomePage() {
               <div className="flex flex-col items-center gap-[5px] rounded-lg border border-[#72937f] bg-white p-5 h-[121px] drop-shadow-[2px_2px_0px_#72937f]">
                 <Image src={card.icon} alt={card.label} width={48} height={48} />
                 <div className="flex flex-col items-center gap-[2px] text-center">
-                  <span className="text-sm font-bold text-[#006728]">{card.label}</span>
+                  <span className="text-base font-bold text-[#006728]">{card.label}</span>
                   {card.sub && (
-                    <span className="text-[10px] text-[#717171]">{card.sub}</span>
+                    <span className="text-xs text-[#717171]">{card.sub}</span>
                   )}
                 </div>
               </div>

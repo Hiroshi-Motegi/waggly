@@ -110,19 +110,19 @@ function ClubRow({
         )}
       </div>
       <div className="flex flex-1 flex-col gap-px min-w-0">
-        <span className="text-xs font-medium text-[#8b8b8b]">
+        <span className="text-sm font-medium text-[#8b8b8b]">
           {club.club_number}
         </span>
-        <span className="text-sm font-bold text-black truncate">
+        <span className="text-base font-bold text-black truncate">
           {club.model ?? "—"}
         </span>
-        <span className="text-xs text-[#8b8b8b] truncate">
+        <span className="text-sm text-[#8b8b8b] truncate">
           {club.maker ?? "—"}
           {(club.latest_avg_distance ?? club.distance) != null && ` · ${club.latest_avg_distance ?? club.distance} yd`}
         </span>
       </div>
       {showStatus && bagLabel && (
-        <span className="shrink-0 rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-[10px] font-medium text-black">
+        <span className="shrink-0 rounded-full bg-[#c7e2ca] px-1.5 py-0.5 text-xs font-medium text-black">
           {bagLabel}
         </span>
       )}
@@ -225,7 +225,7 @@ export default function BagPage() {
           {isBagView && !isReordering && clubs.length > 1 && (
             <button
               onClick={startReorder}
-              className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-xs font-bold text-white"
+              className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-sm font-bold text-white"
             >
               <GripVertical className="h-4 w-4" />
               並替
@@ -234,7 +234,7 @@ export default function BagPage() {
           {!isReordering && (
             <Link href="/bag/new">
               <button
-                className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#006728] disabled:opacity-50"
+                className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728] disabled:opacity-50"
                 disabled={isBagView && (bagCount ?? 0) >= MAX_BAG_CLUBS}
               >
                 <Plus className="h-4 w-4" />
@@ -256,7 +256,7 @@ export default function BagPage() {
                   onClick={() => setStatusFilter(tab.value)}
                   className="flex shrink-0 flex-col items-center gap-0.5 pt-1"
                 >
-                  <span className="px-3 py-0.5 text-sm font-bold text-[#006728] whitespace-nowrap">
+                  <span className="px-3 py-0.5 text-base font-bold text-[#006728] whitespace-nowrap">
                     {tab.label}
                   </span>
                   <div
@@ -277,7 +277,7 @@ export default function BagPage() {
             <div className="flex items-center gap-2 mb-2">
               <button
                 onClick={() => setChartTab("distance")}
-                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                className={`rounded-full px-3 py-1 text-sm font-bold ${
                   chartTab === "distance"
                     ? "bg-[#006728] text-white"
                     : "bg-[#f0f0f0] text-[#666]"
@@ -287,7 +287,7 @@ export default function BagPage() {
               </button>
               <button
                 onClick={() => setChartTab("weight")}
-                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                className={`rounded-full px-3 py-1 text-sm font-bold ${
                   chartTab === "weight"
                     ? "bg-[#006728] text-white"
                     : "bg-[#f0f0f0] text-[#666]"
@@ -310,7 +310,7 @@ export default function BagPage() {
           </div>
         )}
         {showCharts && !isReordering && (
-          <div className="flex justify-end">
+          <div className="flex justify-end pb-3 border-b border-[#ececec]">
             <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />
           </div>
         )}
@@ -338,13 +338,13 @@ export default function BagPage() {
             <div className="flex gap-2 pt-2">
               <button
                 onClick={cancelReorder}
-                className="flex-1 rounded-full border border-white py-2 text-sm font-bold text-white"
+                className="flex-1 rounded-full border border-white py-2 text-base font-bold text-white"
               >
                 キャンセル
               </button>
               <button
                 onClick={saveOrder}
-                className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white"
+                className="flex-1 rounded-full bg-[#006728] py-2 text-base font-bold text-white"
               >
                 保存
               </button>
@@ -353,7 +353,7 @@ export default function BagPage() {
         ) : isLoading ? (
           <Loading />
         ) : clubs.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
+          <p className="py-8 text-center text-base text-muted-foreground">
             クラブが登録されていません
           </p>
         ) : (

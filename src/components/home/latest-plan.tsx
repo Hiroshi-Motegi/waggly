@@ -23,7 +23,7 @@ export function LatestPlan({ plan }: LatestPlanProps) {
         </CardHeader>
         <CardContent>
           <p className="font-medium">{plan.title}</p>
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{plan.summary}</p>
+          <p className="mt-1 text-base text-muted-foreground line-clamp-2">{plan.summary}</p>
         </CardContent>
       </Card>
     </Link>

@@ -82,8 +82,8 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-lg bg-white p-4">
           {/* Club info */}
           <div className="flex items-center gap-2">
-            <span className="bg-[#006728] text-white text-sm rounded-full px-2.5">{club?.club_number}</span>
-            {club?.model && <span className="text-sm text-[#6c6c6c]">{club.model}</span>}
+            <span className="bg-[#006728] text-white text-base rounded-full px-2.5">{club?.club_number}</span>
+            {club?.model && <span className="text-base text-[#6c6c6c]">{club.model}</span>}
           </div>
 
           {/* Condition */}
@@ -107,7 +107,7 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
                 }`}
               >
                 <img src={opt.image} alt={opt.label} className="w-8 h-8" />
-                <span className="text-sm font-bold">{opt.label}</span>
+                <span className="text-base font-bold">{opt.label}</span>
               </button>
             ))}
           </div>
@@ -117,11 +117,11 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
             <>
               {tagSet.goodTags && condition === "good" && (
                 <div className="flex flex-col gap-1 py-0.5">
-                  <p className="text-xs">球筋</p>
+                  <p className="text-sm">球筋</p>
                   <div className="flex flex-wrap gap-1">
                     {tagSet.goodTags.map((tag) => (
                       <button key={tag} type="button" onClick={() => toggleTag(tag, symptomTags, setSymptomTags)}
-                        className={`rounded-full px-[13px] py-1 text-xs font-bold ${symptomTags.includes(tag) ? "bg-[#006728] text-white border border-[#006728]" : "border border-[#999] text-[#414141]"}`}>
+                        className={`rounded-full px-[13px] py-1 text-sm font-bold ${symptomTags.includes(tag) ? "bg-[#006728] text-white border border-[#006728]" : "border border-[#999] text-[#414141]"}`}>
                         {tag}
                       </button>
                     ))}
@@ -133,11 +133,11 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
                 <>
                   {tagSet.symptomTags.map((cat) => (
                     <div key={cat.label} className="flex flex-col gap-1 py-0.5">
-                      <p className="text-xs">{cat.label}</p>
+                      <p className="text-sm">{cat.label}</p>
                       <div className="flex flex-wrap gap-1">
                         {cat.tags.map((tag) => (
                           <button key={tag} type="button" onClick={() => toggleTag(tag, symptomTags, setSymptomTags)}
-                            className={`rounded-full px-[13px] py-1 text-xs font-bold ${symptomTags.includes(tag) ? "bg-[#006728] text-white border border-[#006728]" : "border border-[#999] text-[#414141]"}`}>
+                            className={`rounded-full px-[13px] py-1 text-sm font-bold ${symptomTags.includes(tag) ? "bg-[#006728] text-white border border-[#006728]" : "border border-[#999] text-[#414141]"}`}>
                             {tag}
                           </button>
                         ))}
@@ -149,11 +149,11 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
 
               {tagSet.feelingTags && condition !== "good" && (
                 <div className="flex flex-col gap-1 py-0.5">
-                  <p className="text-xs">体の感覚</p>
+                  <p className="text-sm">体の感覚</p>
                   <div className="flex flex-wrap gap-1">
                     {tagSet.feelingTags.map((tag) => (
                       <button key={tag} type="button" onClick={() => toggleTag(tag, feelingTags, setFeelingTags)}
-                        className={`rounded-full px-[13px] py-1 text-xs font-bold ${feelingTags.includes(tag) ? "bg-[#006728] text-white border border-[#006728]" : "border border-[#999] text-[#414141]"}`}>
+                        className={`rounded-full px-[13px] py-1 text-sm font-bold ${feelingTags.includes(tag) ? "bg-[#006728] text-white border border-[#006728]" : "border border-[#999] text-[#414141]"}`}>
                         {tag}
                       </button>
                     ))}
@@ -163,11 +163,11 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
 
               {tagSet.gearTags && condition !== "good" && (
                 <div className="flex flex-col gap-1 py-0.5">
-                  <p className="text-xs">ギアの気づき</p>
+                  <p className="text-sm">ギアの気づき</p>
                   <div className="flex flex-wrap gap-1">
                     {tagSet.gearTags.map((tag) => (
                       <button key={tag} type="button" onClick={() => toggleTag(tag, gearTags, setGearTags)}
-                        className={`rounded-full px-[13px] py-1 text-xs font-bold ${gearTags.includes(tag) ? "bg-[#006728] text-white border border-[#006728]" : "border border-[#999] text-[#414141]"}`}>
+                        className={`rounded-full px-[13px] py-1 text-sm font-bold ${gearTags.includes(tag) ? "bg-[#006728] text-white border border-[#006728]" : "border border-[#999] text-[#414141]"}`}>
                         {tag}
                       </button>
                     ))}
@@ -197,27 +197,27 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
                 value={distance}
                 onChange={(e) => setDistance(e.target.value)}
                 placeholder="—"
-                className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+                className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-sm text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
               />
-              <span className="text-xs">yd</span>
+              <span className="text-sm">yd</span>
             </div>
           </div>
 
           {/* Memo */}
           <div className="flex flex-col gap-0.5 py-1">
-            <p className="text-xs">所感・メモ</p>
+            <p className="text-sm">所感・メモ</p>
             <textarea value={memo} onChange={(e) => setMemo(e.target.value)} rows={3}
-              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
           </div>
 
           {/* Actions */}
           <div className="flex gap-2">
             <button type="button" onClick={() => router.back()}
-              className="flex-1 rounded-full border border-[#c4c4c4] py-2 text-sm font-bold text-[#666]">
+              className="flex-1 rounded-full border border-[#c4c4c4] py-2 text-base font-bold text-[#666]">
               キャンセル
             </button>
             <button type="submit" disabled={submitting}
-              className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50">
+              className="flex-1 rounded-full bg-[#006728] py-2 text-base font-bold text-white disabled:opacity-50">
               {submitting ? "保存中..." : "保存"}
             </button>
           </div>

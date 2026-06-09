@@ -25,7 +25,7 @@ export function WeightFlow({ data }: Props) {
   const hasAnyWeight = data.some((d) => d.weight != null);
   if (!hasAnyWeight) {
     return (
-      <p className="py-8 text-center text-sm text-[#8b8b8b]">
+      <p className="py-8 text-center text-base text-[#8b8b8b]">
         詳細スペックで重量を入力するとグラフが表示されます
       </p>
     );
