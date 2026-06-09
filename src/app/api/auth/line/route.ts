@@ -2,7 +2,6 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
-export const dynamic = "force-static";
 
 function getSupabaseAdmin() {
   return createClient(

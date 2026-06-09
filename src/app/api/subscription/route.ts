@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
-export const dynamic = "force-static";
 
 // GET: fetch current user's subscription + plan info
 export async function GET() {

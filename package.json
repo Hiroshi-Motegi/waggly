@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",
-    "build:app": "NEXT_OUTPUT=export next build",
+    "build:app": "mv src/app/api src/app/_api_backup && NEXT_OUTPUT=export next build; mv src/app/_api_backup src/app/api",
     "cap:sync": "npx cap sync",
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android"

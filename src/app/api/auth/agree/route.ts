@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
-export const dynamic = "force-static";
 
 export async function POST() {
   const auth = await getApiAuth();
