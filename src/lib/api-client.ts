@@ -316,6 +316,15 @@ async function routeLocal(
           `INSERT INTO practice_clubs (id, session_id, club_id, balls, avg_distance) VALUES (?, ?, ?, ?, ?)`,
           [crypto.randomUUID(), id, club.club_id, club.balls, club.avg_distance ?? null]
         );
+        // Save club memo (condition, tags) if present
+        if (club.memo) {
+          const m = club.memo;
+          await ex(
+            `INSERT INTO club_memos (id, club_id, distance, memo, condition, symptom_tags, feeling_tags, gear_tags, practice_session_id, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [crypto.randomUUID(), club.club_id, m.distance ?? club.avg_distance ?? null, m.memo ?? null, m.condition ?? null, JSON.stringify(m.symptom_tags ?? []), JSON.stringify(m.feeling_tags ?? []), JSON.stringify(m.gear_tags ?? []), id, now]
+          );
+        }
       }
     }
     return { id, ...body, created_at: now };
@@ -327,7 +336,17 @@ async function routeLocal(
     const rows = await q("SELECT * FROM practice_sessions WHERE id = ?", [match[1]]);
     if (!rows.length) return null;
     const clubs = await q("SELECT pc.*, c.club_number, c.category, c.maker, c.model FROM practice_clubs pc LEFT JOIN clubs c ON pc.club_id = c.id WHERE pc.session_id = ?", [match[1]]);
-    return { ...rows[0], practice_clubs: clubs.map((pc: any) => ({ ...pc, club: { id: pc.club_id, club_number: pc.club_number, category: pc.category, maker: pc.maker, model: pc.model } })) };
+    // Attach memo for each practice club
+    const clubsWithMemos = await Promise.all(clubs.map(async (pc: any) => {
+      const memos = await q("SELECT * FROM club_memos WHERE club_id = ? AND practice_session_id = ?", [pc.club_id, match![1]]);
+      const memo = memos[0] ?? null;
+      return {
+        ...pc,
+        club: { id: pc.club_id, club_number: pc.club_number, category: pc.category, maker: pc.maker, model: pc.model },
+        memo: memo ? { ...memo, symptom_tags: JSON.parse(memo.symptom_tags || "[]"), feeling_tags: JSON.parse(memo.feeling_tags || "[]"), gear_tags: JSON.parse(memo.gear_tags || "[]") } : null,
+      };
+    }));
+    return { ...rows[0], practice_clubs: clubsWithMemos };
   }
 
   // PATCH /api/practice/:id
