@@ -12,9 +12,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
 import type { PracticeSessionWithClubs } from "@/types/database";
 
-export default function EditPracticePage() {
+export default function EditPracticePage({ overrideSessionId }: { overrideSessionId?: string } = {}) {
   const router = useRouter();
-  const { sessionId } = useParams<{ sessionId: string }>();
+  const routeParams = useParams<{ sessionId: string }>();
+  const sessionId = overrideSessionId ?? routeParams.sessionId;
   const { user, isLoading: authLoading } = useAuth();
   const { clubs } = useClubs("bag", 1);
   const { clubs: bag2Clubs } = useClubs("bag", 2);

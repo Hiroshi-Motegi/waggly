@@ -17,8 +17,9 @@ function formatDate(dateStr: string): string {
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
-export default function PracticeDetailPage() {
-  const { sessionId } = useParams<{ sessionId: string }>();
+export default function PracticeDetailPage({ overrideSessionId }: { overrideSessionId?: string } = {}) {
+  const routeParams = useParams<{ sessionId: string }>();
+  const sessionId = overrideSessionId ?? routeParams.sessionId;
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [session, setSession] = useState<PracticeSessionWithClubs | null>(null);

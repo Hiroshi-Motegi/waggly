@@ -21,9 +21,10 @@ const categories = [
   { value: "rules", label: "ルール" },
 ];
 
-export default function KnowledgeEditPage() {
+export default function KnowledgeEditPage({ overrideId }: { overrideId?: string } = {}) {
   const router = useRouter();
-  const { id } = useParams<{ id: string }>();
+  const routeParams = useParams<{ id: string }>();
+  const id = overrideId ?? routeParams.id;
   const isNew = id === "new";
 
   const [isLoading, setIsLoading] = useState(!isNew);
