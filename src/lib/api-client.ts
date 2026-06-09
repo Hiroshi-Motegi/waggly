@@ -73,12 +73,9 @@ export async function apiFetch(
 async function handleLocalRequest(path: string, init?: RequestInit): Promise<Response> {
   const method = init?.method?.toUpperCase() ?? "GET";
 
-  // Skip FormData bodies (image uploads) — not supported in local mode
+  // FormData bodies (image uploads) — save to local filesystem
   if (init?.body instanceof FormData) {
-    return new Response(JSON.stringify({ error: "Image upload not supported offline" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return handleLocalImageUpload(path, method, init.body);
   }
 
   const body = init?.body ? JSON.parse(init.body as string) : null;
@@ -119,7 +116,12 @@ async function routeLocal(
     if (conds.length) sql += " WHERE " + conds.join(" AND ");
     sql += " ORDER BY sort_order ASC";
     const clubs = await q(sql);
-    return clubs.map((c: any) => ({ ...c, club_images: [] }));
+    // Attach images for each club
+    for (const c of clubs) {
+      const imgs = await q("SELECT * FROM club_images WHERE club_id = ? ORDER BY is_primary DESC", [c.id]);
+      c.club_images = imgs;
+    }
+    return clubs;
   }
 
   // POST /api/clubs
@@ -142,7 +144,9 @@ async function routeLocal(
   if (match && method === "GET") {
     const rows = await q("SELECT * FROM clubs WHERE id = ?", [match[1]]);
     if (!rows.length) return null;
-    return { ...rows[0], club_images: [], maintenances: [] };
+    const images = await q("SELECT * FROM club_images WHERE club_id = ? ORDER BY is_primary DESC", [match[1]]);
+    const maintenances = await q("SELECT * FROM maintenances WHERE club_id = ? ORDER BY done_at DESC", [match[1]]);
+    return { ...rows[0], club_images: images, maintenances };
   }
 
   // PATCH /api/clubs/:id
@@ -406,4 +410,86 @@ async function routeLocal(
 
   // ---- Fallback: unsupported route ----
   throw new Error(`Local route not supported: ${method} ${path}`);
+}
+
+// ---------------------------------------------------------------------------
+// Local image upload — saves to device filesystem via Capacitor
+// ---------------------------------------------------------------------------
+
+async function handleLocalImageUpload(path: string, method: string, formData: FormData): Promise<Response> {
+  const { execute, query } = await import("@/lib/sqlite/database");
+
+  // DELETE image
+  if (method === "DELETE") {
+    // /api/clubs/:clubId/images or /api/accessories/:id/image
+    let match = path.match(/^\/api\/clubs\/([^/]+)\/images$/);
+    if (match) {
+      await execute("DELETE FROM club_images WHERE club_id = ?", [match[1]]);
+      return jsonResponse({ success: true });
+    }
+    match = path.match(/^\/api\/accessories\/([^/]+)\/image$/);
+    if (match) {
+      await execute("UPDATE accessories SET image_url = NULL WHERE id = ?", [match[1]]);
+      return jsonResponse({ success: true });
+    }
+  }
+
+  // POST image
+  const file = formData.get("file") as File | null;
+  if (!file) {
+    return jsonResponse({ error: "No file" }, 400);
+  }
+
+  try {
+    const { Filesystem, Directory } = await import("@capacitor/filesystem");
+
+    // Convert file to base64
+    const buffer = await file.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const fileName = `${crypto.randomUUID()}.${ext}`;
+
+    // Save to app data directory
+    const result = await Filesystem.writeFile({
+      path: `images/${fileName}`,
+      data: base64,
+      directory: Directory.Data,
+      recursive: true,
+    });
+
+    const localUri = result.uri;
+
+    // /api/clubs/:clubId/images
+    let match = path.match(/^\/api\/clubs\/([^/]+)\/images$/);
+    if (match) {
+      const id = crypto.randomUUID();
+      const now = new Date().toISOString();
+      // Set as primary if first image
+      const existing = await query("SELECT COUNT(*) as count FROM club_images WHERE club_id = ?", [match[1]]);
+      const isPrimary = (existing[0]?.count ?? 0) === 0 ? 1 : 0;
+      await execute(
+        "INSERT INTO club_images (id, club_id, image_url, is_primary, created_at) VALUES (?, ?, ?, ?, ?)",
+        [id, match[1], localUri, isPrimary, now]
+      );
+      return jsonResponse({ id, club_id: match[1], image_url: localUri, is_primary: !!isPrimary, created_at: now });
+    }
+
+    // /api/accessories/:id/image
+    match = path.match(/^\/api\/accessories\/([^/]+)\/image$/);
+    if (match) {
+      await execute("UPDATE accessories SET image_url = ? WHERE id = ?", [localUri, match[1]]);
+      return jsonResponse({ image_url: localUri });
+    }
+
+    return jsonResponse({ image_url: localUri });
+  } catch (e: any) {
+    return jsonResponse({ error: e.message ?? "Failed to save image" }, 500);
+  }
+}
+
+function jsonResponse(data: any, status = 200): Response {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
