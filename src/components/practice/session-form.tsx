@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ClubBallsInput, type ClubBallsValue } from "./club-balls-input";
 import type { Club } from "@/types/database";
+import type { InlineClubMemoValue } from "@/components/club/inline-club-memo";
 
 type BallsTab = "total" | "per_club";
 
@@ -16,7 +17,7 @@ interface SessionFormProps {
     total_balls: number | null;
     memo: string | null;
     rating?: number | null;
-    practice_clubs?: { club_id: string; balls: number; avg_distance?: number | null }[];
+    practice_clubs?: { club_id: string; balls: number; avg_distance?: number | null; memo?: InlineClubMemoValue | null }[];
   };
   showRating?: boolean;
   onSubmit: (data: {
@@ -25,7 +26,7 @@ interface SessionFormProps {
     total_balls: number;
     memo: string;
     rating: number | null;
-    clubs: { club_id: string; balls: number; avg_distance?: number | null }[];
+    clubs: { club_id: string; balls: number; avg_distance?: number | null; memo?: InlineClubMemoValue | null }[];
   }) => void;
   isSubmitting?: boolean;
   showCancel?: boolean;
