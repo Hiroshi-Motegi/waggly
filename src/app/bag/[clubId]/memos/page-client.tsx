@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Plus } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
 import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { MemoCondition } from "@/types/database";
@@ -88,12 +89,12 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
       <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative z-10 flex flex-col space-y-2">
-          <div className="px-1 pb-2">
-            <span className="text-xs font-bold text-white">
-              {club.club_number}{club.maker ? ` / ${club.maker}` : ""}{club.model ? ` ${club.model}` : ""}
-            </span>
-            <h2 className="text-lg font-bold text-white">メモの追加</h2>
-          </div>
+          <PageHeader
+            title="メモの追加"
+            subtitle={`${club.club_number}${club.maker ? ` / ${club.maker}` : ""}${club.model ? ` ${club.model}` : ""}`}
+            backHref={`/bag/${clubId}`}
+            variant="dark"
+          />
           <div className="rounded-lg bg-white p-3">
             <StructuredMemoForm
               clubId={clubId}

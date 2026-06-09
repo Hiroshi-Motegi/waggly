@@ -28,8 +28,10 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
     setter(current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag]);
   }
 
+  const hasContent = condition || distance || memo;
+
   async function handleSubmit() {
-    if (!condition) return;
+    if (!hasContent) return;
     setIsSaving(true);
     try {
       await apiFetch(`/api/clubs/${clubId}/memos`, {
@@ -226,7 +228,7 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
         </button>
         <button
           onClick={handleSubmit}
-          disabled={!condition || isSaving}
+          disabled={!hasContent || isSaving}
           className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white disabled:opacity-50"
         >
           {isSaving ? "保存中..." : "保存"}
