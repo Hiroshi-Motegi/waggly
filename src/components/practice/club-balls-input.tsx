@@ -108,7 +108,7 @@ function ClubAccordion({ club, entry, onUpdate, isLast, open, onToggle }: {
         ref={headerRef}
         type="button"
         onClick={onToggle}
-        className="flex items-center gap-2 py-3 w-full text-left scroll-mt-[160px]"
+        className="flex items-center gap-2 py-3 w-full text-left scroll-mt-[80px]"
       >
         <span className="bg-[#006728] text-white text-sm rounded-full px-2.5 shrink-0">{club.club_number}</span>
         <span className="flex-1 text-sm text-[#6c6c6c] truncate">{subLabel || "—"}</span>
