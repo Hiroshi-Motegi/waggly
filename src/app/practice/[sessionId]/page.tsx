@@ -149,7 +149,7 @@ export default function PracticeDetailPage() {
       )}
 
       <div className="flex justify-center pt-2">
-        <button onClick={handleDelete} className="text-sm font-bold text-red-300">
+        <button onClick={handleDelete} className="text-sm font-bold text-white">
           この記録を削除
         </button>
       </div>

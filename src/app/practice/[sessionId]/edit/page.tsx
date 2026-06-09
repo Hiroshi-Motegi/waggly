@@ -169,7 +169,7 @@ export default function EditPracticePage() {
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="text-sm font-bold text-red-300 disabled:opacity-50"
+          className="text-sm font-bold text-white disabled:opacity-50"
         >
           {isDeleting ? "削除中..." : "この記録を削除"}
         </button>
