@@ -44,3 +44,4 @@ next-env.d.ts
 # capacitor native projects
 /ios/
 /android/
+.claude/settings.local.json
