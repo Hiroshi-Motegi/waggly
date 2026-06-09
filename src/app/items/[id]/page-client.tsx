@@ -331,7 +331,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       <PageHeader
         title={[item.brand, item.model].filter(Boolean).join(" ") || "—"}
         subtitle={categoryLabels[item.category]}
-        backHref="/items"
         variant="dark"
       >
         <div className="flex gap-1 shrink-0">
