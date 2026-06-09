@@ -103,7 +103,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ clubId: s
       </div>
 
       <div className="flex justify-center">
-        <button onClick={handleDelete} className="text-sm font-bold text-red-300">
+        <button onClick={handleDelete} className="text-sm font-bold text-white">
           このメモを削除
         </button>
       </div>

@@ -99,7 +99,7 @@ export default function MaintenanceDetailPage({
       </div>
 
       <div className="flex justify-center">
-        <button onClick={handleDelete} className="text-sm font-bold text-red-300">
+        <button onClick={handleDelete} className="text-sm font-bold text-white">
           この記録を削除
         </button>
       </div>
