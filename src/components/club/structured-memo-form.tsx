@@ -9,16 +9,17 @@ interface Props {
   clubId: string;
   clubNumber: string;
   clubModel?: string | null;
+  defaultDistance?: number | null;
   onSaved: () => void;
   onCancel: () => void;
 }
 
-export function StructuredMemoForm({ clubId, clubNumber, clubModel, onSaved, onCancel }: Props) {
+export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDistance, onSaved, onCancel }: Props) {
   const [condition, setCondition] = useState<MemoCondition | null>(null);
   const [symptomTags, setSymptomTags] = useState<string[]>([]);
   const [feelingTags, setFeelingTags] = useState<string[]>([]);
   const [gearTags, setGearTags] = useState<string[]>([]);
-  const [distance, setDistance] = useState<string>("");
+  const [distance, setDistance] = useState<string>(defaultDistance ? String(defaultDistance) : "");
   const [memo, setMemo] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 

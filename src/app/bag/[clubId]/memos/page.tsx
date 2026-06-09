@@ -95,6 +95,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
               clubId={clubId}
               clubNumber={club.club_number}
               clubModel={club.model}
+              defaultDistance={club.distance}
               onSaved={() => router.push(`/bag/${clubId}`)}
               onCancel={() => router.back()}
             />
@@ -138,6 +139,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
             clubId={clubId}
             clubNumber={club.club_number}
             clubModel={club.model}
+            defaultDistance={club.distance}
             onSaved={() => {
               fetchHistory();
               setShowMemoForm(false);
