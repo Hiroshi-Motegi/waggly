@@ -427,8 +427,43 @@ async function routeLocal(
     return rows.map((r: any) => r.location);
   }
 
+  // ---- Stubs for server-only features (return empty data in local mode) ----
+
+  // GET /api/usage
+  if (path === "/api/usage" && method === "GET") {
+    return { month: new Date().toISOString().slice(0, 7), inputTokens: 0, outputTokens: 0, totalTokens: 0, limit: 100000, remaining: 100000, limitReached: false };
+  }
+
+  // GET /api/subscription
+  if (path === "/api/subscription" && method === "GET") {
+    return { plan_id: "free", status: "active", free_until: null };
+  }
+
+  // GET /api/export
+  if (path === "/api/export" && method === "GET") {
+    return {};
+  }
+
+  // GET /api/coach/plans
+  if (path.match(/^\/api\/coach\/plan/) && method === "GET") {
+    return [];
+  }
+
+  // GET /api/courses
+  if (path.match(/^\/api\/courses/) && method === "GET") {
+    return [];
+  }
+
+  // GET /api/admin/knowledge
+  if (path.match(/^\/api\/admin\//) && method === "GET") {
+    return [];
+  }
+
   // ---- Fallback: unsupported route ----
-  throw new Error(`Local route not supported: ${method} ${path}`);
+  // Unsupported routes return empty data gracefully
+  console.warn(`Local route not supported: ${method} ${path}`);
+  if (method === "GET") return [];
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------

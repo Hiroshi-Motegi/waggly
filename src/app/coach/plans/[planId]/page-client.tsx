@@ -67,7 +67,10 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
     apiFetch(`/api/coach/plans?id=${planId}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
