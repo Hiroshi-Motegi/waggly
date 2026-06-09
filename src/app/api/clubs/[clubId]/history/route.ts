@@ -86,7 +86,7 @@ export async function GET(
     for (const pc of practiceClubs) {
       const session = pc.session as any;
       if (!session) continue;
-      const clubMemo = memoBySession.get(session.id);
+      const clubMemo = memoBySession.get(session.id) as any;
       timeline.push({
         type: "practice",
         id: pc.id,
