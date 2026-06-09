@@ -106,6 +106,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
     location: session.location,
     total_balls: session.total_balls,
     memo: session.memo,
+    rating: session.rating,
     practice_clubs: session.practice_clubs?.map((pc) => ({
       club_id: pc.club_id,
       balls: pc.balls,

@@ -52,7 +52,7 @@ export async function PATCH(
   const { supabase, userId } = auth;
 
   const { sessionId } = await params;
-  const { clubs: clubBalls, rating, ...sessionData } = await request.json();
+  const { clubs: clubBalls, ...sessionData } = await request.json();
 
   // Update session fields
   const { data: session, error: sessionError } = await supabase
