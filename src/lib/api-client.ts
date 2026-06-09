@@ -72,6 +72,15 @@ export async function apiFetch(
 
 async function handleLocalRequest(path: string, init?: RequestInit): Promise<Response> {
   const method = init?.method?.toUpperCase() ?? "GET";
+
+  // Skip FormData bodies (image uploads) — not supported in local mode
+  if (init?.body instanceof FormData) {
+    return new Response(JSON.stringify({ error: "Image upload not supported offline" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const body = init?.body ? JSON.parse(init.body as string) : null;
   const { query, execute } = await import("@/lib/sqlite/database");
 
