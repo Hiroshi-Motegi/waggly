@@ -50,7 +50,14 @@ export async function PATCH(
   const body = await request.json();
   const { data, error } = await supabase
     .from("club_memos")
-    .update({ distance: body.distance ?? null, memo: body.memo ?? null })
+    .update({
+      distance: body.distance ?? null,
+      memo: body.memo ?? null,
+      condition: body.condition ?? null,
+      symptom_tags: body.symptom_tags ?? [],
+      feeling_tags: body.feeling_tags ?? [],
+      gear_tags: body.gear_tags ?? [],
+    })
     .eq("id", memoId)
     .eq("club_id", clubId)
     .select()

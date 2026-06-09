@@ -1,11 +1,12 @@
 export type ClubCategory = "driver" | "fairway_wood" | "utility" | "iron" | "wedge" | "putter";
-export type AccessoryCategory = "ball" | "glove" | "tee" | "other";
+export type AccessoryCategory = "ball" | "glove" | "tee" | "apparel" | "bag" | "rangefinder" | "grip" | "shaft" | "other";
 export type AccessoryStatus = "active" | "past";
 export type ClubStatus = "bag" | "reserve" | "sold";
 export type MaintenanceType = "grip_change" | "reshaft" | "loft_adjust" | "other";
 export type PlanSource = "auto" | "chat";
 export type PlanStatus = "new" | "done" | "skipped";
 export type ChatRole = "user" | "assistant";
+export type MemoCondition = "good" | "normal" | "bad";
 
 export interface User {
   id: string;
@@ -37,6 +38,13 @@ export interface Club {
   status: ClubStatus;
   bag_number: number;
   sort_order: number;
+  // 詳細スペック（プログレッシブディスクロージャー: 詳細層）
+  weight: number | null;          // 総重量 (g)
+  swing_weight: string | null;    // バランス (D0, D1, D2 等)
+  frequency: number | null;       // 振動数 (cpm)
+  kick_point: string | null;      // キックポイント
+  head_volume: number | null;     // ヘッド体積 (cc)
+  head_weight: number | null;     // ヘッド重量 (g)
   created_at: string;
 }
 
@@ -112,6 +120,11 @@ export interface ClubMemo {
   club_id: string;
   distance: number | null;
   memo: string | null;
+  condition: MemoCondition | null;
+  symptom_tags: string[];
+  feeling_tags: string[];
+  gear_tags: string[];
+  practice_session_id: string | null;
   created_at: string;
 }
 
@@ -136,7 +149,7 @@ export interface ClubWithImages extends Club {
 }
 
 export interface PracticeSessionWithClubs extends PracticeSession {
-  practice_clubs: (PracticeClub & { club: Club })[];
+  practice_clubs: (PracticeClub & { club: Club; memo: ClubMemo | null })[];
 }
 
 export interface PracticePlanWithItems extends PracticePlan {

@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { ClubUsageSummary } from "@/components/club/club-usage-summary";
 import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
 
 const statusLabels: Record<string, string> = {
@@ -30,6 +31,10 @@ interface ActivityItem {
   // memo
   distance?: number | null;
   memo?: string | null;
+  condition?: string | null;
+  symptom_tags?: string[];
+  feeling_tags?: string[];
+  gear_tags?: string[];
   // practice
   session_id?: string;
   practiced_at?: string;
@@ -100,7 +105,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
     router.push("/bag");
   }
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading variant="light" />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   return (
@@ -183,6 +188,51 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
               <span className="flex-1 text-right font-medium">{club.purchase_price.toLocaleString()}円</span>
             </div>
           )}
+
+          {/* 詳細スペック（入力済みの場合のみ表示） */}
+          {(club.weight != null || club.swing_weight || club.frequency != null || club.kick_point || club.head_volume != null || club.head_weight != null) && (
+            <div className="border-t border-[#e8e8e8] pt-3 mt-3">
+              <p className="text-xs text-[#8b8b8b] mb-2">詳細スペック</p>
+              <div className="grid grid-cols-3 gap-2 text-sm">
+                {club.weight != null && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">重量</span>
+                    <p className="font-medium">{club.weight}g</p>
+                  </div>
+                )}
+                {club.swing_weight && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">バランス</span>
+                    <p className="font-medium">{club.swing_weight}</p>
+                  </div>
+                )}
+                {club.frequency != null && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">振動数</span>
+                    <p className="font-medium">{club.frequency}cpm</p>
+                  </div>
+                )}
+                {club.kick_point && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">キックポイント</span>
+                    <p className="font-medium">{club.kick_point}</p>
+                  </div>
+                )}
+                {club.head_volume != null && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">ヘッド体積</span>
+                    <p className="font-medium">{club.head_volume}cc</p>
+                  </div>
+                )}
+                {club.head_weight != null && (
+                  <div>
+                    <span className="text-xs text-[#8b8b8b]">ヘッド重量</span>
+                    <p className="font-medium">{club.head_weight}g</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Status change buttons inside card */}
@@ -208,6 +258,12 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             </button>
           )}
         </div>
+      </div>
+
+      {/* 使用サマリー */}
+      <div className="rounded-lg bg-white p-3">
+        <h3 className="text-sm font-bold mb-2">使用サマリー（3ヶ月）</h3>
+        <ClubUsageSummary clubId={clubId} />
       </div>
 
       {/* Activity header */}
@@ -292,11 +348,21 @@ function ActivityRow({ item, clubId, isLast }: { item: ActivityItem; clubId: str
             <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium text-black ${badgeColors[item.type]}`}>
               {badgeLabels[item.type]}
             </span>
+            {item.condition && (
+              <img src={`/images/face-${item.condition === "normal" ? "ok" : item.condition}.png`} alt="" className="w-4 h-4" />
+            )}
             {summary && (
               <span className="text-[10px] font-medium text-[#8b8b8b]">{summary}</span>
             )}
             <span className="text-[10px] font-medium text-[#8b8b8b] ml-auto shrink-0">{dateStr}</span>
           </div>
+          {[...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])].length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-0.5">
+              {[...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])].map((tag) => (
+                <span key={tag} className="rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#333]">{tag}</span>
+              ))}
+            </div>
+          )}
           {detail && (
             <p className="text-sm font-bold text-black truncate line-clamp-2">{detail}</p>
           )}

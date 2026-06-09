@@ -1,0 +1,180 @@
+<h2>構造化メモUI — 入力が資産になる設計</h2>
+<p class="subtitle">ユーザーは気軽にメモしてるだけなのに、振り返ると「このクラブの傾向」が見える</p>
+
+<div class="section">
+  <h3>入力フロー比較</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">現在: 自由記述メモ</div>
+      <div class="mockup-body" style="padding:20px;">
+        <div style="background:#f9f9f9;border-radius:12px;padding:16px;max-width:320px;margin:0 auto;">
+          <p style="font-size:12px;color:#888;margin:0 0 8px;">メモ</p>
+          <div style="background:white;border:1px solid #ddd;border-radius:8px;padding:12px;min-height:80px;font-size:14px;color:#666;">
+            7Iが右に出る。シャフト硬いかも。PWの距離感はよかった。
+          </div>
+          <p style="font-size:11px;color:#aaa;margin:8px 0 0;text-align:center;">→ テキスト検索でしか振り返れない</p>
+        </div>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">新: 構造化メモ</div>
+      <div class="mockup-body" style="padding:20px;">
+        <div style="background:#f9f9f9;border-radius:12px;padding:16px;max-width:320px;margin:0 auto;">
+          <p style="font-size:12px;color:#888;margin:0 0 8px;">クラブ別ノート</p>
+
+          <div style="background:white;border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #e74c3c;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-weight:bold;font-size:14px;">7I</span>
+              <span style="font-size:11px;background:#ffeaea;color:#e74c3c;padding:2px 8px;border-radius:12px;">悩み</span>
+            </div>
+            <div style="display:flex;gap:4px;margin:6px 0;">
+              <span style="font-size:11px;background:#f0f0f0;padding:2px 8px;border-radius:12px;">方向性</span>
+              <span style="font-size:11px;background:#f0f0f0;padding:2px 8px;border-radius:12px;">右に出る</span>
+            </div>
+            <p style="font-size:12px;color:#666;margin:4px 0 0;">シャフト硬いかも</p>
+          </div>
+
+          <div style="background:white;border-radius:8px;padding:12px;border-left:3px solid #27ae60;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-weight:bold;font-size:14px;">PW</span>
+              <span style="font-size:11px;background:#eafbea;color:#27ae60;padding:2px 8px;border-radius:12px;">好調</span>
+            </div>
+            <div style="display:flex;gap:4px;margin:6px 0;">
+              <span style="font-size:11px;background:#f0f0f0;padding:2px 8px;border-radius:12px;">距離感</span>
+            </div>
+            <p style="font-size:12px;color:#666;margin:4px 0 0;">距離感よかった</p>
+          </div>
+
+          <p style="font-size:11px;color:#27ae60;margin:8px 0 0;text-align:center;">→ クラブ別に傾向が自動で蓄積</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>入力UIイメージ</h3>
+  <div class="mockup">
+    <div class="mockup-header">メモ入力（練習後）</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="background:#f9f9f9;border-radius:16px;padding:20px;max-width:340px;margin:0 auto;">
+
+        <p style="font-size:13px;font-weight:bold;margin:0 0 12px;">クラブを選択</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+          <span style="font-size:13px;background:#006728;color:white;padding:6px 14px;border-radius:20px;font-weight:bold;">7I</span>
+          <span style="font-size:13px;background:white;border:1px solid #ddd;padding:6px 14px;border-radius:20px;">PW</span>
+          <span style="font-size:13px;background:white;border:1px solid #ddd;padding:6px 14px;border-radius:20px;">Dr</span>
+          <span style="font-size:13px;background:white;border:1px solid #ddd;padding:6px 14px;border-radius:20px;">5W</span>
+          <span style="font-size:13px;background:white;border:1px solid #ddd;padding:6px 14px;border-radius:20px;">56°</span>
+        </div>
+
+        <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">調子は？</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <div style="flex:1;text-align:center;padding:10px;background:white;border:1px solid #ddd;border-radius:12px;">
+            <div style="font-size:20px;">😣</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">悩み</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:white;border:1px solid #ddd;border-radius:12px;">
+            <div style="font-size:20px;">😐</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">普通</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:#ebf1eb;border:2px solid #006728;border-radius:12px;">
+            <div style="font-size:20px;">😊</div>
+            <div style="font-size:11px;color:#006728;margin-top:2px;">好調</div>
+          </div>
+        </div>
+
+        <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">気になった点（複数選択OK）</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+          <span style="font-size:12px;background:#006728;color:white;padding:5px 12px;border-radius:16px;">方向性</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">飛距離</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">打感</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">高さ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">スピン</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">安定性</span>
+        </div>
+
+        <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">方向性の詳細</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+          <span style="font-size:12px;background:#ffeaea;border:1px solid #e74c3c;color:#e74c3c;padding:5px 12px;border-radius:16px;">右に出る</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">左に出る</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">スライス</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">フック</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">バラつく</span>
+        </div>
+
+        <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">自由メモ（任意）</p>
+        <div style="background:white;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:13px;color:#999;min-height:40px;">
+          シャフト硬いかも...
+        </div>
+
+        <div style="margin-top:16px;text-align:center;">
+          <div style="background:#006728;color:white;padding:12px;border-radius:24px;font-weight:bold;font-size:14px;">保存</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>蓄積された後の見え方（クラブ詳細画面）</h3>
+  <div class="mockup">
+    <div class="mockup-header">7I（PING i230）のプロフィール</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="max-width:340px;margin:0 auto;">
+
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+          <div style="width:60px;height:60px;background:#e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888;">写真</div>
+          <div>
+            <p style="margin:0;font-weight:bold;font-size:16px;">7I — PING i230</p>
+            <p style="margin:2px 0 0;font-size:12px;color:#888;">N.S.PRO MODUS³ 105S / 購入 2025.3</p>
+          </div>
+        </div>
+
+        <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:12px;">
+          <p style="margin:0 0 8px;font-weight:bold;font-size:13px;">使用サマリー（直近3ヶ月）</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+            <div>
+              <p style="margin:0;font-size:20px;font-weight:bold;color:#006728;">420球</p>
+              <p style="margin:0;font-size:11px;color:#888;">総打球数</p>
+            </div>
+            <div>
+              <p style="margin:0;font-size:20px;font-weight:bold;color:#006728;">158yd</p>
+              <p style="margin:0;font-size:11px;color:#888;">平均飛距離</p>
+            </div>
+            <div>
+              <p style="margin:0;font-size:20px;font-weight:bold;color:#e74c3c;">3回</p>
+              <p style="margin:0;font-size:11px;color:#888;">悩みメモ</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:12px;">
+          <p style="margin:0 0 8px;font-weight:bold;font-size:13px;">よく出るキーワード</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:12px;background:#ffeaea;color:#e74c3c;padding:4px 10px;border-radius:12px;">方向性 ×3</span>
+            <span style="font-size:12px;background:#ffeaea;color:#e74c3c;padding:4px 10px;border-radius:12px;">右に出る ×2</span>
+            <span style="font-size:12px;background:#eafbea;color:#27ae60;padding:4px 10px;border-radius:12px;">打感 ×2</span>
+          </div>
+        </div>
+
+        <div style="background:#f9f9f9;border-radius:12px;padding:14px;">
+          <p style="margin:0 0 8px;font-weight:bold;font-size:13px;">直近のメモ</p>
+          <div style="border-left:3px solid #e74c3c;padding-left:10px;margin-bottom:8px;">
+            <p style="margin:0;font-size:12px;color:#888;">6/8</p>
+            <p style="margin:2px 0 0;font-size:13px;">😣 方向性 → 右に出る「シャフト硬いかも」</p>
+          </div>
+          <div style="border-left:3px solid #27ae60;padding-left:10px;margin-bottom:8px;">
+            <p style="margin:0;font-size:12px;color:#888;">6/1</p>
+            <p style="margin:2px 0 0;font-size:13px;">😊 打感「芯に当たる感覚が増えた」</p>
+          </div>
+          <div style="border-left:3px solid #e74c3c;padding-left:10px;">
+            <p style="margin:0;font-size:12px;color:#888;">5/25</p>
+            <p style="margin:2px 0 0;font-size:13px;">😣 方向性 → 右に出る「グリップ太い？」</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

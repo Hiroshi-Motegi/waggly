@@ -1,0 +1,168 @@
+<h2>構造化メモUI v3 — ユーザーが入力できるものだけ</h2>
+<p class="subtitle">症状 + 感覚 + ギアの気づき。原因はプロの領域。</p>
+
+<div class="section">
+  <h3>入力UIモック</h3>
+  <div class="mockup">
+    <div class="mockup-header">7I メモ入力</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="background:#f9f9f9;border-radius:16px;padding:20px;max-width:340px;margin:0 auto;">
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+          <span style="font-weight:bold;font-size:16px;">7I</span>
+          <span style="font-size:12px;color:#888;">PING i230</span>
+        </div>
+
+        <!-- 調子 -->
+        <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">調子は？</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <div style="flex:1;text-align:center;padding:10px;background:#ffeaea;border:2px solid #e74c3c;border-radius:12px;">
+            <div style="font-size:20px;">😣</div>
+            <div style="font-size:11px;color:#e74c3c;margin-top:2px;">悩み</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:white;border:1px solid #ddd;border-radius:12px;">
+            <div style="font-size:20px;">😐</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">普通</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:white;border:1px solid #ddd;border-radius:12px;">
+            <div style="font-size:20px;">😊</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">好調</div>
+          </div>
+        </div>
+
+        <!-- 症状：球筋 -->
+        <p style="font-size:13px;font-weight:bold;margin:0 0 6px;">何が起きた？</p>
+        <p style="font-size:11px;color:#888;margin:0 0 6px;">球筋</p>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
+          <span style="font-size:12px;background:#006728;color:white;padding:5px 12px;border-radius:16px;">右に出る</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">左に出る</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">スライス</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">フック</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">バラつく</span>
+        </div>
+
+        <!-- 症状：弾道 -->
+        <p style="font-size:11px;color:#888;margin:0 0 6px;">弾道</p>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">高すぎ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">低すぎ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">吹き上がる</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">ドロップ</span>
+        </div>
+
+        <!-- 症状：ミス -->
+        <p style="font-size:11px;color:#888;margin:0 0 6px;">ミス</p>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px;">
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">トップ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">ダフリ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">シャンク</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">テンプラ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">飛距離不足</span>
+        </div>
+
+        <div style="border-top:1px solid #e0e0e0;padding-top:16px;">
+          <!-- 体の感覚 -->
+          <p style="font-size:13px;font-weight:bold;margin:0 0 6px;">体の感覚</p>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px;">
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">力んだ</span>
+            <span style="font-size:12px;background:#006728;color:white;padding:5px 12px;border-radius:16px;">芯に当たらない</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">リズム悪い</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">疲れ</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">振り切れない</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">手打ち感</span>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid #e0e0e0;padding-top:16px;">
+          <!-- ギアの気づき -->
+          <p style="font-size:13px;font-weight:bold;margin:0 0 6px;">ギアの気づき</p>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px;">
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">硬い</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">柔い</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">重い</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">軽い</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">グリップ滑る</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">構えにくい</span>
+          </div>
+        </div>
+
+        <!-- 自由メモ -->
+        <div style="border-top:1px solid #e0e0e0;padding-top:16px;">
+          <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">メモ（任意）</p>
+          <div style="background:white;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:13px;color:#999;min-height:36px;">
+            後半から崩れた
+          </div>
+        </div>
+
+        <div style="margin-top:16px;text-align:center;">
+          <div style="background:#006728;color:white;padding:12px;border-radius:24px;font-weight:bold;font-size:14px;">保存</div>
+        </div>
+
+        <!-- ナレッジ参考表示 -->
+        <div style="margin-top:20px;background:#f5f5f0;border:1px solid #e0ddd0;border-radius:12px;padding:14px;">
+          <p style="margin:0 0 6px;font-size:12px;font-weight:bold;color:#888;">💡 「右に出る」原因として一般的なもの</p>
+          <ul style="margin:0;padding-left:18px;font-size:12px;color:#666;line-height:1.8;">
+            <li>フェースが開いたままインパクト</li>
+            <li>アウトサイドインの軌道</li>
+            <li>ボール位置が右寄り</li>
+            <li>グリップがウィークすぎる</li>
+          </ul>
+          <p style="margin:8px 0 0;font-size:11px;color:#aaa;">※ 正確な診断にはレッスンプロへの相談をおすすめします</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>好調の場合 — 入力はもっとシンプル</h3>
+  <div class="mockup">
+    <div class="mockup-header">PW メモ入力（好調時）</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="background:#f9f9f9;border-radius:16px;padding:20px;max-width:340px;margin:0 auto;">
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+          <span style="font-weight:bold;font-size:16px;">PW</span>
+          <span style="font-size:12px;color:#888;">PING i230</span>
+        </div>
+
+        <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">調子は？</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <div style="flex:1;text-align:center;padding:10px;background:white;border:1px solid #ddd;border-radius:12px;">
+            <div style="font-size:20px;">😣</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">悩み</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:white;border:1px solid #ddd;border-radius:12px;">
+            <div style="font-size:20px;">😐</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">普通</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:#eafbea;border:2px solid #27ae60;border-radius:12px;">
+            <div style="font-size:20px;">😊</div>
+            <div style="font-size:11px;color:#27ae60;margin-top:2px;">好調</div>
+          </div>
+        </div>
+
+        <!-- 好調時は良かった点 -->
+        <p style="font-size:13px;font-weight:bold;margin:0 0 6px;">何が良かった？</p>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px;">
+          <span style="font-size:12px;background:#27ae60;color:white;padding:5px 12px;border-radius:16px;">距離感</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">方向性</span>
+          <span style="font-size:12px;background:#27ae60;color:white;padding:5px 12px;border-radius:16px;">打感</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">高さ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">安定性</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">スピン</span>
+        </div>
+
+        <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">メモ（任意）</p>
+        <div style="background:white;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:13px;color:#999;min-height:36px;">
+          100yd以内のコントロールが安定してきた
+        </div>
+
+        <div style="margin-top:16px;text-align:center;">
+          <div style="background:#006728;color:white;padding:12px;border-radius:24px;font-weight:bold;font-size:14px;">保存</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -37,7 +37,7 @@ export default function HomePage() {
   const { sessions } = usePracticeSessions();
 
   if (authLoading) {
-    return <Loading />;
+    return <Loading variant="light" />;
   }
 
   if (!user) {

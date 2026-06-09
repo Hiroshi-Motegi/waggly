@@ -10,6 +10,11 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { useClubs, updateClub } from "@/hooks/use-clubs";
 import type { ClubStatus, ClubWithImages } from "@/types/database";
+import { ShareWitbButton } from "@/components/bag/share-witb-button";
+import { getDistanceStaircaseData, getWeightFlowData, getDistanceInsights, getWeightInsights } from "@/lib/gap-analysis";
+import { DistanceStaircase } from "@/components/charts/distance-staircase";
+import { WeightFlow } from "@/components/charts/weight-flow";
+import { ChartInsights } from "@/components/charts/chart-insights";
 
 const MAX_BAG_CLUBS = 14;
 
@@ -158,8 +163,16 @@ export default function BagPage() {
   const { clubs, isLoading, refetch } = useClubs(filterParams.status, filterParams.bagNumber);
   const [isReordering, setIsReordering] = useState(false);
   const [localClubs, setLocalClubs] = useState<ClubWithImages[]>([]);
+  const [chartTab, setChartTab] = useState<"distance" | "weight">("distance");
 
   const isBagView = statusFilter === "bag1" || statusFilter === "bag2";
+
+  const bagClubs = clubs.filter((c) => c.status === "bag" && c.bag_number === (statusFilter === "bag2" ? 2 : 1));
+  const distanceData = getDistanceStaircaseData(bagClubs);
+  const weightData = getWeightFlowData(bagClubs);
+  const distanceInsights = getDistanceInsights(distanceData);
+  const weightInsights = getWeightInsights(weightData);
+  const showCharts = statusFilter === "bag1" || statusFilter === "bag2";
 
   const displayClubs = isReordering
     ? localClubs
@@ -255,6 +268,50 @@ export default function BagPage() {
           </div>
         )}
 
+        {/* Charts */}
+        {showCharts && !isReordering && (
+          <div className="rounded-lg bg-white p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                onClick={() => setChartTab("distance")}
+                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  chartTab === "distance"
+                    ? "bg-[#006728] text-white"
+                    : "bg-[#f0f0f0] text-[#666]"
+                }`}
+              >
+                飛距離階段
+              </button>
+              <button
+                onClick={() => setChartTab("weight")}
+                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  chartTab === "weight"
+                    ? "bg-[#006728] text-white"
+                    : "bg-[#f0f0f0] text-[#666]"
+                }`}
+              >
+                重量フロー
+              </button>
+            </div>
+            {chartTab === "distance" ? (
+              <>
+                <DistanceStaircase data={distanceData} />
+                <ChartInsights insights={distanceInsights} />
+              </>
+            ) : (
+              <>
+                <WeightFlow data={weightData} />
+                <ChartInsights insights={weightInsights} />
+              </>
+            )}
+          </div>
+        )}
+        {showCharts && !isReordering && (
+          <div className="flex justify-end">
+            <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />
+          </div>
+        )}
+
         {/* List */}
         {isReordering ? (
           <>
@@ -291,7 +348,7 @@ export default function BagPage() {
             </div>
           </>
         ) : isLoading ? (
-          <Loading />
+          <Loading variant="light" />
         ) : clubs.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             クラブが登録されていません

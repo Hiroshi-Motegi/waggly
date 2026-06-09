@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import type { PracticeSessionWithClubs } from "@/types/database";
+import type { InlineClubMemoValue } from "@/components/club/inline-club-memo";
 
 export function usePracticeSessions() {
   const { user } = useAuth();
@@ -31,7 +32,7 @@ interface CreateSessionData {
   location: string;
   total_balls: number;
   memo: string;
-  clubs: { club_id: string; balls: number; avg_distance?: number | null }[];
+  clubs: { club_id: string; balls: number; avg_distance?: number | null; memo?: InlineClubMemoValue | null }[];
 }
 
 export async function createPracticeSession(data: CreateSessionData) {

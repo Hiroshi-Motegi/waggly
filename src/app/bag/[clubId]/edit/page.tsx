@@ -40,7 +40,7 @@ export default function EditClubPage({ params }: { params: Promise<{ clubId: str
     setClubImages((prev) => [...prev, newImage]);
   }, []);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading variant="light" />;
   if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
 
   const { club_images, maintenances, id, user_id, created_at, ...editableData } = club as any;

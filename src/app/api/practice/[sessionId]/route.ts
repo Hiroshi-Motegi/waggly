@@ -20,6 +20,22 @@ export async function GET(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Fetch memos linked to this session
+  const { data: memos } = await supabase
+    .from("club_memos")
+    .select("*")
+    .eq("practice_session_id", sessionId);
+
+  // Merge memos into practice_clubs
+  if (data.practice_clubs && memos) {
+    const memoByClub = new Map(memos.map((m: any) => [m.club_id, m]));
+    data.practice_clubs = data.practice_clubs.map((pc: any) => ({
+      ...pc,
+      memo: memoByClub.get(pc.club_id) ?? null,
+    }));
+  }
+
   return NextResponse.json(data);
 }
 
@@ -70,6 +86,37 @@ export async function PATCH(
         .insert(records);
 
       if (clubError) return NextResponse.json({ error: clubError.message }, { status: 500 });
+    }
+  }
+
+  // Replace memos linked to this session: delete existing then insert new
+  const { error: memoDeleteError } = await supabase
+    .from("club_memos")
+    .delete()
+    .eq("practice_session_id", sessionId);
+
+  if (memoDeleteError) return NextResponse.json({ error: memoDeleteError.message }, { status: 500 });
+
+  if (clubBalls && clubBalls.length > 0) {
+    const memoRecords = clubBalls
+      .filter((cb: any) => cb.memo?.condition)
+      .map((cb: any) => ({
+        club_id: cb.club_id,
+        practice_session_id: sessionId,
+        distance: cb.avg_distance ?? null,
+        memo: cb.memo.memo || null,
+        condition: cb.memo.condition,
+        symptom_tags: cb.memo.symptom_tags || [],
+        feeling_tags: cb.memo.condition === "good" ? [] : (cb.memo.feeling_tags || []),
+        gear_tags: cb.memo.condition === "good" ? [] : (cb.memo.gear_tags || []),
+      }));
+
+    if (memoRecords.length > 0) {
+      const { error: memoError } = await supabase
+        .from("club_memos")
+        .insert(memoRecords);
+
+      if (memoError) return NextResponse.json({ error: memoError.message }, { status: 500 });
     }
   }
 

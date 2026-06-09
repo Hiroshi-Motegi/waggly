@@ -1,0 +1,177 @@
+<h2>構造化メモUI v2 — 症状 → 原因の2段階入力</h2>
+<p class="subtitle">「何が起きた」と「なぜ起きた（と思う）」を分けて記録する</p>
+
+<div class="section">
+  <h3>設計思想</h3>
+  <div class="mockup">
+    <div class="mockup-header">メモの構造</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="max-width:500px;margin:0 auto;font-size:14px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="background:#006728;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;">1</div>
+          <div>
+            <p style="margin:0;font-weight:bold;">症状（結果）— 何が起きた？</p>
+            <p style="margin:2px 0 0;font-size:12px;color:#888;">右に出る、飛ばない、トップする 等</p>
+          </div>
+        </div>
+        <div style="border-left:2px dashed #ccc;margin-left:15px;height:16px;"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="background:#006728;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;">2</div>
+          <div>
+            <p style="margin:0;font-weight:bold;">原因（心当たり）— なぜだと思う？</p>
+            <p style="margin:2px 0 0;font-size:12px;color:#888;">捻転不足、トップの位置、クロス、グリップ 等</p>
+          </div>
+        </div>
+        <div style="border-left:2px dashed #ccc;margin-left:15px;height:16px;"></div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="background:#ccc;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;">3</div>
+          <div>
+            <p style="margin:0;font-weight:bold;color:#888;">自由メモ（任意）</p>
+            <p style="margin:2px 0 0;font-size:12px;color:#888;">補足したいことがあれば</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>入力UIモック — 悩みの場合</h3>
+  <div class="mockup">
+    <div class="mockup-header">7I メモ入力</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="background:#f9f9f9;border-radius:16px;padding:20px;max-width:340px;margin:0 auto;">
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+          <span style="font-weight:bold;font-size:16px;">7I</span>
+          <span style="font-size:12px;color:#888;">PING i230</span>
+          <span style="font-size:12px;background:#ffeaea;color:#e74c3c;padding:2px 8px;border-radius:12px;margin-left:auto;">😣 悩み</span>
+        </div>
+
+        <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">① 何が起きた？（症状）</p>
+        <p style="font-size:11px;color:#888;margin:0 0 6px;">球筋</p>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+          <span style="font-size:12px;background:#006728;color:white;padding:5px 12px;border-radius:16px;">右に出る</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">左に出る</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">スライス</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">フック</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">プッシュ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">引っかけ</span>
+        </div>
+        <p style="font-size:11px;color:#888;margin:0 0 6px;">弾道</p>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">高すぎ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">低すぎ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">吹き上がる</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">ドロップ</span>
+        </div>
+        <p style="font-size:11px;color:#888;margin:0 0 6px;">ミスの種類</p>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px;">
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">トップ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">ダフリ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">シャンク</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">テンプラ</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">飛距離不足</span>
+          <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">バラつき</span>
+        </div>
+
+        <div style="border-top:1px solid #e0e0e0;padding-top:16px;">
+          <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">② 心当たりは？（原因）</p>
+          <p style="font-size:11px;color:#888;margin:0 0 6px;">スイング</p>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+            <span style="font-size:12px;background:#fff3e0;border:1px solid #f39c12;color:#e67e22;padding:5px 12px;border-radius:16px;">捻転不足</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">トップの位置</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">クロス</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">振り遅れ</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">アーリーリリース</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">体重移動</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">起き上がり</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">突っ込み</span>
+          </div>
+          <p style="font-size:11px;color:#888;margin:0 0 6px;">アドレス・グリップ</p>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">アライメント</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">ボール位置</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">前傾角度</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">グリップ強さ</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">スタンス幅</span>
+          </div>
+          <p style="font-size:11px;color:#888;margin:0 0 6px;">ギア要因</p>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px;">
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">シャフト硬い</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">シャフト柔い</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">ロフト合ってない</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">ライ角合ってない</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">グリップ太い/細い</span>
+            <span style="font-size:12px;background:white;border:1px solid #ddd;padding:5px 12px;border-radius:16px;">重量合ってない</span>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid #e0e0e0;padding-top:16px;">
+          <p style="font-size:13px;font-weight:bold;margin:0 0 8px;">③ 自由メモ（任意）</p>
+          <div style="background:white;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:13px;color:#999;min-height:36px;">
+            後半から崩れた。疲れもあるかも
+          </div>
+        </div>
+
+        <div style="margin-top:16px;text-align:center;">
+          <div style="background:#006728;color:white;padding:12px;border-radius:24px;font-weight:bold;font-size:14px;">保存</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>蓄積後 — クラブ詳細画面で見ると</h3>
+  <div class="mockup">
+    <div class="mockup-header">7I の傾向分析（メモ蓄積から自動生成）</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="max-width:360px;margin:0 auto;">
+
+        <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:12px;">
+          <p style="margin:0 0 10px;font-weight:bold;font-size:13px;">症状の傾向（直近3ヶ月・8回の記録）</p>
+          <div style="margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+              <span>右に出る</span><span style="color:#e74c3c;font-weight:bold;">4回</span>
+            </div>
+            <div style="background:#eee;border-radius:4px;height:8px;overflow:hidden;">
+              <div style="background:#e74c3c;height:100%;width:50%;border-radius:4px;"></div>
+            </div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+              <span>飛距離不足</span><span style="color:#e67e22;font-weight:bold;">2回</span>
+            </div>
+            <div style="background:#eee;border-radius:4px;height:8px;overflow:hidden;">
+              <div style="background:#e67e22;height:100%;width:25%;border-radius:4px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+              <span>好調</span><span style="color:#27ae60;font-weight:bold;">2回</span>
+            </div>
+            <div style="background:#eee;border-radius:4px;height:8px;overflow:hidden;">
+              <div style="background:#27ae60;height:100%;width:25%;border-radius:4px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:12px;">
+          <p style="margin:0 0 10px;font-weight:bold;font-size:13px;">原因の傾向</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div style="font-size:12px;background:#fff3e0;border:1px solid #f39c12;color:#e67e22;padding:4px 10px;border-radius:12px;">捻転不足 ×3</div>
+            <div style="font-size:12px;background:#fff3e0;border:1px solid #f39c12;color:#e67e22;padding:4px 10px;border-radius:12px;">シャフト硬い ×2</div>
+            <div style="font-size:12px;background:#f0f0f0;padding:4px 10px;border-radius:12px;">振り遅れ ×1</div>
+          </div>
+        </div>
+
+        <div style="background:#ebf1eb;border-radius:12px;padding:14px;">
+          <p style="margin:0 0 6px;font-weight:bold;font-size:13px;color:#006728;">💡 見えてきたパターン</p>
+          <p style="margin:0;font-size:13px;color:#333;">「右に出る」×「捻転不足」の組み合わせが3回。スイング課題の可能性が高いが、「シャフト硬い」も2回記録あり。</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -57,6 +57,31 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: clubError.message }, { status: 500 });
       }
     }
+
+    // Create club memos linked to this session
+    const memoRecords = clubBalls
+      .filter((cb: any) => cb.memo?.condition)
+      .map((cb: any) => ({
+        club_id: cb.club_id,
+        practice_session_id: session.id,
+        distance: cb.avg_distance ?? null,
+        memo: cb.memo.memo || null,
+        condition: cb.memo.condition,
+        symptom_tags: cb.memo.symptom_tags || [],
+        feeling_tags: cb.memo.condition === "good" ? [] : (cb.memo.feeling_tags || []),
+        gear_tags: cb.memo.condition === "good" ? [] : (cb.memo.gear_tags || []),
+      }));
+
+    if (memoRecords.length > 0) {
+      const { error: memoError } = await supabase
+        .from("club_memos")
+        .insert(memoRecords);
+
+      if (memoError) {
+        console.error("club memos insert error:", memoError.message, memoRecords);
+        return NextResponse.json({ error: memoError.message }, { status: 500 });
+      }
+    }
   }
 
   return NextResponse.json(session, { status: 201 });

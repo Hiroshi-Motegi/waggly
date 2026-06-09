@@ -2,12 +2,15 @@
 
 const text = "読み込み中...";
 
-export function Loading() {
-  return (
+export function Loading({ variant = "default" }: { variant?: "default" | "light" }) {
+  const isLight = variant === "light";
+  const textColor = isLight ? "text-white" : "text-[#006728]";
+
+  const content = (
     <div className="flex flex-col items-center justify-center gap-0 py-12">
       <div className="loading-bounce">
         <img
-          src="/icons/loading-ball.svg"
+          src={isLight ? "/icons/loading-ball-white.svg" : "/icons/loading-ball.svg"}
           alt=""
           className="h-10 w-10"
         />
@@ -17,7 +20,7 @@ export function Loading() {
         {text.split("").map((char, i) => (
           <span
             key={i}
-            className="loading-wave text-sm font-bold text-[#006728]"
+            className={`loading-wave text-sm font-bold ${textColor}`}
             style={{ animationDelay: `${i * 0.08}s` }}
           >
             {char}
@@ -26,4 +29,15 @@ export function Loading() {
       </div>
     </div>
   );
+
+  if (isLight) {
+    return (
+      <div className="relative flex items-center justify-center bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <div className="relative z-10">{content}</div>
+      </div>
+    );
+  }
+
+  return content;
 }

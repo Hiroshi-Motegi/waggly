@@ -66,7 +66,7 @@ export default function PlansPage() {
       )}
 
       {isLoading ? (
-        <Loading />
+        <Loading variant="light" />
       ) : plans.length === 0 && !generating ? (
         <p className="text-center text-sm text-[#8b8b8b] py-8">まだ練習メニューがありません</p>
       ) : (

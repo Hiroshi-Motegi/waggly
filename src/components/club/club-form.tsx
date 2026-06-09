@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Club, ClubCategory } from "@/types/database";
+import { ClubDetailSpecs } from "@/components/club/club-detail-specs";
 
 const categories: { value: ClubCategory; label: string }[] = [
   { value: "driver", label: "ドライバー" },
@@ -48,6 +49,12 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     purchase_date: undefined,
     purchase_shop: "",
     purchase_price: undefined,
+    weight: undefined,
+    swing_weight: "",
+    frequency: undefined,
+    kick_point: "",
+    head_volume: undefined,
+    head_weight: undefined,
     ...initialData,
   });
 
@@ -100,6 +107,10 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         lie: prev.lie ?? specs.lie ?? prev.lie,
         length: prev.length ?? specs.length ?? prev.length,
         distance: prev.distance ?? specs.distance ?? prev.distance,
+        weight: prev.weight ?? specs.weight ?? prev.weight,
+        swing_weight: prev.swing_weight || specs.swing_weight || prev.swing_weight,
+        head_volume: prev.head_volume ?? specs.head_volume ?? prev.head_volume,
+        head_weight: prev.head_weight ?? specs.head_weight ?? prev.head_weight,
       }));
     } catch (error) {
       console.error("Autofill failed:", error);
@@ -111,9 +122,9 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
   const presetNumbers = form.category ? (clubNumbersByCategory[form.category] ?? []) : [];
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-2 pb-8 pt-3 overflow-x-hidden">
+    <form onSubmit={handleSubmit} className="flex flex-col space-y-2 px-3 pt-2">
       {/* Section 1: クラブ詳細 */}
-      <h3 className="px-1 pt-4 text-base font-bold text-white">クラブ詳細</h3>
+      <h3 className="px-1 pt-2 text-base font-bold text-white">クラブ詳細</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* 種類 */}
         <div className="flex flex-col gap-0.5 py-1">
@@ -224,7 +235,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
       </div>
 
       {/* Section 2: スペック */}
-      <h3 className="px-1 pt-4 text-base font-bold text-white">スペック</h3>
+      <h3 className="px-1 pt-2 text-base font-bold text-white">スペック</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* 自動入力 */}
         <div className="flex flex-col items-center gap-1 rounded bg-[#ebf1eb] p-3">
@@ -257,10 +268,11 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
           <input type="number" step="0.25" value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[77px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-sm focus-visible:outline-none" />
           <span className="w-[30px] text-xs">inch</span>
         </div>
+        <ClubDetailSpecs form={form} onChange={update} />
       </div>
 
       {/* Section 3: 購入情報 */}
-      <h3 className="px-1 pt-4 text-base font-bold text-white">購入情報</h3>
+      <h3 className="px-1 pt-2 text-base font-bold text-white">購入情報</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         <div className="flex flex-col gap-0.5 py-1">
           <span className={labelClass}>購入日</span>
