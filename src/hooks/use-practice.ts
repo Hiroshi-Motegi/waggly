@@ -3,6 +3,7 @@
 import useSWR, { mutate } from "swr";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
+import { isNative } from "@/lib/platform";
 import type { PracticeSessionWithClubs } from "@/types/database";
 import type { InlineClubMemoValue } from "@/components/club/inline-club-memo";
 
@@ -12,11 +13,20 @@ async function fetcher(url: string) {
   return res.json();
 }
 
+async function localFetcher() {
+  const { getLocalPracticeSessions } = await import("@/lib/local-data");
+  return getLocalPracticeSessions();
+}
+
 export function usePracticeSessions() {
   const { user } = useAuth();
-  const key = user ? "/api/practice" : null;
+  const localMode = isNative() && !user;
+  const key = localMode ? "local:/practice" : user ? "/api/practice" : null;
 
-  const { data, isLoading, mutate: refetch } = useSWR<PracticeSessionWithClubs[]>(key, fetcher);
+  const { data, isLoading, mutate: refetch } = useSWR<PracticeSessionWithClubs[]>(
+    key,
+    localMode ? localFetcher : fetcher
+  );
 
   return { sessions: data ?? [], isLoading, refetch };
 }
@@ -30,6 +40,24 @@ interface CreateSessionData {
 }
 
 export async function createPracticeSession(data: CreateSessionData) {
+  if (isNative()) {
+    try {
+      const res = await apiFetch("/api/practice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        mutate((key) => typeof key === "string" && (key.startsWith("/api/practice") || key.startsWith("local:/practice")));
+        return res.json();
+      }
+    } catch {}
+    const { saveLocalPracticeSession } = await import("@/lib/local-data");
+    const result = await saveLocalPracticeSession(data);
+    mutate((key) => typeof key === "string" && (key.startsWith("/api/practice") || key.startsWith("local:/practice")));
+    return result;
+  }
+
   const res = await apiFetch("/api/practice", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -47,11 +75,25 @@ export async function updatePracticeSession(sessionId: string, data: any) {
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to update practice session");
-  mutate((key) => typeof key === "string" && key.startsWith("/api/practice"));
+  mutate((key) => typeof key === "string" && (key.startsWith("/api/practice") || key.startsWith("local:/practice")));
   return res.json();
 }
 
 export async function deletePracticeSession(sessionId: string) {
+  if (isNative()) {
+    try {
+      const res = await apiFetch(`/api/practice/${sessionId}`, { method: "DELETE" });
+      if (res.ok) {
+        mutate((key) => typeof key === "string" && (key.startsWith("/api/practice") || key.startsWith("local:/practice")));
+        return;
+      }
+    } catch {}
+    const { deleteLocalPracticeSession } = await import("@/lib/local-data");
+    await deleteLocalPracticeSession(sessionId);
+    mutate((key) => typeof key === "string" && (key.startsWith("/api/practice") || key.startsWith("local:/practice")));
+    return;
+  }
+
   const res = await apiFetch(`/api/practice/${sessionId}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete practice session");
   mutate((key) => typeof key === "string" && key.startsWith("/api/practice"));

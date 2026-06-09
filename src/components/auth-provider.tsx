@@ -54,9 +54,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (isNative()) {
-          // Native: no session → redirect to login page
+          // Native: no session → local mode (SQLite only, no sign-in required)
           setIsLoading(false);
-          router.replace("/login");
           return;
         }
 

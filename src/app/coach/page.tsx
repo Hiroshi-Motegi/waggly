@@ -168,6 +168,25 @@ function HistoryPanel({
 
 export default function CoachPage() {
   const { user } = useAuth();
+  const isLocalMode = !user;
+
+  if (isLocalMode) {
+    return (
+      <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <div className="relative z-10 flex flex-col space-y-2">
+          <PageHeader title="AIに相談" showBack={false} variant="dark" />
+          <div className="rounded-lg bg-white p-6 text-center">
+            <p className="text-sm font-bold mb-2">AI機能を利用するにはサインインが必要です</p>
+            <p className="text-xs text-[#8b8b8b] mb-4">設定画面からGoogleアカウントでサインインしてください</p>
+            <a href="/settings" className="inline-block rounded-full bg-[#006728] px-6 py-2 text-sm font-bold text-white">
+              設定へ
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const [chatKey, setChatKey] = useState(0);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
