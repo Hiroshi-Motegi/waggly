@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/hooks/use-auth";
-import { apiFetch } from "@/lib/api-client";
-import { initLiff, getLiffProfile } from "@/lib/liff";
 import { createClient } from "@/lib/supabase/client";
+import { isNative } from "@/lib/platform";
 import type { User } from "@/types/database";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -16,8 +15,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function authenticate() {
       try {
-        // Development mode: skip LIFF auth
-        if (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true") {
+        // Development mode: skip auth
+        if (
+          process.env.NODE_ENV === "development" &&
+          process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true"
+        ) {
           setUser({
             id: "dev-user",
             line_user_id: "dev-line-id",
@@ -30,19 +32,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        // Init LIFF first — captures liff.state deep link path
-        const deepLink = await initLiff();
-
-        // Mark LIFF client for CSS
-        const { liff } = await import("@/lib/liff");
-        if (liff.isInClient()) {
-          document.documentElement.classList.add("liff-client");
-        }
-
         const supabase = createClient();
 
-        // Check for existing Supabase session
-        const { data: { user: existingAuth } } = await supabase.auth.getUser();
+        // Check for existing Supabase session (common to both web & native)
+        const {
+          data: { user: existingAuth },
+        } = await supabase.auth.getUser();
+
         if (existingAuth) {
           const { data } = await supabase
             .from("users")
@@ -53,14 +49,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (data) {
             setUser(data);
             setIsLoading(false);
-            if (deepLink) router.replace(deepLink);
             return;
           }
         }
 
-        // No session — do full LIFF auth flow
+        if (isNative()) {
+          // Native: no session → redirect to login page
+          setIsLoading(false);
+          router.replace("/login");
+          return;
+        }
+
+        // Web: LIFF auth flow
+        const { initLiff, getLiffProfile } = await import("@/lib/liff");
+        const deepLink = await initLiff();
+
+        const { liff } = await import("@/lib/liff");
+        if (liff.isInClient()) {
+          document.documentElement.classList.add("liff-client");
+        }
+
+        if (existingAuth) {
+          if (deepLink) router.replace(deepLink);
+          return;
+        }
+
         const { profile } = await getLiffProfile();
 
+        const { apiFetch } = await import("@/lib/api-client");
         const res = await apiFetch("/api/auth/line", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -75,14 +91,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const { email, password } = await res.json();
 
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { error: signInError } =
+          await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
 
         if (signInError) throw new Error(signInError.message);
 
-        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
         if (!authUser) throw new Error("No auth user");
 
         const { data } = await supabase
@@ -104,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading }}>
+    <AuthContext.Provider value={{ user, isLoading, setUser }}>
       {children}
     </AuthContext.Provider>
   );
