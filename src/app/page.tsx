@@ -48,7 +48,7 @@ export default function HomePage() {
   if (forceGuest || (!user && !isNative())) {
     return (
       <div className="relative flex flex-col items-center justify-center bg-[#139847]" style={{ minHeight: "100dvh" }}>
-        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative z-10 flex flex-col items-center px-8 w-full max-w-sm">
           <Image
             src="/icons/waggly-logo.svg"
