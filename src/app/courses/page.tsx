@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Heart } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { nativeHref } from "@/lib/native-routes";
 import Image from "next/image";
 import { apiFetch } from "@/lib/api-client";
+import { useAuth } from "@/hooks/use-auth";
+import { useFavoriteCourses, addFavoriteCourse, removeFavoriteCourse } from "@/hooks/use-profile";
 
 const STORAGE_KEY = "courses-search-state";
 
@@ -66,6 +69,27 @@ export default function CoursesPage() {
   const [results, setResults] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { courses: favCourses, refetch: refetchFav } = useFavoriteCourses();
+
+  async function toggleFav(e: React.MouseEvent, course: GolfCourse) {
+    e.preventDefault();
+    e.stopPropagation();
+    const existing = favCourses.find((c) => c.gora_course_id === course.golfCourseId);
+    if (existing) {
+      await removeFavoriteCourse(existing.id);
+    } else {
+      await addFavoriteCourse({
+        gora_course_id: course.golfCourseId,
+        course_name: course.golfCourseName,
+        course_image_url: course.golfCourseImageUrl,
+        evaluation: course.evaluation,
+        address: course.address,
+        is_manual: false,
+      });
+    }
+    refetchFav();
+  }
   const [currentPage, setCurrentPage] = useState(1);
 
   // Restore from sessionStorage on mount
@@ -172,7 +196,15 @@ export default function CoursesPage() {
               {results.Items.map((course) => (
                 <Link key={course.golfCourseId} href={nativeHref(`/courses/${course.golfCourseId}`)}>
                   <div className="rounded-lg bg-white p-3">
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 relative">
+                      {user && (
+                        <button
+                          onClick={(e) => toggleFav(e, course)}
+                          className="absolute top-0 right-0 z-10 p-1"
+                        >
+                          <Heart className={`h-5 w-5 ${favCourses.some((c) => c.gora_course_id === course.golfCourseId) ? "fill-red-500 text-red-500" : "text-[#c4c4c4]"}`} />
+                        </button>
+                      )}
                       {course.golfCourseImageUrl ? (
                         <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-[#f5f5f5]">
                           <Image
