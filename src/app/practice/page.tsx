@@ -58,7 +58,7 @@ export default function PracticePage() {
                     </button>
                   </Link>
                 </PageHeader>
-                <div className="pt-2 pb-1">
+                <div className="pt-2">
                   <MonthCalendar
                     year={calYear}
                     month={calMonth}
@@ -72,6 +72,7 @@ export default function PracticePage() {
               </div>
             </div>
 
+            <div className="-mt-2">
             {listLoading ? (
               <div className="rounded-lg bg-white p-4">
                 <Loading />
@@ -91,6 +92,7 @@ export default function PracticePage() {
                 selectedDate={selectedDate}
               />
             )}
+            </div>
           </>
         ) : (
           <>
