@@ -149,10 +149,16 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
 
         <div className="flex flex-col gap-2 px-2 pb-8">
           {/* Golf info */}
-          {(profile.golf_start_date != null || profile.average_score != null || profile.best_score != null || profile.home_course) && (
-            <>
+          {(profile.golf_start_date != null || profile.average_score != null || profile.best_score != null || profile.home_course) && (() => {
+              const stats = [
+                profile.golf_start_date != null ? "golf" : null,
+                profile.average_score != null ? "avg" : null,
+                profile.best_score != null ? "best" : null,
+              ].filter(Boolean);
+              const colsClass = stats.length === 1 ? "grid-cols-1" : stats.length === 2 ? "grid-cols-2" : "grid-cols-3";
+              return (
               <div className="rounded-lg bg-white overflow-hidden">
-                <div className="grid grid-cols-3">
+                <div className={`grid ${colsClass}`}>
                   {profile.golf_start_date != null && (() => {
                     const start = new Date(profile.golf_start_date + "T00:00:00");
                     const now = new Date();
@@ -187,8 +193,8 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                   </div>
                 )}
               </div>
-            </>
-          )}
+              );
+            })()}
 
           {/* その他のリンク (accordion) */}
           {profile.sns_links?.custom_links && profile.sns_links.custom_links.length > 0 && (
