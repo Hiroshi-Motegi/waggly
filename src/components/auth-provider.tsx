@@ -42,11 +42,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } = await supabase.auth.getUser();
 
         if (existingAuth) {
-          const { data } = await supabase
+          let { data } = await supabase
             .from("users")
             .select("*")
             .eq("id", existingAuth.id)
             .single();
+
+          // First OAuth login (Google/LINE OIDC): create user profile
+          if (!data && existingAuth.id) {
+            const meta = existingAuth.user_metadata ?? {};
+            const { data: newProfile } = await supabase
+              .from("users")
+              .insert({
+                id: existingAuth.id,
+                line_user_id: meta.provider_id ?? `oauth-${existingAuth.id}`,
+                display_name: meta.full_name ?? meta.name ?? meta.display_name ?? existingAuth.email ?? "ゲスト",
+                avatar_url: meta.avatar_url ?? meta.picture ?? null,
+              })
+              .select()
+              .single();
+            data = newProfile;
+          }
 
           if (data) {
             setUser(data);
