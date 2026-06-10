@@ -9,6 +9,7 @@ export default function LinkCompletePage() {
       const params = new URLSearchParams(window.location.search);
       const provider = params.get("provider");
       const providerId = params.get("providerId");
+      const originalUserId = sessionStorage.getItem("link_original_user");
 
       if (!provider || !providerId) {
         window.location.href = "/settings";
@@ -16,17 +17,13 @@ export default function LinkCompletePage() {
       }
 
       try {
-        // Sign out the Google session (we want to stay logged in as the original user)
-        const { createClient } = await import("@/lib/supabase/client");
-        const supabase = createClient();
-
-        // Get the original session back — the Google OAuth may have replaced it
-        // Call link API with the original session's cookie
         const { apiFetch } = await import("@/lib/api-client");
+
+        // First call: check if merge is needed
         const res = await apiFetch("/api/auth/link", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ provider, providerId }),
+          body: JSON.stringify({ provider, providerId, originalUserId }),
         });
 
         if (!res.ok) {
@@ -38,10 +35,54 @@ export default function LinkCompletePage() {
 
         const result = await res.json();
 
+        if (result.needsConfirm) {
+          // Ask user to confirm merge
+          const ok = confirm(result.message + "\n\nよろしいですか？");
+          if (!ok) {
+            window.location.href = "/settings";
+            return;
+          }
+
+          // Confirmed — call again with confirmMerge
+          const confirmRes = await apiFetch("/api/auth/link", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ provider, providerId, originalUserId, confirmMerge: true }),
+          });
+
+          if (!confirmRes.ok) {
+            alert("統合に失敗しました");
+            window.location.href = "/settings";
+            return;
+          }
+
+          const confirmResult = await confirmRes.json();
+          if (confirmResult.merged) {
+            alert(confirmResult.message);
+            const { createClient } = await import("@/lib/supabase/client");
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            sessionStorage.removeItem("link_original_user");
+            window.location.href = "/";
+            return;
+          }
+        }
+
         if (result.merged) {
+          alert(result.message);
+          const { createClient } = await import("@/lib/supabase/client");
+          const supabase = createClient();
           await supabase.auth.signOut();
-          window.location.href = "/?message=" + encodeURIComponent(result.message);
+          sessionStorage.removeItem("link_original_user");
+          window.location.href = "/";
         } else {
+          // Simple link — sign back in as original user
+          sessionStorage.removeItem("link_original_user");
+          // Sign out the Google session, then redirect to home
+          // The original session (LINE) should be restored on reload
+          const { createClient } = await import("@/lib/supabase/client");
+          const supabase = createClient();
+          await supabase.auth.signOut();
           window.location.href = "/settings?linked=" + encodeURIComponent(provider);
         }
       } catch (e) {
