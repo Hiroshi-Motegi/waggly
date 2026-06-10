@@ -89,7 +89,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
       <div className="flex items-center justify-center min-h-dvh bg-[#139847]">
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative z-10">
-          <Loading />
+          <Loading variant="light" />
         </div>
       </div>
     );
@@ -184,9 +184,23 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
             </>
           )}
 
+          {/* その他のリンク (accordion) */}
+          {profile.sns_links?.custom_links && profile.sns_links.custom_links.length > 0 && (
+            <AccordionSection title="リンク" defaultOpen>
+              <div className="flex flex-col">
+                {profile.sns_links.custom_links.map((link, i) => (
+                  <a key={i} href={link.url} target="_blank" rel="noopener" className={`flex items-center py-2.5 ${i < profile.sns_links!.custom_links!.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                    <span className="flex-1 text-base text-black truncate">{link.label}</span>
+                    <svg width="6" height="10" viewBox="0 0 6 10" className="shrink-0 opacity-60 ml-2"><path d="M1 1l4 4-4 4" stroke="#8b8b8b" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </a>
+                ))}
+              </div>
+            </AccordionSection>
+          )}
+
           {/* マイバッグ (accordion) */}
           {profile.clubs && profile.clubs.length > 0 && (
-            <AccordionSection title="マイバッグ" defaultOpen>
+            <AccordionSection title="マイバッグ">
               <div className="flex flex-col">
                 {profile.clubs.map((club, i) => {
                   const img = club.club_images?.find((c) => c.is_primary) ?? club.club_images?.[0];
@@ -241,20 +255,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                     <div key={c.id}>{inner}</div>
                   );
                 })}
-              </div>
-            </AccordionSection>
-          )}
-
-          {/* その他のリンク (accordion) */}
-          {profile.sns_links?.custom_links && profile.sns_links.custom_links.length > 0 && (
-            <AccordionSection title="リンク">
-              <div className="flex flex-col">
-                {profile.sns_links.custom_links.map((link, i) => (
-                  <a key={i} href={link.url} target="_blank" rel="noopener" className={`flex items-center py-2.5 ${i < profile.sns_links!.custom_links!.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                    <span className="flex-1 text-base text-black truncate">{link.label}</span>
-                    <svg width="6" height="10" viewBox="0 0 6 10" className="shrink-0 opacity-60 ml-2"><path d="M1 1l4 4-4 4" stroke="#8b8b8b" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  </a>
-                ))}
               </div>
             </AccordionSection>
           )}
