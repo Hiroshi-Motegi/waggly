@@ -100,7 +100,7 @@ export default function HomePage() {
       <img
         src="/images/home-bg.jpg"
         alt=""
-        className="absolute inset-0 w-full h-full object-cover opacity-40"
+        className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none"
       />
       <div className="relative z-10 flex flex-col px-2 pt-2 pb-4">
         {/* Logo */}
