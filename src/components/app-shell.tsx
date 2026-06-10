@@ -121,13 +121,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Normal app
   const native = isNative();
   const isPublicPage = pathname.startsWith("/p/");
+  const hideChrome = isPublicPage || (!user && !native);
   return (
     <div className={`min-h-dvh relative animate-fade-in bg-[#ebf1eb] ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-md shadow-sm"}`}>
-      {!isPublicPage && <Header />}
-      <main style={{ paddingBottom: isPublicPage || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
+      {!hideChrome && <Header />}
+      <main style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
       </main>
-      {!isPublicPage && <BottomNav />}
+      {!hideChrome && <BottomNav />}
     </div>
   );
 }
