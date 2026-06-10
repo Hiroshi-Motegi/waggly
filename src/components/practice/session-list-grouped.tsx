@@ -12,7 +12,7 @@ interface SessionListGroupedProps {
 
 export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupedProps) {
   const filtered = sessions
-    .filter((s) => s.practiced_at <= selectedDate)
+    .filter((s) => s.practiced_at >= selectedDate)
     .sort((a, b) => a.practiced_at.localeCompare(b.practiced_at));
 
   if (filtered.length === 0) {
