@@ -148,7 +148,7 @@ export default function HomePage() {
         </div>
 
         {/* Recent practice */}
-        <div className="flex items-center px-1 mt-4 mb-1">
+        <div className="flex items-center px-1 mt-4 mb-2">
           <h3 className="flex-1 text-base font-bold text-white">最近の練習記録</h3>
           <Link href="/practice" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
         </div>
@@ -157,7 +157,7 @@ export default function HomePage() {
         {/* Favorite courses */}
         {favCourses.length > 0 && (
           <>
-            <div className="flex items-center px-1 mt-4 mb-1">
+            <div className="flex items-center px-1 mt-4 mb-2">
           <h3 className="flex-1 text-base font-bold text-white">お気に入りコース</h3>
           <Link href="/settings/profile/courses" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">管理</Link>
         </div>
