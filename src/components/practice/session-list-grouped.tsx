@@ -58,7 +58,7 @@ export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupe
                 </div>
 
                 {/* Session card */}
-                <div className="flex-1 min-w-0">
+                <div className={`flex-1 min-w-0${idx > 0 ? " border-t border-[#efefef] pt-3" : ""}`}
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-bold text-base truncate">
                       {session.location ?? "場所未入力"}
