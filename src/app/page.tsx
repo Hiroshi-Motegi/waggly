@@ -98,7 +98,7 @@ export default function HomePage() {
             </svg>
             Googleでログイン
           </button>
-          {process.env.NODE_ENV === "development" && (
+          {process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true" && (
             <button
               onClick={() => { localStorage.removeItem("dev-logged-in"); window.location.reload(); }}
               className="mt-3 flex h-12 w-full items-center justify-center rounded-full border border-white/30 text-white/70 font-bold text-base"
