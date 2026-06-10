@@ -5,8 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, X, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { nativeHref } from "@/lib/native-routes";
-import { useAuth } from "@/hooks/use-auth";
-import { isNative } from "@/lib/platform";
+import { PageHeader } from "@/components/layout/page-header";
 import type { AccessoryCategory, AccessoryStatus } from "@/types/database";
 
 const categories: { value: AccessoryCategory; label: string }[] = [
@@ -27,6 +26,7 @@ const statuses: { value: AccessoryStatus; label: string }[] = [
 ];
 
 const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
+const labelClass = "text-sm";
 
 export default function NewItemPage() {
   const router = useRouter();
@@ -109,114 +109,121 @@ export default function NewItemPage() {
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
-      <h2 className="px-1 text-lg font-bold text-white">アイテムを追加</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col rounded-lg bg-white p-3">
-        {/* 画像 */}
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-sm">画像</span>
-          <div className="flex gap-2">
-            {previewUrl && (
-              <div className="relative h-20 w-20 shrink-0">
-                <img src={previewUrl} alt="Preview" className="h-20 w-20 rounded-lg object-cover" />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+        <PageHeader title="アイテムを追加" variant="dark" />
+
+        <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
+          {/* Section 1: アイテム詳細 */}
+          <h3 className="px-1 pt-2 text-base font-bold text-white">アイテム詳細</h3>
+          <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+            {/* 画像 */}
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className={labelClass}>写真</span>
+              <div className="flex gap-2">
+                {previewUrl && (
+                  <div className="relative h-20 w-20 shrink-0">
+                    <img src={previewUrl} alt="Preview" className="h-20 w-20 rounded-lg object-cover" />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+                {!previewUrl && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]"
+                  >
+                    <Plus className="h-6 w-6" />
+                  </button>
+                )}
               </div>
-            )}
-            {!previewUrl && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]"
-              >
-                <Plus className="h-6 w-6" />
-              </button>
-            )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+            </div>
+
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className={labelClass}>カテゴリ</span>
+              <select value={form.category} onChange={(e) => update("category", e.target.value)} required className={inputClass}>
+                <option value="">選択してください</option>
+                {categories.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className={labelClass}>ブランド・メーカー</span>
+              <input value={form.brand} onChange={(e) => update("brand", e.target.value)} placeholder="例: Titleist" className={inputClass} />
+            </div>
+
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className={labelClass}>商品名・モデル</span>
+              <input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="例: Pro V1" className={inputClass} />
+            </div>
+
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className={labelClass}>メモ</span>
+              <textarea value={form.memo} onChange={(e) => update("memo", e.target.value)} placeholder="使用感など..." rows={5} className={inputClass} />
+            </div>
+
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className={labelClass}>評価</span>
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => update("rating", form.rating === star ? null : star)}
+                    className={`text-xl transition-colors ${
+                      form.rating != null && star <= form.rating ? "text-amber-400" : "text-gray-300"
+                    }`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileSelect}
-          />
-        </div>
 
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-sm">カテゴリ</span>
-          <select value={form.category} onChange={(e) => update("category", e.target.value)} required className={inputClass}>
-            <option value="">選択してください</option>
-            {categories.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
-          </select>
-        </div>
+          {/* Section 2: その他 */}
+          <h3 className="px-1 pt-2 text-base font-bold text-white">その他</h3>
+          <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className={labelClass}>購入URL</span>
+              <input type="url" value={form.purchase_url} onChange={(e) => update("purchase_url", e.target.value)} placeholder="https://..." className={inputClass} />
+            </div>
 
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-sm">ブランド・メーカー</span>
-          <input value={form.brand} onChange={(e) => update("brand", e.target.value)} placeholder="例: Titleist" className={inputClass} />
-        </div>
-
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-sm">商品名・モデル</span>
-          <input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="例: Pro V1" className={inputClass} />
-        </div>
-
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-sm">メモ</span>
-          <textarea value={form.memo} onChange={(e) => update("memo", e.target.value)} placeholder="使用感など..." rows={5} className={inputClass} />
-        </div>
-
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-sm">評価</span>
-          <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => update("rating", form.rating === star ? null : star)}
-                className={`text-xl transition-colors ${
-                  form.rating != null && star <= form.rating ? "text-amber-400" : "text-gray-300"
-                }`}
-              >
-                ★
-              </button>
-            ))}
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className={labelClass}>ステータス</span>
+              <select value={form.status} onChange={(e) => update("status", e.target.value)} className={inputClass}>
+                {statuses.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-sm">購入URL</span>
-          <input type="url" value={form.purchase_url} onChange={(e) => update("purchase_url", e.target.value)} placeholder="https://..." className={inputClass} />
-        </div>
-
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className="text-sm">ステータス</span>
-          <select value={form.status} onChange={(e) => update("status", e.target.value)} className={inputClass}>
-            {statuses.map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
-        </div>
-      </form>
-
-      <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
-        <button onClick={(e) => handleSubmit(e)} disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50">
-          {isSubmitting ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              保存中...
-            </span>
-          ) : "保存する"}
-        </button>
-        <button type="button" onClick={() => router.back()} className="text-base font-bold text-white">
-          キャンセル
-        </button>
-      </div>
+          {/* Buttons */}
+          <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
+            <button type="submit" disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50">
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  保存中...
+                </span>
+              ) : "保存する"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
