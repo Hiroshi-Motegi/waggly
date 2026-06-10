@@ -137,7 +137,7 @@ export default function ShareSettingsPage() {
               )}
             </>
           )}
-          {usernameError && <p className="text-xs text-red-500">{usernameError}</p>}
+          {usernameError && <p className="text-sm text-red-500">{usernameError}</p>}
         </div>
 
         {/* Public toggle */}
@@ -164,7 +164,7 @@ export default function ShareSettingsPage() {
         {/* Visible fields */}
         <h3 className="px-1 pt-2 text-base font-bold text-white">公開する項目</h3>
         <div className="flex flex-col rounded-lg bg-white p-3">
-          <p className="text-xs text-[#8b8b8b] pb-2">設定はリアルタイムで反映されます</p>
+          <p className="text-sm text-[#8b8b8b] pb-2">設定はリアルタイムで反映されます</p>
           {Object.entries(VISIBLE_FIELD_LABELS).map(([field, label]) => {
             const visible = profile?.visible_fields?.[field] !== false;
             return (
