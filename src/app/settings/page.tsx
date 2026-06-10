@@ -111,7 +111,7 @@ export default function SettingsPage() {
           </Avatar>
           <div>
             <p className="text-base font-bold">{profile?.nickname || user.display_name}</p>
-            <p className="text-sm text-[#8b8b8b]">LINE連携済み</p>
+            <p className="text-sm text-[#8b8b8b]">{user.line_user_id?.startsWith("google-") ? "Google連携済み" : user.line_user_id?.startsWith("oauth-") ? "ログイン済み" : "LINE連携済み"}</p>
           </div>
         </div>
       </div>
