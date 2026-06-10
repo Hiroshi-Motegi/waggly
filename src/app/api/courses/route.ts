@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
 
 const RAKUTEN_APP_ID = process.env.RAKUTEN_APP_ID;
@@ -7,6 +8,9 @@ const RAKUTEN_AFFILIATE_ID = process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID;
 const APP_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ? "https://waggly.jp" : "http://localhost:3000";
 
 export async function GET(request: NextRequest) {
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+
   if (!RAKUTEN_APP_ID || !RAKUTEN_ACCESS_KEY) {
     return NextResponse.json({ error: "Rakuten API not configured" }, { status: 500 });
   }

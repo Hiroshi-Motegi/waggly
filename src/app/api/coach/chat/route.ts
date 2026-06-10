@@ -109,7 +109,7 @@ export async function POST(request: Request) {
   const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
-    model: anthropic("claude-sonnet-4-6"),
+    model: anthropic("claude-haiku-4-5-20251001"),
     system: systemPrompt,
     messages: modelMessages,
     maxOutputTokens: 1000,
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
           user_id: userId,
           input_tokens: usage.inputTokens ?? 0,
           output_tokens: usage.outputTokens ?? 0,
-          model: "claude-sonnet-4-6",
+          model: "claude-haiku-4-5",
           source: "chat",
         });
       }

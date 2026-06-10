@@ -28,7 +28,12 @@ export async function POST(
   const file = formData.get("file") as File;
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
-  const ext = file.name.split(".").pop();
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
+  }
+  const extMap: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+  const ext = extMap[file.type] || "jpg";
   const filePath = `${userId}/${clubId}/${Date.now()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage

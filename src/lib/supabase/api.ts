@@ -92,15 +92,22 @@ export async function getApiAuth(): Promise<{
 
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7);
-    const supabase = createRawClient(
+    // Verify token with admin client
+    const adminClient = createRawClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
     const {
       data: { user },
       error,
-    } = await supabase.auth.getUser(token);
+    } = await adminClient.auth.getUser(token);
     if (error || !user) return null;
+    // Return user-scoped client (RLS enforced) instead of service role
+    const supabase = createRawClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
+    );
     return { supabase, userId: user.id };
   }
 

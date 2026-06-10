@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
 export function generateStaticParams() {
   return [{ courseId: "_" }];
@@ -13,6 +14,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+
   const { courseId } = await params;
   if (!RAKUTEN_APP_ID || !RAKUTEN_ACCESS_KEY) {
     return NextResponse.json({ error: "Rakuten API not configured" }, { status: 500 });

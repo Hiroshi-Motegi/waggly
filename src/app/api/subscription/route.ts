@@ -41,7 +41,7 @@ export async function GET() {
   });
 }
 
-// POST: create or update subscription (will be called by Stripe webhook later)
+// POST: create or update subscription — only free plan allowed without payment verification
 export async function POST(request: Request) {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -58,6 +58,11 @@ export async function POST(request: Request) {
 
   if (!plan) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+  }
+
+  // Block paid plan creation without payment verification
+  if (plan.price > 0 && !coupon_code) {
+    return NextResponse.json({ error: "Payment required for paid plans" }, { status: 402 });
   }
 
   // Validate coupon if provided

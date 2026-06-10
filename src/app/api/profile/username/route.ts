@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
-const RESERVED = ["admin", "settings", "api", "p", "auth", "login", "signup", "profile", "new", "edit"];
+const RESERVED = [
+  "admin", "settings", "api", "p", "auth", "login", "signup", "profile", "new", "edit",
+  "bag", "items", "practice", "coach", "courses", "export", "subscription", "usage",
+  "accessories", "maintenances", "privacy", "terms",
+];
 const USERNAME_RE = /^[a-zA-Z0-9_-]{3,20}$/;
 
 export async function POST(request: NextRequest) {

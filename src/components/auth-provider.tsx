@@ -75,14 +75,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        const { profile } = await getLiffProfile();
+        const { profile, idToken } = await getLiffProfile();
 
         const { apiFetch } = await import("@/lib/api-client");
         const res = await apiFetch("/api/auth/line", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            lineUserId: profile.userId,
+            idToken,
             displayName: profile.displayName,
             avatarUrl: profile.pictureUrl,
           }),
@@ -90,12 +90,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (!res.ok) throw new Error("Auth failed");
 
-        const { email, password } = await res.json();
+        const { access_token, refresh_token } = await res.json();
 
         const { error: signInError } =
-          await supabase.auth.signInWithPassword({
-            email,
-            password,
+          await supabase.auth.setSession({
+            access_token,
+            refresh_token,
           });
 
         if (signInError) throw new Error(signInError.message);

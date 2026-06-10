@@ -11,8 +11,17 @@ export async function GET(
 ) {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
   const { clubId } = await params;
+
+  // Verify ownership
+  const { data: club } = await supabase
+    .from("clubs")
+    .select("id")
+    .eq("id", clubId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!club) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const threeMonthsAgo = new Date();
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
