@@ -154,7 +154,10 @@ export default function HomePage() {
         {/* Favorite courses */}
         {favCourses.length > 0 && (
           <>
-            <h3 className="text-base font-bold text-white px-1 mt-4 mb-1">お気に入りコース</h3>
+            <div className="flex items-center px-1 mt-4 mb-1">
+          <h3 className="flex-1 text-base font-bold text-white">お気に入りコース</h3>
+          <Link href="/settings/profile/courses" className="text-sm font-bold text-white/70">管理</Link>
+        </div>
             <div className="rounded-lg bg-white p-3">
               {favCourses.map((c, i) => {
                 const goraUrl = c.gora_course_id
