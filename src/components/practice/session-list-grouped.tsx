@@ -14,6 +14,7 @@ interface SessionListGroupedProps {
 export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupedProps) {
   const sorted = [...sessions].sort((a, b) => a.practiced_at.localeCompare(b.practiced_at));
   const groupRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const isFirstRender = useRef(true);
 
   const setGroupRef = useCallback((date: string, el: HTMLDivElement | null) => {
     if (el) {
@@ -23,8 +24,12 @@ export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupe
     }
   }, []);
 
-  // Auto-scroll to the nearest group when selectedDate changes
+  // Scroll to nearest group only on user-initiated date change (not initial render)
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (sorted.length === 0) return;
 
     const dates = [...new Set(sorted.map((s) => s.practiced_at))].sort();
@@ -37,7 +42,7 @@ export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupe
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [selectedDate, sorted.length]);
+  }, [selectedDate]);
 
   if (sorted.length === 0) {
     return (
