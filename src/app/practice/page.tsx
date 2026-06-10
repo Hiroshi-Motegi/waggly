@@ -54,7 +54,11 @@ export default function PracticePage() {
         {viewMode === "calendar" ? (
           <>
             {/* Sticky calendar - bg-[#2d6e3f] on MonthCalendar handles opacity */}
-            <div className="sticky top-[52px] z-20">
+            <div className="sticky top-[52px] z-20 -mx-2 px-2 pb-1 bg-[#139847]"
+              style={{ backgroundImage: "url(/images/home-bg.jpg)", backgroundSize: "cover", backgroundPosition: "center" }}
+            >
+              <div className="absolute inset-0 bg-[#139847]/60 pointer-events-none" />
+              <div className="relative">
               <MonthCalendar
                 year={calYear}
                 month={calMonth}
@@ -64,6 +68,7 @@ export default function PracticePage() {
                 onChangeMonth={handleChangeMonth}
                 onToggleView={() => setViewMode("list")}
               />
+              </div>
             </div>
 
             {listLoading ? (
