@@ -150,7 +150,7 @@ export default function HomePage() {
         {/* Recent practice */}
         <div className="flex items-center px-1 mt-4 mb-1">
           <h3 className="flex-1 text-base font-bold text-white">最近の練習記録</h3>
-          <Link href="/practice" className="text-sm font-bold text-white/70">すべて見る</Link>
+          <Link href="/practice" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
         </div>
         <RecentPractice sessions={sessions} />
 
@@ -159,7 +159,7 @@ export default function HomePage() {
           <>
             <div className="flex items-center px-1 mt-4 mb-1">
           <h3 className="flex-1 text-base font-bold text-white">お気に入りコース</h3>
-          <Link href="/settings/profile/courses" className="text-sm font-bold text-white/70">管理</Link>
+          <Link href="/settings/profile/courses" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">管理</Link>
         </div>
             <div className="rounded-lg bg-white p-3">
               {favCourses.map((c, i) => {

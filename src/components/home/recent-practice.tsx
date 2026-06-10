@@ -54,14 +54,6 @@ export function RecentPractice({ sessions }: RecentPracticeProps) {
             ))}
           </div>
         )}
-        <div className="flex flex-col items-center pt-1">
-          <Link
-            href="/practice"
-            className="rounded-full border border-[#006728] px-5 py-1 text-base font-bold text-[#006728]"
-          >
-            すべて見る
-          </Link>
-        </div>
       </div>
     </div>
   );
