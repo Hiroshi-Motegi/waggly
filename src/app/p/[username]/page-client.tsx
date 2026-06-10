@@ -37,7 +37,7 @@ function AccordionSection({ title, defaultOpen, children }: { title: string; def
   const [open, setOpen] = useState(defaultOpen ?? false);
   return (
     <div className="rounded-lg bg-white overflow-hidden">
-      <button onClick={() => setOpen(!open)} className="flex items-center w-full px-3 py-3">
+      <button onClick={() => setOpen(!open)} className="flex items-center w-full px-3 py-4">
         <h2 className="flex-1 text-sm font-bold text-[#006728] text-left">{title}</h2>
         {open ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
       </button>
