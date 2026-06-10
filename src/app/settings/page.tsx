@@ -351,7 +351,7 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
           <div className="flex items-center gap-2">
             <span className="text-sm text-[#006728] font-bold">連携済み</span>
             {hasBoth && (
-              <button onClick={() => unlinkProvider("line")} className="text-xs text-[#8b8b8b]">解除</button>
+              <button onClick={() => unlinkProvider("line")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5">解除</button>
             )}
           </div>
         ) : (
@@ -367,7 +367,7 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
           <div className="flex items-center gap-2">
             <span className="text-sm text-[#006728] font-bold">連携済み</span>
             {hasBoth && (
-              <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b]">解除</button>
+              <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5">解除</button>
             )}
           </div>
         ) : (
