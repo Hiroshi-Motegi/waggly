@@ -195,16 +195,16 @@ export default function CoursesPage() {
             <div className="flex flex-col gap-2">
               {results.Items.map((course) => (
                 <Link key={course.golfCourseId} href={nativeHref(`/courses/${course.golfCourseId}`)}>
-                  <div className="rounded-lg bg-white p-3">
-                    <div className="flex gap-3 relative">
-                      {user && (
-                        <button
-                          onClick={(e) => toggleFav(e, course)}
-                          className="absolute top-0 right-0 z-10 p-1"
-                        >
-                          <Heart className={`h-5 w-5 ${favCourses.some((c) => c.gora_course_id === course.golfCourseId) ? "fill-red-500 text-red-500" : "text-[#c4c4c4]"}`} />
-                        </button>
-                      )}
+                  <div className="rounded-lg bg-white p-3 relative">
+                    {user && (
+                      <button
+                        onClick={(e) => toggleFav(e, course)}
+                        className="absolute top-2 right-2 z-10"
+                      >
+                        <Heart className={`h-5 w-5 ${favCourses.some((c) => c.gora_course_id === course.golfCourseId) ? "fill-red-500 text-red-500" : "text-[#c4c4c4]"}`} />
+                      </button>
+                    )}
+                    <div className="flex gap-3">
                       {course.golfCourseImageUrl ? (
                         <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-[#f5f5f5]">
                           <Image

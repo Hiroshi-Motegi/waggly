@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { usePracticeSessions } from "@/hooks/use-practice";
-import { useProfile } from "@/hooks/use-profile";
+import { useProfile, useFavoriteCourses } from "@/hooks/use-profile";
 import { isNative } from "@/lib/platform";
 import { RecentPractice } from "@/components/home/recent-practice";
 
@@ -37,6 +37,7 @@ const featureCards = [
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
   const { profile } = useProfile();
+  const { courses: favCourses } = useFavoriteCourses();
   const { sessions } = usePracticeSessions();
   const searchParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const forceGuest = searchParams.get("guest") !== null;
@@ -149,6 +150,36 @@ export default function HomePage() {
         {/* Recent practice */}
         <h3 className="text-base font-bold text-white px-1 mt-4 mb-1">最近の練習記録</h3>
         <RecentPractice sessions={sessions} />
+
+        {/* Favorite courses */}
+        {favCourses.length > 0 && (
+          <>
+            <h3 className="text-base font-bold text-white px-1 mt-4 mb-1">お気に入りコース</h3>
+            <div className="flex flex-col gap-2">
+              {favCourses.map((c) => {
+                const goraUrl = c.gora_course_id
+                  ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/gora/detail/id=${c.gora_course_id}/`
+                  : null;
+                return (
+                  <a key={c.id} href={goraUrl ?? "#"} target={goraUrl ? "_blank" : undefined} rel="noopener" className="rounded-lg bg-white p-3">
+                    <div className="flex items-center gap-2">
+                      {c.course_image_url && (
+                        <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate">{c.course_name}</p>
+                        {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
+                      </div>
+                      {c.evaluation != null && (
+                        <span className="text-xs text-amber-500 shrink-0">★{c.evaluation.toFixed(1)}</span>
+                      )}
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
