@@ -43,6 +43,10 @@ export async function GET(request: NextRequest) {
   const data = await res.json();
 
   if (!res.ok) {
+    // "not_found" means no results — return empty, not error
+    if (data?.error === "not_found") {
+      return NextResponse.json({ Items: [], count: 0, page: 1, pageCount: 0, hits: 0 });
+    }
     console.error("[courses] Rakuten API error:", JSON.stringify(data));
     return NextResponse.json({ error: "Failed to fetch courses", detail: data }, { status: 500 });
   }

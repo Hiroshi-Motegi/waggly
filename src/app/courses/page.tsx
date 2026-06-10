@@ -120,7 +120,7 @@ export default function CoursesPage() {
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="ゴルフ場を探す" showBack={false} variant="dark" />
 
@@ -162,9 +162,11 @@ export default function CoursesPage() {
           </p>
 
           {results.Items.length === 0 ? (
-            <p className="text-center text-base text-[#8b8b8b] py-8">
-              コースが見つかりませんでした
-            </p>
+            <div className="rounded-lg bg-white p-6">
+              <p className="text-center text-base text-[#8b8b8b]">
+                コースが見つかりませんでした
+              </p>
+            </div>
           ) : (
             <div className="flex flex-col gap-2">
               {results.Items.map((course) => (

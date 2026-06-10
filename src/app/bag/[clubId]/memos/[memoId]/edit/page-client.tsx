@@ -75,14 +75,14 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-      <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
         <PageHeader title="メモを編集" variant="dark" />
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-lg bg-white p-4">
           {/* Club info */}
           <div className="flex items-center gap-2">
-            <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5">{club?.club_number}</span>
+            <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">{club?.club_number}</span>
             {club?.model && <span className="text-base text-[#6c6c6c]">{club.model}</span>}
           </div>
 

@@ -1,0 +1,41 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - main [ref=e3]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: 読
+        - generic [ref=e12]: み
+        - generic [ref=e13]: 込
+        - generic [ref=e14]: み
+        - generic [ref=e15]: 中
+        - generic [ref=e16]: .
+        - generic [ref=e17]: .
+        - generic [ref=e18]: .
+    - navigation [ref=e20]:
+      - link "ホーム ホーム" [ref=e21] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e23]:
+          - img "ホーム" [ref=e24]
+          - generic [ref=e25]: ホーム
+      - link "マイバッグ マイバッグ" [ref=e26] [cursor=pointer]:
+        - /url: /bag
+        - generic [ref=e28]:
+          - img "マイバッグ" [ref=e29]
+          - generic [ref=e30]: マイバッグ
+      - link "アイテム アイテム" [ref=e31] [cursor=pointer]:
+        - /url: /items
+        - generic [ref=e33]:
+          - img "アイテム" [ref=e34]
+          - generic [ref=e35]: アイテム
+      - link "練習記録 練習記録" [ref=e36] [cursor=pointer]:
+        - /url: /practice
+        - generic [ref=e38]:
+          - img "練習記録" [ref=e39]
+          - generic [ref=e40]: 練習記録
+      - link "AIに相談 AIに相談" [ref=e41] [cursor=pointer]:
+        - /url: /coach
+        - generic [ref=e43]:
+          - img "AIに相談" [ref=e44]
+          - generic [ref=e45]: AIに相談
+  - button "Open Next.js Dev Tools" [ref=e51] [cursor=pointer]:
+    - img [ref=e52]
+  - alert [ref=e55]

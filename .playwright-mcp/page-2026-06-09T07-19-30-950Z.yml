@@ -1,0 +1,80 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - main [ref=e3]:
+      - generic [ref=e6]:
+        - heading "アイテムを追加" [level=2] [ref=e7]
+        - generic [ref=e8]:
+          - generic [ref=e9]:
+            - generic [ref=e10]: 画像
+            - button [ref=e12]:
+              - img [ref=e13]
+          - generic [ref=e14]:
+            - generic [ref=e15]: カテゴリ
+            - combobox [ref=e16]:
+              - option "選択してください" [selected]
+              - option "ボール"
+              - option "グローブ"
+              - option "ティー"
+              - option "アパレル"
+              - option "バッグ"
+              - option "距離計"
+              - option "グリップ"
+              - option "シャフト"
+              - option "その他"
+          - generic [ref=e17]:
+            - generic [ref=e18]: ブランド
+            - 'textbox "例: Titleist" [ref=e19]'
+          - generic [ref=e20]:
+            - generic [ref=e21]: モデル
+            - 'textbox "例: Pro V1" [ref=e22]'
+          - generic [ref=e23]:
+            - generic [ref=e24]: メモ
+            - textbox "使用感など..." [ref=e25]
+          - generic [ref=e26]:
+            - generic [ref=e27]: 評価
+            - generic [ref=e28]:
+              - button "★" [ref=e29]
+              - button "★" [ref=e30]
+              - button "★" [ref=e31]
+              - button "★" [ref=e32]
+              - button "★" [ref=e33]
+          - generic [ref=e34]:
+            - generic [ref=e35]: 購入URL
+            - textbox "https://..." [ref=e36]
+          - generic [ref=e37]:
+            - generic [ref=e38]: ステータス
+            - combobox [ref=e39]:
+              - option "使用中" [selected]
+              - option "アーカイブ"
+        - generic [ref=e40]:
+          - button "保存する" [ref=e41]
+          - button "キャンセル" [ref=e42]
+    - navigation [ref=e44]:
+      - link "ホーム ホーム" [ref=e45] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e47]:
+          - img "ホーム" [ref=e48]
+          - generic [ref=e49]: ホーム
+      - link "マイバッグ マイバッグ" [ref=e50] [cursor=pointer]:
+        - /url: /bag
+        - generic [ref=e52]:
+          - img "マイバッグ" [ref=e53]
+          - generic [ref=e54]: マイバッグ
+      - link "アイテム アイテム" [ref=e55] [cursor=pointer]:
+        - /url: /items
+        - generic [ref=e57]:
+          - img "アイテム" [ref=e58]
+          - generic [ref=e59]: アイテム
+      - link "練習記録 練習記録" [ref=e60] [cursor=pointer]:
+        - /url: /practice
+        - generic [ref=e62]:
+          - img "練習記録" [ref=e63]
+          - generic [ref=e64]: 練習記録
+      - link "AIに相談 AIに相談" [ref=e65] [cursor=pointer]:
+        - /url: /coach
+        - generic [ref=e67]:
+          - img "AIに相談" [ref=e68]
+          - generic [ref=e69]: AIに相談
+  - button "Open Next.js Dev Tools" [ref=e75] [cursor=pointer]:
+    - img [ref=e76]
+  - alert [ref=e79]

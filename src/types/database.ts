@@ -156,3 +156,33 @@ export interface PracticeSessionWithClubs extends PracticeSession {
 export interface PracticePlanWithItems extends PracticePlan {
   practice_plan_items: (PracticePlanItem & { club: Club | null })[];
 }
+
+export interface Profile {
+  id: string;
+  username: string | null;
+  nickname: string | null;
+  avatar_url: string | null;
+  golf_start_date: string | null;
+  average_score: number | null;
+  best_score: number | null;
+  home_course: string | null;
+  bio: string | null;
+  sns_links: { instagram?: string; x?: string };
+  is_public: boolean;
+  visible_fields: Record<string, boolean>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FavoriteCourse {
+  id: string;
+  user_id: string;
+  gora_course_id: number | null;
+  course_name: string;
+  course_image_url: string | null;
+  evaluation: number | null;
+  address: string | null;
+  is_manual: boolean;
+  sort_order: number;
+  created_at: string;
+}

@@ -21,7 +21,10 @@ export async function initLiff(): Promise<string | null> {
   }
 
   if (!liff.isLoggedIn()) {
-    liff.login();
+    // Auto-login only inside LINE app; on web, let user click the button
+    if (liff.isInClient()) {
+      liff.login();
+    }
     return null;
   }
 
@@ -34,11 +37,30 @@ export async function getLiffProfile() {
   return { profile, idToken };
 }
 
-export function liffLogout() {
-  if (liff.isLoggedIn()) {
-    liff.logout();
-    window.location.reload();
+export async function liffLogout() {
+  // Dev mode: clear flag
+  localStorage.setItem("dev-logged-in", "false");
+
+  // Clear Supabase session
+  try {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    await supabase.auth.signOut();
+  } catch {
+    // ignore
   }
+
+  // Clear LIFF session
+  try {
+    await initLiff();
+    if (liff.isLoggedIn()) {
+      liff.logout();
+    }
+  } catch {
+    // init may fail if no LIFF ID configured
+  }
+
+  window.location.href = "/";
 }
 
 export { liff };

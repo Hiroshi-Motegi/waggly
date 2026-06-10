@@ -33,7 +33,7 @@ export function Loading({ variant = "default" }: { variant?: "default" | "light"
   if (isLight) {
     return (
       <div className="relative flex items-center justify-center bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative z-10">{content}</div>
       </div>
     );

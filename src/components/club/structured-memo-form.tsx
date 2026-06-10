@@ -21,6 +21,7 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
   const [feelingTags, setFeelingTags] = useState<string[]>([]);
   const [gearTags, setGearTags] = useState<string[]>([]);
   const [distance, setDistance] = useState<string>(defaultDistance ? String(defaultDistance) : "");
+  const [balls, setBalls] = useState<string>("");
   const [memo, setMemo] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -39,6 +40,7 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           distance: distance ? Number(distance) : null,
+          balls: balls ? Number(balls) : null,
           memo: memo || null,
           condition,
           symptom_tags: symptomTags,
@@ -57,7 +59,7 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5">{clubNumber}</span>
+        <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">{clubNumber}</span>
         {clubModel && <span className="text-base text-[#6c6c6c]">{clubModel}</span>}
       </div>
 
@@ -210,6 +212,32 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
         </div>
       </div>
 
+      {/* Balls */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <input
+            type="range"
+            min={0}
+            max={200}
+            step={5}
+            value={balls ? Number(balls) : 0}
+            onChange={(e) => setBalls(e.target.value === "0" ? "" : e.target.value)}
+            className="club-balls-slider w-full"
+          />
+        </div>
+        <div className="flex items-center gap-1 w-[72px] shrink-0">
+          <input
+            type="number"
+            inputMode="numeric"
+            value={balls}
+            onChange={(e) => setBalls(e.target.value)}
+            placeholder="—"
+            className="w-[52px] rounded-md border border-[#c4c4c4] bg-white px-1 py-1.5 text-sm text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+          />
+          <span className="text-sm">球</span>
+        </div>
+      </div>
+
       {/* Memo text */}
       <div className="flex flex-col gap-0.5 py-1">
         <p className="text-sm">所感・メモ</p>
@@ -221,17 +249,17 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
         />
       </div>
 
-      {/* Buttons */}
-      <div className="flex gap-2">
-        <button onClick={onCancel} className="flex-1 rounded-full border border-[#c4c4c4] py-2 text-base font-bold text-[#666]">
-          キャンセル
-        </button>
+      {/* Buttons — rendered outside white card visually via negative margin */}
+      <div className="flex flex-col items-center gap-2 -mx-3 -mb-3 pt-4 pb-2 px-3">
         <button
           onClick={handleSubmit}
           disabled={!hasContent || isSaving}
-          className="flex-1 rounded-full bg-[#006728] py-2 text-base font-bold text-white disabled:opacity-50"
+          className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50"
         >
-          {isSaving ? "保存中..." : "保存"}
+          {isSaving ? "保存中..." : "保存する"}
+        </button>
+        <button onClick={onCancel} className="text-base font-bold text-white">
+          キャンセル
         </button>
       </div>
     </div>

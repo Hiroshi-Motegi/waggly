@@ -15,19 +15,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function authenticate() {
       try {
-        // Development mode: skip auth
+        // Development mode: check localStorage flag
         if (
           process.env.NODE_ENV === "development" &&
           process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true"
         ) {
-          setUser({
-            id: "dev-user",
-            line_user_id: "dev-line-id",
-            display_name: "開発ユーザー",
-            avatar_url: null,
-            agreed_terms_at: new Date().toISOString(),
-            created_at: new Date().toISOString(),
-          });
+          if (localStorage.getItem("dev-logged-in") !== "false") {
+            setUser({
+              id: "dev-user",
+              line_user_id: "dev-line-id",
+              display_name: "開発ユーザー",
+              avatar_url: null,
+              agreed_terms_at: new Date().toISOString(),
+              created_at: new Date().toISOString(),
+            });
+          }
           setIsLoading(false);
           return;
         }
