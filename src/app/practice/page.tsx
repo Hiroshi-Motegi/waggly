@@ -109,13 +109,13 @@ export default function PracticePage() {
             </div>
 
             <div className="-mt-2">
-            {listLoading ? (
+            {monthLoading ? (
               <div className="rounded-b-lg bg-white p-4">
                 <Loading />
               </div>
-            ) : allSessions.length === 0 ? (
+            ) : monthSessions.length === 0 ? (
               <div className="rounded-b-lg bg-white p-6 text-center">
-                <p className="text-base text-[#8b8b8b]">練習記録がありません</p>
+                <p className="text-base text-[#8b8b8b]">今月の練習: 0回</p>
                 <Link href="/practice/new">
                   <button className="mt-3 rounded-full bg-[#006728] px-5 py-2 text-sm font-bold text-white">
                     記録する
@@ -124,7 +124,7 @@ export default function PracticePage() {
               </div>
             ) : (
               <SessionListGrouped
-                sessions={allSessions}
+                sessions={monthSessions}
                 selectedDate={selectedDate}
               />
             )}
