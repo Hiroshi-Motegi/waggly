@@ -4,14 +4,14 @@ CREATE TABLE public.profiles (
   username text UNIQUE,
   nickname text,
   avatar_url text,
-  golf_experience_years integer,
+  golf_start_date date,
   average_score integer,
   best_score integer,
   home_course text,
   bio text,
   sns_links jsonb DEFAULT '{}',
   is_public boolean NOT NULL DEFAULT false,
-  visible_fields jsonb DEFAULT '{"nickname":true,"golf_experience_years":true,"average_score":true,"best_score":true,"home_course":true,"bio":true,"bag":true,"favorite_courses":true,"sns_links":true}',
+  visible_fields jsonb DEFAULT '{"nickname":true,"golf_start_date":true,"average_score":true,"best_score":true,"home_course":true,"bio":true,"bag":true,"favorite_courses":true,"sns_links":true}',
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );

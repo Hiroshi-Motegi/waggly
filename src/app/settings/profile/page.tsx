@@ -21,28 +21,24 @@ export default function ProfileSettingsPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [form, setForm] = useState({
     nickname: "",
-    golf_experience_years: null as number | null,
+    golf_start_date: "" as string,
     average_score: null as number | null,
     best_score: null as number | null,
     home_course: "",
     bio: "",
-    sns_links: { instagram: "", x: "", line: "" },
+    sns_instagram: "",
   });
 
   useEffect(() => {
     if (profile) {
       setForm({
         nickname: profile.nickname ?? "",
-        golf_experience_years: profile.golf_experience_years,
+        golf_start_date: profile.golf_start_date ?? "",
         average_score: profile.average_score,
         best_score: profile.best_score,
         home_course: profile.home_course ?? "",
         bio: profile.bio ?? "",
-        sns_links: {
-          instagram: profile.sns_links?.instagram ?? "",
-          x: profile.sns_links?.x ?? "",
-          line: profile.sns_links?.line ?? "",
-        },
+        sns_instagram: profile.sns_links?.instagram ?? "",
       });
     }
   }, [profile]);
@@ -72,13 +68,11 @@ export default function ProfileSettingsPage() {
     setIsSaving(true);
     try {
       const snsLinks: Record<string, string> = {};
-      if (form.sns_links.instagram) snsLinks.instagram = form.sns_links.instagram;
-      if (form.sns_links.x) snsLinks.x = form.sns_links.x;
-      if (form.sns_links.line) snsLinks.line = form.sns_links.line;
+      if (form.sns_instagram) snsLinks.instagram = form.sns_instagram;
 
       await updateProfile({
         nickname: form.nickname || null,
-        golf_experience_years: form.golf_experience_years,
+        golf_start_date: form.golf_start_date || null,
         average_score: form.average_score,
         best_score: form.best_score,
         home_course: form.home_course || null,
@@ -145,8 +139,8 @@ export default function ProfileSettingsPage() {
         <h3 className="px-1 pt-2 text-base font-bold text-white">ゴルフ情報</h3>
         <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
           <div className="flex flex-col gap-0.5 py-1">
-            <span className={labelClass}>ゴルフ歴（年）</span>
-            <input type="number" value={form.golf_experience_years ?? ""} onChange={(e) => update("golf_experience_years", e.target.value ? Number(e.target.value) : null)} className={inputClass} />
+            <span className={labelClass}>ゴルフを始めた日</span>
+            <input type="date" value={form.golf_start_date} onChange={(e) => update("golf_start_date", e.target.value || null)} className={inputClass} />
           </div>
           <div className="flex flex-col gap-0.5 py-1">
             <span className={labelClass}>平均スコア</span>
@@ -167,15 +161,7 @@ export default function ProfileSettingsPage() {
         <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
           <div className="flex flex-col gap-0.5 py-1">
             <span className={labelClass}>Instagram</span>
-            <input value={form.sns_links.instagram} onChange={(e) => setForm((p) => ({ ...p, sns_links: { ...p.sns_links, instagram: e.target.value } }))} placeholder="https://instagram.com/..." className={inputClass} />
-          </div>
-          <div className="flex flex-col gap-0.5 py-1">
-            <span className={labelClass}>X (Twitter)</span>
-            <input value={form.sns_links.x} onChange={(e) => setForm((p) => ({ ...p, sns_links: { ...p.sns_links, x: e.target.value } }))} placeholder="https://x.com/..." className={inputClass} />
-          </div>
-          <div className="flex flex-col gap-0.5 py-1">
-            <span className={labelClass}>LINE</span>
-            <input value={form.sns_links.line} onChange={(e) => setForm((p) => ({ ...p, sns_links: { ...p.sns_links, line: e.target.value } }))} placeholder="LINE ID" className={inputClass} />
+            <input value={form.sns_instagram} onChange={(e) => setForm((p) => ({ ...p, sns_instagram: e.target.value }))} placeholder="https://instagram.com/..." className={inputClass} />
           </div>
         </div>
 

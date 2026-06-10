@@ -162,12 +162,12 @@ export interface Profile {
   username: string | null;
   nickname: string | null;
   avatar_url: string | null;
-  golf_experience_years: number | null;
+  golf_start_date: string | null;
   average_score: number | null;
   best_score: number | null;
   home_course: string | null;
   bio: string | null;
-  sns_links: { instagram?: string; x?: string; line?: string };
+  sns_links: { instagram?: string; x?: string };
   is_public: boolean;
   visible_fields: Record<string, boolean>;
   created_at: string;

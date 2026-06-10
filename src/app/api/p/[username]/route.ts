@@ -42,7 +42,7 @@ export async function GET(
   };
   if (vf.nickname !== false) publicProfile.nickname = profile.nickname;
   if (vf.bio !== false) publicProfile.bio = profile.bio;
-  if (vf.golf_experience_years !== false) publicProfile.golf_experience_years = profile.golf_experience_years;
+  if (vf.golf_start_date !== false) publicProfile.golf_start_date = profile.golf_start_date;
   if (vf.average_score !== false) publicProfile.average_score = profile.average_score;
   if (vf.best_score !== false) publicProfile.best_score = profile.best_score;
   if (vf.home_course !== false) publicProfile.home_course = profile.home_course;

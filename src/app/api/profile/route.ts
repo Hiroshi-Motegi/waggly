@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest) {
 
   const body = await request.json();
   const allowed = [
-    "nickname", "golf_experience_years", "average_score", "best_score",
+    "nickname", "golf_start_date", "average_score", "best_score",
     "home_course", "bio", "sns_links", "is_public", "visible_fields",
   ];
   const updates: Record<string, any> = { updated_at: new Date().toISOString() };

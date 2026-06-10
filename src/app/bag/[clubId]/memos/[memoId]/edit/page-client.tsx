@@ -82,7 +82,7 @@ export default function MemoEditPage({ params }: { params: Promise<{ clubId: str
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-lg bg-white p-4">
           {/* Club info */}
           <div className="flex items-center gap-2">
-            <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5">{club?.club_number}</span>
+            <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">{club?.club_number}</span>
             {club?.model && <span className="text-base text-[#6c6c6c]">{club.model}</span>}
           </div>
 

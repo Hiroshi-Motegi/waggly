@@ -23,7 +23,7 @@ const categoryLabels: Record<string, string> = {
   driver: "ドライバー", fairway_wood: "フェアウェイウッド", utility: "ユーティリティ",
   iron: "アイアン", wedge: "ウェッジ", putter: "パター",
 };
-const statusLabels: Record<string, string> = { bag: "バッグ", reserve: "リザーブ", sold: "売却済" };
+const statusLabels: Record<string, string> = { bag: "マイバッグ", reserve: "保管庫", sold: "アーカイブ" };
 const accessoryCategoryLabels: Record<string, string> = { ball: "ボール", glove: "グローブ", tee: "ティー", other: "その他" };
 const accessoryStatusLabels: Record<string, string> = { active: "使用中", past: "アーカイブ" };
 

@@ -1,0 +1,73 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - main [ref=e3]:
+      - generic [ref=e6]:
+        - generic [ref=e8]:
+          - button [ref=e9]:
+            - img [ref=e10]
+          - heading "練習を記録" [level=2] [ref=e13]
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]:
+              - generic [ref=e17]: 日付
+              - textbox [ref=e18]: 2026-06-09
+            - generic [ref=e19]:
+              - generic [ref=e20]: 練習場
+              - textbox "練習場名を入力" [ref=e21]
+          - heading "練習球数" [level=3] [ref=e22]
+          - generic [ref=e23]:
+            - generic [ref=e24]:
+              - button "総球数のみ" [ref=e25]:
+                - generic [ref=e26]: 総球数のみ
+              - button "番手別球数・飛距離" [ref=e28]:
+                - generic [ref=e29]: 番手別球数・飛距離
+            - generic [ref=e33]:
+              - slider [ref=e35] [cursor=pointer]: "0"
+              - generic [ref=e36]:
+                - spinbutton [ref=e37]
+                - generic [ref=e38]: 球
+          - heading "気づき・メモ" [level=3] [ref=e39]
+          - generic [ref=e40]:
+            - generic [ref=e41]:
+              - generic [ref=e42]: 練習の評価
+              - generic [ref=e43]:
+                - button "★" [ref=e44]
+                - button "★" [ref=e45]
+                - button "★" [ref=e46]
+                - button "★" [ref=e47]
+                - button "★" [ref=e48]
+            - generic [ref=e49]:
+              - generic [ref=e50]: 所感・メモ
+              - textbox "今日の気づきや感覚をメモ..." [ref=e51]
+          - generic [ref=e52]:
+            - button "保存する" [ref=e53]
+            - button "キャンセル" [ref=e54]
+    - navigation [ref=e56]:
+      - link "ホーム ホーム" [ref=e57] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e59]:
+          - img "ホーム" [ref=e60]
+          - generic [ref=e61]: ホーム
+      - link "マイバッグ マイバッグ" [ref=e62] [cursor=pointer]:
+        - /url: /bag
+        - generic [ref=e64]:
+          - img "マイバッグ" [ref=e65]
+          - generic [ref=e66]: マイバッグ
+      - link "アイテム アイテム" [ref=e67] [cursor=pointer]:
+        - /url: /items
+        - generic [ref=e69]:
+          - img "アイテム" [ref=e70]
+          - generic [ref=e71]: アイテム
+      - link "練習記録 練習記録" [ref=e72] [cursor=pointer]:
+        - /url: /practice
+        - generic [ref=e74]:
+          - img "練習記録" [ref=e75]
+          - generic [ref=e76]: 練習記録
+      - link "AIに相談 AIに相談" [ref=e77] [cursor=pointer]:
+        - /url: /coach
+        - generic [ref=e79]:
+          - img "AIに相談" [ref=e80]
+          - generic [ref=e81]: AIに相談
+  - button "Open Next.js Dev Tools" [ref=e87] [cursor=pointer]:
+    - img [ref=e88]
+  - alert [ref=e91]

@@ -9,11 +9,11 @@ interface PublicProfile {
   avatar_url: string | null;
   nickname?: string | null;
   bio?: string | null;
-  golf_experience_years?: number | null;
+  golf_start_date?: string | null;
   average_score?: number | null;
   best_score?: number | null;
   home_course?: string | null;
-  sns_links?: { instagram?: string; x?: string; line?: string };
+  sns_links?: { instagram?: string };
   clubs?: Array<{
     id: string;
     category: string;
@@ -105,16 +105,21 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
 
         <div className="flex flex-col gap-2 px-2 pb-8">
           {/* Golf info */}
-          {(profile.golf_experience_years != null || profile.average_score != null || profile.best_score != null || profile.home_course) && (
+          {(profile.golf_start_date != null || profile.average_score != null || profile.best_score != null || profile.home_course) && (
             <div className="rounded-lg bg-white p-4">
               <h2 className="text-sm font-bold text-[#006728] mb-2">ゴルフ情報</h2>
               <div className="grid grid-cols-2 gap-3">
-                {profile.golf_experience_years != null && (
-                  <div>
-                    <p className="text-xs text-[#8b8b8b]">ゴルフ歴</p>
-                    <p className="text-base font-bold">{profile.golf_experience_years}年</p>
-                  </div>
-                )}
+                {profile.golf_start_date != null && (() => {
+                  const start = new Date(profile.golf_start_date + "T00:00:00");
+                  const now = new Date();
+                  const years = Math.floor((now.getTime() - start.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+                  return (
+                    <div>
+                      <p className="text-xs text-[#8b8b8b]">ゴルフ歴</p>
+                      <p className="text-base font-bold">{years}年</p>
+                    </div>
+                  );
+                })()}
                 {profile.average_score != null && (
                   <div>
                     <p className="text-xs text-[#8b8b8b]">平均スコア</p>
@@ -195,12 +200,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
               <div className="flex gap-3">
                 {profile.sns_links.instagram && (
                   <a href={profile.sns_links.instagram} target="_blank" rel="noopener" className="rounded-full bg-[#f0f0f0] px-4 py-2 text-sm font-bold">Instagram</a>
-                )}
-                {profile.sns_links.x && (
-                  <a href={profile.sns_links.x} target="_blank" rel="noopener" className="rounded-full bg-[#f0f0f0] px-4 py-2 text-sm font-bold">X</a>
-                )}
-                {profile.sns_links.line && (
-                  <span className="rounded-full bg-[#f0f0f0] px-4 py-2 text-sm font-bold">LINE: {profile.sns_links.line}</span>
                 )}
               </div>
             </div>

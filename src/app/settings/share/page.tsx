@@ -11,7 +11,7 @@ const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2
 
 const VISIBLE_FIELD_LABELS: Record<string, string> = {
   nickname: "ニックネーム",
-  golf_experience_years: "ゴルフ歴",
+  golf_start_date: "ゴルフ歴",
   average_score: "平均スコア",
   best_score: "ベストスコア",
   home_course: "ホームコース",
