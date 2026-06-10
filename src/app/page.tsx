@@ -65,12 +65,12 @@ export default function HomePage() {
           {/* LINE login */}
           <button
             onClick={async () => {
-              const { initLiff } = await import("@/lib/liff");
-              await initLiff();
-              const liffMod = await import("@line/liff");
-              if (!liffMod.default.isLoggedIn()) {
-                liffMod.default.login();
-              }
+              const { createClient } = await import("@/lib/supabase/client");
+              const supabase = createClient();
+              await supabase.auth.signInWithOAuth({
+                provider: "custom:line" as any,
+                options: { redirectTo: `${window.location.origin}/auth/callback` },
+              });
             }}
             className="mt-12 flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#06C755] text-white font-bold text-base shadow-lg"
           >
