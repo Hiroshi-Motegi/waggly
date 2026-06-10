@@ -77,7 +77,7 @@ export default function PracticePage() {
                 <Loading />
               </div>
             ) : allSessions.length === 0 ? (
-              <div className="rounded-lg bg-white p-6 text-center">
+              <div className="rounded-b-lg bg-white p-6 text-center">
                 <p className="text-base text-[#8b8b8b]">練習記録がありません</p>
                 <Link href="/practice/new">
                   <button className="mt-3 rounded-full bg-[#006728] px-5 py-2 text-sm font-bold text-white">

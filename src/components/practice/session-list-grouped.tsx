@@ -41,7 +41,7 @@ export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupe
 
   if (sorted.length === 0) {
     return (
-      <div className="rounded-lg bg-white p-6 text-center">
+      <div className="rounded-b-lg bg-white p-6 text-center">
         <p className="text-base text-[#8b8b8b]">練習記録がありません</p>
       </div>
     );
@@ -59,7 +59,7 @@ export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupe
   }
 
   return (
-    <div className="rounded-lg bg-white overflow-hidden">
+    <div className="rounded-b-lg bg-white overflow-hidden">
       {groups.map((group, groupIdx) => {
         const dayNumber = group.date.split("-")[2].replace(/^0/, "");
         const weekday = formatWeekday(group.date);

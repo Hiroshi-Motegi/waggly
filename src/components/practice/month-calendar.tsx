@@ -108,7 +108,7 @@ export function MonthCalendar({
   }
 
   return (
-    <div className="rounded-lg bg-[#2d6e3f] px-4 py-3">
+    <div className="rounded-t-lg bg-[#2d6e3f] px-4 py-3">
       {/* Header row */}
       <div className="flex items-center mb-2">
         <MonthPicker year={year} month={month} onChange={onChangeMonth} />
