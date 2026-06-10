@@ -251,7 +251,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
               <div className="flex flex-col">
                 {profile.sns_links.custom_links.map((link, i) => (
                   <a key={i} href={link.url} target="_blank" rel="noopener" className={`flex items-center py-2.5 ${i < profile.sns_links!.custom_links!.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                    <span className="flex-1 text-base font-bold text-black truncate">{link.label}</span>
+                    <span className="flex-1 text-base text-black truncate">{link.label}</span>
                     <svg width="6" height="10" viewBox="0 0 6 10" className="shrink-0 opacity-60 ml-2"><path d="M1 1l4 4-4 4" stroke="#8b8b8b" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </a>
                 ))}
