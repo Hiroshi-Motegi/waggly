@@ -148,7 +148,10 @@ export default function HomePage() {
         </div>
 
         {/* Recent practice */}
-        <h3 className="text-base font-bold text-white px-1 mt-4 mb-1">最近の練習記録</h3>
+        <div className="flex items-center px-1 mt-4 mb-1">
+          <h3 className="flex-1 text-base font-bold text-white">最近の練習記録</h3>
+          <Link href="/practice" className="text-sm font-bold text-white/70">すべて見る</Link>
+        </div>
         <RecentPractice sessions={sessions} />
 
         {/* Favorite courses */}
