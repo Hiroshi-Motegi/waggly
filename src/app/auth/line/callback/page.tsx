@@ -36,7 +36,7 @@ export default function LineCallbackPage() {
         const supabase = createClient();
         await supabase.auth.setSession({ access_token, refresh_token });
 
-        router.replace("/");
+        window.location.href = "/";
       } catch (e) {
         console.error("LINE auth error:", e);
         router.replace("/?error=line_auth_failed");
