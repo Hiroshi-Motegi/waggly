@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { MonthPicker } from "./month-picker";
 import { WEEKDAY_LABELS, buildCalendarGrid, todayString } from "@/lib/calendar-utils";
 import type { CalendarDay } from "@/lib/calendar-utils";
@@ -25,6 +26,19 @@ export function MonthCalendar({
   const today = todayString();
   const now = new Date();
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("practice-calendar-collapsed") === "true";
+    }
+    return false;
+  });
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("practice-calendar-collapsed", String(next));
+      return next;
+    });
+  }
 
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
@@ -119,40 +133,51 @@ export function MonthCalendar({
             今日
           </button>
         )}
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          className="p-1 text-white/70"
+        >
+          {collapsed ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
+        </button>
       </div>
 
-      {/* Weekday header */}
-      <div className="grid grid-cols-7 mb-1">
-        {WEEKDAY_LABELS.map((label) => (
-          <div key={label} className="text-center text-xs font-medium text-white/60 py-1">
-            {label}
+      {!collapsed && (
+        <>
+          {/* Weekday header */}
+          <div className="grid grid-cols-7 mb-1">
+            {WEEKDAY_LABELS.map((label) => (
+              <div key={label} className="text-center text-xs font-medium text-white/60 py-1">
+                {label}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Calendar grid */}
-      <div
-        className="grid grid-cols-7 gap-y-1"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {cells.map((day) => (
-          <button
-            key={day.dateString}
-            type="button"
-            className="flex items-center justify-center"
-            onClick={() => handleDayClick(day)}
-            aria-label={day.dateString}
-            aria-pressed={day.dateString === selectedDate && day.isCurrentMonth}
+          {/* Calendar grid */}
+          <div
+            className="grid grid-cols-7 gap-y-1"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
-            <div
-              className={`h-8 w-8 flex items-center justify-center rounded-full text-base ${getDayCellClass(day)}`}
-            >
-              {day.date}
-            </div>
-          </button>
-        ))}
-      </div>
+            {cells.map((day) => (
+              <button
+                key={day.dateString}
+                type="button"
+                className="flex items-center justify-center"
+                onClick={() => handleDayClick(day)}
+                aria-label={day.dateString}
+                aria-pressed={day.dateString === selectedDate && day.isCurrentMonth}
+              >
+                <div
+                  className={`h-8 w-8 flex items-center justify-center rounded-full text-base ${getDayCellClass(day)}`}
+                >
+                  {day.date}
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
