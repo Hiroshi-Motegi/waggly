@@ -42,7 +42,17 @@ export default function PracticePage() {
   const now = new Date();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
+  const [viewMode, setViewModeState] = useState<"calendar" | "list">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("practice-view-mode");
+      if (saved === "list") return "list";
+    }
+    return "calendar";
+  });
+  function setViewMode(mode: "calendar" | "list") {
+    setViewModeState(mode);
+    localStorage.setItem("practice-view-mode", mode);
+  }
   const [calYear, setCalYear] = useState(now.getFullYear());
   const [calMonth, setCalMonth] = useState(now.getMonth());
   const [selectedDate, setSelectedDate] = useState(todayString());
