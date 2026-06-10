@@ -68,23 +68,17 @@ export default function LinkCompletePage() {
           }
         }
 
-        if (result.merged) {
-          alert(result.message);
-          const { createClient } = await import("@/lib/supabase/client");
-          const supabase = createClient();
-          await supabase.auth.signOut();
-          sessionStorage.removeItem("link_original_user");
-          window.location.href = "/";
-        } else {
-          // Simple link — sign back in as original user
-          sessionStorage.removeItem("link_original_user");
-          // Sign out the Google session, then redirect to home
-          // The original session (LINE) should be restored on reload
-          const { createClient } = await import("@/lib/supabase/client");
-          const supabase = createClient();
-          await supabase.auth.signOut();
-          window.location.href = "/settings?linked=" + encodeURIComponent(provider);
-        }
+        // After link/merge, sign out and redirect to login
+        // (Google OAuth replaced the session, original session is gone)
+        sessionStorage.removeItem("link_original_user");
+        const { createClient } = await import("@/lib/supabase/client");
+        await createClient().auth.signOut();
+
+        const msg = result.merged
+          ? result.message
+          : `${provider === "google" ? "Google" : "LINE"}を連携しました`;
+        alert(msg + "\n再ログインしてください。");
+        window.location.href = "/";
       } catch (e) {
         console.error("Link error:", e);
         alert("連携に失敗しました");
