@@ -84,17 +84,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        // Web: LIFF auth flow
+        // Web: LIFF auth flow (only inside LINE app)
         const { initLiff, getLiffProfile } = await import("@/lib/liff");
         const deepLink = await initLiff();
 
         const { liff } = await import("@/lib/liff");
-        if (liff.isInClient()) {
+        const isLiffClient = liff.isInClient();
+        if (isLiffClient) {
           document.documentElement.classList.add("liff-client");
         }
 
         if (existingAuth) {
           if (deepLink) router.replace(deepLink);
+          return;
+        }
+
+        // Outside LINE app: stop here, show landing page with login buttons
+        if (!isLiffClient) {
+          setIsLoading(false);
           return;
         }
 
