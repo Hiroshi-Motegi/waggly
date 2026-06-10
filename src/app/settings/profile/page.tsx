@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile, updateProfile, uploadAvatar } from "@/hooks/use-profile";
@@ -28,6 +28,7 @@ export default function ProfileSettingsPage() {
     bio: "",
     sns_instagram: "",
     sns_x: "",
+    custom_links: [] as { label: string; url: string }[],
   });
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function ProfileSettingsPage() {
         bio: profile.bio ?? "",
         sns_instagram: profile.sns_links?.instagram ?? "",
         sns_x: profile.sns_links?.x ?? "",
+        custom_links: (profile.sns_links as any)?.custom_links ?? [],
       });
     }
   }, [profile]);
@@ -69,9 +71,11 @@ export default function ProfileSettingsPage() {
   async function handleSave() {
     setIsSaving(true);
     try {
-      const snsLinks: Record<string, string> = {};
+      const snsLinks: Record<string, any> = {};
       if (form.sns_instagram) snsLinks.instagram = form.sns_instagram;
       if (form.sns_x) snsLinks.x = form.sns_x;
+      const validLinks = form.custom_links.filter((l) => l.label && l.url);
+      if (validLinks.length > 0) snsLinks.custom_links = validLinks;
 
       await updateProfile({
         nickname: form.nickname || null,
@@ -170,6 +174,52 @@ export default function ProfileSettingsPage() {
             <span className={labelClass}>X</span>
             <input value={form.sns_x} onChange={(e) => setForm((p) => ({ ...p, sns_x: e.target.value }))} placeholder="https://x.com/..." className={inputClass} />
           </div>
+        </div>
+
+        {/* Custom links */}
+        <h3 className="px-1 pt-2 text-base font-bold text-white">その他のリンク</h3>
+        <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
+          {form.custom_links.map((link, i) => (
+            <div key={i} className="flex gap-2 items-start">
+              <div className="flex flex-1 flex-col gap-1">
+                <input
+                  value={link.label}
+                  onChange={(e) => {
+                    const next = [...form.custom_links];
+                    next[i] = { ...next[i], label: e.target.value };
+                    setForm((p) => ({ ...p, custom_links: next }));
+                  }}
+                  placeholder="ラベル（例: ブログ）"
+                  className={inputClass}
+                />
+                <input
+                  value={link.url}
+                  onChange={(e) => {
+                    const next = [...form.custom_links];
+                    next[i] = { ...next[i], url: e.target.value };
+                    setForm((p) => ({ ...p, custom_links: next }));
+                  }}
+                  placeholder="https://..."
+                  className={inputClass}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setForm((p) => ({ ...p, custom_links: p.custom_links.filter((_, j) => j !== i) }))}
+                className="shrink-0 p-2 text-[#8b8b8b] mt-1"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setForm((p) => ({ ...p, custom_links: [...p.custom_links, { label: "", url: "" }] }))}
+            className="flex items-center gap-1 text-sm font-bold text-[#006728] pt-1"
+          >
+            <Plus className="h-4 w-4" />
+            リンクを追加
+          </button>
         </div>
 
         {/* Save */}

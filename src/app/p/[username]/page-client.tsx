@@ -13,7 +13,7 @@ interface PublicProfile {
   average_score?: number | null;
   best_score?: number | null;
   home_course?: string | null;
-  sns_links?: { instagram?: string; x?: string };
+  sns_links?: { instagram?: string; x?: string; custom_links?: { label: string; url: string }[] };
   clubs?: Array<{
     id: string;
     category: string;
@@ -218,18 +218,21 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
             </>
           )}
 
-          {/* SNS Links */}
-          {profile.sns_links && Object.values(profile.sns_links).some(Boolean) && (
+          {/* Links */}
+          {profile.sns_links && (profile.sns_links.instagram || profile.sns_links.x || (profile.sns_links.custom_links && profile.sns_links.custom_links.length > 0)) && (
             <>
-            <h2 className="px-1 pt-2 text-base font-bold text-white">SNS</h2>
+            <h2 className="px-1 pt-2 text-base font-bold text-white">リンク</h2>
             <div className="rounded-lg bg-white p-4">
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-2">
                 {profile.sns_links.instagram && (
                   <a href={profile.sns_links.instagram} target="_blank" rel="noopener" className="rounded-full bg-[#f0f0f0] px-4 py-2 text-sm font-bold">Instagram</a>
                 )}
                 {profile.sns_links.x && (
                   <a href={profile.sns_links.x} target="_blank" rel="noopener" className="rounded-full bg-[#f0f0f0] px-4 py-2 text-sm font-bold">X</a>
                 )}
+                {profile.sns_links.custom_links?.map((link, i) => (
+                  <a key={i} href={link.url} target="_blank" rel="noopener" className="rounded-full bg-[#f0f0f0] px-4 py-2 text-sm font-bold">{link.label}</a>
+                ))}
               </div>
             </div>
             </>
