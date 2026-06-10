@@ -1,9 +1,10 @@
 "use client";
 import { Loading } from "@/components/loading";
 
-import { useState, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, Calendar, List } from "lucide-react";
 import { nativeHref } from "@/lib/native-routes";
 import { PageHeader } from "@/components/layout/page-header";
@@ -19,10 +20,23 @@ function formatDate(dateStr: string): string {
 
 export default function PracticePage() {
   const now = new Date();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const [calYear, setCalYear] = useState(now.getFullYear());
   const [calMonth, setCalMonth] = useState(now.getMonth());
   const [selectedDate, setSelectedDate] = useState(todayString());
+  const [toast, setToast] = useState<string | null>(null);
+
+  // Show toast on delete
+  useEffect(() => {
+    if (searchParams.get("deleted") === "1") {
+      setToast("記録を削除しました");
+      router.replace("/practice", { scroll: false });
+      const timer = setTimeout(() => setToast(null), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, router]);
 
   const currentMonthKey = monthKey(calYear, calMonth);
   const { sessions: monthSessions, isLoading: monthLoading } =
@@ -160,6 +174,15 @@ export default function PracticePage() {
           </>
         )}
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-[calc(var(--bottom-nav-height)+16px)] left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="rounded-full bg-[#333] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
+            {toast}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
