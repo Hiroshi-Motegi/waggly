@@ -121,7 +121,7 @@ export default function FavoriteCoursesPage() {
           </div>
 
           {results.length > 0 && (
-            <div className="flex flex-col max-h-60 overflow-y-auto">
+            <div className="flex flex-col">
               {results.map((r) => (
                 <button
                   key={r.golfCourseId}
