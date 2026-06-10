@@ -162,9 +162,11 @@ export default function CoursesPage() {
           </p>
 
           {results.Items.length === 0 ? (
-            <p className="text-center text-base text-[#8b8b8b] py-8">
-              コースが見つかりませんでした
-            </p>
+            <div className="rounded-lg bg-white p-6">
+              <p className="text-center text-base text-[#8b8b8b]">
+                コースが見つかりませんでした
+              </p>
+            </div>
           ) : (
             <div className="flex flex-col gap-2">
               {results.Items.map((course) => (
