@@ -79,31 +79,6 @@ export default function FavoriteCoursesPage() {
       <div className="relative z-10 flex flex-col space-y-2">
         <PageHeader title="お気に入りコース" variant="dark" />
 
-        {/* Registered courses */}
-        <h3 className="px-1 pt-2 text-base font-bold text-white">登録済み</h3>
-        <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
-          {isLoading ? (
-            <Loading />
-          ) : courses.length === 0 ? (
-            <p className="py-4 text-center text-sm text-[#8b8b8b]">まだ登録されていません</p>
-          ) : (
-            courses.map((c) => (
-              <div key={c.id} className="flex items-center gap-2 py-2 border-b border-[#ececec] last:border-0">
-                {c.course_image_url && (
-                  <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate">{c.course_name}</p>
-                  {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
-                </div>
-                <button onClick={() => handleRemove(c.id)} className="shrink-0 p-1 text-[#8b8b8b]">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-
         {/* Search */}
         <h3 className="px-1 pt-2 text-base font-bold text-white">コースを追加</h3>
         <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
@@ -151,6 +126,31 @@ export default function FavoriteCoursesPage() {
             <button onClick={() => setShowManual(true)} className="pt-2 text-sm text-[#006728] font-bold text-left border-t border-[#ececec]">
               手動で入力する
             </button>
+          )}
+        </div>
+
+        {/* Registered courses */}
+        <h3 className="px-1 pt-2 text-base font-bold text-white">登録済み</h3>
+        <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+          {isLoading ? (
+            <Loading />
+          ) : courses.length === 0 ? (
+            <p className="py-4 text-center text-sm text-[#8b8b8b]">まだ登録されていません</p>
+          ) : (
+            courses.map((c) => (
+              <div key={c.id} className="flex items-center gap-2 py-2 border-b border-[#ececec] last:border-0">
+                {c.course_image_url && (
+                  <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold truncate">{c.course_name}</p>
+                  {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
+                </div>
+                <button onClick={() => handleRemove(c.id)} className="shrink-0 p-1 text-[#8b8b8b]">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))
           )}
         </div>
       </div>
