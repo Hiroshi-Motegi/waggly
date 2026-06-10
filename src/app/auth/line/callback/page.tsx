@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Loading } from "@/components/loading";
 
 export default function LineCallbackPage() {
+  const processed = useRef(false);
+
   useEffect(() => {
+    if (processed.current) return;
+    processed.current = true;
+
     async function handleCallback() {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
