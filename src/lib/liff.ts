@@ -38,6 +38,9 @@ export async function getLiffProfile() {
 }
 
 export async function liffLogout() {
+  // Dev mode: clear flag
+  localStorage.setItem("dev-logged-in", "false");
+
   // Clear Supabase session
   try {
     const { createClient } = await import("@/lib/supabase/client");

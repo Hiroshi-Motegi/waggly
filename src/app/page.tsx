@@ -36,12 +36,14 @@ const featureCards = [
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
   const { sessions } = usePracticeSessions();
+  const searchParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+  const forceGuest = searchParams.get("guest") !== null;
 
-  if (authLoading) {
+  if (authLoading && !forceGuest) {
     return <Loading variant="light" />;
   }
 
-  if (!user && !isNative()) {
+  if (forceGuest || (!user && !isNative())) {
     return (
       <div className="relative flex flex-col items-center justify-center bg-[#139847]" style={{ minHeight: "100dvh" }}>
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
@@ -73,6 +75,14 @@ export default function HomePage() {
             </svg>
             LINEでログイン
           </button>
+          {process.env.NODE_ENV === "development" && (
+            <button
+              onClick={() => { localStorage.removeItem("dev-logged-in"); window.location.reload(); }}
+              className="mt-4 flex h-12 w-full items-center justify-center rounded-full border border-white/30 text-white/70 font-bold text-base"
+            >
+              開発ログイン
+            </button>
+          )}
           <div className="flex gap-4 mt-6">
             <Link href="/terms" className="text-xs text-white/50">利用規約</Link>
             <Link href="/privacy" className="text-xs text-white/50">プライバシーポリシー</Link>
