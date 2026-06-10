@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Loader2, Trash2 } from "lucide-react";
+import { Plus, X, Loader2, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile, updateProfile, uploadAvatar } from "@/hooks/use-profile";
@@ -180,7 +180,33 @@ export default function ProfileSettingsPage() {
         <h3 className="px-1 pt-2 text-base font-bold text-white">その他のリンク</h3>
         <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
           {form.custom_links.map((link, i) => (
-            <div key={i} className="flex gap-2 items-start">
+            <div key={i} className={`flex gap-2 items-start pb-2 ${i < form.custom_links.length - 1 ? "border-b border-[#ececec] mb-2" : ""}`}>
+              <div className="flex flex-col gap-1 shrink-0 mt-1">
+                <button
+                  type="button"
+                  disabled={i === 0}
+                  onClick={() => {
+                    const next = [...form.custom_links];
+                    [next[i - 1], next[i]] = [next[i], next[i - 1]];
+                    setForm((p) => ({ ...p, custom_links: next }));
+                  }}
+                  className="p-0.5 text-[#8b8b8b] disabled:opacity-20"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  disabled={i === form.custom_links.length - 1}
+                  onClick={() => {
+                    const next = [...form.custom_links];
+                    [next[i], next[i + 1]] = [next[i + 1], next[i]];
+                    setForm((p) => ({ ...p, custom_links: next }));
+                  }}
+                  className="p-0.5 text-[#8b8b8b] disabled:opacity-20"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+              </div>
               <div className="flex flex-1 flex-col gap-1">
                 <input
                   value={link.label}
