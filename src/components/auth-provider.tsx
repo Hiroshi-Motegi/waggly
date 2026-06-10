@@ -15,26 +15,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function authenticate() {
       try {
-        // Development mode: check localStorage flag
+        const supabase = createClient();
+
+        // Development mode: check for real session first, then fall back to dev user
         if (
           process.env.NODE_ENV === "development" &&
           process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true"
         ) {
-          if (localStorage.getItem("dev-logged-in") !== "false") {
-            setUser({
-              id: "dev-user",
-              line_user_id: "dev-line-id",
-              display_name: "開発ユーザー",
-              avatar_url: null,
-              agreed_terms_at: new Date().toISOString(),
-              created_at: new Date().toISOString(),
-            });
+          // Check if there's a real Supabase session (from Google/LINE OAuth)
+          const { data: { user: realAuth } } = await supabase.auth.getUser();
+          if (!realAuth) {
+            // No real session: use dev user or show landing
+            if (localStorage.getItem("dev-logged-in") !== "false") {
+              setUser({
+                id: "dev-user",
+                line_user_id: "dev-line-id",
+                display_name: "開発ユーザー",
+                avatar_url: null,
+                agreed_terms_at: new Date().toISOString(),
+                created_at: new Date().toISOString(),
+              });
+            }
+            setIsLoading(false);
+            return;
           }
-          setIsLoading(false);
-          return;
+          // Real session found — fall through to normal auth flow
         }
-
-        const supabase = createClient();
 
         // Check for existing Supabase session (common to both web & native)
         const {
