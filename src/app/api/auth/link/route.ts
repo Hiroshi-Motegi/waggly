@@ -158,6 +158,53 @@ export async function POST(request: NextRequest) {
 }
 
 /**
+ * DELETE /api/auth/link
+ * Unlink a provider from the current account.
+ * Only allowed if the user has at least 2 providers linked.
+ */
+export async function DELETE(request: NextRequest) {
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { userId } = auth;
+
+  const { provider } = await request.json();
+  const supabaseAdmin = getSupabaseAdmin();
+
+  const { data: currentUser } = await supabaseAdmin
+    .from("users")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (!currentUser) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  const hasLine = currentUser.line_user_id && !currentUser.line_user_id.startsWith("google-") && !currentUser.line_user_id.startsWith("oauth-");
+  const hasGoogle = !!currentUser.google_id;
+
+  if (!hasLine || !hasGoogle) {
+    return NextResponse.json({ error: "最低1つのログイン方法が必要です" }, { status: 400 });
+  }
+
+  if (provider === "line") {
+    await supabaseAdmin
+      .from("users")
+      .update({ line_user_id: `oauth-${userId}` })
+      .eq("id", userId);
+  } else if (provider === "google") {
+    await supabaseAdmin
+      .from("users")
+      .update({ google_id: null })
+      .eq("id", userId);
+  } else {
+    return NextResponse.json({ error: "Unknown provider" }, { status: 400 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+/**
  * Delete all user data (clubs, accessories, practice, etc.)
  */
 async function deleteUserData(supabase: any, userId: string) {
