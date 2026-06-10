@@ -9,10 +9,9 @@ import type { PracticeSessionWithClubs } from "@/types/database";
 interface SessionListGroupedProps {
   sessions: PracticeSessionWithClubs[];
   selectedDate: string; // "YYYY-MM-DD"
-  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-export function SessionListGrouped({ sessions, selectedDate, scrollContainerRef }: SessionListGroupedProps) {
+export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupedProps) {
   const sorted = [...sessions].sort((a, b) => a.practiced_at.localeCompare(b.practiced_at));
   const groupRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -28,7 +27,6 @@ export function SessionListGrouped({ sessions, selectedDate, scrollContainerRef 
   useEffect(() => {
     if (sorted.length === 0) return;
 
-    // Find the closest date: first on/after selectedDate, else last before
     const dates = [...new Set(sorted.map((s) => s.practiced_at))].sort();
     let targetDate = dates.find((d) => d >= selectedDate);
     if (!targetDate) {
@@ -36,10 +34,8 @@ export function SessionListGrouped({ sessions, selectedDate, scrollContainerRef 
     }
 
     const el = groupRefs.current.get(targetDate);
-    if (el && scrollContainerRef?.current) {
-      const container = scrollContainerRef.current;
-      const elTop = el.offsetTop - container.offsetTop;
-      container.scrollTo({ top: elTop, behavior: "smooth" });
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [selectedDate, sorted.length]);
 
