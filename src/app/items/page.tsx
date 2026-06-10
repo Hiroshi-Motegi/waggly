@@ -171,11 +171,6 @@ export default function ItemsPage() {
                         {[item.brand, item.model].filter(Boolean).join(" ") || "—"}
                       </span>
                       <StarRating rating={item.rating} />
-                      {item.status === "past" && (
-                        <span className="w-fit rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
-                          アーカイブ
-                        </span>
-                      )}
                     </div>
                   </div>
                 </Link>
