@@ -64,13 +64,12 @@ export default function HomePage() {
           </p>
           {/* LINE login */}
           <button
-            onClick={async () => {
-              const { createClient } = await import("@/lib/supabase/client");
-              const supabase = createClient();
-              await supabase.auth.signInWithOAuth({
-                provider: "custom:line" as any,
-                options: { redirectTo: `${window.location.origin}/auth/callback` },
-              });
+            onClick={() => {
+              const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
+              const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback`);
+              const state = crypto.randomUUID();
+              sessionStorage.setItem("line_oauth_state", state);
+              window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
             }}
             className="mt-12 flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#06C755] text-white font-bold text-base shadow-lg"
           >
