@@ -14,6 +14,25 @@ import { SessionListGrouped } from "@/components/practice/session-list-grouped";
 import { usePracticeSessions, usePracticeSessionsByMonth } from "@/hooks/use-practice";
 import { todayString, monthKey } from "@/lib/calendar-utils";
 
+function ViewToggle({ mode, onChange }: { mode: "calendar" | "list"; onChange: (m: "calendar" | "list") => void }) {
+  return (
+    <div className="flex rounded-full border border-white/30 overflow-hidden">
+      <button
+        onClick={() => onChange("calendar")}
+        className={`p-1.5 ${mode === "calendar" ? "bg-white" : ""}`}
+      >
+        <Calendar className={`h-4 w-4 ${mode === "calendar" ? "text-[#006728]" : "text-white/60"}`} />
+      </button>
+      <button
+        onClick={() => onChange("list")}
+        className={`p-1.5 ${mode === "list" ? "bg-white" : ""}`}
+      >
+        <List className={`h-4 w-4 ${mode === "list" ? "text-[#006728]" : "text-white/60"}`} />
+      </button>
+    </div>
+  );
+}
+
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
@@ -67,12 +86,7 @@ export default function PracticePage() {
               <div className="relative">
                 <PageHeader title="練習記録" showBack={false} variant="dark">
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setViewMode("list")}
-                      className="rounded-full bg-white/20 p-1.5"
-                    >
-                      <List className="h-4 w-4 text-white" />
-                    </button>
+                    <ViewToggle mode={viewMode} onChange={setViewMode} />
                     <Link href="/practice/new">
                       <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
                         <Plus className="h-4 w-4" />
@@ -120,12 +134,7 @@ export default function PracticePage() {
           <>
             <PageHeader title="練習記録" showBack={false} variant="dark">
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setViewMode("calendar")}
-                  className="rounded-full bg-white/20 p-1.5"
-                >
-                  <Calendar className="h-4 w-4 text-white" />
-                </button>
+                <ViewToggle mode={viewMode} onChange={setViewMode} />
                 <Link href="/practice/new">
                   <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
                     <Plus className="h-4 w-4" />
