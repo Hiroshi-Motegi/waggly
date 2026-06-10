@@ -27,6 +27,7 @@ export default function ProfileSettingsPage() {
     home_course: "",
     bio: "",
     sns_instagram: "",
+    sns_x: "",
   });
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function ProfileSettingsPage() {
         home_course: profile.home_course ?? "",
         bio: profile.bio ?? "",
         sns_instagram: profile.sns_links?.instagram ?? "",
+        sns_x: profile.sns_links?.x ?? "",
       });
     }
   }, [profile]);
@@ -69,6 +71,7 @@ export default function ProfileSettingsPage() {
     try {
       const snsLinks: Record<string, string> = {};
       if (form.sns_instagram) snsLinks.instagram = form.sns_instagram;
+      if (form.sns_x) snsLinks.x = form.sns_x;
 
       await updateProfile({
         nickname: form.nickname || null,
@@ -162,6 +165,10 @@ export default function ProfileSettingsPage() {
           <div className="flex flex-col gap-0.5 py-1">
             <span className={labelClass}>Instagram</span>
             <input value={form.sns_instagram} onChange={(e) => setForm((p) => ({ ...p, sns_instagram: e.target.value }))} placeholder="https://instagram.com/..." className={inputClass} />
+          </div>
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className={labelClass}>X</span>
+            <input value={form.sns_x} onChange={(e) => setForm((p) => ({ ...p, sns_x: e.target.value }))} placeholder="https://x.com/..." className={inputClass} />
           </div>
         </div>
 

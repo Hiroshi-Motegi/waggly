@@ -13,7 +13,7 @@ interface PublicProfile {
   average_score?: number | null;
   best_score?: number | null;
   home_course?: string | null;
-  sns_links?: { instagram?: string };
+  sns_links?: { instagram?: string; x?: string };
   clubs?: Array<{
     id: string;
     category: string;
@@ -200,6 +200,9 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
               <div className="flex gap-3">
                 {profile.sns_links.instagram && (
                   <a href={profile.sns_links.instagram} target="_blank" rel="noopener" className="rounded-full bg-[#f0f0f0] px-4 py-2 text-sm font-bold">Instagram</a>
+                )}
+                {profile.sns_links.x && (
+                  <a href={profile.sns_links.x} target="_blank" rel="noopener" className="rounded-full bg-[#f0f0f0] px-4 py-2 text-sm font-bold">X</a>
                 )}
               </div>
             </div>
