@@ -2,6 +2,7 @@
 import { Loading } from "@/components/loading";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -175,13 +176,14 @@ export default function PracticePage() {
         )}
       </div>
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-[calc(var(--bottom-nav-height)+16px)] left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      {/* Toast via portal to escape transform context */}
+      {toast && createPortal(
+        <div className="fixed bottom-[calc(var(--bottom-nav-height)+16px)] left-1/2 -translate-x-1/2 z-50">
           <div className="rounded-full bg-[#333] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
             {toast}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
