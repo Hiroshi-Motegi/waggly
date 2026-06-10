@@ -234,17 +234,20 @@ export default function BagPage() {
               並替
             </button>
           )}
-          {!isReordering && (
-            <Link href={statusFilter === "all" || statusFilter === "bag1" ? "/bag/new" : `/bag/new?tab=${statusFilter}`}>
+          {!isReordering && (() => {
+            const isFull = isBagView && (bagCount ?? 0) >= MAX_BAG_CLUBS;
+            const btn = (
               <button
-                className="flex items-center gap-1 rounded-full bg-white px-4 h-[34px] text-sm font-bold text-[#006728] disabled:opacity-50"
-                disabled={isBagView && (bagCount ?? 0) >= MAX_BAG_CLUBS}
+                className={`flex items-center gap-1 rounded-full px-4 h-[34px] text-sm font-bold ${isFull ? "bg-white/50 text-[#006728]/40" : "bg-white text-[#006728]"}`}
+                disabled={isFull}
               >
                 <Plus className="h-4 w-4" />
                 追加
               </button>
-            </Link>
-          )}
+            );
+            if (isFull) return btn;
+            return <Link href={statusFilter === "all" || statusFilter === "bag1" ? "/bag/new" : `/bag/new?tab=${statusFilter}`}>{btn}</Link>;
+          })()}
         </div>
       </PageHeader>
 
