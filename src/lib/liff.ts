@@ -37,11 +37,16 @@ export async function getLiffProfile() {
   return { profile, idToken };
 }
 
-export function liffLogout() {
-  if (liff.isLoggedIn()) {
-    liff.logout();
-    window.location.reload();
+export async function liffLogout() {
+  try {
+    await initLiff();
+    if (liff.isLoggedIn()) {
+      liff.logout();
+    }
+  } catch {
+    // init may fail if no LIFF ID configured
   }
+  window.location.reload();
 }
 
 export { liff };
