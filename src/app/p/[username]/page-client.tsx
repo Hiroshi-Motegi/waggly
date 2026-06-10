@@ -24,6 +24,7 @@ interface PublicProfile {
   }>;
   courses?: Array<{
     id: string;
+    gora_course_id: number | null;
     course_name: string;
     course_image_url: string | null;
     evaluation: number | null;
@@ -188,20 +189,30 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
             <h2 className="px-1 pt-2 text-base font-bold text-white">お気に入りコース</h2>
             <div className="rounded-lg bg-white p-4">
               <div className="flex flex-col gap-2">
-                {profile.courses.map((c) => (
-                  <div key={c.id} className="flex items-center gap-2">
-                    {c.course_image_url && (
-                      <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold truncate">{c.course_name}</p>
-                      {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
+                {profile.courses.map((c) => {
+                  const goraUrl = c.gora_course_id
+                    ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/gora/detail/id=${c.gora_course_id}/`
+                    : null;
+                  const inner = (
+                    <div className="flex items-center gap-2">
+                      {c.course_image_url && (
+                        <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate">{c.course_name}</p>
+                        {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
+                      </div>
+                      {c.evaluation != null && (
+                        <span className="text-xs text-amber-500 shrink-0">★{c.evaluation.toFixed(1)}</span>
+                      )}
                     </div>
-                    {c.evaluation != null && (
-                      <span className="text-xs text-amber-500 shrink-0">★{c.evaluation.toFixed(1)}</span>
-                    )}
-                  </div>
-                ))}
+                  );
+                  return goraUrl ? (
+                    <a key={c.id} href={goraUrl} target="_blank" rel="noopener">{inner}</a>
+                  ) : (
+                    <div key={c.id}>{inner}</div>
+                  );
+                })}
               </div>
             </div>
             </>
