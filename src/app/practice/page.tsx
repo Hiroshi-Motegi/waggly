@@ -74,7 +74,7 @@ export default function PracticePage() {
 
             <div className="-mt-2">
             {listLoading ? (
-              <div className="rounded-lg bg-white p-4">
+              <div className="rounded-b-lg bg-white p-4">
                 <Loading />
               </div>
             ) : allSessions.length === 0 ? (
