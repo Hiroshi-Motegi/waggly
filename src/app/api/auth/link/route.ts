@@ -12,10 +12,6 @@ function getSupabaseAdmin() {
 /**
  * POST /api/auth/link
  * Link current account with another provider.
- * If the target provider has a separate account, clean it up.
- *
- * Accepts optional `originalUserId` — the user who initiated the link
- * (needed when Google OAuth replaces the session).
  */
 export async function POST(request: NextRequest) {
   const auth = await getApiAuth();
@@ -25,7 +21,6 @@ export async function POST(request: NextRequest) {
   const { provider, originalUserId } = body;
   let { providerId } = body;
 
-  // Use originalUserId if provided (Google OAuth replaces the session)
   const targetUserId = originalUserId || auth.userId;
 
   if (!provider) {
@@ -34,7 +29,7 @@ export async function POST(request: NextRequest) {
 
   const supabaseAdmin = getSupabaseAdmin();
 
-  // For LINE linking via OAuth code, resolve the LINE user ID server-side
+  // For LINE linking via OAuth code, resolve LINE user ID
   if (provider === "line" && !providerId && body.code) {
     const tokenRes = await fetch("https://api.line.me/oauth2/v2.1/token", {
       method: "POST",
@@ -70,7 +65,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing providerId" }, { status: 400 });
   }
 
-  // Get the user we're linking TO
+  // Get the user initiating the link
   const { data: currentUser } = await supabaseAdmin
     .from("users")
     .select("*")
@@ -81,119 +76,87 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
+  // Find existing user with this provider ID
+  let existingUser = null;
   if (provider === "line") {
-    // Check if LINE account already has a separate user
-    const { data: existingLineUser } = await supabaseAdmin
+    const { data } = await supabaseAdmin
       .from("users")
       .select("*")
       .eq("line_user_id", providerId)
       .neq("id", targetUserId)
       .maybeSingle();
-
-    if (existingLineUser) {
-      // Existing LINE user found — ask for confirmation
-      if (!body.confirmMerge) {
-        return NextResponse.json({
-          needsConfirm: true,
-          existingUser: {
-            id: existingLineUser.id,
-            display_name: existingLineUser.display_name,
-            lineUserId: providerId,
-          },
-          message: `既存のLINEアカウント「${existingLineUser.display_name}」が見つかりました。現在のアカウントのデータは削除され、LINEアカウントのデータに切り替わります。`,
-        });
-      }
-
-      // Confirmed — merge: keep existing LINE user, delete current user
-      const googleId = currentUser.google_id;
-      if (googleId) {
-        await supabaseAdmin
-          .from("users")
-          .update({ google_id: googleId })
-          .eq("id", existingLineUser.id);
-      }
-
-      await deleteUserData(supabaseAdmin, targetUserId);
-      await supabaseAdmin.auth.admin.deleteUser(targetUserId);
-
-      return NextResponse.json({
-        merged: true,
-        mergedInto: existingLineUser.id,
-        message: "LINEアカウントに統合しました。再ログインしてください。",
-      });
-    }
-
-    // No existing LINE user — just link, and clean up any orphan user with this LINE ID
-    await supabaseAdmin
-      .from("users")
-      .update({ line_user_id: providerId })
-      .eq("id", targetUserId);
-
-    return NextResponse.json({ merged: false, message: "LINEを連携しました" });
-
+    existingUser = data;
   } else if (provider === "google") {
-    // Check if Google account already has a separate user
-    const { data: existingGoogleUser } = await supabaseAdmin
+    const { data } = await supabaseAdmin
       .from("users")
       .select("*")
       .eq("google_id", providerId)
       .neq("id", targetUserId)
       .maybeSingle();
+    existingUser = data;
+  }
 
-    if (existingGoogleUser) {
-      if (!body.confirmMerge) {
-        return NextResponse.json({
-          needsConfirm: true,
-          existingUser: {
-            id: existingGoogleUser.id,
-            display_name: existingGoogleUser.display_name,
-          },
-          message: `既存のGoogleアカウント「${existingGoogleUser.display_name}」が見つかりました。現在のアカウントのデータは削除され、Googleアカウントのデータに切り替わります。`,
-        });
-      }
-
-      // Confirmed — merge: keep existing Google user, delete current user
-      const lineId = currentUser.line_user_id;
-      if (lineId && !lineId.startsWith("google-") && !lineId.startsWith("oauth-")) {
-        await supabaseAdmin
-          .from("users")
-          .update({ line_user_id: lineId })
-          .eq("id", existingGoogleUser.id);
-      }
-
-      await deleteUserData(supabaseAdmin, targetUserId);
-      await supabaseAdmin.auth.admin.deleteUser(targetUserId);
-
+  if (existingUser) {
+    // Existing account found — need confirmation
+    if (!body.confirmMerge) {
       return NextResponse.json({
-        merged: true,
-        mergedInto: existingGoogleUser.id,
-        message: "Googleアカウントに統合しました。再ログインしてください。",
+        needsConfirm: true,
+        currentAccount: { id: currentUser.id, display_name: currentUser.display_name },
+        existingAccount: {
+          id: existingUser.id,
+          display_name: existingUser.display_name,
+          lineUserId: provider === "line" ? providerId : undefined,
+        },
       });
     }
 
-    // No existing Google user — just link
-    // Also clean up orphan: find any users record created by the Google OAuth session
-    const googleAuthUserId = auth.userId; // The Google OAuth session user
+    // Confirmed — merge
+    const keepAccountId = body.keepAccountId;
+    const deleteAccountId = keepAccountId === currentUser.id ? existingUser.id : currentUser.id;
+    const keepAccount = keepAccountId === currentUser.id ? currentUser : existingUser;
+
+    // Transfer provider IDs to the kept account
+    if (provider === "line") {
+      await supabaseAdmin.from("users").update({
+        line_user_id: providerId,
+        google_id: keepAccount.google_id || currentUser.google_id || existingUser.google_id,
+      }).eq("id", keepAccountId);
+    } else {
+      await supabaseAdmin.from("users").update({
+        google_id: providerId,
+        line_user_id: keepAccount.line_user_id?.startsWith("oauth-") ? (currentUser.line_user_id || existingUser.line_user_id) : keepAccount.line_user_id,
+      }).eq("id", keepAccountId);
+    }
+
+    // Delete the other account
+    await deleteUserData(supabaseAdmin, deleteAccountId);
+    await supabaseAdmin.auth.admin.deleteUser(deleteAccountId);
+
+    return NextResponse.json({
+      merged: true,
+      mergedInto: keepAccountId,
+      message: "アカウントを統合しました",
+    });
+  }
+
+  // No existing account — simple link
+  if (provider === "line") {
+    await supabaseAdmin.from("users").update({ line_user_id: providerId }).eq("id", targetUserId);
+  } else if (provider === "google") {
+    // Clean up orphan Google user if exists
+    const googleAuthUserId = auth.userId;
     if (googleAuthUserId !== targetUserId) {
-      // Delete the orphan users record created by Google OAuth auto-create
       await deleteUserData(supabaseAdmin, googleAuthUserId);
       await supabaseAdmin.auth.admin.deleteUser(googleAuthUserId);
     }
-
-    await supabaseAdmin
-      .from("users")
-      .update({ google_id: providerId })
-      .eq("id", targetUserId);
-
-    return NextResponse.json({ merged: false, message: "Googleを連携しました" });
+    await supabaseAdmin.from("users").update({ google_id: providerId }).eq("id", targetUserId);
   }
 
-  return NextResponse.json({ error: "Unknown provider" }, { status: 400 });
+  return NextResponse.json({ merged: false, message: `${provider === "google" ? "Google" : "LINE"}を連携しました` });
 }
 
 /**
- * DELETE /api/auth/link
- * Unlink a provider from the current account.
+ * DELETE /api/auth/link — Unlink a provider
  */
 export async function DELETE(request: NextRequest) {
   const auth = await getApiAuth();
@@ -221,15 +184,9 @@ export async function DELETE(request: NextRequest) {
   }
 
   if (provider === "line") {
-    await supabaseAdmin
-      .from("users")
-      .update({ line_user_id: `oauth-${userId}` })
-      .eq("id", userId);
+    await supabaseAdmin.from("users").update({ line_user_id: `oauth-${userId}` }).eq("id", userId);
   } else if (provider === "google") {
-    await supabaseAdmin
-      .from("users")
-      .update({ google_id: null })
-      .eq("id", userId);
+    await supabaseAdmin.from("users").update({ google_id: null }).eq("id", userId);
   } else {
     return NextResponse.json({ error: "Unknown provider" }, { status: 400 });
   }
@@ -237,9 +194,6 @@ export async function DELETE(request: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
-/**
- * Delete all user data (clubs, accessories, practice, etc.)
- */
 async function deleteUserData(supabase: any, userId: string) {
   await supabase.from("favorite_courses").delete().eq("user_id", userId);
   await supabase.from("profiles").delete().eq("id", userId);

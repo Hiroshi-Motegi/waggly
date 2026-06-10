@@ -21,7 +21,6 @@ export default function LineCallbackPage() {
           const originalUserId = sessionStorage.getItem("link_original_user");
           const { apiFetch } = await import("@/lib/api-client");
 
-          // First call: check if merge is needed
           const res = await apiFetch("/api/auth/link", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -43,46 +42,20 @@ export default function LineCallbackPage() {
           const result = await res.json();
 
           if (result.needsConfirm) {
-            const ok = confirm(result.message + "\n\nよろしいですか？");
-            if (!ok) {
-              window.location.href = "/settings";
-              return;
-            }
-
-            // Confirmed — call again (need to re-verify LINE since code is used)
-            // Use the providerId from the first call
-            const confirmRes = await apiFetch("/api/auth/link", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                provider: "line",
-                providerId: result.existingUser?.lineUserId,
-                originalUserId,
-                confirmMerge: true,
-              }),
-            });
-
-            if (confirmRes.ok) {
-              const confirmResult = await confirmRes.json();
-              if (confirmResult.merged) {
-                alert(confirmResult.message);
-                const { createClient } = await import("@/lib/supabase/client");
-                await createClient().auth.signOut();
-                sessionStorage.removeItem("link_original_user");
-                window.location.href = "/";
-                return;
-              }
-            }
-          }
-
-          if (result.merged) {
-            alert(result.message);
-            const { createClient } = await import("@/lib/supabase/client");
-            await createClient().auth.signOut();
+            sessionStorage.setItem("merge_info", JSON.stringify({
+              provider: "line",
+              providerId: result.existingAccount?.lineUserId,
+              originalUserId,
+              currentAccount: result.currentAccount,
+              existingAccount: result.existingAccount,
+            }));
+            window.location.href = "/auth/merge";
+            return;
           }
 
           sessionStorage.removeItem("link_original_user");
-          window.location.href = result.merged ? "/" : "/settings?linked=line";
+          alert("LINEを連携しました。");
+          window.location.href = "/settings";
         } else {
           // Normal login mode
           const res = await fetch("/api/auth/line-oauth", {

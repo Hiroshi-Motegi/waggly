@@ -19,7 +19,6 @@ export default function LinkCompletePage() {
       try {
         const { apiFetch } = await import("@/lib/api-client");
 
-        // First call: check if merge is needed
         const res = await apiFetch("/api/auth/link", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -36,48 +35,23 @@ export default function LinkCompletePage() {
         const result = await res.json();
 
         if (result.needsConfirm) {
-          // Ask user to confirm merge
-          const ok = confirm(result.message + "\n\nよろしいですか？");
-          if (!ok) {
-            window.location.href = "/settings";
-            return;
-          }
-
-          // Confirmed — call again with confirmMerge
-          const confirmRes = await apiFetch("/api/auth/link", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ provider, providerId, originalUserId, confirmMerge: true }),
-          });
-
-          if (!confirmRes.ok) {
-            alert("統合に失敗しました");
-            window.location.href = "/settings";
-            return;
-          }
-
-          const confirmResult = await confirmRes.json();
-          if (confirmResult.merged) {
-            alert(confirmResult.message);
-            const { createClient } = await import("@/lib/supabase/client");
-            const supabase = createClient();
-            await supabase.auth.signOut();
-            sessionStorage.removeItem("link_original_user");
-            window.location.href = "/";
-            return;
-          }
+          // Redirect to merge page
+          sessionStorage.setItem("merge_info", JSON.stringify({
+            provider,
+            providerId,
+            originalUserId,
+            currentAccount: result.currentAccount,
+            existingAccount: result.existingAccount,
+          }));
+          window.location.href = "/auth/merge";
+          return;
         }
 
-        // After link/merge, sign out and redirect to login
-        // (Google OAuth replaced the session, original session is gone)
+        // Simple link completed
         sessionStorage.removeItem("link_original_user");
         const { createClient } = await import("@/lib/supabase/client");
         await createClient().auth.signOut();
-
-        const msg = result.merged
-          ? result.message
-          : `${provider === "google" ? "Google" : "LINE"}を連携しました`;
-        alert(msg + "\n再ログインしてください。");
+        alert(`${provider === "google" ? "Google" : "LINE"}を連携しました。再ログインしてください。`);
         window.location.href = "/";
       } catch (e) {
         console.error("Link error:", e);
