@@ -54,7 +54,7 @@ export default function PracticePage() {
         {viewMode === "calendar" ? (
           <>
             {/* Sticky calendar - bg-[#2d6e3f] on MonthCalendar handles opacity */}
-            <div className="sticky top-0 z-20">
+            <div className="sticky top-[52px] z-20">
               <MonthCalendar
                 year={calYear}
                 month={calMonth}
