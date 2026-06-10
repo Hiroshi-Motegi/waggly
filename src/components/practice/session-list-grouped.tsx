@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { nativeHref } from "@/lib/native-routes";
 import { formatWeekday } from "@/lib/calendar-utils";
@@ -8,22 +9,41 @@ import type { PracticeSessionWithClubs } from "@/types/database";
 interface SessionListGroupedProps {
   sessions: PracticeSessionWithClubs[];
   selectedDate: string; // "YYYY-MM-DD"
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupedProps) {
+export function SessionListGrouped({ sessions, selectedDate, scrollContainerRef }: SessionListGroupedProps) {
   const sorted = [...sessions].sort((a, b) => a.practiced_at.localeCompare(b.practiced_at));
+  const groupRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Find the starting index: first session on or after selectedDate,
-  // or if none, the most recent session before selectedDate
-  let startIdx = sorted.findIndex((s) => s.practiced_at >= selectedDate);
-  if (startIdx === -1) {
-    // No sessions on or after selected date — show from the last one
-    startIdx = Math.max(0, sorted.length - 1);
-  }
+  const setGroupRef = useCallback((date: string, el: HTMLDivElement | null) => {
+    if (el) {
+      groupRefs.current.set(date, el);
+    } else {
+      groupRefs.current.delete(date);
+    }
+  }, []);
 
-  const filtered = sorted.slice(startIdx);
+  // Auto-scroll to the nearest group when selectedDate changes
+  useEffect(() => {
+    if (sorted.length === 0) return;
 
-  if (filtered.length === 0) {
+    // Find the closest date: first on/after selectedDate, else last before
+    const dates = [...new Set(sorted.map((s) => s.practiced_at))].sort();
+    let targetDate = dates.find((d) => d >= selectedDate);
+    if (!targetDate) {
+      targetDate = dates[dates.length - 1];
+    }
+
+    const el = groupRefs.current.get(targetDate);
+    if (el && scrollContainerRef?.current) {
+      const container = scrollContainerRef.current;
+      const elTop = el.offsetTop - container.offsetTop;
+      container.scrollTo({ top: elTop, behavior: "smooth" });
+    }
+  }, [selectedDate, sorted.length]);
+
+  if (sorted.length === 0) {
     return (
       <div className="rounded-lg bg-white p-6 text-center">
         <p className="text-base text-[#8b8b8b]">練習記録がありません</p>
@@ -31,9 +51,9 @@ export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupe
     );
   }
 
-  // Group by date preserving descending order
+  // Group by date
   const groups: { date: string; sessions: PracticeSessionWithClubs[] }[] = [];
-  for (const session of filtered) {
+  for (const session of sorted) {
     const last = groups[groups.length - 1];
     if (last && last.date === session.practiced_at) {
       last.sessions.push(session);
@@ -48,7 +68,11 @@ export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupe
         const dayNumber = group.date.split("-")[2].replace(/^0/, "");
         const weekday = formatWeekday(group.date);
         return (
-          <div key={group.date} className={groupIdx > 0 ? "border-t border-[#efefef]" : ""}>
+          <div
+            key={group.date}
+            ref={(el) => setGroupRef(group.date, el)}
+            className={groupIdx > 0 ? "border-t border-[#efefef]" : ""}
+          >
             {group.sessions.map((session, idx) => (
               <Link
                 key={session.id}

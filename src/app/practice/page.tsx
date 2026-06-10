@@ -1,7 +1,7 @@
 "use client";
 import { Loading } from "@/components/loading";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Plus, Calendar, List } from "lucide-react";
@@ -19,6 +19,7 @@ function formatDate(dateStr: string): string {
 
 export default function PracticePage() {
   const now = new Date();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const [calYear, setCalYear] = useState(now.getFullYear());
   const [calMonth, setCalMonth] = useState(now.getMonth());
@@ -77,7 +78,7 @@ export default function PracticePage() {
         </div>
 
         {/* Scrollable list */}
-        <div className="relative z-10 flex-1 overflow-y-auto px-2 pt-2 pb-2">
+        <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-2 pt-2 pb-2">
           {listLoading ? (
             <div className="rounded-lg bg-white p-4">
               <Loading />
@@ -95,6 +96,7 @@ export default function PracticePage() {
             <SessionListGrouped
               sessions={allSessions}
               selectedDate={selectedDate}
+              scrollContainerRef={scrollRef}
             />
           )}
         </div>
