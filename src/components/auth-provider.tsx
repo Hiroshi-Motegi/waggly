@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 line_user_id: meta.provider_id ?? `oauth-${existingAuth.id}`,
                 display_name: meta.full_name ?? meta.name ?? meta.display_name ?? existingAuth.email ?? "ゲスト",
                 avatar_url: meta.avatar_url ?? meta.picture ?? null,
+                agreed_terms_at: new Date().toISOString(),
               })
               .select()
               .single();
