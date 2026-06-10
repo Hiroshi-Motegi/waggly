@@ -64,23 +64,25 @@ export default function PracticePage() {
 
         {viewMode === "calendar" ? (
           <>
-            <MonthCalendar
-              year={calYear}
-              month={calMonth}
-              selectedDate={selectedDate}
-              practicedDates={practicedDates}
-              onSelectDate={setSelectedDate}
-              onChangeMonth={handleChangeMonth}
-              onToggleView={() => setViewMode("list")}
-            />
+            <div className="sticky top-[56px] z-10">
+              <MonthCalendar
+                year={calYear}
+                month={calMonth}
+                selectedDate={selectedDate}
+                practicedDates={practicedDates}
+                onSelectDate={setSelectedDate}
+                onChangeMonth={handleChangeMonth}
+                onToggleView={() => setViewMode("list")}
+              />
+            </div>
 
-            {monthLoading ? (
+            {listLoading ? (
               <div className="rounded-lg bg-white p-4">
                 <Loading />
               </div>
-            ) : monthSessions.length === 0 ? (
+            ) : allSessions.length === 0 ? (
               <div className="rounded-lg bg-white p-6 text-center">
-                <p className="text-base text-[#8b8b8b]">今月の練習: 0回</p>
+                <p className="text-base text-[#8b8b8b]">練習記録がありません</p>
                 <Link href="/practice/new">
                   <button className="mt-3 rounded-full bg-[#006728] px-5 py-2 text-sm font-bold text-white">
                     記録する
@@ -89,7 +91,7 @@ export default function PracticePage() {
               </div>
             ) : (
               <SessionListGrouped
-                sessions={monthSessions}
+                sessions={allSessions}
                 selectedDate={selectedDate}
               />
             )}

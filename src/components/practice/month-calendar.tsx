@@ -108,9 +108,9 @@ export function MonthCalendar({
   }
 
   return (
-    <div className="rounded-lg bg-[#2d6e3f] p-3">
+    <div className="rounded-lg bg-[#2d6e3f] px-4 py-3">
       {/* Header row */}
-      <div className="flex items-center mb-3">
+      <div className="flex items-center mb-2">
         <MonthPicker year={year} month={month} onChange={onChangeMonth} />
         <div className="flex-1" />
         {!isCurrentMonth && (
@@ -151,13 +151,13 @@ export function MonthCalendar({
           <button
             key={day.dateString}
             type="button"
-            className="p-0.5"
+            className="flex items-center justify-center"
             onClick={() => handleDayClick(day)}
             aria-label={day.dateString}
             aria-pressed={day.dateString === selectedDate && day.isCurrentMonth}
           >
             <div
-              className={`aspect-square flex items-center justify-center rounded-full text-sm ${getDayCellClass(day)}`}
+              className={`h-8 w-8 flex items-center justify-center rounded-full text-sm ${getDayCellClass(day)}`}
             >
               {day.date}
             </div>
