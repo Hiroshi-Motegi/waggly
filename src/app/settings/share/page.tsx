@@ -16,9 +16,10 @@ const VISIBLE_FIELD_LABELS: Record<string, string> = {
   best_score: "ベストスコア",
   home_course: "ホームコース",
   bio: "ひとこと",
-  bag: "MY BAG",
+  bag: "マイバッグ",
   favorite_courses: "お気に入りコース",
-  sns_links: "SNSリンク",
+  sns_links: "SNS",
+  custom_links: "その他のリンク",
 };
 
 export default function ShareSettingsPage() {
