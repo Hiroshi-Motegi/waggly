@@ -146,7 +146,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
   const presetNumbers = form.category ? (clubNumbersByCategory[form.category] ?? []) : [];
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col space-y-2 pt-2">
+    <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
       {/* Section 1: クラブ詳細 */}
       <h3 className="px-1 pt-2 text-base font-bold text-white">クラブ詳細</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
