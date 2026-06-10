@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { nativeHref } from "@/lib/native-routes";
 import { PageHeader } from "@/components/layout/page-header";
 import { ClubForm } from "@/components/club/club-form";
@@ -11,12 +11,22 @@ import type { Club } from "@/types/database";
 
 export default function NewClubPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const defaults: Partial<Club> = tab === "bag2"
+    ? { status: "bag", bag_number: 2 }
+    : tab === "reserve"
+      ? { status: "reserve" }
+      : tab === "sold"
+        ? { status: "sold" }
+        : { status: "bag", bag_number: 1 };
 
   async function handleSubmit(data: Partial<Club>, pendingImage?: File) {
     setIsSubmitting(true);
     try {
-      const club = await createClub({ status: "bag", ...data });
+      const club = await createClub({ ...defaults, ...data });
       if (pendingImage) {
         const formData = new FormData();
         formData.append("file", pendingImage);
@@ -25,7 +35,7 @@ export default function NewClubPage() {
           body: formData,
         });
       }
-      router.push(nativeHref(`/bag/${club.id}`));
+      router.replace(nativeHref(`/bag/${club.id}`));
     } catch (error) {
       console.error("Failed to create club:", error);
     } finally {

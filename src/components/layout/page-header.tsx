@@ -43,7 +43,7 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
           <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none" />
         </>
       )}
-      <div className="relative z-10 flex items-center gap-2">
+      <div className="relative z-10 flex items-center gap-2 min-h-[40px]">
         {showBack && (
           <button onClick={handleBack} className="shrink-0 -ml-1 p-1">
             <ChevronLeft className={`h-5 w-5 ${isDark ? "text-white" : "text-[#006728]"}`} />

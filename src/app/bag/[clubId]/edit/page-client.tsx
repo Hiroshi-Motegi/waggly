@@ -20,7 +20,7 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
     setIsSubmitting(true);
     try {
       await updateClub(clubId, data);
-      router.push(nativeHref(`/bag/${clubId}`));
+      router.replace(nativeHref(`/bag/${clubId}`));
     } catch (error) {
       console.error("Failed to update club:", error);
     } finally {

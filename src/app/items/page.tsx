@@ -99,7 +99,7 @@ export default function ItemsPage() {
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="アイテム" showBack={false} variant="dark">
-        <Link href="/items/new">
+        <Link href={filter === "all" || filter === "active" ? "/items/new" : `/items/new?status=${filter}`}>
           <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
             <Plus className="h-4 w-4" />
             追加

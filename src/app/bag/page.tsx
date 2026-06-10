@@ -36,7 +36,7 @@ function clubSortKey(club: ClubWithImages): number {
 
 const statusLabels: Record<string, string> = {
   bag: "マイバッグ",
-  reserve: "予備",
+  reserve: "保管庫",
   sold: "アーカイブ",
 };
 
@@ -46,7 +46,7 @@ const filterTabs: { value: FilterTab; label: string }[] = [
   { value: "all", label: "すべて" },
   { value: "bag1", label: "マイバッグ" },
   { value: "bag2", label: "予備バッグ" },
-  { value: "reserve", label: "予備" },
+  { value: "reserve", label: "保管庫" },
   { value: "sold", label: "アーカイブ" },
 ];
 
@@ -111,7 +111,7 @@ function ClubRow({
       </div>
       <div className="flex flex-1 flex-col gap-0.5 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="shrink-0 bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5">
+          <span className="shrink-0 bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">
             {club.club_number}
           </span>
           <span className="text-base font-bold text-black truncate">{club.model ?? "—"}</span>
@@ -121,11 +121,6 @@ function ClubRow({
         </div>
         <span className="text-sm text-[#8b8b8b] truncate pl-0.5">{club.maker ?? "—"}</span>
       </div>
-      {showStatus && bagLabel && (
-        <span className="shrink-0 rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
-          {bagLabel}
-        </span>
-      )}
       {!isReordering && (
         <Image
           src="/icons/chevron-right.svg"
@@ -182,7 +177,6 @@ export default function BagPage() {
       : clubs;
 
   const bagCount = isBagView ? clubs.length : null;
-  const bagLabel = statusFilter === "bag1" ? "マイバッグ" : statusFilter === "bag2" ? "予備バッグ" : "マイバッグ";
 
   function startReorder() {
     setLocalClubs([...clubs].sort((a, b) => a.sort_order - b.sort_order));
@@ -217,24 +211,24 @@ export default function BagPage() {
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader
-        title={isBagView && bagCount !== null ? `${bagLabel} (${bagCount}/${MAX_BAG_CLUBS})` : "マイバッグ"}
+        title="マイバッグ"
         showBack={false}
         variant="dark"
       >
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           {isBagView && !isReordering && clubs.length > 1 && (
             <button
               onClick={startReorder}
-              className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-sm font-bold text-white"
+              className="flex items-center gap-1 rounded-full border border-white px-3 h-[34px] text-sm font-bold text-white"
             >
               <GripVertical className="h-4 w-4" />
               並替
             </button>
           )}
           {!isReordering && (
-            <Link href="/bag/new">
+            <Link href={statusFilter === "all" || statusFilter === "bag1" ? "/bag/new" : `/bag/new?tab=${statusFilter}`}>
               <button
-                className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728] disabled:opacity-50"
+                className="flex items-center gap-1 rounded-full bg-white px-4 h-[34px] text-sm font-bold text-[#006728] disabled:opacity-50"
                 disabled={isBagView && (bagCount ?? 0) >= MAX_BAG_CLUBS}
               >
                 <Plus className="h-4 w-4" />
@@ -312,6 +306,13 @@ export default function BagPage() {
         {showCharts && !isReordering && (
           <div className="flex justify-end pb-3 border-b border-[#ececec]">
             <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />
+          </div>
+        )}
+
+        {/* Count */}
+        {isBagView && !isReordering && bagCount !== null && (
+          <div className="pt-1 pb-1 text-sm text-[#8b8b8b] text-right">
+            {bagCount} / {MAX_BAG_CLUBS}本
           </div>
         )}
 

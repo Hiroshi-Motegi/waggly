@@ -15,7 +15,7 @@ import { nativeHref } from "@/lib/native-routes";
 
 const statusLabels: Record<string, string> = {
   bag: "マイバッグ",
-  reserve: "予備",
+  reserve: "保管庫",
   sold: "アーカイブ",
 };
 
@@ -57,9 +57,9 @@ function formatDate(dateStr: string): string {
 }
 
 const badgeColors: Record<string, string> = {
-  memo: "bg-[#c7e2ca]",
-  practice: "bg-[#c7d2e2]",
-  maintenance: "bg-[#e2dac7]",
+  memo: "border border-[#006728] text-[#006728] bg-white",
+  practice: "border border-[#3573e5] text-[#3573e5] bg-white",
+  maintenance: "border border-[#b5850a] text-[#b5850a] bg-white",
 };
 
 const badgeLabels: Record<string, string> = {
@@ -76,16 +76,23 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
   const [activityLoading, setActivityLoading] = useState(true);
   const [activityCount, setActivityCount] = useState(0);
   const [latestDistance, setLatestDistance] = useState<number | null>(null);
+  const [hasSummary, setHasSummary] = useState(false);
 
   const { user } = useAuth();
 
   useEffect(() => {
     if (!club) return;
+    apiFetch(`/api/clubs/${clubId}/summary`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && (data.totalBalls > 0 || data.memoCount > 0)) setHasSummary(true);
+      })
+      .catch(() => {});
     apiFetch(`/api/clubs/${clubId}/history`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data: ActivityItem[]) => {
         setActivityCount(data.length);
-        setActivity(data.slice(0, 4));
+        setActivity(data.slice(0, 3));
         const dist = data.find((d) =>
           (d.type === "memo" && d.distance != null) ||
           (d.type === "practice" && d.avg_distance != null)
@@ -142,13 +149,10 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {(() => {
           const primaryImage = club.club_images?.find((img: any) => img.is_primary) ?? club.club_images?.[0];
+          if (!primaryImage) return null;
           return (
             <div className="flex items-center justify-center py-2">
-              {primaryImage ? (
-                <img src={primaryImage.image_url} alt={club.club_number} className="max-h-[229px] rounded object-contain" />
-              ) : (
-                <img src="/icons/cat-club.svg" alt="" className="h-[100px] opacity-40" />
-              )}
+              <img src={primaryImage.image_url} alt={club.club_number} className="max-h-[229px] rounded object-contain" />
             </div>
           );
         })()}
@@ -244,29 +248,29 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         <div className="flex flex-wrap items-center justify-center gap-2 py-5">
           {!(club.status === "bag" && club.bag_number === 1) && (
             <button onClick={() => handleStatusChange("bag", 1)} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-base font-bold text-[#006728]">
-              マイバッグに入れる
+              マイバッグへ
             </button>
           )}
           {!(club.status === "bag" && club.bag_number === 2) && (
             <button onClick={() => handleStatusChange("bag", 2)} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-base font-bold text-[#006728]">
-              予備バッグに入れる
+              予備バッグへ
             </button>
           )}
           {club.status !== "reserve" && (
             <button onClick={() => handleStatusChange("reserve")} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-base font-bold text-[#006728]">
-              予備にする
+              保管庫へ
             </button>
           )}
           {club.status !== "sold" && (
             <button onClick={() => handleStatusChange("sold")} className="rounded-full border border-[#006728] bg-white px-4 py-1 text-base font-bold text-[#006728]">
-              アーカイブする
+              アーカイブへ
             </button>
           )}
         </div>
       </div>
 
       {/* 使用感サマリー */}
-      {user && (
+      {user && hasSummary && (
         <div className="flex flex-col gap-2 pt-4">
           <h3 className="text-base font-bold text-white px-1">使用感サマリー</h3>
           <ClubUsageSummary clubId={clubId} />
@@ -288,7 +292,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
           className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
         >
           <Plus className="h-3 w-3" />
-          メンテナンス記録
+          メンテナンス
         </Link>
       </div>
 
@@ -353,44 +357,52 @@ function ActivityRow({ item, clubId, isLast }: { item: ActivityItem; clubId: str
 
   const allTags = [...(item.symptom_tags ?? []), ...(item.feeling_tags ?? []), ...(item.gear_tags ?? [])];
 
+  const conditionLabel: Record<string, string> = { good: "Good", normal: "OK", bad: "Bad" };
+  const conditionColor: Record<string, string> = { good: "bg-[#ffedce] text-[#e28e08]", normal: "bg-[#d8f6db] text-[#006728]", bad: "bg-[#ffe6e7] text-[#d54848]" };
+
   return (
     <Link href={href}>
-      <div className={`flex items-center gap-2.5 py-2 ${!isLast ? "border-b border-[#dfdfdf]" : ""}`}>
+      <div className={`flex items-center gap-2.5 py-3 ${!isLast ? "border-b border-[#dfdfdf]" : ""}`}>
         <div className="flex flex-1 flex-col gap-px min-w-0">
-          {/* Row 1: badge + date */}
+          {/* Row 1: type badge + date + yd/球 badges */}
           <div className="flex items-center gap-1.5">
-            <span className={`rounded-full px-2.5 py-1 text-xs font-bold text-black ${badgeColors[item.type]}`}>
+            <span className={`rounded-md px-2.5 py-1 text-xs font-bold ${badgeColors[item.type]}`}>
               {badgeLabels[item.type]}
             </span>
-            <span className="text-sm font-medium text-[#8b8b8b]">{dateStr}</span>
+            <span className="flex-1 text-sm font-medium text-[#8b8b8b]">{dateStr}</span>
+            {(item.type === "memo" && item.distance) && (
+              <span className="rounded-full border border-[#6b6b6b] px-2.5 py-1 text-xs font-bold text-[#474747]">{item.distance}yd</span>
+            )}
+            {(item.type === "practice" && item.avg_distance) && (
+              <span className="rounded-full border border-[#6b6b6b] px-2.5 py-1 text-xs font-bold text-[#474747]">{item.avg_distance}yd</span>
+            )}
+            {(item.type === "practice" && item.balls) && (
+              <span className="rounded-full border border-[#6b6b6b] px-2.5 py-1 text-xs font-bold text-[#474747]">{item.balls}球</span>
+            )}
           </div>
-          {/* Row 2: title (bold) */}
+          {/* Row 2: title (bold, green) */}
           {title && (
-            <p className="text-sm font-bold text-black pt-1 pb-0.5">{title}</p>
+            <p className="text-sm font-bold text-[#006728] pt-1 pb-0.5 pl-1.5">{title}</p>
           )}
-          {/* Row 3: condition + yd/球 badges + tags */}
-          {(item.condition || item.distance || item.avg_distance || item.balls || allTags.length > 0) && (
-            <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
+          {/* Row 3: condition badge + tags in light border box */}
+          {(item.condition || allTags.length > 0) && (
+            <div className="flex flex-wrap items-center gap-1.5 py-1.5 mt-1">
               {item.condition && (
-                <img src={`/images/face-${item.condition === "normal" ? "ok" : item.condition}.png`} alt="" className="w-5 h-5" />
-              )}
-              {(item.type === "memo" && item.distance) && (
-                <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.distance}yd</span>
-              )}
-              {(item.type === "practice" && item.avg_distance) && (
-                <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.avg_distance}yd</span>
-              )}
-              {(item.type === "practice" && item.balls) && (
-                <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.balls}球</span>
+                <span className="flex items-center h-7 rounded-full">
+                  <img src={`/images/face-${item.condition === "normal" ? "ok" : item.condition}.png`} alt="" className="w-7 h-7 shrink-0 relative z-10" />
+                  <span className={`h-7 flex items-center rounded-r-full -ml-3 pl-4 pr-2.5 text-xs font-bold ${conditionColor[item.condition] ?? conditionColor.normal}`}>
+                    {conditionLabel[item.condition] ?? "OK"}
+                  </span>
+                </span>
               )}
               {allTags.map((tag) => (
-                <span key={tag} className="rounded-full bg-[#f0f0f0] p-1.5 text-xs font-medium text-black">{tag}</span>
+                <span key={tag} className="h-7 flex items-center rounded-full bg-[#eee] px-2.5 text-xs font-medium text-black">{tag}</span>
               ))}
             </div>
           )}
           {/* Row 4: memo text */}
           {memoText && (
-            <p className="text-sm text-black pt-1.5 line-clamp-2 overflow-hidden">{memoText}</p>
+            <p className="text-sm text-black pt-1.5 pl-1.5 line-clamp-2 overflow-hidden">{memoText}</p>
           )}
         </div>
         <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" />

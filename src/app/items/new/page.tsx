@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, X, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
+import { nativeHref } from "@/lib/native-routes";
 import { useAuth } from "@/hooks/use-auth";
 import { isNative } from "@/lib/platform";
 import type { AccessoryCategory, AccessoryStatus } from "@/types/database";
@@ -29,6 +30,8 @@ const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2
 
 export default function NewItemPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialStatus = (searchParams.get("status") === "past" ? "past" : "active") as AccessoryStatus;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -39,7 +42,7 @@ export default function NewItemPage() {
     model: "",
     memo: "",
     rating: null as number | null,
-    status: "active" as AccessoryStatus,
+    status: initialStatus,
     purchase_url: "",
   });
 
@@ -94,7 +97,7 @@ export default function NewItemPage() {
         });
       }
 
-      router.push("/items");
+      router.replace(nativeHref(`/items/${created.id}`));
     } catch (error) {
       console.error("Failed to create accessory:", error);
     } finally {
