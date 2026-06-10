@@ -104,7 +104,7 @@ export default function ShareSettingsPage() {
         {/* Username */}
         <h3 className="px-1 pt-2 text-base font-bold text-white">ユーザー名</h3>
         <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
-          <p className="text-xs text-[#8b8b8b]">公開ページのURLに使われます（英数字・ハイフン・アンダースコア、3〜20文字）</p>
+          <p className="text-sm text-[#8b8b8b]">公開ページのURLに使われます（英数字・ハイフン・アンダースコア、3〜20文字）</p>
           {hasUsername && !isEditingUsername ? (
             <>
               <div className="flex gap-2 items-center">
@@ -116,7 +116,7 @@ export default function ShareSettingsPage() {
                   変更する
                 </button>
               </div>
-              <p className="text-xs text-[#8b8b8b]">URL: waggly.jp/p/{profile.username}</p>
+              <p className="text-sm text-[#8b8b8b]">URL: waggly.jp/p/{profile.username}</p>
             </>
           ) : (
             <>
