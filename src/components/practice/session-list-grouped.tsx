@@ -11,9 +11,17 @@ interface SessionListGroupedProps {
 }
 
 export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupedProps) {
-  const filtered = sessions
-    .filter((s) => s.practiced_at >= selectedDate)
-    .sort((a, b) => a.practiced_at.localeCompare(b.practiced_at));
+  const sorted = [...sessions].sort((a, b) => a.practiced_at.localeCompare(b.practiced_at));
+
+  // Find the starting index: first session on or after selectedDate,
+  // or if none, the most recent session before selectedDate
+  let startIdx = sorted.findIndex((s) => s.practiced_at >= selectedDate);
+  if (startIdx === -1) {
+    // No sessions on or after selected date — show from the last one
+    startIdx = Math.max(0, sorted.length - 1);
+  }
+
+  const filtered = sorted.slice(startIdx);
 
   if (filtered.length === 0) {
     return (
