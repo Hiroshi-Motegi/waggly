@@ -6,14 +6,26 @@ export async function GET() {
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  // Upsert to ensure profile exists
-  const { data, error } = await supabase
+  // Try to get existing profile
+  let { data, error } = await supabase
     .from("profiles")
-    .upsert({ id: userId }, { onConflict: "id", ignoreDuplicates: true })
-    .select()
-    .single();
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Create if not exists
+  if (!data) {
+    const { data: created, error: createError } = await supabase
+      .from("profiles")
+      .insert({ id: userId })
+      .select()
+      .single();
+    if (createError) return NextResponse.json({ error: createError.message }, { status: 500 });
+    data = created;
+  }
+
   return NextResponse.json(data);
 }
 
