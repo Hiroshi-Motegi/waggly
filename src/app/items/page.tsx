@@ -23,15 +23,15 @@ const categoryLabels: Record<AccessoryCategory, string> = {
 };
 
 const categoryIcons: Record<AccessoryCategory, string> = {
-  ball: "/icons/cat-ball.svg",
-  glove: "/icons/cat-glove.svg",
-  tee: "/icons/cat-tee.svg",
-  apparel: "/icons/cat-apparel.svg",
-  bag: "/icons/cat-bag.svg",
-  rangefinder: "/icons/cat-rangefinder.svg",
-  grip: "/icons/cat-grip.svg",
-  shaft: "/icons/cat-shaft.svg",
-  other: "/icons/cat-other.svg",
+  ball: "/no-images/ball.png",
+  glove: "/no-images/globe.png",
+  tee: "/no-images/tee.png",
+  apparel: "/no-images/ware.png",
+  bag: "/no-images/bag.png",
+  rangefinder: "/no-images/distance.png",
+  grip: "/no-images/grip.png",
+  shaft: "/no-images/shaft.png",
+  other: "/no-images/etc.png",
 };
 
 function StarRating({ rating }: { rating: number | null }) {
@@ -151,7 +151,7 @@ export default function ItemsPage() {
                     {item.image_url ? (
                       <img src={item.image_url} alt={item.model ?? ""} className="size-full object-cover" />
                     ) : (
-                      <Image src={categoryIcons[item.category]} alt="" width={30} height={30} className="opacity-50" />
+                      <img src={categoryIcons[item.category]} alt="" className="size-full object-cover" />
                     )}
                   </div>
                   <div className="flex flex-1 flex-col gap-px min-w-0">

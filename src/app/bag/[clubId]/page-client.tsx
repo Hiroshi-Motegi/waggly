@@ -149,10 +149,17 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {(() => {
           const primaryImage = club.club_images?.find((img: any) => img.is_primary) ?? club.club_images?.[0];
-          if (!primaryImage) return null;
+          const noImage: Record<string, string> = {
+            driver: "/no-images/driver.png", fairway_wood: "/no-images/fw.png", utility: "/no-images/ut.png",
+            iron: "/no-images/Iron.png", wedge: "/no-images/wedge.png", putter: "/no-images/putter.png",
+          };
           return (
             <div className="flex items-center justify-center py-2">
-              <img src={primaryImage.image_url} alt={club.club_number} className="max-h-[229px] rounded object-contain" />
+              <img
+                src={primaryImage?.image_url ?? noImage[club.category] ?? "/no-images/etc.png"}
+                alt={club.club_number}
+                className="max-h-[229px] rounded object-contain"
+              />
             </div>
           );
         })()}

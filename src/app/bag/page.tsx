@@ -19,6 +19,15 @@ import { ChartInsights } from "@/components/charts/chart-insights";
 
 const MAX_BAG_CLUBS = 14;
 
+const clubNoImage: Record<string, string> = {
+  driver: "/no-images/driver.png",
+  fairway_wood: "/no-images/fw.png",
+  utility: "/no-images/ut.png",
+  iron: "/no-images/Iron.png",
+  wedge: "/no-images/wedge.png",
+  putter: "/no-images/putter.png",
+};
+
 const categoryOrder: Record<string, number> = {
   driver: 100, fairway_wood: 200, utility: 300, iron: 400, wedge: 500, putter: 600,
 };
@@ -106,7 +115,7 @@ function ClubRow({
             className="size-full object-cover"
           />
         ) : (
-          <Image src="/icons/cat-club.svg" alt="" width={30} height={30} className="opacity-50" />
+          <img src={clubNoImage[club.category] ?? "/no-images/etc.png"} alt="" className="size-full object-cover" />
         )}
       </div>
       <div className="flex flex-1 flex-col gap-0.5 min-w-0">

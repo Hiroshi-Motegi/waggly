@@ -26,15 +26,15 @@ const categoryLabels: Record<AccessoryCategory, string> = {
 };
 
 const categoryIcons: Record<AccessoryCategory, string> = {
-  ball: "/icons/cat-ball.svg",
-  glove: "/icons/cat-glove.svg",
-  tee: "/icons/cat-tee.svg",
-  apparel: "/icons/cat-apparel.svg",
-  bag: "/icons/cat-bag.svg",
-  rangefinder: "/icons/cat-rangefinder.svg",
-  grip: "/icons/cat-grip.svg",
-  shaft: "/icons/cat-shaft.svg",
-  other: "/icons/cat-other.svg",
+  ball: "/no-images/ball.png",
+  glove: "/no-images/globe.png",
+  tee: "/no-images/tee.png",
+  apparel: "/no-images/ware.png",
+  bag: "/no-images/bag.png",
+  rangefinder: "/no-images/distance.png",
+  grip: "/no-images/grip.png",
+  shaft: "/no-images/shaft.png",
+  other: "/no-images/etc.png",
 };
 
 const categories: { value: AccessoryCategory; label: string }[] = [
