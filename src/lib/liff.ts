@@ -52,7 +52,10 @@ export async function liffLogout() {
 
   // Clear LIFF session
   try {
-    await initLiff();
+    if (!initPromise) {
+      initPromise = liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! });
+    }
+    await initPromise;
     if (liff.isLoggedIn()) {
       liff.logout();
     }
