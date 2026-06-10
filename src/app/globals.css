@@ -138,6 +138,7 @@ html, body {
   }
   .liff-client {
     --bottom-nav-padding: 1rem;
+    --bottom-nav-height: calc(4.5rem + var(--bottom-nav-padding) + env(safe-area-inset-bottom));
   }
 }
 
