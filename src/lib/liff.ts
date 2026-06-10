@@ -21,7 +21,10 @@ export async function initLiff(): Promise<string | null> {
   }
 
   if (!liff.isLoggedIn()) {
-    liff.login();
+    // Auto-login only inside LINE app; on web, let user click the button
+    if (liff.isInClient()) {
+      liff.login();
+    }
     return null;
   }
 
