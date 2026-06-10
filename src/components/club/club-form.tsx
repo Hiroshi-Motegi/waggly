@@ -59,6 +59,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
     kick_point: "",
     head_volume: undefined,
     head_weight: undefined,
+    rating: null,
     ...initialData,
   });
   const { user } = useAuth();
@@ -292,6 +293,24 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
           </>
         )}
 
+        {/* 評価 */}
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className={labelClass}>評価</span>
+          <div className="flex gap-1.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => update("rating", form.rating === star ? null : star)}
+                className={`text-xl transition-colors ${
+                  form.rating != null && star <= form.rating ? "text-amber-400" : "text-gray-300"
+                }`}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Section 2: スペック */}

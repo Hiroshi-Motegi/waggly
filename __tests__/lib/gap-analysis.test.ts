@@ -11,7 +11,7 @@ function makeClub(overrides: Partial<Club>): Club {
     status: "bag", sort_order: 0, created_at: "2026-01-01",
     release_year: null, memo: null, bag_number: 1,
     weight: null, swing_weight: null, frequency: null,
-    kick_point: null, head_volume: null, head_weight: null,
+    kick_point: null, head_volume: null, head_weight: null, rating: null,
     ...overrides,
   };
 }

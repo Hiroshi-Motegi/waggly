@@ -28,9 +28,9 @@ export async function saveLocalClub(club: any): Promise<any> {
   const id = club.id || crypto.randomUUID();
   const now = new Date().toISOString();
   await execute(
-    `INSERT OR REPLACE INTO clubs (id, user_id, category, club_number, maker, model, shaft_name, shaft_flex, loft, lie, length, distance, release_year, memo, purchase_date, purchase_shop, purchase_price, status, bag_number, sort_order, weight, swing_weight, frequency, kick_point, head_volume, head_weight, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, club.user_id ?? "local", club.category, club.club_number, club.maker ?? null, club.model ?? null, club.shaft_name ?? null, club.shaft_flex ?? null, club.loft ?? null, club.lie ?? null, club.length ?? null, club.distance ?? null, club.release_year ?? null, club.memo ?? null, club.purchase_date ?? null, club.purchase_shop ?? null, club.purchase_price ?? null, club.status ?? "bag", club.bag_number ?? 1, club.sort_order ?? 0, club.weight ?? null, club.swing_weight ?? null, club.frequency ?? null, club.kick_point ?? null, club.head_volume ?? null, club.head_weight ?? null, club.created_at ?? now]
+    `INSERT OR REPLACE INTO clubs (id, user_id, category, club_number, maker, model, shaft_name, shaft_flex, loft, lie, length, distance, release_year, memo, purchase_date, purchase_shop, purchase_price, status, bag_number, sort_order, weight, swing_weight, frequency, kick_point, head_volume, head_weight, rating, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, club.user_id ?? "local", club.category, club.club_number, club.maker ?? null, club.model ?? null, club.shaft_name ?? null, club.shaft_flex ?? null, club.loft ?? null, club.lie ?? null, club.length ?? null, club.distance ?? null, club.release_year ?? null, club.memo ?? null, club.purchase_date ?? null, club.purchase_shop ?? null, club.purchase_price ?? null, club.status ?? "bag", club.bag_number ?? 1, club.sort_order ?? 0, club.weight ?? null, club.swing_weight ?? null, club.frequency ?? null, club.kick_point ?? null, club.head_volume ?? null, club.head_weight ?? null, club.rating ?? null, club.created_at ?? now]
   );
   return { ...club, id, created_at: club.created_at ?? now };
 }

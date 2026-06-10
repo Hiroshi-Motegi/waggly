@@ -1,5 +1,13 @@
 /** Schema version — increment when adding migrations. */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 3;
+
+export const SCHEMA_V3 = `
+ALTER TABLE clubs ADD COLUMN rating INTEGER;
+`;
+
+export const SCHEMA_V2 = `
+ALTER TABLE club_memos ADD COLUMN balls INTEGER;
+`;
 
 /** SQLite DDL for all mirrored tables + sync metadata. */
 export const SCHEMA_V1 = `
@@ -30,6 +38,7 @@ CREATE TABLE IF NOT EXISTS clubs (
   kick_point TEXT,
   head_volume REAL,
   head_weight REAL,
+  rating INTEGER,
   created_at TEXT NOT NULL
 );
 
@@ -37,6 +46,7 @@ CREATE TABLE IF NOT EXISTS club_memos (
   id TEXT PRIMARY KEY,
   club_id TEXT NOT NULL,
   distance REAL,
+  balls INTEGER,
   memo TEXT,
   condition TEXT,
   symptom_tags TEXT DEFAULT '[]',

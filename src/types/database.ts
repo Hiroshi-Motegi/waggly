@@ -45,6 +45,7 @@ export interface Club {
   kick_point: string | null;      // キックポイント
   head_volume: number | null;     // ヘッド体積 (cc)
   head_weight: number | null;     // ヘッド重量 (g)
+  rating: number | null;
   created_at: string;
 }
 

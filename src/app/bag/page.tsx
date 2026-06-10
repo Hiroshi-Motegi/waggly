@@ -408,6 +408,13 @@ export default function BagPage() {
                           <span className="text-sm font-bold text-black truncate">{club.model ?? "—"}</span>
                         </div>
                         <span className="text-xs text-[#8b8b8b] truncate">{club.maker ?? "—"}</span>
+                        {club.rating != null && (
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <span key={i} className={`text-xs ${i <= club.rating! ? "text-amber-400" : "text-gray-300"}`}>★</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Link>

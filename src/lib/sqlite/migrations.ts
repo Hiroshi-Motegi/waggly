@@ -1,8 +1,10 @@
 import { execute, query } from "./database";
-import { SCHEMA_VERSION, SCHEMA_V1 } from "./schema";
+import { SCHEMA_VERSION, SCHEMA_V1, SCHEMA_V2, SCHEMA_V3 } from "./schema";
 
 const MIGRATIONS: Record<number, string> = {
   1: SCHEMA_V1,
+  2: SCHEMA_V2,
+  3: SCHEMA_V3,
 };
 
 export async function runMigrations(): Promise<void> {
