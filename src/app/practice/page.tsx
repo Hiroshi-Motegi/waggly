@@ -84,7 +84,7 @@ export default function PracticePage() {
             >
               <div className="absolute inset-0 bg-[#139847]/60 pointer-events-none" />
               <div className="relative">
-                <PageHeader title="練習記録" showBack={false} variant="dark" sticky={false}>
+                <PageHeader title="練習記録" showBack={false} variant="dark">
                   <div className="flex items-center gap-2">
                     <ViewToggle mode={viewMode} onChange={setViewMode} />
                     <Link href="/practice/new">
