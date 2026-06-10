@@ -210,7 +210,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ログアウト */}
-      <div className="flex flex-col items-center pt-4">
+      <div className="flex flex-col items-center pt-4 pb-8">
         <button
           onClick={liffLogout}
           className="w-full max-w-xs rounded-full border border-white py-2.5 text-base font-bold text-white"
