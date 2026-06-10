@@ -244,9 +244,9 @@ async function routeLocal(
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     await ex(
-      `INSERT INTO club_memos (id, club_id, distance, memo, condition, symptom_tags, feeling_tags, gear_tags, practice_session_id, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, clubId, body.distance ?? null, body.memo ?? null, body.condition ?? null, JSON.stringify(body.symptom_tags ?? []), JSON.stringify(body.feeling_tags ?? []), JSON.stringify(body.gear_tags ?? []), body.practice_session_id ?? null, now]
+      `INSERT INTO club_memos (id, club_id, distance, balls, memo, condition, symptom_tags, feeling_tags, gear_tags, practice_session_id, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, clubId, body.distance ?? null, body.balls ?? null, body.memo ?? null, body.condition ?? null, JSON.stringify(body.symptom_tags ?? []), JSON.stringify(body.feeling_tags ?? []), JSON.stringify(body.gear_tags ?? []), body.practice_session_id ?? null, now]
     );
     return { id, club_id: clubId, ...body, created_at: now };
   }
@@ -332,7 +332,25 @@ async function routeLocal(
 
   // GET /api/practice
   if (path.match(/^\/api\/practice(\?|$)/) && method === "GET") {
-    const sessions = await q("SELECT * FROM practice_sessions ORDER BY practiced_at DESC");
+    const params = new URLSearchParams(path.split("?")[1] ?? "");
+    const month = params.get("month");
+
+    let sql = "SELECT * FROM practice_sessions";
+    const sqlParams: any[] = [];
+
+    if (month) {
+      const start = `${month}-01`;
+      const [y, m] = month.split("-").map(Number);
+      const endDate = new Date(y, m, 1);
+      const end = endDate.toISOString().split("T")[0];
+      sql += " WHERE practiced_at >= ? AND practiced_at < ?";
+      sqlParams.push(start, end);
+    }
+
+    sql += " ORDER BY practiced_at DESC";
+    if (!month) sql += " LIMIT 20";
+
+    const sessions = await q(sql, sqlParams);
     // Attach practice_clubs for each session
     for (const s of sessions) {
       const clubs = await q("SELECT pc.*, c.club_number, c.category FROM practice_clubs pc LEFT JOIN clubs c ON pc.club_id = c.id WHERE pc.session_id = ?", [s.id]);

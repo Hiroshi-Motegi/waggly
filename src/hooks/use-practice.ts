@@ -22,6 +22,17 @@ export function usePracticeSessions() {
   return { sessions: data ?? [], isLoading, refetch };
 }
 
+export function usePracticeSessionsByMonth(monthKey: string | null) {
+  const { user } = useAuth();
+  const key = (user || isNative()) && monthKey
+    ? `/api/practice?month=${monthKey}`
+    : null;
+
+  const { data, isLoading } = useSWR<PracticeSessionWithClubs[]>(key, fetcher);
+
+  return { sessions: data ?? [], isLoading };
+}
+
 interface CreateSessionData {
   practiced_at: string;
   location: string;

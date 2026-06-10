@@ -7,12 +7,25 @@ export async function GET(request: NextRequest) {
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  const { data, error } = await supabase
+  const month = request.nextUrl.searchParams.get("month");
+
+  let query = supabase
     .from("practice_sessions")
     .select("*, practice_clubs(*, club:clubs(id, club_number, category))")
     .eq("user_id", userId)
-    .order("practiced_at", { ascending: false })
-    .limit(20);
+    .order("practiced_at", { ascending: false });
+
+  if (month) {
+    const start = `${month}-01`;
+    const [y, m] = month.split("-").map(Number);
+    const endDate = new Date(y, m, 1);
+    const end = endDate.toISOString().split("T")[0];
+    query = query.gte("practiced_at", start).lt("practiced_at", end);
+  } else {
+    query = query.limit(20);
+  }
+
+  const { data, error } = await query;
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
