@@ -88,7 +88,36 @@ export async function POST(request: NextRequest) {
       .from("users")
       .update({ display_name: displayName, avatar_url: avatarUrl })
       .eq("id", userId);
-    await supabaseAdmin.auth.admin.updateUserById(userId, { password });
+
+    // Check if auth user still exists (may have been deleted during account merge)
+    const { data: { user: authCheck } } = await supabaseAdmin.auth.admin.getUserById(userId);
+    if (authCheck) {
+      await supabaseAdmin.auth.admin.updateUserById(userId, { password });
+    } else {
+      // Auth user was deleted — recreate it with the same ID
+      const { error: recreateError } = await supabaseAdmin.auth.admin.createUser({
+        id: userId,
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { line_user_id: lineUserId, display_name: displayName },
+      });
+      if (recreateError) {
+        // ID collision — create with new ID and update users table
+        const { data: newAuth, error: newError } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: { line_user_id: lineUserId, display_name: displayName },
+        });
+        if (newError) {
+          console.error("[line-oauth] Recreate auth failed:", newError);
+          return NextResponse.json({ error: newError.message }, { status: 500 });
+        }
+        userId = newAuth.user.id;
+        await supabaseAdmin.from("users").update({ id: userId }).eq("line_user_id", lineUserId);
+      }
+    }
   } else {
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,

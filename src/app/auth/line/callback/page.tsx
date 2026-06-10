@@ -67,7 +67,11 @@ export default function LineCallbackPage() {
             }),
           });
 
-          if (!res.ok) throw new Error("Auth failed");
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            console.error("[LINE callback] API error:", res.status, errData);
+            throw new Error(errData.error || "Auth failed");
+          }
 
           const { access_token, refresh_token } = await res.json();
 
