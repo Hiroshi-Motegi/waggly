@@ -71,6 +71,26 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(data, { status: 201 });
 }
 
+export async function PATCH(request: NextRequest) {
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+  const { supabase, userId } = auth;
+
+  const { order } = await request.json();
+
+  await Promise.all(
+    order.map((item: { id: string; sort_order: number }) =>
+      supabase
+        .from("favorite_courses")
+        .update({ sort_order: item.sort_order })
+        .eq("id", item.id)
+        .eq("user_id", userId)
+    )
+  );
+
+  return NextResponse.json({ ok: true });
+}
+
 export async function DELETE(request: NextRequest) {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
