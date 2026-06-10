@@ -146,7 +146,7 @@ export function MonthCalendar({
             aria-pressed={day.dateString === selectedDate && day.isCurrentMonth}
           >
             <div
-              className={`h-8 w-8 flex items-center justify-center rounded-full text-sm ${getDayCellClass(day)}`}
+              className={`h-8 w-8 flex items-center justify-center rounded-full text-base ${getDayCellClass(day)}`}
             >
               {day.date}
             </div>

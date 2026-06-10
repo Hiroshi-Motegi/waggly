@@ -41,7 +41,7 @@ export function MonthPicker({ year, month, onChange }: MonthPickerProps) {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="rounded-full bg-white/20 px-3 py-1 text-sm font-bold text-white flex items-center gap-1"
+        className="rounded-full bg-white/20 px-3 py-1 text-base font-bold text-white flex items-center gap-1"
       >
         {year}年{month + 1}月
         <ChevronDown
