@@ -44,9 +44,7 @@ export default function PracticePage() {
       <div
         className="relative flex flex-col bg-[#139847]"
         style={{
-          height: "100dvh",
-          paddingBottom: "var(--bottom-nav-height)",
-          marginBottom: "calc(-1 * var(--bottom-nav-height))",
+          height: "calc(100dvh - var(--bottom-nav-height))",
         }}
       >
         <img
