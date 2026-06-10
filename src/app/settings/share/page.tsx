@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Check, Copy, Loader2, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
@@ -30,6 +30,7 @@ export default function ShareSettingsPage() {
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [copied, setCopied] = useState(false);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const qrRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (profile?.username) setUsername(profile.username);
@@ -91,6 +92,7 @@ export default function ShareSettingsPage() {
       color: { dark: "#006728", light: "#ffffff" },
     });
     setQrUrl(url);
+    setTimeout(() => qrRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
   }
 
   return (
@@ -162,6 +164,7 @@ export default function ShareSettingsPage() {
         {/* Visible fields */}
         <h3 className="px-1 pt-2 text-base font-bold text-white">公開する項目</h3>
         <div className="flex flex-col rounded-lg bg-white p-3">
+          <p className="text-xs text-[#8b8b8b] pb-2">設定はリアルタイムで反映されます</p>
           {Object.entries(VISIBLE_FIELD_LABELS).map(([field, label]) => {
             const visible = profile?.visible_fields?.[field] !== false;
             return (
@@ -198,7 +201,7 @@ export default function ShareSettingsPage() {
                 QRコードを表示
               </button>
               {qrUrl && (
-                <div className="flex flex-col items-center gap-2 pt-2">
+                <div ref={qrRef} className="flex flex-col items-center gap-2 pt-2">
                   <img src={qrUrl} alt="QR Code" className="h-48 w-48" />
                   <a href={qrUrl} download="waggly-qr.png" className="text-sm text-[#006728] font-bold">画像をダウンロード</a>
                 </div>
