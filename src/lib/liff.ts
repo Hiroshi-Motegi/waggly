@@ -46,7 +46,7 @@ export async function liffLogout() {
   } catch {
     // init may fail if no LIFF ID configured
   }
-  window.location.reload();
+  window.location.href = "/";
 }
 
 export { liff };
