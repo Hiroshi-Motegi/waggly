@@ -16,6 +16,7 @@ import { getDistanceStaircaseData, getWeightFlowData, getDistanceInsights, getWe
 import { DistanceStaircase } from "@/components/charts/distance-staircase";
 import { WeightFlow } from "@/components/charts/weight-flow";
 import { ChartInsights } from "@/components/charts/chart-insights";
+import { ViewModeToggle } from "@/components/ui/view-mode-toggle";
 
 const MAX_BAG_CLUBS = 14;
 
@@ -169,6 +170,17 @@ export default function BagPage() {
   const [isReordering, setIsReordering] = useState(false);
   const [localClubs, setLocalClubs] = useState<ClubWithImages[]>([]);
   const [chartTab, setChartTab] = useState<"distance" | "weight">("distance");
+  const [viewMode, setViewModeState] = useState<"list" | "gallery">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("bag-view-mode");
+      if (saved === "gallery") return "gallery";
+    }
+    return "list";
+  });
+  function setViewMode(mode: "list" | "gallery") {
+    setViewModeState(mode);
+    localStorage.setItem("bag-view-mode", mode);
+  }
 
   const isBagView = statusFilter === "bag1" || statusFilter === "bag2";
 
@@ -186,6 +198,7 @@ export default function BagPage() {
       : clubs;
 
   const bagCount = isBagView ? clubs.length : null;
+  const effectiveViewMode = isReordering ? "list" : viewMode;
 
   function startReorder() {
     setLocalClubs([...clubs].sort((a, b) => a.sort_order - b.sort_order));
@@ -225,6 +238,9 @@ export default function BagPage() {
         variant="dark"
       >
         <div className="flex items-center gap-2 ml-auto">
+          {!isReordering && (
+            <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+          )}
           {isBagView && !isReordering && clubs.length > 1 && (
             <button
               onClick={startReorder}
@@ -370,16 +386,46 @@ export default function BagPage() {
             クラブが登録されていません
           </p>
         ) : (
-          <div className="flex flex-col">
-            {displayClubs.map((club, index) => (
-              <div
-                key={club.id}
-                className={index < displayClubs.length - 1 ? "border-b border-[#dfdfdf]" : ""}
-              >
-                <ClubRow club={club} showStatus={statusFilter === "all"} bagLabel={statusFilter === "all" ? (club.status === "bag" ? (club.bag_number === 2 ? "予備バッグ" : "マイバッグ") : statusLabels[club.status]) : undefined} />
-              </div>
-            ))}
-          </div>
+          effectiveViewMode === "gallery" ? (
+            <div className="grid grid-cols-2 gap-3 py-2.5">
+              {displayClubs.map((club) => {
+                const primaryImage = club.club_images?.find((img) => img.is_primary) ?? club.club_images?.[0];
+                return (
+                  <Link key={club.id} href={nativeHref(`/bag/${club.id}`)}>
+                    <div className="flex flex-col gap-1">
+                      <div className="h-[132px] w-full overflow-hidden rounded-md bg-[#f0f0f0] flex items-center justify-center">
+                        {primaryImage ? (
+                          <img src={primaryImage.image_url} alt={club.club_number} className="size-full object-cover" />
+                        ) : (
+                          <img src={clubNoImage[club.category] ?? "/no-images/etc.png"} alt="" className="size-full object-cover" />
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-px pt-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="shrink-0 bg-[#005c24] text-white text-[10px] font-bold rounded-md px-1.5 py-0.5 text-center">
+                            {club.club_number}
+                          </span>
+                          <span className="text-sm font-bold text-black truncate">{club.model ?? "—"}</span>
+                        </div>
+                        <span className="text-xs text-[#8b8b8b] truncate">{club.maker ?? "—"}</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              {displayClubs.map((club, index) => (
+                <div
+                  key={club.id}
+                  className={index < displayClubs.length - 1 ? "border-b border-[#dfdfdf]" : ""}
+                >
+                  <ClubRow club={club} showStatus={statusFilter === "all"} bagLabel={statusFilter === "all" ? (club.status === "bag" ? (club.bag_number === 2 ? "予備バッグ" : "マイバッグ") : statusLabels[club.status]) : undefined} />
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
       </div>
