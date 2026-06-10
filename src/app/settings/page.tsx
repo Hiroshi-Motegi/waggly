@@ -35,6 +35,17 @@ export default function SettingsPage() {
   const { user, setUser } = useAuth();
   const { profile } = useProfile();
   const [usage, setUsage] = useState<UsageData | null>(null);
+  const [linkToast, setLinkToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const linked = params.get("linked");
+    if (linked) {
+      setLinkToast(`${linked === "google" ? "Google" : "LINE"}を連携しました`);
+      window.history.replaceState(null, "", "/settings");
+      setTimeout(() => setLinkToast(null), 3000);
+    }
+  }, []);
   const [usageLoaded, setUsageLoaded] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
 
@@ -268,6 +279,15 @@ export default function SettingsPage() {
         </button>
       </div>
       </div>
+
+      {/* Link toast */}
+      {linkToast && (
+        <div className="fixed bottom-[calc(var(--bottom-nav-height)+16px)] left-1/2 -translate-x-1/2 z-50">
+          <div className="rounded-full bg-[#333] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
+            {linkToast}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

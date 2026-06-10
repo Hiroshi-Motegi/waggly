@@ -39,12 +39,10 @@ export default function LinkCompletePage() {
         const result = await res.json();
 
         if (result.merged) {
-          alert(result.message);
           await supabase.auth.signOut();
-          window.location.href = "/";
+          window.location.href = "/?message=" + encodeURIComponent(result.message);
         } else {
-          alert(result.message);
-          window.location.href = "/settings";
+          window.location.href = "/settings?linked=" + encodeURIComponent(provider);
         }
       } catch (e) {
         console.error("Link error:", e);
