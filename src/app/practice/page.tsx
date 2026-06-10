@@ -52,7 +52,8 @@ export default function PracticePage() {
         <img
           src="/images/home-bg.jpg"
           alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none"
+          className="absolute inset-0 w-full object-cover opacity-40 pointer-events-none"
+          style={{ height: "calc(100% + var(--bottom-nav-height))" }}
         />
 
         {/* Fixed top: header + calendar */}
