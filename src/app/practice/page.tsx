@@ -42,32 +42,33 @@ export default function PracticePage() {
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
-        <PageHeader title="練習記録" showBack={false} variant="dark">
-          <Link href="/practice/new">
-            <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
-              <Plus className="h-4 w-4" />
-              記録する
-            </button>
-          </Link>
-        </PageHeader>
-
         {viewMode === "calendar" ? (
           <>
-            {/* Sticky calendar - bg-[#2d6e3f] on MonthCalendar handles opacity */}
-            <div className="sticky top-[52px] z-20 -mx-2 px-2 pb-1 bg-[#139847]"
+            {/* Sticky header + calendar together */}
+            <div className="sticky top-0 z-20 -mx-2 -mt-2 px-2 bg-[#139847]"
               style={{ backgroundImage: "url(/images/home-bg.jpg)", backgroundSize: "cover", backgroundPosition: "center" }}
             >
               <div className="absolute inset-0 bg-[#139847]/60 pointer-events-none" />
               <div className="relative">
-              <MonthCalendar
-                year={calYear}
-                month={calMonth}
-                selectedDate={selectedDate}
-                practicedDates={practicedDates}
-                onSelectDate={setSelectedDate}
-                onChangeMonth={handleChangeMonth}
-                onToggleView={() => setViewMode("list")}
-              />
+                <PageHeader title="練習記録" showBack={false} variant="dark">
+                  <Link href="/practice/new">
+                    <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
+                      <Plus className="h-4 w-4" />
+                      記録する
+                    </button>
+                  </Link>
+                </PageHeader>
+                <div className="pt-2 pb-1">
+                  <MonthCalendar
+                    year={calYear}
+                    month={calMonth}
+                    selectedDate={selectedDate}
+                    practicedDates={practicedDates}
+                    onSelectDate={setSelectedDate}
+                    onChangeMonth={handleChangeMonth}
+                    onToggleView={() => setViewMode("list")}
+                  />
+                </div>
               </div>
             </div>
 
@@ -93,14 +94,22 @@ export default function PracticePage() {
           </>
         ) : (
           <>
-            <div className="flex justify-end px-1">
-              <button
-                onClick={() => setViewMode("calendar")}
-                className="rounded-full bg-white/20 p-1.5"
-              >
-                <Calendar className="h-4 w-4 text-white" />
-              </button>
-            </div>
+            <PageHeader title="練習記録" showBack={false} variant="dark">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewMode("calendar")}
+                  className="rounded-full bg-white/20 p-1.5"
+                >
+                  <Calendar className="h-4 w-4 text-white" />
+                </button>
+                <Link href="/practice/new">
+                  <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
+                    <Plus className="h-4 w-4" />
+                    記録する
+                  </button>
+                </Link>
+              </div>
+            </PageHeader>
 
             <div className="flex flex-col rounded-lg bg-white p-3">
               {listLoading ? (
