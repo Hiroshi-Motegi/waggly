@@ -66,12 +66,20 @@ export default function PracticePage() {
               <div className="absolute inset-0 bg-[#139847]/60 pointer-events-none" />
               <div className="relative">
                 <PageHeader title="練習記録" showBack={false} variant="dark">
-                  <Link href="/practice/new">
-                    <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
-                      <Plus className="h-4 w-4" />
-                      記録する
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setViewMode("list")}
+                      className="rounded-full bg-white/20 p-1.5"
+                    >
+                      <List className="h-4 w-4 text-white" />
                     </button>
-                  </Link>
+                    <Link href="/practice/new">
+                      <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
+                        <Plus className="h-4 w-4" />
+                        記録する
+                      </button>
+                    </Link>
+                  </div>
                 </PageHeader>
                 <div className="pt-2">
                   <MonthCalendar
@@ -81,7 +89,6 @@ export default function PracticePage() {
                     practicedDates={practicedDates}
                     onSelectDate={setSelectedDate}
                     onChangeMonth={handleChangeMonth}
-                    onToggleView={() => setViewMode("list")}
                   />
                 </div>
               </div>

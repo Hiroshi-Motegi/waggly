@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import { List } from "lucide-react";
 import { MonthPicker } from "./month-picker";
 import { WEEKDAY_LABELS, buildCalendarGrid, todayString } from "@/lib/calendar-utils";
 import type { CalendarDay } from "@/lib/calendar-utils";
@@ -13,7 +12,6 @@ interface MonthCalendarProps {
   practicedDates: Set<string>; // set of "YYYY-MM-DD"
   onSelectDate: (dateString: string) => void;
   onChangeMonth: (year: number, month: number) => void;
-  onToggleView: () => void;
 }
 
 export function MonthCalendar({
@@ -23,7 +21,6 @@ export function MonthCalendar({
   practicedDates,
   onSelectDate,
   onChangeMonth,
-  onToggleView,
 }: MonthCalendarProps) {
   const today = todayString();
   const now = new Date();
@@ -122,14 +119,6 @@ export function MonthCalendar({
             今日
           </button>
         )}
-        <button
-          type="button"
-          onClick={onToggleView}
-          className="rounded-full bg-white/20 p-1.5"
-          aria-label="リスト表示"
-        >
-          <List className="h-4 w-4 text-white" />
-        </button>
       </div>
 
       {/* Weekday header */}
