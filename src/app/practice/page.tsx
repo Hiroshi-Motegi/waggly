@@ -16,16 +16,16 @@ import { todayString, monthKey } from "@/lib/calendar-utils";
 
 function ViewToggle({ mode, onChange }: { mode: "calendar" | "list"; onChange: (m: "calendar" | "list") => void }) {
   return (
-    <div className="flex rounded-full border border-white/30 overflow-hidden">
+    <div className="flex h-[34px] rounded-full border border-white/30 overflow-hidden">
       <button
         onClick={() => onChange("calendar")}
-        className={`p-1.5 ${mode === "calendar" ? "bg-white" : ""}`}
+        className={`flex items-center justify-center w-[34px] ${mode === "calendar" ? "bg-white" : ""}`}
       >
         <Calendar className={`h-4 w-4 ${mode === "calendar" ? "text-[#006728]" : "text-white/60"}`} />
       </button>
       <button
         onClick={() => onChange("list")}
-        className={`p-1.5 ${mode === "list" ? "bg-white" : ""}`}
+        className={`flex items-center justify-center w-[34px] ${mode === "list" ? "bg-white" : ""}`}
       >
         <List className={`h-4 w-4 ${mode === "list" ? "text-[#006728]" : "text-white/60"}`} />
       </button>
