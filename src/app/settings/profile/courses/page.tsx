@@ -204,20 +204,29 @@ export default function FavoriteCoursesPage() {
               </div>
             </>
           ) : (
-            courses.map((c) => (
-              <div key={c.id} className="flex items-center gap-2 py-2 border-b border-[#ececec] last:border-0">
-                {c.course_image_url && (
-                  <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate">{c.course_name}</p>
-                  {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
+            courses.map((c) => {
+              const goraUrl = c.gora_course_id
+                ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/gora/detail/id=${c.gora_course_id}/`
+                : null;
+              return (
+                <div key={c.id} className="flex items-center gap-2 py-2 border-b border-[#ececec] last:border-0">
+                  {c.course_image_url && (
+                    <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    {goraUrl ? (
+                      <a href={goraUrl} target="_blank" rel="noopener" className="text-sm font-bold truncate block text-[#006728]">{c.course_name}</a>
+                    ) : (
+                      <p className="text-sm font-bold truncate">{c.course_name}</p>
+                    )}
+                    {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
+                  </div>
+                  <button onClick={() => handleRemove(c.id)} className="shrink-0 p-1 text-[#8b8b8b]">
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-                <button onClick={() => handleRemove(c.id)} className="shrink-0 p-1 text-[#8b8b8b]">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
