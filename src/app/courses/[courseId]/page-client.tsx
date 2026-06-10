@@ -3,8 +3,11 @@ import { Loading } from "@/components/loading";
 
 import { useEffect, useState, use } from "react";
 import Image from "next/image";
+import { Heart, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { PageHeader } from "@/components/layout/page-header";
+import { useAuth } from "@/hooks/use-auth";
+import { useFavoriteCourses, addFavoriteCourse, removeFavoriteCourse } from "@/hooks/use-profile";
 
 interface CourseDetail {
   golfCourseId: number;
@@ -115,6 +118,35 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
+  const { user } = useAuth();
+  const { courses: favCourses, refetch: refetchFav } = useFavoriteCourses();
+  const [favLoading, setFavLoading] = useState(false);
+  const isFavorited = favCourses.some((c) => c.gora_course_id === Number(courseId));
+
+  async function toggleFavorite() {
+    if (!course) return;
+    setFavLoading(true);
+    try {
+      if (isFavorited) {
+        const fav = favCourses.find((c) => c.gora_course_id === Number(courseId));
+        if (fav) await removeFavoriteCourse(fav.id);
+      } else {
+        await addFavoriteCourse({
+          gora_course_id: course.golfCourseId,
+          course_name: course.golfCourseName,
+          course_image_url: course.golfCourseImageUrl1,
+          evaluation: course.evaluation,
+          address: course.address,
+          is_manual: false,
+        });
+      }
+      refetchFav();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setFavLoading(false);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -133,11 +165,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   }, [courseId]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loading variant="light" />
-      </div>
-    );
+    return <Loading variant="light" />;
   }
 
   if (error || !course) {
@@ -193,9 +221,27 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
         </div>
       )}
 
-      {/* Link buttons + Reserve */}
+      {/* Link buttons + Reserve + Favorite */}
       <LinkButtons layoutUrl={course.layoutUrl} routeMapUrl={course.routeMapUrl} />
       <ReserveButton url={course.reserveCalUrl} />
+      {user && (
+        <button
+          onClick={toggleFavorite}
+          disabled={favLoading}
+          className={`flex items-center justify-center gap-2 w-full rounded-full py-2 text-base font-bold ${
+            isFavorited
+              ? "border border-white text-white"
+              : "bg-white/20 text-white"
+          }`}
+        >
+          {favLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Heart className={`h-4 w-4 ${isFavorited ? "fill-white" : ""}`} />
+          )}
+          {isFavorited ? "お気に入り登録済み" : "お気に入りに追加"}
+        </button>
+      )}
 
       {/* Introduction */}
       {course.introduction && (
