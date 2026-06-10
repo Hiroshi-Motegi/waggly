@@ -34,6 +34,7 @@ export async function GET(
     .select("id, category, club_number, maker, model, club_images(image_url, is_primary)")
     .eq("user_id", profile.id)
     .eq("status", "bag")
+    .eq("bag_number", 1)
     .order("sort_order", { ascending: true });
 
   const vf = profile.visible_fields ?? {};

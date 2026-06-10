@@ -68,7 +68,10 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-dvh bg-[#139847]">
-        <Loading />
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <div className="relative z-10">
+          <Loading />
+        </div>
       </div>
     );
   }
@@ -106,74 +109,84 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
         <div className="flex flex-col gap-2 px-2 pb-8">
           {/* Golf info */}
           {(profile.golf_start_date != null || profile.average_score != null || profile.best_score != null || profile.home_course) && (
-            <div className="rounded-lg bg-white p-4">
-              <h2 className="text-sm font-bold text-[#006728] mb-2">ゴルフ情報</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {profile.golf_start_date != null && (() => {
-                  const start = new Date(profile.golf_start_date + "T00:00:00");
-                  const now = new Date();
-                  const years = Math.floor((now.getTime() - start.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
-                  return (
-                    <div>
-                      <p className="text-xs text-[#8b8b8b]">ゴルフ歴</p>
-                      <p className="text-base font-bold">{years}年</p>
+            <>
+              <h2 className="px-1 pt-2 text-base font-bold text-white">ゴルフ情報</h2>
+              <div className="rounded-lg bg-white overflow-hidden">
+                <div className="grid grid-cols-3">
+                  {profile.golf_start_date != null && (() => {
+                    const start = new Date(profile.golf_start_date + "T00:00:00");
+                    const now = new Date();
+                    let years = now.getFullYear() - start.getFullYear();
+                    let months = now.getMonth() - start.getMonth();
+                    if (months < 0) { years--; months += 12; }
+                    const label = years > 0 ? `${years}年${months > 0 ? `${months}ヶ月` : ""}` : `${months}ヶ月`;
+                    return (
+                      <div className="flex items-center p-3 border-b border-[#dfdfdf]">
+                        <span className="flex-1 text-sm text-[#9c9c9c]">ゴルフ歴</span>
+                        <span className="text-[#006728] font-bold text-base">{label}</span>
+                      </div>
+                    );
+                  })()}
+                  {profile.average_score != null && (
+                    <div className="flex items-center p-3 border-b border-l border-[#dfdfdf]">
+                      <span className="flex-1 text-sm text-[#9c9c9c]">平均スコア</span>
+                      <span className="text-[#006728] font-bold text-base">{profile.average_score}</span>
                     </div>
-                  );
-                })()}
-                {profile.average_score != null && (
-                  <div>
-                    <p className="text-xs text-[#8b8b8b]">平均スコア</p>
-                    <p className="text-base font-bold">{profile.average_score}</p>
-                  </div>
-                )}
-                {profile.best_score != null && (
-                  <div>
-                    <p className="text-xs text-[#8b8b8b]">ベストスコア</p>
-                    <p className="text-base font-bold">{profile.best_score}</p>
-                  </div>
-                )}
+                  )}
+                  {profile.best_score != null && (
+                    <div className="flex items-center p-3 border-b border-l border-[#dfdfdf]">
+                      <span className="flex-1 text-sm text-[#9c9c9c]">ベストスコア</span>
+                      <span className="text-[#006728] font-bold text-base">{profile.best_score}</span>
+                    </div>
+                  )}
+                </div>
                 {profile.home_course && (
-                  <div>
-                    <p className="text-xs text-[#8b8b8b]">ホームコース</p>
-                    <p className="text-base font-bold">{profile.home_course}</p>
+                  <div className="flex items-center p-3">
+                    <span className="shrink-0 text-sm text-[#9c9c9c] mr-3">ホームコース</span>
+                    <span className="text-[#006728] font-bold text-base truncate">{profile.home_course}</span>
                   </div>
                 )}
               </div>
-            </div>
+            </>
           )}
 
-          {/* MY BAG */}
+          {/* マイバッグ */}
           {profile.clubs && profile.clubs.length > 0 && (
-            <div className="rounded-lg bg-white p-4">
-              <h2 className="text-sm font-bold text-[#006728] mb-2">MY BAG</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {profile.clubs.map((club) => {
-                  const img = club.club_images?.find((i) => i.is_primary) ?? club.club_images?.[0];
+            <>
+            <h2 className="px-1 pt-2 text-base font-bold text-white">マイバッグ</h2>
+            <div className="rounded-lg bg-white p-3">
+              <div className="flex flex-col">
+                {profile.clubs.map((club, i) => {
+                  const img = club.club_images?.find((c) => c.is_primary) ?? club.club_images?.[0];
                   return (
-                    <div key={club.id} className="flex flex-col gap-1">
-                      <div className="h-[100px] w-full overflow-hidden rounded-md bg-[#f0f0f0] flex items-center justify-center">
+                    <div key={club.id} className={`flex items-center gap-2.5 py-2 ${i < profile.clubs!.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                      <div className="size-[50px] shrink-0 overflow-hidden rounded bg-[#f0f0f0] flex items-center justify-center">
                         {img ? (
                           <img src={img.image_url} alt="" className="size-full object-cover" />
                         ) : (
                           <img src={clubNoImage[club.category] ?? "/no-images/etc.png"} alt="" className="size-full object-cover" />
                         )}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span className="shrink-0 bg-[#005c24] text-white text-[10px] font-bold rounded-md px-1.5 py-0.5">{club.club_number}</span>
-                        <span className="text-sm font-bold truncate">{club.model ?? "—"}</span>
+                      <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="shrink-0 bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">{club.club_number}</span>
+                          <span className="text-base font-bold text-black truncate">{club.model ?? "—"}</span>
+                        </div>
+                        <span className="text-sm text-[#8b8b8b] truncate pl-0.5">{club.maker ?? "—"}</span>
                       </div>
-                      <span className="text-xs text-[#8b8b8b]">{club.maker ?? ""}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
+            </>
           )}
 
           {/* Favorite courses */}
           {profile.courses && profile.courses.length > 0 && (
+            <>
+            <h2 className="px-1 pt-2 text-base font-bold text-white">お気に入りコース</h2>
             <div className="rounded-lg bg-white p-4">
-              <h2 className="text-sm font-bold text-[#006728] mb-2">お気に入りコース</h2>
               <div className="flex flex-col gap-2">
                 {profile.courses.map((c) => (
                   <div key={c.id} className="flex items-center gap-2">
@@ -191,12 +204,14 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                 ))}
               </div>
             </div>
+            </>
           )}
 
           {/* SNS Links */}
           {profile.sns_links && Object.values(profile.sns_links).some(Boolean) && (
+            <>
+            <h2 className="px-1 pt-2 text-base font-bold text-white">SNS</h2>
             <div className="rounded-lg bg-white p-4">
-              <h2 className="text-sm font-bold text-[#006728] mb-2">SNS</h2>
               <div className="flex gap-3">
                 {profile.sns_links.instagram && (
                   <a href={profile.sns_links.instagram} target="_blank" rel="noopener" className="rounded-full bg-[#f0f0f0] px-4 py-2 text-sm font-bold">Instagram</a>
@@ -206,6 +221,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                 )}
               </div>
             </div>
+            </>
           )}
 
           {/* Footer */}
