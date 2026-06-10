@@ -88,6 +88,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data = newProfile;
           }
 
+          // Auto-set google_id if logged in via Google and not yet set
+          if (data && !data.google_id && existingAuth.app_metadata?.provider === "google") {
+            const googleId = existingAuth.user_metadata?.sub ?? existingAuth.id;
+            await supabase
+              .from("users")
+              .update({ google_id: googleId })
+              .eq("id", data.id);
+            data.google_id = googleId;
+          }
+
           if (data) {
             setUser(data);
             setIsLoading(false);
