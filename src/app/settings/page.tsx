@@ -52,7 +52,7 @@ export default function SettingsPage() {
           <PageHeader title="設定" variant="dark" />
           <div className="rounded-lg bg-white p-4">
             <h3 className="text-base font-bold mb-2">アカウント</h3>
-            <p className="text-sm text-[#8b8b8b] mb-3">サインインするとデータのバックアップ、AI機能、Web版との同期が使えます。</p>
+            <p className="text-sm text-[#8b8b8b] mb-3">サインインするとプロフィール公開・共有、AIコーチ、データのバックアップ・Web版との同期が使えます。</p>
             <button
               onClick={async () => {
                 const { signInWithGoogle } = await import("@/lib/native-auth");
