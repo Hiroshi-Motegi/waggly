@@ -186,15 +186,27 @@ export default function ShareSettingsPage() {
           })}
         </div>
 
-        {/* Share */}
+        {/* Preview (always if username set) */}
+        {profile?.username && (
+          <>
+            <h3 className="px-1 pt-2 text-base font-bold text-white">プレビュー</h3>
+            <div className="flex flex-col gap-3 rounded-lg bg-white p-3">
+              <a href={`/p/${profile.username}?preview=1`} target="_blank" rel="noopener" className="flex items-center gap-2 text-[#006728] text-sm font-bold">
+                <ExternalLink className="h-4 w-4" />
+                公開ページをプレビュー
+              </a>
+              {!profile.is_public && (
+                <p className="text-sm text-[#8b8b8b]">公開前でもプレビューで表示を確認できます</p>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Share (only when public) */}
         {profileUrl && profile?.is_public && (
           <>
             <h3 className="px-1 pt-2 text-base font-bold text-white">シェア</h3>
             <div className="flex flex-col gap-3 rounded-lg bg-white p-3">
-              <a href={profileUrl} target="_blank" rel="noopener" className="flex items-center gap-2 text-[#006728] text-sm font-bold">
-                <ExternalLink className="h-4 w-4" />
-                プレビューを見る
-              </a>
               <button onClick={handleCopy} className="flex items-center gap-2 rounded-full border border-[#006728] px-4 py-2 text-sm font-bold text-[#006728]">
                 {copied ? <><Check className="h-4 w-4" /> コピーしました</> : <><Copy className="h-4 w-4" /> リンクをコピー</>}
               </button>

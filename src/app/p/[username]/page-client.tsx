@@ -68,7 +68,13 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/p/${username}`);
+        const isPreview = new URLSearchParams(window.location.search).has("preview");
+        const url = isPreview ? "/api/profile/preview" : `/api/p/${username}`;
+        const fetchFn = isPreview
+          ? import("@/lib/api-client").then((m) => m.apiFetch)
+          : Promise.resolve(fetch);
+        const doFetch = await fetchFn;
+        const res = await doFetch(url);
         if (res.status === 404) {
           setNotFound(true);
           return;
