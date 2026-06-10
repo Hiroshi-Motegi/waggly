@@ -32,11 +32,11 @@ export default function PracticePage() {
   useEffect(() => {
     if (searchParams.get("deleted") === "1") {
       setToast("記録を削除しました");
-      router.replace("/practice", { scroll: false });
+      window.history.replaceState(null, "", "/practice");
       const timer = setTimeout(() => setToast(null), 2500);
       return () => clearTimeout(timer);
     }
-  }, [searchParams, router]);
+  }, []);
 
   const currentMonthKey = monthKey(calYear, calMonth);
   const { sessions: monthSessions, isLoading: monthLoading } =
