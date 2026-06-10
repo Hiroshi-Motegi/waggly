@@ -38,6 +38,16 @@ export async function getLiffProfile() {
 }
 
 export async function liffLogout() {
+  // Clear Supabase session
+  try {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    await supabase.auth.signOut();
+  } catch {
+    // ignore
+  }
+
+  // Clear LIFF session
   try {
     await initLiff();
     if (liff.isLoggedIn()) {
@@ -46,6 +56,7 @@ export async function liffLogout() {
   } catch {
     // init may fail if no LIFF ID configured
   }
+
   window.location.href = "/";
 }
 
