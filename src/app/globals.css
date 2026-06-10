@@ -9,6 +9,12 @@ html, body {
   overscroll-behavior: none;
 }
 
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  max-width: 100%;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
