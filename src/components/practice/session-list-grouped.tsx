@@ -40,7 +40,11 @@ export function SessionListGrouped({ sessions, selectedDate }: SessionListGroupe
 
     const el = groupRefs.current.get(targetDate);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Account for sticky header+calendar height
+      const stickyHeader = document.querySelector("[data-sticky-calendar]");
+      const offset = stickyHeader?.getBoundingClientRect().height ?? 0;
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: "smooth" });
     }
   }, [selectedDate]);
 

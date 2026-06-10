@@ -79,7 +79,7 @@ export default function PracticePage() {
         {viewMode === "calendar" ? (
           <>
             {/* Sticky header + calendar together */}
-            <div className="sticky top-0 z-20 -mx-2 -mt-2 px-2 bg-[#139847]"
+            <div data-sticky-calendar className="sticky top-0 z-20 -mx-2 -mt-2 px-2 bg-[#139847]"
               style={{ backgroundImage: "url(/images/home-bg.jpg)", backgroundSize: "cover", backgroundPosition: "center" }}
             >
               <div className="absolute inset-0 bg-[#139847]/60 pointer-events-none" />
