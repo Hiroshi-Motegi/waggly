@@ -23,6 +23,30 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
 
+  // Duplicate check
+  if (body.gora_course_id) {
+    const { data: existing } = await supabase
+      .from("favorite_courses")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("gora_course_id", body.gora_course_id)
+      .maybeSingle();
+    if (existing) {
+      return NextResponse.json({ error: "このコースは既に登録されています" }, { status: 409 });
+    }
+  } else if (body.course_name) {
+    const { data: existing } = await supabase
+      .from("favorite_courses")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("course_name", body.course_name)
+      .eq("is_manual", true)
+      .maybeSingle();
+    if (existing) {
+      return NextResponse.json({ error: "このコースは既に登録されています" }, { status: 409 });
+    }
+  }
+
   const { count } = await supabase
     .from("favorite_courses")
     .select("id", { count: "exact", head: true })
