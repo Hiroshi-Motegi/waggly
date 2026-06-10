@@ -1,12 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Loading } from "@/components/loading";
 
 export default function LineCallbackPage() {
-  const router = useRouter();
-
   useEffect(() => {
     async function handleCallback() {
       const params = new URLSearchParams(window.location.search);
@@ -15,43 +12,34 @@ export default function LineCallbackPage() {
       const isLinking = params.has("link");
 
       if (error || !code) {
-        router.replace("/?error=line_auth_failed");
+        window.location.href = "/?error=line_auth_failed";
         return;
       }
 
       try {
         if (isLinking) {
-          // Account linking mode: verify LINE token and link to current account
+          // Account linking mode: send code to link API (which verifies LINE identity)
           const { apiFetch } = await import("@/lib/api-client");
-
-          // First get LINE user ID by exchanging code
-          const tokenRes = await fetch("/api/auth/line-oauth", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              code,
-              redirectUri: `${window.location.origin}/auth/line/callback?link=1`,
-            }),
-          });
-
-          // We need the LINE user ID, extract from the response or verify separately
-          const verifyRes = await apiFetch("/api/auth/link", {
+          const res = await apiFetch("/api/auth/link", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               provider: "line",
-              providerId: null, // Will be resolved server-side
               code,
               redirectUri: `${window.location.origin}/auth/line/callback?link=1`,
             }),
           });
 
-          if (!verifyRes.ok) throw new Error("Link failed");
+          if (!res.ok) {
+            const err = await res.json();
+            alert(err.error || "連携に失敗しました");
+            window.location.href = "/settings";
+            return;
+          }
 
-          const result = await verifyRes.json();
+          const result = await res.json();
 
           if (result.merged) {
-            // Account was merged — need to re-login
             alert(result.message);
             const { createClient } = await import("@/lib/supabase/client");
             const supabase = createClient();
@@ -84,12 +72,12 @@ export default function LineCallbackPage() {
         }
       } catch (e) {
         console.error("LINE auth error:", e);
-        router.replace("/?error=line_auth_failed");
+        window.location.href = "/?error=line_auth_failed";
       }
     }
 
     handleCallback();
-  }, [router]);
+  }, []);
 
   return <Loading variant="light" />;
 }
