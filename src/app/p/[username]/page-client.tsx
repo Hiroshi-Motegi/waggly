@@ -36,17 +36,17 @@ interface PublicProfile {
 function AccordionSection({ title, defaultOpen, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   return (
-    <>
-      <button onClick={() => setOpen(!open)} className="flex items-center px-1 pt-2">
-        <h2 className="flex-1 text-base font-bold text-white text-left">{title}</h2>
-        {open ? <ChevronUp className="h-4 w-4 text-white/70" /> : <ChevronDown className="h-4 w-4 text-white/70" />}
+    <div className="rounded-lg bg-white overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="flex items-center w-full px-3 py-3">
+        <h2 className="flex-1 text-sm font-bold text-[#006728] text-left">{title}</h2>
+        {open ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
       </button>
       {open && (
-        <div className="rounded-lg bg-white p-3">
+        <div className="px-3 pb-3">
           {children}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -145,7 +145,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
           {/* Golf info */}
           {(profile.golf_start_date != null || profile.average_score != null || profile.best_score != null || profile.home_course) && (
             <>
-              <h2 className="px-1 pt-2 text-base font-bold text-white">ゴルフ情報</h2>
               <div className="rounded-lg bg-white overflow-hidden">
                 <div className="grid grid-cols-3">
                   {profile.golf_start_date != null && (() => {
