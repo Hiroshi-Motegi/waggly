@@ -114,6 +114,28 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* プロフィール・共有設定 */}
+      <div className="flex flex-col rounded-lg bg-white p-3">
+        <Link href="/settings/profile">
+          <div className="flex items-center justify-between py-3 border-b border-[#ececec]">
+            <span className="text-base">プロフィール設定</span>
+            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+          </div>
+        </Link>
+        <Link href="/settings/profile/courses">
+          <div className="flex items-center justify-between py-3 border-b border-[#ececec]">
+            <span className="text-base">お気に入りコース</span>
+            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+          </div>
+        </Link>
+        <Link href="/settings/share">
+          <div className="flex items-center justify-between py-3">
+            <span className="text-base">名刺・共有設定</span>
+            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+          </div>
+        </Link>
+      </div>
+
       {/* プラン */}
       <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
       <div className="rounded-lg bg-white p-3">
