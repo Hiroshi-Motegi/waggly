@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setUser({
                 id: "dev-user",
                 line_user_id: "dev-line-id",
+                google_id: null,
                 display_name: "開発ユーザー",
                 avatar_url: null,
                 agreed_terms_at: new Date().toISOString(),
@@ -54,14 +55,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .eq("id", existingAuth.id)
             .single();
 
+          // Check if this Google account is linked to another user
+          if (!data && existingAuth.app_metadata?.provider === "google") {
+            const googleId = existingAuth.user_metadata?.sub ?? existingAuth.id;
+            const { data: linkedUser } = await supabase
+              .from("users")
+              .select("*")
+              .eq("google_id", googleId)
+              .maybeSingle();
+            if (linkedUser) {
+              data = linkedUser;
+            }
+          }
+
           // First OAuth login (Google/LINE OIDC): create user profile
           if (!data && existingAuth.id) {
             const meta = existingAuth.user_metadata ?? {};
+            const googleId = existingAuth.app_metadata?.provider === "google"
+              ? (meta.sub ?? existingAuth.id) : null;
             const { data: newProfile } = await supabase
               .from("users")
               .insert({
                 id: existingAuth.id,
                 line_user_id: meta.provider_id ?? `oauth-${existingAuth.id}`,
+                google_id: googleId,
                 display_name: meta.full_name ?? meta.name ?? meta.display_name ?? existingAuth.email ?? "ゲスト",
                 avatar_url: meta.avatar_url ?? meta.picture ?? null,
                 agreed_terms_at: new Date().toISOString(),
