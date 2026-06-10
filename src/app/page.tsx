@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { usePracticeSessions } from "@/hooks/use-practice";
+import { useProfile } from "@/hooks/use-profile";
 import { isNative } from "@/lib/platform";
 import { RecentPractice } from "@/components/home/recent-practice";
 
@@ -35,6 +36,7 @@ const featureCards = [
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
+  const { profile } = useProfile();
   const { sessions } = usePracticeSessions();
   const searchParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const forceGuest = searchParams.get("guest") !== null;
@@ -112,11 +114,11 @@ export default function HomePage() {
             className="brightness-0 invert"
           />
           <Link href="/settings" className="absolute right-2">
-            {user?.avatar_url ? (
-              <img src={user.avatar_url} alt="" className="h-8 w-8 rounded-full" />
+            {(profile?.avatar_url ?? user?.avatar_url) ? (
+              <img src={profile?.avatar_url ?? user?.avatar_url ?? ""} alt="" className="h-8 w-8 rounded-full object-cover" />
             ) : (
               <div className="h-8 w-8 rounded-full bg-white/30 flex items-center justify-center text-white text-base font-bold">
-                {user?.display_name?.[0] ?? "G"}
+                {(profile?.nickname ?? user?.display_name)?.[0] ?? "G"}
               </div>
             )}
           </Link>
@@ -124,7 +126,7 @@ export default function HomePage() {
 
         {/* Greeting */}
         <p className="text-lg font-medium text-white text-center mt-2">
-          こんにちは{user ? `、${user.display_name}さん` : ""}
+          こんにちは{user ? `、${profile?.nickname || user.display_name}さん` : ""}
         </p>
 
         {/* Feature cards */}
