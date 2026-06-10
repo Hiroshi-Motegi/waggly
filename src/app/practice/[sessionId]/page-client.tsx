@@ -31,7 +31,7 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
     if (!confirm("この練習記録を削除しますか？")) return;
     try {
       await deletePracticeSession(sessionId);
-      router.push("/practice");
+      router.push("/practice?deleted=1");
     } catch (error) {
       console.error("Failed to delete:", error);
     }
@@ -123,7 +123,7 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
               <div key={pc.club_id} className={`flex flex-col py-2 ${i < session.practice_clubs.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
                 {/* Row 1: badge + maker/model */}
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5">{pc.club?.club_number ?? "?"}</span>
+                  <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">{pc.club?.club_number ?? "?"}</span>
                   {(pc.club?.maker || pc.club?.model) && (
                     <span className="text-sm text-[#8b8b8b] truncate">
                       {[pc.club?.maker, pc.club?.model].filter(Boolean).join(" ")}
