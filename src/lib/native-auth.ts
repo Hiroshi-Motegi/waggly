@@ -65,6 +65,13 @@ export async function signInWithGoogle(): Promise<NativeSignInResult> {
         });
         const result = await res.json();
         if (res.ok && result.found && result.user) {
+          // Switch session to the linked account
+          if (result.access_token) {
+            await supabase.auth.setSession({
+              access_token: result.access_token,
+              refresh_token: result.refresh_token,
+            });
+          }
           return { user: result.user, error: null };
         }
       } catch (e) {
