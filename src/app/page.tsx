@@ -114,7 +114,10 @@ export default function HomePage() {
                 const supabase = createClient();
                 await supabase.auth.signInWithOAuth({
                   provider: "google",
-                  options: { redirectTo: `${window.location.origin}/auth/callback` },
+                  options: {
+                    redirectTo: `${window.location.origin}/auth/callback`,
+                    queryParams: { prompt: "select_account" },
+                  },
                 });
               }}
               className="mt-3 flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-white text-gray-800 font-bold text-base shadow-lg"

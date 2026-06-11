@@ -412,7 +412,10 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?link=google&originalUser=${user.id}` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?link=google&originalUser=${user.id}`,
+        queryParams: { prompt: "select_account" },
+      },
     });
   }
 
