@@ -440,12 +440,14 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
           <span className="text-base">Google</span>
         </div>
         {hasGoogle ? (
-          <div className="flex items-center gap-2">
-            {googleEmail && <span className="text-xs text-[#8b8b8b] truncate max-w-[120px]">{googleEmail}</span>}
+          <div className="flex flex-col items-end gap-0.5">
+            <div className="flex items-center gap-2">
             <span className="text-sm text-[#006728] font-bold shrink-0">連携済み</span>
             {canUnlinkGoogle && (
               <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5 shrink-0">解除</button>
             )}
+            </div>
+            {googleEmail && <span className="text-xs text-[#8b8b8b]">{googleEmail}</span>}
           </div>
         ) : (
           <button onClick={linkGoogle} className="text-sm font-bold text-[#006728] border border-[#006728] rounded-full px-3 py-1">連携する</button>
