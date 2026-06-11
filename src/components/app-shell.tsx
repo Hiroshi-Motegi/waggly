@@ -9,7 +9,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { PageTransition } from "@/components/layout/page-transition";
 import { Onboarding } from "@/components/onboarding";
 import { Loading } from "@/components/loading";
-import { TERMS_UPDATED_AT } from "@/lib/constants";
+import { TERMS_UPDATED_AT, ONBOARDING_VERSION } from "@/lib/constants";
 import { isNative } from "@/lib/platform";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -19,8 +19,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [onboardingChecked, setOnboardingChecked] = useState(false);
 
   useEffect(() => {
-    const done = !!localStorage.getItem("onboarding_done");
-    setOnboardingDone(done);
+    const seenVersion = parseInt(localStorage.getItem("onboarding_version") || "0", 10);
+    setOnboardingDone(seenVersion >= ONBOARDING_VERSION);
     setOnboardingChecked(true);
   }, []);
 
@@ -111,7 +111,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Onboarding
           isReagreement={!!user?.agreed_terms_at}
           onComplete={async () => {
-            localStorage.setItem("onboarding_done", "1");
+            localStorage.setItem("onboarding_version", String(ONBOARDING_VERSION));
             if (user) {
               await apiFetch("/api/auth/agree", { method: "POST" });
             }
