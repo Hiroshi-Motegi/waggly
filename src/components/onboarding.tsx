@@ -299,7 +299,7 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
 
   // Slides view
   return (
-    <div className="flex flex-col min-h-dvh bg-[#f7fff3]">
+    <div className="flex flex-col min-h-dvh bg-[#f7fff3] overflow-hidden">
       {currentSlide === 0 && <Slide1 />}
       {currentSlide === 1 && <Slide2 />}
       {currentSlide === 2 && <Slide3 />}
@@ -311,8 +311,8 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
         />
       )}
 
-      {/* Bottom bar */}
-      <div className="w-full bg-[#026f09] py-3 flex flex-col items-center gap-3">
+      {/* Bottom bar — fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#026f09] py-3 flex flex-col items-center gap-3">
         {/* Dots */}
         <div className="flex gap-1.5">
           {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
