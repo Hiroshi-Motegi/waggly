@@ -34,7 +34,7 @@ interface SubscriptionData {
 
 export default function SettingsPage() {
   const { user, setUser } = useAuth();
-  const { profile } = useProfile();
+  const { profile, isLoading: profileLoading } = useProfile();
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [linkToast, setLinkToast] = useState<string | null>(null);
 
@@ -122,11 +122,15 @@ export default function SettingsPage() {
       <div className="rounded-lg bg-white p-3">
         <div className="flex items-center gap-3">
           <Avatar className="h-14 w-14">
-            <AvatarImage src={profile?.avatar_url ?? user.avatar_url ?? undefined} />
-            <AvatarFallback className="text-lg">{(profile?.nickname ?? user.display_name ?? "?")[0]}</AvatarFallback>
+            <AvatarImage src={profile?.avatar_url ?? (profileLoading ? undefined : user.avatar_url) ?? undefined} />
+            <AvatarFallback className="text-lg">
+              {profileLoading ? "" : (profile?.nickname ?? user.display_name ?? "?")[0]}
+            </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-base font-bold">{profile?.nickname || user.display_name}</p>
+            <p className="text-base font-bold">
+              {profileLoading ? "　" : (profile?.nickname || user.display_name)}
+            </p>
             <p className="text-sm text-[#8b8b8b]">ID: W-{user.id.replace(/-/g, "").substring(0, 12).toUpperCase()}</p>
           </div>
         </div>
