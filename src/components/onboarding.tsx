@@ -76,7 +76,7 @@ function Slide2() {
       {/* Content */}
       <div className="flex flex-col items-center w-full px-4 pt-4 pb-8">
         {/* Club screenshot */}
-        <div className="w-[60%] border-3 border-white rounded-sm overflow-hidden">
+        <div className="w-[57%] border-3 border-white rounded-sm overflow-hidden">
           <Image
             src="/onboarding/2-1.png"
             alt="クラブ詳細画面"
@@ -94,7 +94,7 @@ function Slide2() {
           </p>
         </div>
         {/* Share screenshot */}
-        <div className="w-[60%] border-3 border-white rounded-sm overflow-hidden">
+        <div className="w-[57%] border-3 border-white rounded-sm overflow-hidden">
           <Image
             src="/onboarding/2-2.png"
             alt="シェア画面"
