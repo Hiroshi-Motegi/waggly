@@ -121,12 +121,12 @@ export default function AccountLinkingHelpPage() {
               <details
                 key={i}
                 open
-                className={`py-3 ${i < arr.length - 1 ? "border-b border-[#ececec]" : ""}`}
+                className={`group py-3 ${i < arr.length - 1 ? "border-b border-[#ececec]" : ""}`}
               >
-                <summary className="text-sm font-bold cursor-pointer list-none flex items-center gap-1 [&>svg]:open:-rotate-180">
+                <summary className="text-sm font-bold cursor-pointer list-none flex items-center gap-1">
                   <span className="text-[#006728]">Q.</span>
                   <span className="flex-1">{item.q}</span>
-                  <ChevronDown className="h-4 w-4 text-[#8b8b8b] shrink-0 transition-transform duration-200" />
+                  <ChevronDown className="h-4 w-4 text-[#8b8b8b] shrink-0 transition-transform duration-200 group-open:rotate-180" />
                 </summary>
                 <p className="text-sm text-[#666] leading-relaxed mt-1.5 pl-0.5">
                   <span className="text-[#006728] font-bold">A.</span> {item.a}
