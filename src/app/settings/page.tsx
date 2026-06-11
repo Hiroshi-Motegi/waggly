@@ -62,7 +62,7 @@ export default function SettingsPage() {
   const [conflictConfirm, setConflictConfirm] = useState(false);
   const [conflictProcessing, setConflictProcessing] = useState(false);
 
-  if (!user && isNative() && conflictInfo) {
+  if (isNative() && conflictInfo) {
     // Show conflict resolution UI
     const selectedSource = conflictSelected === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
     return (
@@ -291,7 +291,7 @@ export default function SettingsPage() {
           <HelpCircle className="h-5 w-5 text-white opacity-80" />
         </Link>
       </div>
-      <AccountLinking user={user} onUpdate={() => window.location.reload()} />
+      <AccountLinking user={user} onUpdate={() => window.location.reload()} onConflict={setConflictInfo} />
 
       {/* プラン */}
       <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
@@ -441,7 +441,7 @@ function ExportSection() {
   );
 }
 
-function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }) {
+function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: () => void; onConflict: (info: any) => void }) {
   const hasLine = user.line_user_id && !user.line_user_id.startsWith("google-") && !user.line_user_id.startsWith("oauth-") && !user.line_user_id.startsWith("dev-");
   const hasGoogle = !!user.google_id;
   const hasBoth = hasLine && hasGoogle;
@@ -493,27 +493,34 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
       if (linkResult.needsConfirm) {
         const summaryRes = await apiFetch("/api/auth/data-summary");
         const currentSummary = summaryRes.ok ? await summaryRes.json() : { counts: { clubs: 0, practices: 0, accessories: 0 }, lastUpdated: null };
+        const existingSummary = {
+          lastUpdated: linkResult.existingAccount.lastUpdated ?? null,
+          counts: linkResult.existingAccount.counts ?? { clubs: 0, practices: 0, accessories: 0 },
+        };
 
-        sessionStorage.setItem("conflict_info", JSON.stringify({
+        const currentDate = currentSummary.lastUpdated ? new Date(currentSummary.lastUpdated).getTime() : 0;
+        const existingDate = existingSummary.lastUpdated ? new Date(existingSummary.lastUpdated).getTime() : 0;
+        const currentIsNewer = currentDate >= existingDate;
+
+        onConflict({
           scenario: "account-linking",
           provider: "line",
           providerUserId: result.userId,
           sourceA: {
             label: "現在のアカウントのデータ",
-            isNew: false,
+            isNew: currentIsNewer,
             wid: user.id,
             lastUpdated: currentSummary.lastUpdated,
             counts: currentSummary.counts,
           },
           sourceB: {
             label: "LINEアカウントのデータ",
-            isNew: true,
+            isNew: !currentIsNewer,
             wid: linkResult.existingAccount.id,
-            lastUpdated: linkResult.existingAccount.lastUpdated ?? null,
-            counts: linkResult.existingAccount.counts ?? { clubs: 0, practices: 0, accessories: 0 },
+            lastUpdated: existingSummary.lastUpdated,
+            counts: existingSummary.counts,
           },
-        }));
-        window.location.href = "/auth/resolve-conflict";
+        });
         return;
       }
       // Force full reload to reset WebView state after LINE SDK return
