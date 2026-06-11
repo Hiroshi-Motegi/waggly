@@ -77,15 +77,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const googleSub = existingAuth.user_metadata?.sub;
 
             // If profile exists but google_id is null, Google was unlinked.
-            // This auth user's ID matches the users row, but the user
-            // intentionally removed Google access. Sign out and redirect.
+            // Treat as orphan — the resolve-google-user API will handle
+            // cleanup or this will fall through to new user creation.
             if (data && !data.google_id) {
-              console.log("[auth] Google was unlinked from this profile, signing out");
-              await supabase.auth.signOut();
-              setUser(null);
-              setIsLoading(false);
-              router.push("/login");
-              return;
+              console.log("[auth] Google was unlinked, treating as new user");
+              data = null; // Force new user creation below
             }
 
             const isOrphan = !data;
