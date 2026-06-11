@@ -84,16 +84,11 @@ export default function SettingsPage() {
                 try {
                   const { signInWithGoogle } = await import("@/lib/native-auth");
                   const result = await signInWithGoogle();
+                  if (result.error === "__CONFLICT__") {
+                    window.location.href = "/auth/resolve-conflict";
+                    return;
+                  }
                   if (result.user) {
-                    const { resetLocalModeCache } = await import("@/lib/api-client");
-                    resetLocalModeCache();
-                    // Sync server data to local SQLite
-                    try {
-                      const { fullSync } = await import("@/lib/sync");
-                      await fullSync();
-                    } catch (e) {
-                      console.error("Post-login sync failed:", e);
-                    }
                     setUser?.(result.user);
                     window.location.href = "/";
                   } else {

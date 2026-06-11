@@ -19,6 +19,10 @@ export default function LoginPage() {
     setError(null);
     const { signInWithGoogle } = await import("@/lib/native-auth");
     const result = await signInWithGoogle();
+    if (result.error === "__CONFLICT__") {
+      window.location.href = "/auth/resolve-conflict";
+      return;
+    }
     if (result.error) {
       setError(result.error);
       setIsSigningIn(false);
@@ -33,6 +37,10 @@ export default function LoginPage() {
     setError(null);
     const { signInWithApple } = await import("@/lib/native-auth");
     const result = await signInWithApple();
+    if (result.error === "__CONFLICT__") {
+      window.location.href = "/auth/resolve-conflict";
+      return;
+    }
     if (result.error) {
       setError(result.error);
       setIsSigningIn(false);
