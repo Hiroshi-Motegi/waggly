@@ -26,14 +26,13 @@ export default function LineCallbackPage() {
           const originalUserId = sessionStorage.getItem("link_original_user") || params.get("originalUser");
           const { apiFetch } = await import("@/lib/api-client");
 
-          const res = await apiFetch("/api/auth/link", {
+          const res = await apiFetch("/api/auth/link-provider", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               provider: "line",
               code,
               redirectUri: `${window.location.origin}/auth/line/callback?link=1`,
-              originalUserId,
             }),
           });
 
@@ -47,24 +46,20 @@ export default function LineCallbackPage() {
           const result = await res.json();
 
           if (result.needsConfirm) {
-            const currentDate = result.currentAccount?.lastUpdated ? new Date(result.currentAccount.lastUpdated).getTime() : 0;
-            const existingDate = result.existingAccount?.lastUpdated ? new Date(result.existingAccount.lastUpdated).getTime() : 0;
-            const currentIsNewer = currentDate >= existingDate;
-
             const conflictInfo = JSON.stringify({
               scenario: "account-linking",
               provider: "line",
-              providerUserId: result.providerId,
+              providerSub: result.providerId,
               sourceA: {
                 label: "現在のアカウントのデータ",
-                isNew: currentIsNewer,
+                isNew: true,
                 wid: originalUserId,
                 lastUpdated: result.currentAccount?.lastUpdated ?? null,
                 counts: result.currentAccount?.counts ?? { clubs: 0, practices: 0, accessories: 0 },
               },
               sourceB: {
                 label: "LINEアカウントのデータ",
-                isNew: !currentIsNewer,
+                isNew: false,
                 wid: result.existingAccount?.id,
                 lastUpdated: result.existingAccount?.lastUpdated ?? null,
                 counts: result.existingAccount?.counts ?? { clubs: 0, practices: 0, accessories: 0 },
@@ -72,13 +67,12 @@ export default function LineCallbackPage() {
             });
             sessionStorage.setItem("conflict_info", conflictInfo);
             localStorage.setItem("conflict_info", conflictInfo);
-            window.location.href = "/auth/resolve-conflict";
+            window.location.href = "/settings?conflict=line";
             return;
           }
 
           sessionStorage.removeItem("link_original_user");
-          alert("LINEを連携しました。");
-          window.location.href = "/settings";
+          window.location.href = "/settings?linked=line";
         } else {
           // Normal login mode
           const res = await fetch("/api/auth/line-oauth", {
