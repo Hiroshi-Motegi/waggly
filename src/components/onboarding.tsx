@@ -66,7 +66,7 @@ function Slide2() {
       {/* Header */}
       <div className="relative w-full py-4 px-6 shrink-0">
         <div className="absolute inset-0 bg-[#139847]" />
-        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <h2 className="relative text-xl font-bold text-white leading-snug">
           ギアをまとめて管理
           <br />
@@ -122,7 +122,7 @@ function Slide3() {
       {/* Header */}
       <div className="relative w-full py-4 px-6 shrink-0">
         <div className="absolute inset-0 bg-[#139847]" />
-        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <h2 className="relative text-xl font-bold text-white leading-snug">
           練習球数や内容を
           <br />
