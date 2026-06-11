@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
 import { insertLocalData } from "@/lib/insert-local-data";
+import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
 function getSupabaseAdmin() {
   return createClient(
@@ -11,11 +12,20 @@ function getSupabaseAdmin() {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await getApiAuth();
+  if (!auth) return unauthorized();
+
   const body = await request.json();
   const { scenario, provider, providerUserId, choice, winnerWid, loserWid, localData } = body;
 
   if (!scenario || !provider || !providerUserId || !choice) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  }
+
+  if (scenario === "account-linking") {
+    if (winnerWid !== auth.userId && loserWid !== auth.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
   }
 
   const supabaseAdmin = getSupabaseAdmin();

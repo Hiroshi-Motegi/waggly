@@ -27,14 +27,14 @@ export async function POST(request: NextRequest) {
   if (provider === "google") {
     const { data } = await supabaseAdmin
       .from("users")
-      .select("*")
+      .select("id")
       .eq("google_id", providerUserId)
       .maybeSingle();
     existingUser = data;
   } else if (provider === "line") {
     const { data } = await supabaseAdmin
       .from("users")
-      .select("*")
+      .select("id")
       .eq("line_user_id", providerUserId)
       .maybeSingle();
     existingUser = data;
@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
     conflict: true,
     existingUser: {
       wid: existingUser.id,
-      displayName: existingUser.display_name,
       ...existingSummary,
     },
   };

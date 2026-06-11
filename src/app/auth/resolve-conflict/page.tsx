@@ -46,6 +46,7 @@ export default function ResolveConflictPage() {
   }, []);
 
   function handleSelect(side: "a" | "b") {
+    if (isProcessing) return;
     setSelected(side);
     setShowConfirm(true);
   }
