@@ -53,7 +53,7 @@ function Slide1() {
         <img
           src="/onboarding/1-2.png"
           alt="練習記録画面"
-          className="absolute left-[calc(40%+30px)] top-[calc(12%+5px)] w-[56%] border-3 border-white"
+          className="absolute left-[calc(40%+30px)] top-[calc(12%+5px)] w-[56%] border-3 border-white scale-110 origin-bottom-right"
         />
       </div>
     </div>
