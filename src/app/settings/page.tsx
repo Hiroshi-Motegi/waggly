@@ -338,8 +338,9 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
     })();
   }, []);
 
-  const canUnlinkLine = hasBoth && loginProvider !== "line";
-  const canUnlinkGoogle = hasBoth && loginProvider !== "google";
+  const isGoogleSession = loginProvider === "google";
+  const canUnlinkLine = hasBoth && isGoogleSession;
+  const canUnlinkGoogle = hasBoth && !isGoogleSession;
 
   async function unlinkProvider(provider: "line" | "google") {
     if (!confirm(`${provider === "line" ? "LINE" : "Google"}の連携を解除しますか？`)) return;
