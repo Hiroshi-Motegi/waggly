@@ -111,4 +111,36 @@ describe("SyncEngine", () => {
       });
     });
   });
+
+  describe("collectLocalData", () => {
+    it("collects clubs with child tables, accessories, and practice sessions with practice_clubs", async () => {
+      const mockClubs = [{ id: "c1", user_id: "local", category: "iron", club_number: "7I", created_at: "2026-01-01" }];
+      const mockMemos = [{ id: "m1", club_id: "c1", memo: "good", created_at: "2026-01-01" }];
+      const mockImages = [{ id: "i1", club_id: "c1", image_url: "http://...", is_primary: 1, created_at: "2026-01-01" }];
+      const mockMaintenances = [{ id: "mt1", club_id: "c1", type: "grip_change", done_at: "2026-01-01", created_at: "2026-01-01" }];
+      const mockAccessories = [{ id: "a1", user_id: "local", category: "ball", created_at: "2026-01-01" }];
+      const mockSessions = [{ id: "s1", user_id: "local", practiced_at: "2026-01-01", created_at: "2026-01-01" }];
+      const mockPracticeClubs = [{ id: "pc1", session_id: "s1", club_id: "c1", balls: 20 }];
+
+      vi.mocked(query)
+        .mockResolvedValueOnce(mockClubs)          // SELECT * FROM clubs
+        .mockResolvedValueOnce(mockMemos)           // club_memos for c1
+        .mockResolvedValueOnce(mockImages)          // club_images for c1
+        .mockResolvedValueOnce(mockMaintenances)    // maintenances for c1
+        .mockResolvedValueOnce(mockAccessories)     // SELECT * FROM accessories
+        .mockResolvedValueOnce(mockSessions)        // SELECT * FROM practice_sessions
+        .mockResolvedValueOnce(mockPracticeClubs);  // practice_clubs for s1
+
+      const { collectLocalData } = await import("@/lib/sync");
+      const data = await collectLocalData();
+
+      expect(data.clubs).toHaveLength(1);
+      expect(data.clubs[0].club_memos).toEqual(mockMemos);
+      expect(data.clubs[0].club_images).toEqual(mockImages);
+      expect(data.clubs[0].maintenances).toEqual(mockMaintenances);
+      expect(data.accessories).toEqual(mockAccessories);
+      expect(data.practiceSessions).toHaveLength(1);
+      expect(data.practiceSessions[0].practice_clubs).toEqual(mockPracticeClubs);
+    });
+  });
 });
