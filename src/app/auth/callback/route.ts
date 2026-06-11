@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { getSupabaseAdmin } from "@/lib/auth-helpers";
 import { getUserDataSummary } from "@/lib/user-data-summary";
-
-function getSupabaseAdmin() {
-  return createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const link = searchParams.get("link"); // "google" if linking
+  const link = searchParams.get("link");
   const next = searchParams.get("next") ?? "/";
 
   if (code) {
@@ -24,7 +17,7 @@ export async function GET(request: NextRequest) {
       if (link === "google") {
         return handleGoogleLink(request, data.user, origin);
       }
-
+      // Normal login → auth-provider's resolve-session handles it
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
@@ -33,8 +26,9 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * Handle Google account linking entirely server-side.
- * No more client-side link-complete page needed for this flow.
+ * Google linking callback.
+ * Extract google_sub from the OAuth user, check user_providers for conflicts,
+ * then insert a new provider row or return conflict info.
  */
 async function handleGoogleLink(
   request: NextRequest,
@@ -43,66 +37,34 @@ async function handleGoogleLink(
 ) {
   const { searchParams } = new URL(request.url);
   const originalUserId = searchParams.get("originalUser");
-  const googleId = googleUser.user_metadata?.sub ?? googleUser.id;
-  const googleAuthUserId = googleUser.id;
-
-  console.log("[callback] Google link:", { googleId: googleId?.substring(0, 10), originalUserId, googleAuthUserId });
+  const googleSub = googleUser.user_metadata?.sub ?? googleUser.id;
+  const googleEmail = googleUser.user_metadata?.email ?? googleUser.email ?? null;
 
   if (!originalUserId) {
-    console.error("[callback] No originalUser param");
     return NextResponse.redirect(`${origin}/settings?error=missing_user`);
   }
 
   const supabaseAdmin = getSupabaseAdmin();
 
-  // Find the target user
-  const { data: targetUser } = await supabaseAdmin
-    .from("users")
-    .select("*")
-    .eq("id", originalUserId)
-    .single();
+  // Check user_providers for conflict
+  const { data: existingProvider } = await supabaseAdmin
+    .from("user_providers")
+    .select("user_id")
+    .eq("provider", "google")
+    .eq("provider_sub", googleSub)
+    .maybeSingle();
 
-  if (!targetUser) {
-    console.error("[callback] Target user not found:", originalUserId);
-    return NextResponse.redirect(`${origin}/settings?error=user_not_found`);
-  }
-
-  // Check if the Google auth user itself has an existing profile
-  // (most reliable conflict detection — doesn't depend on google_id being set)
-  let existingUser = null;
-  if (googleAuthUserId !== originalUserId) {
-    const { data: googleProfile } = await supabaseAdmin
-      .from("users")
-      .select("*")
-      .eq("id", googleAuthUserId)
-      .maybeSingle();
-    if (googleProfile) {
-      console.log("[callback] Conflict: Google auth user has existing profile:", googleAuthUserId);
-      existingUser = googleProfile;
-    }
-  }
-
-  // Also check by google_id (covers edge case where Google identity was merged into a different auth user)
-  if (!existingUser) {
-    const { data } = await supabaseAdmin
-      .from("users")
-      .select("*")
-      .eq("google_id", googleId)
-      .neq("id", originalUserId)
-      .maybeSingle();
-    existingUser = data;
-  }
-
-  if (existingUser) {
+  if (existingProvider && existingProvider.user_id !== originalUserId) {
+    // Conflict → redirect to settings with conflict info in cookie
     const [currentSummary, existingSummary] = await Promise.all([
       getUserDataSummary(supabaseAdmin, originalUserId),
-      getUserDataSummary(supabaseAdmin, existingUser.id),
+      getUserDataSummary(supabaseAdmin, existingProvider.user_id),
     ]);
 
     const conflictInfo = JSON.stringify({
       scenario: "account-linking",
       provider: "google",
-      providerUserId: googleId,
+      providerSub: googleSub,
       sourceA: {
         label: "現在のアカウントのデータ",
         isNew: false,
@@ -113,14 +75,13 @@ async function handleGoogleLink(
       sourceB: {
         label: "Googleアカウントのデータ",
         isNew: true,
-        wid: existingUser.id,
+        wid: existingProvider.user_id,
         lastUpdated: existingSummary.lastUpdated,
         counts: existingSummary.counts,
       },
     });
 
-    const url = new URL(`${origin}/auth/resolve-conflict`);
-    const response = NextResponse.redirect(url.toString());
+    const response = NextResponse.redirect(`${origin}/settings?conflict=google`);
     response.cookies.set("conflict_info", encodeURIComponent(conflictInfo), {
       path: "/",
       maxAge: 300,
@@ -129,26 +90,22 @@ async function handleGoogleLink(
     return response;
   }
 
-  // No conflict — do the simple link right here, server-side
-  console.log("[callback] Simple link: setting google_id on", originalUserId);
+  // No conflict → insert user_providers row
+  await supabaseAdmin.from("user_providers").insert({
+    user_id: originalUserId,
+    provider: "google",
+    provider_sub: googleSub,
+    provider_email: googleEmail,
+    auth_user_id: googleUser.id,
+  });
 
-  // Set google_id and google_email on the target user
-  const googleEmail = googleUser.user_metadata?.email ?? googleUser.email ?? null;
-  const { error: updateError } = await supabaseAdmin
-    .from("users")
-    .update({ google_id: googleId, google_email: googleEmail })
-    .eq("id", originalUserId);
-
-  if (updateError) {
-    console.error("[callback] Failed to update google_id:", updateError);
-    return NextResponse.redirect(`${origin}/settings?error=link_failed`);
+  // Update google_email on users table too
+  if (googleEmail) {
+    await supabaseAdmin
+      .from("users")
+      .update({ google_email: googleEmail })
+      .eq("id", originalUserId);
   }
 
-  console.log("[callback] Google linked successfully, orphan auth user:", googleAuthUserId);
-
-  // Don't delete the orphan Google auth user here — the browser still holds
-  // a JWT for it. Let auth-provider's resolve-google-user API detect the
-  // orphan, switch to the correct session, and clean up.
-  // Redirect to root so auth-provider can resolve.
   return NextResponse.redirect(`${origin}/settings?linked=google`);
 }
