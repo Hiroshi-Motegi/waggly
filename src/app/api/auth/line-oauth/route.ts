@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
-
-function getSupabaseAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
+import { getSupabaseAdmin } from "@/lib/auth-helpers";
 
 function derivePassword(lineUserId: string): string {
   return crypto
@@ -48,7 +41,7 @@ export async function POST(request: NextRequest) {
 
   const tokens = await tokenRes.json();
 
-  // Verify ID token to get LINE user ID
+  // Verify ID token to get LINE user ID and profile
   const verifyRes = await fetch("https://api.line.me/oauth2/v2.1/verify", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -68,57 +61,30 @@ export async function POST(request: NextRequest) {
   const displayName = verified.name ?? "LINEユーザー";
   const avatarUrl = verified.picture ?? null;
 
-  // Get or create Supabase user (same approach as existing LINE auth)
   const supabaseAdmin = getSupabaseAdmin();
   const email = `${lineUserId}@line.waggly.app`;
   const password = derivePassword(lineUserId);
 
-  // Check if user exists
-  const { data: existingUser } = await supabaseAdmin
-    .from("users")
-    .select("id")
-    .eq("line_user_id", lineUserId)
+  // user_providers で既存ユーザーを検索
+  const { data: existingProvider } = await supabaseAdmin
+    .from("user_providers")
+    .select("user_id, auth_user_id")
+    .eq("provider", "line")
+    .eq("provider_sub", lineUserId)
     .maybeSingle();
 
-  let userId: string;
+  let authUserId: string;
 
-  if (existingUser) {
-    userId = existingUser.id;
+  if (existingProvider?.auth_user_id) {
+    // Returning user with existing auth account
+    authUserId = existingProvider.auth_user_id;
     await supabaseAdmin
       .from("users")
       .update({ display_name: displayName, avatar_url: avatarUrl })
-      .eq("id", userId);
-
-    // Check if auth user still exists (may have been deleted during account merge)
-    const { data: { user: authCheck } } = await supabaseAdmin.auth.admin.getUserById(userId);
-    if (authCheck) {
-      await supabaseAdmin.auth.admin.updateUserById(userId, { password });
-    } else {
-      // Auth user was deleted — recreate it with the same ID
-      const { error: recreateError } = await supabaseAdmin.auth.admin.createUser({
-        id: userId,
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { line_user_id: lineUserId, display_name: displayName },
-      });
-      if (recreateError) {
-        // ID collision — create with new ID and update users table
-        const { data: newAuth, error: newError } = await supabaseAdmin.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-          user_metadata: { line_user_id: lineUserId, display_name: displayName },
-        });
-        if (newError) {
-          console.error("[line-oauth] Recreate auth failed:", newError);
-          return NextResponse.json({ error: newError.message }, { status: 500 });
-        }
-        userId = newAuth.user.id;
-        await supabaseAdmin.from("users").update({ id: userId }).eq("line_user_id", lineUserId);
-      }
-    }
+      .eq("id", existingProvider.user_id);
+    await supabaseAdmin.auth.admin.updateUserById(authUserId, { password });
   } else {
+    // Create auth user
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -131,20 +97,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: authError.message }, { status: 500 });
     }
 
-    userId = authUser.user.id;
+    authUserId = authUser.user.id;
 
-    await supabaseAdmin.from("users").insert({
-      id: userId,
-      line_user_id: lineUserId,
-      display_name: displayName,
-      avatar_url: avatarUrl,
-      agreed_terms_at: new Date().toISOString(),
-    });
+    if (existingProvider) {
+      // User exists but no auth account yet - link it
+      await supabaseAdmin
+        .from("user_providers")
+        .update({ auth_user_id: authUserId })
+        .eq("provider", "line")
+        .eq("provider_sub", lineUserId);
+    } else {
+      // Brand new user - create user + provider row
+      const { data: newUser } = await supabaseAdmin
+        .from("users")
+        .insert({
+          display_name: displayName,
+          avatar_url: avatarUrl,
+          agreed_terms_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single();
+
+      if (newUser) {
+        await supabaseAdmin.from("user_providers").insert({
+          user_id: newUser.id,
+          provider: "line",
+          auth_user_id: authUserId,
+          provider_sub: lineUserId,
+        });
+      }
+    }
   }
 
   // Create session — use actual auth user email (may differ from LINE email
   // if this user was originally created via Google OAuth)
-  const { data: { user: signInAuthUser } } = await supabaseAdmin.auth.admin.getUserById(userId);
+  const { data: { user: signInAuthUser } } = await supabaseAdmin.auth.admin.getUserById(authUserId);
   const signInEmail = signInAuthUser?.email ?? email;
 
   const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({

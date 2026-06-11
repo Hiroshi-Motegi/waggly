@@ -1,16 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { getSupabaseAdmin, verifyLineIdToken } from "@/lib/auth-helpers";
 
-
-function getSupabaseAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
-
-// Derive a deterministic password from LINE user ID + secret
 function derivePassword(lineUserId: string): string {
   return crypto
     .createHmac("sha256", process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -18,36 +9,14 @@ function derivePassword(lineUserId: string): string {
     .digest("hex");
 }
 
-// Verify LINE ID token server-side
-async function verifyLineIdToken(idToken: string): Promise<{ sub: string; name: string; picture?: string } | null> {
-  try {
-    const res = await fetch("https://api.line.me/oauth2/v2.1/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        id_token: idToken,
-        client_id: process.env.NEXT_PUBLIC_LIFF_CHANNEL_ID!,
-      }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.sub) return null;
-    return { sub: data.sub, name: data.name, picture: data.picture };
-  } catch {
-    return null;
-  }
-}
-
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
-  // Prefer verified ID token; fall back to legacy flow only in development
   let lineUserId: string;
   let displayName: string;
   let avatarUrl: string | null = null;
 
   if (body.idToken) {
-    // Verify LINE ID token
     const verified = await verifyLineIdToken(body.idToken);
     if (!verified) {
       return NextResponse.json({ error: "Invalid LINE token" }, { status: 401 });
@@ -56,7 +25,6 @@ export async function POST(request: NextRequest) {
     displayName = body.displayName || verified.name;
     avatarUrl = body.avatarUrl || verified.picture || null;
   } else if (process.env.NODE_ENV === "development") {
-    // Legacy: allow unverified in dev only
     lineUserId = body.lineUserId;
     displayName = body.displayName;
     avatarUrl = body.avatarUrl ?? null;
@@ -72,26 +40,26 @@ export async function POST(request: NextRequest) {
   const email = `${lineUserId}@line.waggly.app`;
   const password = derivePassword(lineUserId);
 
-  // Check if user exists
-  const { data: existingUser } = await supabaseAdmin
-    .from("users")
-    .select("id")
-    .eq("line_user_id", lineUserId)
-    .single();
+  // user_providers で既存ユーザーを検索
+  const { data: existingProvider } = await supabaseAdmin
+    .from("user_providers")
+    .select("user_id, auth_user_id")
+    .eq("provider", "line")
+    .eq("provider_sub", lineUserId)
+    .maybeSingle();
 
-  let userId: string;
+  let authUserId: string;
 
-  if (existingUser) {
-    userId = existingUser.id;
-    // Update profile
+  if (existingProvider?.auth_user_id) {
+    // Returning user with existing auth account
+    authUserId = existingProvider.auth_user_id;
     await supabaseAdmin
       .from("users")
       .update({ display_name: displayName, avatar_url: avatarUrl })
-      .eq("id", userId);
-    // Ensure password is set
-    await supabaseAdmin.auth.admin.updateUserById(userId, { password });
+      .eq("id", existingProvider.user_id);
+    await supabaseAdmin.auth.admin.updateUserById(authUserId, { password });
   } else {
-    // Create auth user with password
+    // Create auth user
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -103,24 +71,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: authError.message }, { status: 500 });
     }
 
-    userId = authUser.user.id;
+    authUserId = authUser.user.id;
 
-    // Create profile
-    const { error: profileError } = await supabaseAdmin.from("users").insert({
-      id: userId,
-      line_user_id: lineUserId,
-      display_name: displayName,
-      avatar_url: avatarUrl,
-    });
+    if (existingProvider) {
+      // User exists but no auth account yet - link it
+      await supabaseAdmin
+        .from("user_providers")
+        .update({ auth_user_id: authUserId })
+        .eq("provider", "line")
+        .eq("provider_sub", lineUserId);
+    } else {
+      // Brand new user - create user + provider row
+      const { data: newUser } = await supabaseAdmin
+        .from("users")
+        .insert({
+          display_name: displayName,
+          avatar_url: avatarUrl,
+          agreed_terms_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single();
 
-    if (profileError) {
-      return NextResponse.json({ error: profileError.message }, { status: 500 });
+      if (newUser) {
+        await supabaseAdmin.from("user_providers").insert({
+          user_id: newUser.id,
+          provider: "line",
+          auth_user_id: authUserId,
+          provider_sub: lineUserId,
+        });
+      }
     }
   }
 
   // Generate session — use actual auth user email (may differ from LINE email
   // if this user was originally created via Google OAuth)
-  const { data: { user: signInAuthUser } } = await supabaseAdmin.auth.admin.getUserById(userId);
+  const { data: { user: signInAuthUser } } = await supabaseAdmin.auth.admin.getUserById(authUserId);
   const signInEmail = signInAuthUser?.email ?? email;
 
   const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
@@ -133,7 +118,6 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({
-    userId,
     access_token: signInData.session.access_token,
     refresh_token: signInData.session.refresh_token,
   });
