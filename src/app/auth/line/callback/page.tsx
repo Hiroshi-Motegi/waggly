@@ -36,14 +36,14 @@ export default function LineCallbackPage() {
             }),
           });
 
+          const result = await res.json();
+          alert(`link-provider: status=${res.status} result=${JSON.stringify(result).substring(0, 200)}`);
+
           if (!res.ok) {
-            const err = await res.json();
-            alert(err.error || "連携に失敗しました");
+            alert(result.error || "連携に失敗しました");
             window.location.href = "/settings";
             return;
           }
-
-          const result = await res.json();
 
           if (result.needsConfirm) {
             const conflictInfo = JSON.stringify({
