@@ -130,26 +130,18 @@ function Slide3() {
         </h2>
       </div>
       {/* Content */}
-      <div className="flex flex-col items-center w-full px-4 pt-4">
-        <div className="flex w-full gap-2">
-          <div className="w-[56%] shrink-0 border-3 border-white rounded-sm overflow-hidden">
-            <Image
-              src="/onboarding/3-1.png"
-              alt="練習記録一覧"
-              width={430}
-              height={932}
-              className="w-full h-auto"
-            />
-          </div>
-          <div className="w-[56%] shrink-0 border-3 border-white rounded-sm overflow-hidden mt-[10%]">
-            <Image
-              src="/onboarding/3-2.png"
-              alt="練習記録入力"
-              width={430}
-              height={932}
-              className="w-full h-auto"
-            />
-          </div>
+      <div className="flex flex-col items-center w-full px-4 pt-4 pb-8">
+        <div className="relative w-full" style={{ paddingBottom: "120%" }}>
+          <img
+            src="/onboarding/3-1.png"
+            alt="練習記録一覧"
+            className="absolute left-0 top-0 w-[56%] border-3 border-white"
+          />
+          <img
+            src="/onboarding/3-2.png"
+            alt="練習記録入力"
+            className="absolute left-[40%] top-[10%] w-[56%] border-3 border-white"
+          />
         </div>
         {/* Callout */}
         <div className="w-full border-3 border-[#006728] bg-white rounded p-3 mt-2">
