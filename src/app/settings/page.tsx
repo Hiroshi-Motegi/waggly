@@ -319,7 +319,6 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
   const hasLine = user.line_user_id && !user.line_user_id.startsWith("google-") && !user.line_user_id.startsWith("oauth-") && !user.line_user_id.startsWith("dev-");
   const hasGoogle = !!user.google_id;
   const hasBoth = hasLine && hasGoogle;
-  const [loginProvider, setLoginProvider] = useState<string | null>(null);
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -327,20 +326,15 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       const { data: { user: authUser } } = await supabase.auth.getUser();
-      setLoginProvider(authUser?.app_metadata?.provider ?? null);
+      // Get Google email from auth user or linked identity
       if (authUser?.app_metadata?.provider === "google") {
         setGoogleEmail(authUser.email ?? null);
       } else {
-        // Check identities for linked Google account
         const googleIdentity = authUser?.identities?.find((i: any) => i.provider === "google");
         setGoogleEmail(googleIdentity?.identity_data?.email ?? null);
       }
     })();
   }, []);
-
-  const isGoogleSession = loginProvider === "google";
-  const canUnlinkLine = hasBoth && isGoogleSession;
-  const canUnlinkGoogle = hasBoth && !isGoogleSession;
 
   async function unlinkProvider(provider: "line" | "google") {
     if (!confirm(`${provider === "line" ? "LINE" : "Google"}の連携を解除しますか？`)) return;
@@ -430,7 +424,7 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
         {hasLine ? (
           <div className="flex items-center gap-2">
             <span className="text-sm text-[#006728] font-bold">連携済み</span>
-            {canUnlinkLine && (
+            {hasBoth && (
               <button onClick={() => unlinkProvider("line")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5">解除</button>
             )}
           </div>
@@ -447,7 +441,7 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
           <div className="flex flex-col items-end gap-0.5">
             <div className="flex items-center gap-2">
             <span className="text-sm text-[#006728] font-bold shrink-0">連携済み</span>
-            {canUnlinkGoogle && (
+            {hasBoth && (
               <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5 shrink-0">解除</button>
             )}
             </div>

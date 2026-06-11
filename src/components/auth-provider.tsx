@@ -73,7 +73,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log("[auth] provider:", existingAuth.app_metadata?.provider, "hasData:", !!data, "userId:", existingAuth.id?.substring(0, 8));
           if (existingAuth.app_metadata?.provider === "google") {
             const googleSub = existingAuth.user_metadata?.sub;
-            const isOrphan = !data || (data && googleSub && data.google_id !== googleSub);
+            // Only treat as orphan if no profile exists for this auth user.
+            // If profile exists but google_id differs/is null, it may be an
+            // intentional unlink — don't resolve in that case.
+            const isOrphan = !data;
             console.log("[auth] Google resolve check:", { googleSub: googleSub?.substring(0, 10), isOrphan, dataGoogleId: data?.google_id?.substring(0, 10) });
             if (isOrphan) {
               try {
