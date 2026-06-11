@@ -144,30 +144,45 @@ export default function SettingsPage() {
                   setConflictProcessing(true);
                   try {
                     const source = conflictSelected === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
-                    const isLocal = source.wid === null;
-                    const resolveBody: any = {
-                      choice: isLocal ? "local" : "server",
-                      existingUserId: conflictInfo.sourceB.wid,
-                      provider: conflictInfo.provider,
-                      providerSub: conflictInfo.providerSub,
-                    };
-                    if (isLocal) {
-                      const { collectLocalData } = await import("@/lib/sync");
-                      resolveBody.localData = await collectLocalData();
+                    let res: Response;
+
+                    if (conflictInfo.scenario === "account-linking") {
+                      // account-linking: link-provider に confirmMerge で再送
+                      res = await apiFetch("/api/auth/link-provider", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          provider: conflictInfo.provider,
+                          providerSub: conflictInfo.providerSub,
+                          confirmMerge: true,
+                          keepAccountId: source.wid,
+                        }),
+                      });
+                    } else {
+                      // first-signin: resolve-session PUT
+                      const isLocal = source.wid === null;
+                      const resolveBody: any = {
+                        choice: isLocal ? "local" : "server",
+                        existingUserId: conflictInfo.sourceB.wid,
+                        provider: conflictInfo.provider,
+                        providerSub: conflictInfo.providerSub,
+                      };
+                      if (isLocal) {
+                        const { collectLocalData } = await import("@/lib/sync");
+                        resolveBody.localData = await collectLocalData();
+                      }
+                      res = await apiFetch("/api/auth/resolve-session", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(resolveBody) });
                     }
-                    const res = await apiFetch("/api/auth/resolve-session", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(resolveBody) });
-                    if (!res.ok) { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); return; }
-                    // Upload local images to cloud storage (local URLs don't work on server)
-                    if (resolveBody.choice === "local" && resolveBody.localData) {
-                      const { uploadLocalImages } = await import("@/lib/sync");
-                      await uploadLocalImages(resolveBody.localData);
+
+                    if (!res.ok) {
+                      const err = await res.json().catch(() => ({}));
+                      alert(err.error || "処理に失敗しました");
+                      setConflictProcessing(false); setConflictConfirm(false);
+                      return;
                     }
                     localStorage.removeItem("conflict_info");
-                    const { resetLocalModeCache } = await import("@/lib/api-client");
-                    resetLocalModeCache();
-                    const { fullSync } = await import("@/lib/sync");
-                    await fullSync();
-                    window.location.href = "/";
+                    sessionStorage.removeItem("conflict_info");
+                    window.location.href = "/settings";
                   } catch { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); }
                 }} disabled={conflictProcessing} className="flex-1 py-2.5 rounded-lg bg-[#006728] text-white text-sm font-bold disabled:opacity-50">
                   {conflictProcessing ? "処理中..." : "OK"}

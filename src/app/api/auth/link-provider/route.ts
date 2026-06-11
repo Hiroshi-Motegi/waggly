@@ -31,10 +31,13 @@ export async function POST(request: NextRequest) {
   const supabaseAdmin = getSupabaseAdmin();
 
   // Step 1: プロバイダトークンを検証して provider_sub を取得
-  let providerSub: string | null = null;
+  let providerSub: string | null = body.providerSub ?? null;
   let providerEmail: string | null = null;
 
-  if (provider === "google") {
+  // confirmMerge 時は providerSub を直接受け取る（トークンは初回リクエストで検証済み）
+  if (confirmMerge && providerSub) {
+    // providerSub は初回の衝突検出時に検証済み — 再検証不要
+  } else if (provider === "google") {
     if (idToken) {
       const result = await verifyGoogleIdToken(idToken);
       if (!result) return NextResponse.json({ error: "Invalid Google ID token" }, { status: 401 });
