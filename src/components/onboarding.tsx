@@ -140,7 +140,7 @@ function Slide3() {
           <img
             src="/onboarding/3-2.png"
             alt="練習記録入力"
-            className="absolute left-[calc(40%+20px)] top-[10%] w-[56%] border-3 border-white"
+            className="absolute left-[calc(40%+17px)] top-[10%] w-[56%] border-3 border-white"
           />
         </div>
         {/* Callout */}
