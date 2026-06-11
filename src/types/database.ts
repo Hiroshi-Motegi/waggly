@@ -12,6 +12,7 @@ export interface User {
   id: string;
   line_user_id: string;
   google_id: string | null;
+  google_email: string | null;
   agreed_terms_at: string | null;
   display_name: string;
   avatar_url: string | null;

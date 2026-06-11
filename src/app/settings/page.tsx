@@ -319,25 +319,9 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
   const hasLine = user.line_user_id && !user.line_user_id.startsWith("google-") && !user.line_user_id.startsWith("oauth-") && !user.line_user_id.startsWith("dev-");
   const hasGoogle = !!user.google_id;
   const hasBoth = hasLine && hasGoogle;
-  const [googleEmail, setGoogleEmail] = useState<string | null>(null);
   const loginMethod = typeof window !== "undefined" ? localStorage.getItem("login_method") : null;
   const canUnlinkLine = hasBoth && loginMethod === "google";
   const canUnlinkGoogle = hasBoth && loginMethod === "line";
-
-  useEffect(() => {
-    (async () => {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      // Get Google email from auth user or linked identity
-      if (authUser?.app_metadata?.provider === "google") {
-        setGoogleEmail(authUser.email ?? null);
-      } else {
-        const googleIdentity = authUser?.identities?.find((i: any) => i.provider === "google");
-        setGoogleEmail(googleIdentity?.identity_data?.email ?? null);
-      }
-    })();
-  }, []);
 
   async function unlinkProvider(provider: "line" | "google") {
     if (!confirm(`${provider === "line" ? "LINE" : "Google"}の連携を解除しますか？`)) return;
@@ -448,7 +432,7 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
               <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5 shrink-0">解除</button>
             )}
             </div>
-            {googleEmail && <span className="text-xs text-[#8b8b8b]">{googleEmail}</span>}
+            {user.google_email && <span className="text-xs text-[#8b8b8b]">{user.google_email}</span>}
           </div>
         ) : (
           <button onClick={linkGoogle} className="text-sm font-bold text-[#006728] border border-[#006728] rounded-full px-3 py-1">連携する</button>

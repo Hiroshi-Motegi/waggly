@@ -105,10 +105,11 @@ async function handleGoogleLink(
   // No conflict — do the simple link right here, server-side
   console.log("[callback] Simple link: setting google_id on", originalUserId);
 
-  // Set google_id on the target user
+  // Set google_id and google_email on the target user
+  const googleEmail = googleUser.user_metadata?.email ?? googleUser.email ?? null;
   const { error: updateError } = await supabaseAdmin
     .from("users")
-    .update({ google_id: googleId })
+    .update({ google_id: googleId, google_email: googleEmail })
     .eq("id", originalUserId);
 
   if (updateError) {
