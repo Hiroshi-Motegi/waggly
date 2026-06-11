@@ -131,7 +131,7 @@ function Slide3() {
       </div>
       {/* Content */}
       <div className="flex flex-col items-center w-full px-4 pt-4 pb-8">
-        <div className="relative w-full" style={{ paddingBottom: "120%" }}>
+        <div className="relative w-full" style={{ paddingBottom: "140%" }}>
           <img
             src="/onboarding/3-1.png"
             alt="練習記録一覧"
