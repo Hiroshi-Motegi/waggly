@@ -52,8 +52,13 @@ export async function signInWithGoogle(): Promise<NativeSignInResult> {
       .eq("id", data.user.id)
       .single();
 
-    if (profile) {
+    if (profile && profile.google_id) {
+      // Profile exists and Google is still linked
       loadedProfile = profile;
+    } else if (profile && !profile.google_id) {
+      // Profile exists but Google was unlinked — reject this login
+      await supabase.auth.signOut();
+      return { user: null, error: "このGoogleアカウントは連携解除されています。LINEでログインしてください。" };
     } else {
       // No profile for this auth user — check if linked via google_id
       // Use server API to bypass RLS (client can't query other users' rows)

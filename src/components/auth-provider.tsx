@@ -71,13 +71,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .single();
 
           // For Google logins, check if this auth user should resolve to a
-          // different (linked) account.
+          // different (linked) account, or if Google was unlinked.
           console.log("[auth] provider:", existingAuth.app_metadata?.provider, "hasData:", !!data, "userId:", existingAuth.id?.substring(0, 8));
           if (existingAuth.app_metadata?.provider === "google") {
             const googleSub = existingAuth.user_metadata?.sub;
-            // Only treat as orphan if no profile exists for this auth user.
-            // If profile exists but google_id differs/is null, it may be an
-            // intentional unlink — don't resolve in that case.
+
+            // If profile exists but google_id is null, Google was unlinked.
+            // This auth user's ID matches the users row, but the user
+            // intentionally removed Google access. Sign out and redirect.
+            if (data && !data.google_id) {
+              console.log("[auth] Google was unlinked from this profile, signing out");
+              await supabase.auth.signOut();
+              setUser(null);
+              setIsLoading(false);
+              router.push("/login");
+              return;
+            }
+
             const isOrphan = !data;
             console.log("[auth] Google resolve check:", { googleSub: googleSub?.substring(0, 10), isOrphan, dataGoogleId: data?.google_id?.substring(0, 10) });
             if (isOrphan) {
