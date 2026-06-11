@@ -23,8 +23,8 @@ const termsContent = [
 
 function Slide1() {
   return (
-    <div className="flex-1 flex flex-col items-center text-center px-6">
-      <div className="flex-1 flex flex-col items-center justify-center">
+    <div className="flex-1 flex flex-col items-center text-center px-6 pb-[70px] overflow-hidden">
+      <div className="flex flex-col items-center justify-center pt-10 pb-4">
         <img
           src="/images/onboarding/waggly-logo.svg"
           alt="Waggly"
@@ -37,7 +37,7 @@ function Slide1() {
           <br />
           ギア & 練習管理アプリ
         </h2>
-        <p className="text-xl font-bold text-[#2c2c2c] leading-snug mb-8">
+        <p className="text-xl font-bold text-[#2c2c2c] leading-snug">
           ギアのこと、練習のこと、
           <br />
           まとめられます。
