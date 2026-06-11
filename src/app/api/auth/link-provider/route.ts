@@ -220,28 +220,19 @@ export async function DELETE(request: NextRequest) {
     .delete()
     .eq("id", targetProvider.id);
 
-  // auth.users を削除（孤児防止）
-  if (targetProvider.auth_user_id) {
+  // 残りのプロバイダが同じ auth_user_id を使っているか確認
+  const remainingProviders = providers.filter((p: any) => p.id !== targetProvider.id);
+  const authUserIdStillUsed = remainingProviders.some(
+    (p: any) => p.auth_user_id === targetProvider.auth_user_id
+  );
+
+  // auth_user_id が他で使われていなければ auth.users を削除（孤児防止）
+  if (targetProvider.auth_user_id && !authUserIdStillUsed) {
     await supabaseAdmin.auth.admin.deleteUser(targetProvider.auth_user_id);
   }
 
-  // 現在のセッションが解除対象か判定
-  let currentAuthUserId: string | null = null;
-  const headersList = await headers();
-  const authHeader = headersList.get("authorization");
-
-  if (authHeader?.startsWith("Bearer ")) {
-    const token = authHeader.slice(7);
-    const { data: { user } } = await supabaseAdmin.auth.getUser(token);
-    currentAuthUserId = user?.id ?? null;
-  } else {
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    currentAuthUserId = user?.id ?? null;
-  }
-
-  const needsRelogin = currentAuthUserId === targetProvider.auth_user_id;
+  // セッションが無効になるのは auth_user_id が削除された場合のみ
+  const needsRelogin = !authUserIdStillUsed && targetProvider.auth_user_id !== null;
 
   // Google 解除時は google_email もクリア
   if (provider === "google") {
