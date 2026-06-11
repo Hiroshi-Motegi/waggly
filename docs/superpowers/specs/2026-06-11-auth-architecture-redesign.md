@@ -143,6 +143,8 @@ async function getApiAuth(): Promise<{ supabase: any; userId: string } | null> {
 
 全データAPIはこの`userId`（= users.id）を使って`.eq("user_id", userId)`でフィルタ。クライアントからusers.idを自己申告することはない。
 
+注意: リクエスト内キャッシュは同一リクエスト内で`getApiAuth()`が複数回呼ばれた場合の重複防止。リクエストごとに1回はuser_providersへのDB問い合わせが走る（インデックスありで1ms以下）。現在のスケールでは問題ない。将来の最適化としてSupabaseのauth hookでログイン時にJWTのcustom claimに`users.id`を注入する方式も検討可能。
+
 ## アカウント連携フロー
 
 ### Google連携
@@ -222,25 +224,63 @@ link-provider API内で、連携先のprovider_subがuser_providersに既に存�
    → セッションに影響なし。完了
 ```
 
+### クライアント側UXフロー（needsRelogin時）
+
+```
+設定ページで「Google連携を解除」ボタン押下
+  ↓
+確認ダイアログ:
+  「Google連携を解除しますか？
+   現在Googleでログイン中のため、解除後に再ログインが必要です」
+  ↓
+DELETE /api/auth/link-provider → { needsRelogin: true }
+  ↓
+設定ページ: supabase.auth.signOut()
+  ↓
+ネイティブ → ローカルモードに戻る（サインインボタン表示）
+Web → LIFF初期化 or ランディングページ
+```
+
+別プロバイダでログイン中（例：LINEセッションでGoogleを解除）なら`needsRelogin: false`で何も起きない。
+
 ### 今との違い
 
 - auth.usersを削除するので孤児が残らない
-- 古いJWTが自動で無効化されるのでセッション問題が構造的に発生しない
+- リフレッシュトークンはauth.users削除で即時無効化
+- アクセストークン（JWT）は有効期限まで技術的に有効だが、RLS + APIレイヤーの二重防御で実質ブロック
+- セッション問題が構造的に発生しない
 
 ## データ衝突解決（ローカル→クラウド同期）
 
 今日実装した選択UIはそのまま使う。バックエンド処理のみ変更。
 
-### 初回サインイン（衝突あり）
+### resolve-sessionの衝突判定ロジック
+
+auth_user_idで見つからない + provider_subで既存ユーザーが見つかる場合、2パターンある：
+
+**パターンA: 既存ユーザーへの紐づけ（衝突ではない）**
+- 例: 端末AでLINEログイン済み → 端末Bで同じLINEでサインイン
+- auth_user_idは新しいが、provider_subは同じ
+- ネイティブにローカルデータがない → auth_user_idを既存user_providersに更新するだけ
+- 選択UI不要
+
+**パターンB: ローカルデータとの衝突**
+- 例: ネイティブで未ログインのままクラブ登録 → Googleでサインイン → そのgoogle_subが別ユーザーに紐づいてる
+- ネイティブにローカルデータがある → データ衝突 → 選択UI表示
+
+判定: `ネイティブ && ローカルデータあり` の場合のみ衝突。それ以外は単純紐づけ。
+
+### 初回サインイン（衝突あり — パターンB）
 
 ```
 1. resolve-session: auth_user_id で user_providers 検索 → 見つからない
-2. JWTメタデータから provider_sub を抽出 → user_providers で検索 → 別ユーザーが見つかる → 衝突
-3. 選択UI表示
-4. ユーザーが選択:
+2. admin APIでraw_user_meta_dataからprovider_sub取得
+3. user_providers(provider, provider_sub) で検索 → 別ユーザーが見つかる
+4. ネイティブ + ローカルデータあり → 衝突レスポンス → 選択UI表示
+5. ユーザーが選択:
    ├─ ローカル → 既存ユーザーのデータ削除、ローカルデータアップロード
    └─ サーバー → ローカル捨てて fullSync
-5. user_providers に auth_user_id を勝者ユーザーに紐づけ
+6. user_providers に auth_user_id を勝者ユーザーに紐づけ
 ```
 
 ### アカウント連携（衝突あり）
