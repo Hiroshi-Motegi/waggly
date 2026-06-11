@@ -74,7 +74,7 @@ function Slide2() {
         </h2>
       </div>
       {/* Content */}
-      <div className="flex flex-col items-center w-full px-4 pt-4">
+      <div className="flex flex-col items-center w-full px-4 pt-4 pb-4">
         {/* Club screenshot */}
         <div className="w-[60%] border-3 border-white rounded-sm overflow-hidden">
           <Image
@@ -86,7 +86,7 @@ function Slide2() {
           />
         </div>
         {/* Callout 1 */}
-        <div className="w-full border-3 border-[#006728] bg-white rounded p-3">
+        <div className="w-full border-3 border-[#006728] bg-white rounded p-3 mb-4">
           <p className="text-base font-bold text-[#2c2c2c] text-center leading-snug">
             クラブ詳細や飛距離・使用感、
             <br />
