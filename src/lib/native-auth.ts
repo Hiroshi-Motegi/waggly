@@ -231,7 +231,7 @@ export async function handlePostSignIn(
   const checkRes = await apiFetch("/api/auth/check-conflict", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ provider, providerUserId, currentWid: authUser?.id }),
+    body: JSON.stringify({ provider, providerUserId }),
   });
 
   if (!checkRes.ok) {
@@ -265,28 +265,34 @@ export async function handlePostSignIn(
     provider === "google" ? "Googleアカウント" :
     provider === "apple" ? "Appleアカウント" : "LINEアカウント";
 
-  sessionStorage.setItem(
-    "conflict_info",
-    JSON.stringify({
-      scenario: "first-signin",
-      provider,
-      providerUserId,
-      sourceA: {
-        label: "ローカルのデータ",
-        isNew: false,
-        wid: null,
-        lastUpdated: localSummary.lastUpdated,
-        counts: localSummary.counts,
-      },
-      sourceB: {
-        label: `${providerLabel}のデータ`,
-        isNew: true,
-        wid: checkResult.existingUser.wid,
-        lastUpdated: checkResult.existingUser.lastUpdated,
-        counts: checkResult.existingUser.counts,
-      },
-    })
-  );
+  const localDate = localSummary.lastUpdated ? new Date(localSummary.lastUpdated).getTime() : 0;
+  const serverDate = checkResult.existingUser.lastUpdated ? new Date(checkResult.existingUser.lastUpdated).getTime() : 0;
+  const localIsNewer = localDate >= serverDate;
+
+  const conflictInfo = {
+    scenario: "first-signin",
+    provider,
+    providerUserId,
+    sourceA: {
+      label: "ローカルのデータ",
+      isNew: localIsNewer,
+      wid: null,
+      lastUpdated: localSummary.lastUpdated,
+      counts: localSummary.counts,
+    },
+    sourceB: {
+      label: `${providerLabel}のデータ`,
+      isNew: !localIsNewer,
+      wid: checkResult.existingUser.wid,
+      lastUpdated: checkResult.existingUser.lastUpdated,
+      counts: checkResult.existingUser.counts,
+    },
+  };
+
+  // Store in both sessionStorage and localStorage for resilience
+  const encoded = JSON.stringify(conflictInfo);
+  sessionStorage.setItem("conflict_info", encoded);
+  localStorage.setItem("conflict_info", encoded);
 
   return null;
 }

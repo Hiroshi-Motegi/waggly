@@ -57,6 +57,99 @@ export default function SettingsPage() {
   }, [user]);
 
   const [signingIn, setSigningIn] = useState(false);
+  const [conflictInfo, setConflictInfo] = useState<any>(null);
+  const [conflictSelected, setConflictSelected] = useState<"a" | "b" | null>(null);
+  const [conflictConfirm, setConflictConfirm] = useState(false);
+  const [conflictProcessing, setConflictProcessing] = useState(false);
+
+  if (!user && isNative() && conflictInfo) {
+    // Show conflict resolution UI
+    const selectedSource = conflictSelected === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
+    return (
+      <div className="relative flex flex-col px-4 py-4 space-y-4 bg-[#139847]" style={{ minHeight: "100dvh" }}>
+        <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <div className="relative z-10 flex flex-col space-y-4 pt-4">
+          <h1 className="text-xl font-bold text-white text-center">使用するデータを選んでください</h1>
+          {["a", "b"].map((side) => {
+            const src = side === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
+            const isSel = conflictSelected === side;
+            const hasData = src.counts.clubs > 0 || src.counts.practices > 0 || src.counts.accessories > 0;
+            return (
+              <button key={side} onClick={() => { setConflictSelected(side as "a" | "b"); setConflictConfirm(true); }} disabled={conflictProcessing}
+                className={`w-full text-left rounded-xl p-4 transition-all disabled:opacity-50 ${isSel ? "bg-white ring-2 ring-[#006728] shadow-lg" : "bg-white/90 shadow"}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  {src.isNew && <span className="text-xs font-bold text-white bg-[#006728] rounded-full px-2 py-0.5">NEW</span>}
+                  <span className="text-base font-bold text-[#333]">{src.label}</span>
+                </div>
+                {hasData ? (
+                  <>
+                    <div className="flex gap-4 text-sm text-[#666] mb-1">
+                      <span>クラブ: {src.counts.clubs}件</span>
+                      <span>練習記録: {src.counts.practices}件</span>
+                    </div>
+                    <div className="text-sm text-[#666] mb-1">アクセサリー: {src.counts.accessories}件</div>
+                    {src.lastUpdated && <p className="text-xs text-[#999] mt-1">最終更新: {new Date(src.lastUpdated).toLocaleString("ja-JP")}</p>}
+                  </>
+                ) : (
+                  <p className="text-sm text-[#999]">データはありません</p>
+                )}
+              </button>
+            );
+          })}
+          <div className="flex items-start gap-2 rounded-lg bg-white/90 p-3">
+            <span className="text-amber-500 text-lg">⚠</span>
+            <p className="text-sm text-[#666]">選ばなかった側のデータは削除され、復元できません</p>
+          </div>
+          <button onClick={() => {
+            localStorage.removeItem("conflict_info");
+            import("@/lib/supabase/client").then(({ createClient }) => { createClient().auth.signOut(); });
+            setConflictInfo(null); setConflictSelected(null); setConflictConfirm(false);
+          }} disabled={conflictProcessing} className="text-sm text-white/80 py-2 text-center disabled:opacity-50">キャンセル</button>
+        </div>
+        {conflictConfirm && selectedSource && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
+            <div className="bg-white rounded-xl p-5 w-full max-w-sm space-y-4">
+              <p className="text-base font-bold text-center">{selectedSource.label}を使用します</p>
+              <p className="text-sm text-[#666] text-center">もう一方のデータは削除されます。よろしいですか？</p>
+              <div className="flex gap-3">
+                <button onClick={() => setConflictConfirm(false)} disabled={conflictProcessing} className="flex-1 py-2.5 rounded-lg border border-[#ccc] text-sm disabled:opacity-50">戻る</button>
+                <button onClick={async () => {
+                  setConflictProcessing(true);
+                  try {
+                    const source = conflictSelected === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
+                    const loser = conflictSelected === "a" ? conflictInfo.sourceB : conflictInfo.sourceA;
+                    const resolveBody: any = { scenario: conflictInfo.scenario, provider: conflictInfo.provider, providerUserId: conflictInfo.providerUserId };
+                    if (conflictInfo.scenario === "first-signin") {
+                      const isLocal = source.wid === null;
+                      resolveBody.choice = isLocal ? "local" : "server";
+                      if (isLocal) { const { collectLocalData } = await import("@/lib/sync"); resolveBody.localData = await collectLocalData(); }
+                    } else {
+                      resolveBody.choice = source.wid === conflictInfo.sourceA.wid ? "current" : "existing";
+                      resolveBody.winnerWid = source.wid; resolveBody.loserWid = loser.wid;
+                    }
+                    const { createClient } = await import("@/lib/supabase/client");
+                    const supabase = createClient();
+                    const res = await apiFetch("/api/auth/resolve-conflict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(resolveBody) });
+                    if (!res.ok) { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); return; }
+                    const result = await res.json();
+                    if (result.access_token) { await supabase.auth.setSession({ access_token: result.access_token, refresh_token: result.refresh_token }); }
+                    localStorage.removeItem("conflict_info");
+                    const { resetLocalModeCache } = await import("@/lib/api-client");
+                    resetLocalModeCache();
+                    const { fullSync } = await import("@/lib/sync");
+                    await fullSync();
+                    window.location.href = "/";
+                  } catch { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); }
+                }} disabled={conflictProcessing} className="flex-1 py-2.5 rounded-lg bg-[#006728] text-white text-sm font-bold disabled:opacity-50">
+                  {conflictProcessing ? "処理中..." : "OK"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (!user && isNative()) {
     if (signingIn) {
@@ -85,7 +178,11 @@ export default function SettingsPage() {
                   const { signInWithGoogle } = await import("@/lib/native-auth");
                   const result = await signInWithGoogle();
                   if (result.error === "__CONFLICT__") {
-                    window.location.href = "/auth/resolve-conflict";
+                    const stored = localStorage.getItem("conflict_info");
+                    if (stored) {
+                      setConflictInfo(JSON.parse(stored));
+                      setSigningIn(false);
+                    }
                     return;
                   }
                   if (result.user) {

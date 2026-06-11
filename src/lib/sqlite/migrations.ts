@@ -28,7 +28,15 @@ export async function runMigrations(): Promise<void> {
     if (!migration) {
       throw new Error(`Missing migration for version ${v}`);
     }
-    await execute(migration);
+    try {
+      await execute(migration);
+    } catch (e: any) {
+      // Ignore "duplicate column" errors — V1 schema already includes
+      // columns that V2/V3 try to ADD via ALTER TABLE
+      if (!e.message?.includes("duplicate column")) {
+        throw e;
+      }
+    }
     await execute(
       "INSERT OR REPLACE INTO sync_meta (key, value) VALUES (?, ?)",
       ["schema_version", String(v)]

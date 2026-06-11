@@ -99,8 +99,22 @@ export async function getLocalDataSummary(): Promise<DataSummary> {
   const accessoryRows = await query<{ count: number }>("SELECT COUNT(*) as count FROM accessories");
   const metaRows = await query<{ value: string }>("SELECT value FROM sync_meta WHERE key = 'last_data_updated'");
 
+  let lastUpdated: string | null = metaRows.length > 0 ? metaRows[0].value : null;
+
+  // Fallback: if no sync_meta entry, use MAX(created_at) from tables
+  if (!lastUpdated) {
+    const dates = await query<{ latest: string | null }>(
+      `SELECT MAX(latest) as latest FROM (
+        SELECT MAX(created_at) as latest FROM clubs
+        UNION ALL SELECT MAX(created_at) FROM practice_sessions
+        UNION ALL SELECT MAX(created_at) FROM accessories
+      )`
+    );
+    lastUpdated = dates[0]?.latest ?? null;
+  }
+
   return {
-    lastUpdated: metaRows.length > 0 ? metaRows[0].value : null,
+    lastUpdated,
     counts: {
       clubs: clubRows[0]?.count ?? 0,
       practices: practiceRows[0]?.count ?? 0,

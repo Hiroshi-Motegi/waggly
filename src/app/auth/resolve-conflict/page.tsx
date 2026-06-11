@@ -26,14 +26,14 @@ export default function ResolveConflictPage() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
-    let stored = sessionStorage.getItem("conflict_info");
+    // Try sessionStorage first, then localStorage, then cookie
+    let stored = sessionStorage.getItem("conflict_info")
+      || localStorage.getItem("conflict_info");
 
-    // Fallback: read from cookie (set by server-side redirect)
     if (!stored) {
       const cookieMatch = document.cookie.match(/conflict_info=([^;]+)/);
       if (cookieMatch) {
         stored = decodeURIComponent(cookieMatch[1]);
-        sessionStorage.setItem("conflict_info", stored);
         document.cookie = "conflict_info=; path=/; max-age=0";
       }
     }
@@ -108,6 +108,7 @@ export default function ResolveConflictPage() {
       }
 
       sessionStorage.removeItem("conflict_info");
+      localStorage.removeItem("conflict_info");
       const { isNative } = await import("@/lib/platform");
       if (isNative()) {
         const { resetLocalModeCache } = await import("@/lib/api-client");
@@ -126,6 +127,7 @@ export default function ResolveConflictPage() {
 
   function handleCancel() {
     sessionStorage.removeItem("conflict_info");
+      localStorage.removeItem("conflict_info");
     import("@/lib/supabase/client").then(({ createClient }) => {
       createClient().auth.signOut();
     });
