@@ -48,12 +48,12 @@ function Slide1() {
         <img
           src="/onboarding/1-1.png"
           alt="マイバッグ画面"
-          className="absolute left-0 top-[12%] w-[56%] border-3 border-white"
+          className="absolute left-0 top-[calc(12%+5px)] w-[56%] border-3 border-white"
         />
         <img
           src="/onboarding/1-2.png"
           alt="練習記録画面"
-          className="absolute left-[40%] top-[12%] w-[56%] border-3 border-white"
+          className="absolute left-[40%] top-[calc(12%+5px)] w-[56%] border-3 border-white"
         />
       </div>
     </div>
