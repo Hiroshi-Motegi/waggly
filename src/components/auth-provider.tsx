@@ -124,9 +124,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data = newProfile;
           }
 
-          // Auto-set google_id if not yet set — detect via primary provider OR
-          // linked identity (from linkIdentity)
-          if (data && !data.google_id) {
+          // Auto-set google_id only for newly created profiles (within 10 seconds)
+          // Skip for existing profiles to avoid overwriting intentional unlinks
+          const isNewProfile = data && !data.google_id &&
+            (Date.now() - new Date(data.created_at).getTime() < 10000);
+          if (isNewProfile) {
             let googleId: string | null = null;
             if (existingAuth.app_metadata?.provider === "google") {
               googleId = existingAuth.user_metadata?.sub ?? existingAuth.id;
