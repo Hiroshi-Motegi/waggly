@@ -303,7 +303,7 @@ function ExportSection() {
               <Download className="h-4 w-4 text-[#006728] shrink-0" />
             )}
             <span className="flex-1 text-base font-bold">{item.label}</span>
-            <span className="text-sm text-[#8b8b8b]">CSV</span>
+            <span className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5">CSV</span>
           </button>
         ))}
       </div>
@@ -335,7 +335,8 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
   function linkLine() {
     sessionStorage.setItem("link_original_user", user.id);
     const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
-    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
+    const baseUrl = isNative() ? "https://waggly.jp" : window.location.origin;
+    const redirectUri = encodeURIComponent(`${baseUrl}/auth/line/callback?link=1&originalUser=${user.id}`);
     const state = crypto.randomUUID();
     window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
   }
