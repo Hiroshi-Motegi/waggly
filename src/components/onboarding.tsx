@@ -173,7 +173,8 @@ function Slide4({ agreed, setAgreed, showTerms }: { agreed: boolean; setAgreed: 
         alt="Waggly"
         width={128}
         height={128}
-        className="mb-6 animate-bounce"
+        className="mt-4 mb-6"
+        style={{ animation: "smallBounce 1.2s ease-in-out infinite" }}
       />
       <div className="flex-1" />
       <div className="w-full pb-[120px]">
