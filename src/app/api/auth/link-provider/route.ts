@@ -90,16 +90,31 @@ export async function POST(request: NextRequest) {
     }
 
     // confirmMerge = true → マージ実行
+    // セッション（auth.users）は触らない。データだけ操作。
     const deleteId = keepAccountId === userId ? existingProvider.user_id : userId;
     const keepId = keepAccountId === userId ? userId : existingProvider.user_id;
 
-    await deleteUserCompletely(supabaseAdmin, deleteId);
+    // 現在のセッションの auth_user_id を取得（削除前に）
+    const { data: currentProvider } = await supabaseAdmin
+      .from("user_providers")
+      .select("auth_user_id")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
+    const currentAuthUserId = currentProvider?.auth_user_id ?? null;
 
+    // 敗者のデータ + user_providers + users を削除（auth.users はそのまま）
+    await deleteUserData(supabaseAdmin, deleteId);
+    await supabaseAdmin.from("user_providers").delete().eq("user_id", deleteId);
+    await supabaseAdmin.from("users").delete().eq("id", deleteId);
+
+    // 勝者にプロバイダ行追加（現在のセッションの auth_user_id を紐づけ）
     await supabaseAdmin.from("user_providers").insert({
       user_id: keepId,
       provider,
       provider_sub: providerSub,
       provider_email: providerEmail,
+      auth_user_id: currentAuthUserId,
     });
 
     return NextResponse.json({ linked: true, merged: true, mergedInto: keepId });
