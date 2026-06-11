@@ -105,17 +105,24 @@ export async function POST(request: NextRequest) {
 
     // 敗者のデータ + user_providers + users を削除（auth.users はそのまま）
     await deleteUserData(supabaseAdmin, deleteId);
-    await supabaseAdmin.from("user_providers").delete().eq("user_id", deleteId);
-    await supabaseAdmin.from("users").delete().eq("id", deleteId);
+    const { error: delProvErr } = await supabaseAdmin.from("user_providers").delete().eq("user_id", deleteId);
+    console.log("[link-provider] delete loser providers:", { deleteId, error: delProvErr?.message });
+    const { error: delUserErr } = await supabaseAdmin.from("users").delete().eq("id", deleteId);
+    console.log("[link-provider] delete loser user:", { deleteId, error: delUserErr?.message });
 
     // 勝者にプロバイダ行追加（現在のセッションの auth_user_id を紐づけ）
-    await supabaseAdmin.from("user_providers").insert({
+    const { error: insertErr } = await supabaseAdmin.from("user_providers").insert({
       user_id: keepId,
       provider,
       provider_sub: providerSub,
       provider_email: providerEmail,
       auth_user_id: currentAuthUserId,
     });
+    console.log("[link-provider] insert winner provider:", { keepId, provider, providerSub, currentAuthUserId, error: insertErr?.message });
+
+    if (insertErr) {
+      return NextResponse.json({ error: `Failed to link: ${insertErr.message}` }, { status: 500 });
+    }
 
     return NextResponse.json({ linked: true, merged: true, mergedInto: keepId });
   }
