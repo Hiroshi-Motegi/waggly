@@ -152,16 +152,10 @@ function Slide3() {
           </p>
         </div>
         {/* Notes */}
-        <div className="w-full text-left px-1 py-3">
-          <p className="text-xs font-bold text-[#2c2c2c] leading-relaxed">
-            ※ AI機能はベータ公開中となります。
-            <br />
-            &nbsp;&nbsp;&nbsp;&nbsp;正式リリース時にプラン体系が変更される場合があります。
-          </p>
-          <p className="text-xs font-bold text-[#2c2c2c] leading-relaxed mt-2">
-            ※ アカウントログインで利用可能となります。
-          </p>
-        </div>
+        <ul className="w-full text-left px-1 py-3 text-xs font-bold text-[#2c2c2c] leading-relaxed list-disc pl-5 space-y-2">
+          <li>AI機能はベータ公開中となります。正式リリース時にプラン体系が変更される場合があります。</li>
+          <li>アカウントログインで利用可能となります。</li>
+        </ul>
       </div>
     </div>
   );
