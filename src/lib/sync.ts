@@ -87,3 +87,24 @@ export async function fullSync(): Promise<void> {
     ["last_sync", new Date().toISOString()]
   );
 }
+
+export interface DataSummary {
+  lastUpdated: string | null;
+  counts: { clubs: number; practices: number; accessories: number };
+}
+
+export async function getLocalDataSummary(): Promise<DataSummary> {
+  const clubRows = await query<{ count: number }>("SELECT COUNT(*) as count FROM clubs");
+  const practiceRows = await query<{ count: number }>("SELECT COUNT(*) as count FROM practice_sessions");
+  const accessoryRows = await query<{ count: number }>("SELECT COUNT(*) as count FROM accessories");
+  const metaRows = await query<{ value: string }>("SELECT value FROM sync_meta WHERE key = 'last_data_updated'");
+
+  return {
+    lastUpdated: metaRows.length > 0 ? metaRows[0].value : null,
+    counts: {
+      clubs: clubRows[0]?.count ?? 0,
+      practices: practiceRows[0]?.count ?? 0,
+      accessories: accessoryRows[0]?.count ?? 0,
+    },
+  };
+}

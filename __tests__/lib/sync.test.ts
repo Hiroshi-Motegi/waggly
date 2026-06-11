@@ -77,4 +77,38 @@ describe("SyncEngine", () => {
       expect(apiFetch).toHaveBeenCalledWith("/api/accessories");
     });
   });
+
+  describe("getLocalDataSummary", () => {
+    it("returns counts and lastUpdated for local data", async () => {
+      vi.mocked(query)
+        .mockResolvedValueOnce([{ count: 14 }])   // clubs
+        .mockResolvedValueOnce([{ count: 8 }])     // practice_sessions
+        .mockResolvedValueOnce([{ count: 3 }])     // accessories
+        .mockResolvedValueOnce([{ value: "2026-12-12T13:11:00.000Z" }]); // sync_meta
+
+      const { getLocalDataSummary } = await import("@/lib/sync");
+      const summary = await getLocalDataSummary();
+
+      expect(summary).toEqual({
+        lastUpdated: "2026-12-12T13:11:00.000Z",
+        counts: { clubs: 14, practices: 8, accessories: 3 },
+      });
+    });
+
+    it("returns null lastUpdated when no sync_meta entry exists", async () => {
+      vi.mocked(query)
+        .mockResolvedValueOnce([{ count: 0 }])
+        .mockResolvedValueOnce([{ count: 0 }])
+        .mockResolvedValueOnce([{ count: 0 }])
+        .mockResolvedValueOnce([]); // no sync_meta row
+
+      const { getLocalDataSummary } = await import("@/lib/sync");
+      const summary = await getLocalDataSummary();
+
+      expect(summary).toEqual({
+        lastUpdated: null,
+        counts: { clubs: 0, practices: 0, accessories: 0 },
+      });
+    });
+  });
 });
