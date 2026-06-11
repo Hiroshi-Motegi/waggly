@@ -23,7 +23,7 @@ export default function LineCallbackPage() {
 
       try {
         if (isLinking) {
-          const originalUserId = sessionStorage.getItem("link_original_user");
+          const originalUserId = sessionStorage.getItem("link_original_user") || params.get("originalUser");
           const { apiFetch } = await import("@/lib/api-client");
 
           const res = await apiFetch("/api/auth/link", {
