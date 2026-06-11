@@ -48,20 +48,28 @@ export default function SettingsPage() {
     }
     const conflict = params.get("conflict");
     if (conflict) {
-      // Read conflict info from cookie
-      const cookieValue = document.cookie
-        .split("; ")
-        .find((c) => c.startsWith("conflict_info="))
-        ?.split("=")
-        .slice(1)
-        .join("=");
-      if (cookieValue) {
+      // LINE callback uses localStorage, Google callback uses cookie
+      const stored = localStorage.getItem("conflict_info") || sessionStorage.getItem("conflict_info");
+      if (stored) {
         try {
-          const info = JSON.parse(decodeURIComponent(cookieValue));
-          setConflictInfo(info);
-          // Clear cookie
-          document.cookie = "conflict_info=; path=/; max-age=0";
+          setConflictInfo(JSON.parse(stored));
+          localStorage.removeItem("conflict_info");
+          sessionStorage.removeItem("conflict_info");
         } catch {}
+      } else {
+        // Google callback: cookie
+        const cookieValue = document.cookie
+          .split("; ")
+          .find((c) => c.startsWith("conflict_info="))
+          ?.split("=")
+          .slice(1)
+          .join("=");
+        if (cookieValue) {
+          try {
+            setConflictInfo(JSON.parse(decodeURIComponent(cookieValue)));
+            document.cookie = "conflict_info=; path=/; max-age=0";
+          } catch {}
+        }
       }
       window.history.replaceState(null, "", "/settings");
     }
