@@ -220,19 +220,38 @@ export async function DELETE(request: NextRequest) {
     .delete()
     .eq("id", targetProvider.id);
 
-  // 残りのプロバイダが同じ auth_user_id を使っているか確認
+  // 現在のセッションの auth_user_id が残りのプロバイダに存在するか確認
   const remainingProviders = providers.filter((p: any) => p.id !== targetProvider.id);
-  const authUserIdStillUsed = remainingProviders.some(
-    (p: any) => p.auth_user_id === targetProvider.auth_user_id
+
+  // 現在のセッションの auth_user_id を取得
+  let currentAuthUserId: string | null = null;
+  const headersList = await headers();
+  const authHeader = headersList.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const { data: { user: authUser } } = await supabaseAdmin.auth.getUser(token);
+    currentAuthUserId = authUser?.id ?? null;
+  } else {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    currentAuthUserId = authUser?.id ?? null;
+  }
+
+  // 現在のセッションが残りのプロバイダに紐づいているか
+  const sessionStillValid = remainingProviders.some(
+    (p: any) => p.auth_user_id === currentAuthUserId
   );
 
-  // auth_user_id が他で使われていなければ auth.users を削除（孤児防止）
-  if (targetProvider.auth_user_id && !authUserIdStillUsed) {
+  // 解除対象の auth_user_id が他で使われていなければ削除（孤児防止）
+  const targetAuthStillUsed = remainingProviders.some(
+    (p: any) => p.auth_user_id === targetProvider.auth_user_id
+  );
+  if (targetProvider.auth_user_id && !targetAuthStillUsed) {
     await supabaseAdmin.auth.admin.deleteUser(targetProvider.auth_user_id);
   }
 
-  // セッションが無効になるのは auth_user_id が削除された場合のみ
-  const needsRelogin = !authUserIdStillUsed && targetProvider.auth_user_id !== null;
+  const needsRelogin = !sessionStillValid;
 
   // Google 解除時は google_email もクリア
   if (provider === "google") {
