@@ -196,11 +196,26 @@ export async function DELETE(request: NextRequest) {
   const { provider } = await request.json();
   const supabaseAdmin = getSupabaseAdmin();
 
-  const { data: currentUser } = await supabaseAdmin
+  // Try to find user by auth user ID first, then by google_id (orphan session)
+  let { data: currentUser } = await supabaseAdmin
     .from("users")
     .select("*")
     .eq("id", userId)
     .single();
+
+  if (!currentUser) {
+    // Auth user ID doesn't match users.id — try finding by google_id
+    const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const googleSub = authUser?.user_metadata?.sub;
+    if (googleSub) {
+      const { data } = await supabaseAdmin
+        .from("users")
+        .select("*")
+        .eq("google_id", googleSub)
+        .single();
+      currentUser = data;
+    }
+  }
 
   if (!currentUser) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
