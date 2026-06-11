@@ -85,7 +85,7 @@ function Slide2() {
         {/* Club screenshot */}
         <div className="w-[60%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
           <Image
-            src="/images/onboarding/slide2-club.png"
+            src="/onboarding/2-1.png"
             alt="クラブ詳細画面"
             width={430}
             height={532}
@@ -103,7 +103,7 @@ function Slide2() {
         {/* Share screenshot */}
         <div className="w-[60%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
           <Image
-            src="/images/onboarding/slide2-share.png"
+            src="/onboarding/2-2.png"
             alt="シェア画面"
             width={430}
             height={532}
@@ -141,7 +141,7 @@ function Slide3() {
         <div className="relative w-full flex-1 overflow-hidden">
           <div className="absolute left-0 top-0 w-[56%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
             <Image
-              src="/images/onboarding/slide3-calendar.png"
+              src="/onboarding/3-1.png"
               alt="練習記録一覧"
               width={430}
               height={932}
@@ -150,7 +150,7 @@ function Slide3() {
           </div>
           <div className="absolute right-0 top-[10%] w-[56%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
             <Image
-              src="/images/onboarding/slide3-input.png"
+              src="/onboarding/3-2.png"
               alt="練習記録入力"
               width={430}
               height={932}
