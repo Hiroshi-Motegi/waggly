@@ -54,7 +54,7 @@ export default function LineCallbackPage() {
             const conflictInfo = JSON.stringify({
               scenario: "account-linking",
               provider: "line",
-              providerUserId: result.existingAccount?.lineUserId,
+              providerUserId: result.providerId,
               sourceA: {
                 label: "現在のアカウントのデータ",
                 isNew: currentIsNewer,

@@ -122,6 +122,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         needsConfirm: true,
+        providerId,
         currentAccount: {
           id: currentUser.id,
           display_name: currentUser.display_name,
