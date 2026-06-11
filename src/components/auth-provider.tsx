@@ -76,13 +76,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (existingAuth.app_metadata?.provider === "google") {
             const googleSub = existingAuth.user_metadata?.sub;
 
-            // If profile exists but google_id is null, Google was unlinked.
-            // Clear the stale session so other login flows (LINE) can proceed.
+            // If profile exists but google_id is null, Google was previously
+            // unlinked. Just continue with the existing profile — don't block.
             if (data && !data.google_id) {
-              console.log("[auth] Google was unlinked, clearing stale session");
-              await supabase.auth.signOut();
-              setIsLoading(false);
-              return;
+              console.log("[auth] Google was unlinked, continuing with profile");
             }
 
             const isOrphan = !data;
@@ -110,16 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
             }
           } else {
-            // LINE or other provider — check if unlinked
-            if (data) {
-              const hasLine = data.line_user_id && !data.line_user_id.startsWith("google-") && !data.line_user_id.startsWith("oauth-");
-              if (!hasLine) {
-                console.log("[auth] LINE was unlinked, clearing stale session");
-                await supabase.auth.signOut();
-                setIsLoading(false);
-                return;
-              }
-            }
+            console.log("[auth] Not a Google login, skipping resolve");
           }
 
           // First OAuth login (Google/LINE OIDC): create user profile
