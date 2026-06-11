@@ -493,39 +493,48 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
   }
 
   async function linkLine() {
-    if (isNative()) {
-      const { nativeLineLogin } = await import("@/lib/native-auth");
-      const result = await nativeLineLogin();
-      if (result.error) {
-        if (!result.error.includes("cancel")) alert(result.error);
+    try {
+      if (isNative()) {
+        const { nativeLineLogin } = await import("@/lib/native-auth");
+        const result = await nativeLineLogin();
+        if (result.error) {
+          if (!result.error.includes("cancel")) alert(result.error);
+          return;
+        }
+        const res = await apiFetch("/api/auth/link-provider", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider: "line",
+            accessToken: result.accessToken,
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          alert(err.error || "連携に失敗しました");
+          return;
+        }
+        const linkResult = await res.json();
+        if (linkResult.needsConfirm) {
+          handleLinkConflict("line", linkResult);
+          return;
+        }
+        window.location.href = "/settings";
         return;
       }
-      const res = await apiFetch("/api/auth/link-provider", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider: "line",
-          accessToken: result.accessToken,
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.error || "連携に失敗しました");
+      // Web: LINE OAuth redirect
+      const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
+      if (!channelId) {
+        alert("LINE Channel ID が設定されていません");
         return;
       }
-      const linkResult = await res.json();
-      if (linkResult.needsConfirm) {
-        handleLinkConflict("line", linkResult);
-        return;
-      }
-      window.location.href = "/settings";
-      return;
+      const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
+      const state = crypto.randomUUID();
+      window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
+    } catch (e: any) {
+      console.error("linkLine error:", e);
+      alert(e.message || "LINE連携に失敗しました");
     }
-    // Web: LINE OAuth redirect
-    const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
-    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
-    const state = crypto.randomUUID();
-    window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
   }
 
   async function linkGoogle() {
