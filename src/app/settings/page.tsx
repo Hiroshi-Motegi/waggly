@@ -319,10 +319,19 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
   const hasLine = user.line_user_id && !user.line_user_id.startsWith("google-") && !user.line_user_id.startsWith("oauth-") && !user.line_user_id.startsWith("dev-");
   const hasGoogle = !!user.google_id;
   const hasBoth = hasLine && hasGoogle;
-  // Detect current login provider — user.id matches LINE auth user, not Google
-  const isLoggedInViaLine = hasLine;
-  const canUnlinkLine = hasBoth && !isLoggedInViaLine;
-  const canUnlinkGoogle = hasBoth && isLoggedInViaLine;
+  const [loginProvider, setLoginProvider] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      setLoginProvider(authUser?.app_metadata?.provider ?? null);
+    })();
+  }, []);
+
+  const canUnlinkLine = hasBoth && loginProvider !== "line";
+  const canUnlinkGoogle = hasBoth && loginProvider !== "google";
 
   async function unlinkProvider(provider: "line" | "google") {
     if (!confirm(`${provider === "line" ? "LINE" : "Google"}の連携を解除しますか？`)) return;
