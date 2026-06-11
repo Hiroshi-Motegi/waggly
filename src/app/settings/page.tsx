@@ -129,7 +129,7 @@ export default function SettingsPage() {
           </div>
           <button onClick={() => {
             localStorage.removeItem("conflict_info");
-            import("@/lib/supabase/client").then(({ createClient }) => { createClient().auth.signOut(); });
+            sessionStorage.removeItem("conflict_info");
             setConflictInfo(null); setConflictSelected(null); setConflictConfirm(false);
           }} disabled={conflictProcessing} className="text-sm text-white/80 py-2 text-center disabled:opacity-50">キャンセル</button>
         </div>

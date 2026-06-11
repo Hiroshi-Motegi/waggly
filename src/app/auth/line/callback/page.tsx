@@ -37,10 +37,8 @@ export default function LineCallbackPage() {
           });
 
           const result = await res.json();
-          alert(`link-provider: status=${res.status} result=${JSON.stringify(result).substring(0, 200)}`);
 
           if (!res.ok) {
-            alert(result.error || "連携に失敗しました");
             window.location.href = "/settings";
             return;
           }
