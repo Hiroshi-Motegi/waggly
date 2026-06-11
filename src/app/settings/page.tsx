@@ -182,6 +182,16 @@ export default function SettingsPage() {
                     }
                     localStorage.removeItem("conflict_info");
                     sessionStorage.removeItem("conflict_info");
+
+                    const mergeResult = await res.json().catch(() => ({}));
+                    // 自分のアカウントが削除された場合はサインアウトして再ログイン
+                    if (mergeResult.mergedInto && mergeResult.mergedInto !== user?.id) {
+                      const { createClient } = await import("@/lib/supabase/client");
+                      await createClient().auth.signOut();
+                      alert("アカウントを統合しました。再ログインしてください。");
+                      window.location.href = "/";
+                      return;
+                    }
                     window.location.href = "/settings";
                   } catch { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); }
                 }} disabled={conflictProcessing} className="flex-1 py-2.5 rounded-lg bg-[#006728] text-white text-sm font-bold disabled:opacity-50">
