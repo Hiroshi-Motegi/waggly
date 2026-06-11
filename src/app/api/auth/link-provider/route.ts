@@ -110,18 +110,34 @@ export async function POST(request: NextRequest) {
     const { error: delUserErr } = await supabaseAdmin.from("users").delete().eq("id", deleteId);
     console.log("[link-provider] delete loser user:", { deleteId, error: delUserErr?.message });
 
-    // 勝者にプロバイダ行追加（現在のセッションの auth_user_id を紐づけ）
-    const { error: insertErr } = await supabaseAdmin.from("user_providers").insert({
-      user_id: keepId,
-      provider,
-      provider_sub: providerSub,
-      provider_email: providerEmail,
-      auth_user_id: currentAuthUserId,
-    });
-    console.log("[link-provider] insert winner provider:", { keepId, provider, providerSub, currentAuthUserId, error: insertErr?.message });
+    // 勝者にプロバイダを紐づけ
+    // 勝者が既にこのプロバイダを持っている場合は auth_user_id を更新するだけ
+    const { data: winnerProvider } = await supabaseAdmin
+      .from("user_providers")
+      .select("id")
+      .eq("user_id", keepId)
+      .eq("provider", provider)
+      .eq("provider_sub", providerSub)
+      .maybeSingle();
 
-    if (insertErr) {
-      return NextResponse.json({ error: `Failed to link: ${insertErr.message}` }, { status: 500 });
+    if (winnerProvider) {
+      // 既存 → auth_user_id だけ更新
+      await supabaseAdmin
+        .from("user_providers")
+        .update({ auth_user_id: currentAuthUserId })
+        .eq("id", winnerProvider.id);
+    } else {
+      // 新規 → INSERT
+      const { error: insertErr } = await supabaseAdmin.from("user_providers").insert({
+        user_id: keepId,
+        provider,
+        provider_sub: providerSub,
+        provider_email: providerEmail,
+        auth_user_id: currentAuthUserId,
+      });
+      if (insertErr) {
+        return NextResponse.json({ error: `Failed to link: ${insertErr.message}` }, { status: 500 });
+      }
     }
 
     return NextResponse.json({ linked: true, merged: true, mergedInto: keepId });
