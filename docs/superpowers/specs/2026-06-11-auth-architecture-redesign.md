@@ -53,6 +53,10 @@ CREATE TABLE user_providers (
   UNIQUE(provider, provider_sub),         -- 同じプロバイダIDは1つだけ
   UNIQUE(provider, auth_user_id)          -- 同じauth userは1つだけ
 );
+
+-- RLSサブクエリ高速化用インデックス
+CREATE INDEX idx_user_providers_auth_user_id ON user_providers(auth_user_id);
+CREATE INDEX idx_user_providers_provider_sub ON user_providers(provider, provider_sub);
 ```
 
 ### 今との違い
@@ -205,7 +209,9 @@ link-provider API内で、連携先のprovider_subがuser_providersに既に存�
 2. サーバー側:
    a. user_providers: 該当行を削除
    b. auth.users: 該当プロバイダの auth user を admin API で削除
-      → 古いJWTも自動無効化
+      → 古いJWTはstatelessなため有効期限まで技術的に有効だが、
+        RLS（user_providersに行がない）+ APIレイヤー（getApiAuthがnull返却）の
+        二重防御で実質ブロックされる
    c. 最低1つのプロバイダが user_providers に残ってるか検証（全解除禁止）
    ↓
 3. 現在のセッションが解除対象の場合:
@@ -275,8 +281,11 @@ link-provider API内で、連携先のprovider_subがuser_providersに既に存�
 処理:
 1. JWTからauth_user_idを取得
 2. `user_providers.auth_user_id` で検索 → 見つかればユーザー返却
-3. JWTメタデータからprovider + provider_subを抽出
-4. `user_providers.provider_sub` で検索 → 別ユーザーが見つかれば衝突
+3. auth_user_idからprovider_subを取得:
+   - admin APIで `auth.users.raw_user_meta_data` を取得
+   - Google: `sub`フィールド、LINE: `provider_id`、Apple: `sub`
+   - JWTのapp_metadataにprovider_subが含まれない場合があるため、admin API経由が確実
+4. `user_providers(provider, provider_sub)` で検索 → 別ユーザーが見つかれば衝突
 5. 誰も見つからない → 新規ユーザー + user_providers作成
 
 #### POST /api/auth/link-provider
@@ -311,6 +320,14 @@ link-provider API内で、連携先のprovider_subがuser_providersに既に存�
   existingAccount: { id: string; lastUpdated: string; counts: {...}; };
 }
 ```
+
+認証情報マトリクス:
+
+| Provider | Web | Native |
+|----------|-----|--------|
+| Google | code（OAuth code exchange） | idToken（GoogleAuth SDK） |
+| LINE | code（OAuth code exchange） | accessToken（LINE SDK → GET /v2/profile で検証） |
+| Apple | code（OAuth code exchange） | idToken（Apple Sign In SDK） |
 
 処理:
 1. idToken/accessToken/codeをサーバー側で検証してprovider_subを取得
@@ -412,3 +429,7 @@ APIレイヤー（getApiAuth）がメインの防御、RLSがバックアップ�
 3. **auth.users削除**: 連携解除時に確実に削除してJWTを無効化
 4. **users.id自己申告禁止**: 全APIでサーバー側がJWT→users.id逆引き。クライアントはJWTのみ送信
 5. **RLS多層防御**: APIレイヤー + RLSの二重チェック
+
+## 将来検討
+
+- **データマージ**: 現在の衝突解決は「どちらかを完全削除」だが、将来的に「両方のデータをマージ」する選択肢を追加する可能性がある。現時点ではスコープ外（YAGNI）。
