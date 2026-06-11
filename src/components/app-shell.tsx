@@ -15,10 +15,14 @@ import { isNative } from "@/lib/platform";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const pathname = usePathname();
-  const [onboardingDone, setOnboardingDone] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return !!localStorage.getItem("onboarding_done");
-  });
+  const [onboardingDone, setOnboardingDone] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+
+  useEffect(() => {
+    const done = !!localStorage.getItem("onboarding_done");
+    setOnboardingDone(done);
+    setOnboardingChecked(true);
+  }, []);
 
   useEffect(() => {
     if (!isNative()) return;
@@ -85,6 +89,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const native = isNative();
+
+  // Wait for localStorage check on native
+  if (native && !onboardingChecked) {
+    return (
+      <div className="min-h-dvh w-full bg-[#f7fff3]" />
+    );
+  }
 
   // Show onboarding:
   // - Native: on first launch (localStorage flag, no login needed)
