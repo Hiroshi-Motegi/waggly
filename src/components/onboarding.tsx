@@ -131,7 +131,7 @@ function Slide3() {
       </div>
       {/* Content */}
       <div className="flex flex-col items-center w-full px-4 pt-4 pb-8">
-        <div className="relative w-full" style={{ paddingBottom: "140%" }}>
+        <div className="relative w-full" style={{ paddingBottom: "130%" }}>
           <img
             src="/onboarding/3-1.png"
             alt="練習記録一覧"
@@ -140,7 +140,7 @@ function Slide3() {
           <img
             src="/onboarding/3-2.png"
             alt="練習記録入力"
-            className="absolute left-[40%] top-[10%] w-[56%] border-3 border-white"
+            className="absolute left-[calc(40%+20px)] top-[10%] w-[56%] border-3 border-white"
           />
         </div>
         {/* Callout */}
