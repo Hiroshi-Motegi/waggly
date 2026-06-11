@@ -15,7 +15,10 @@ import { isNative } from "@/lib/platform";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const pathname = usePathname();
-  const [onboardingDone, setOnboardingDone] = useState(false);
+  const [onboardingDone, setOnboardingDone] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("onboarding_done");
+  });
 
   useEffect(() => {
     if (!isNative()) return;
@@ -90,18 +93,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show onboarding if user hasn't agreed or terms were updated
-  const needsAgreement = user && (
+  // Show onboarding:
+  // - Native: on first launch (localStorage flag)
+  // - Web: when user hasn't agreed to terms
+  const native = isNative();
+  const needsAgreementWeb = user && (
     !user.agreed_terms_at || new Date(user.agreed_terms_at) < new Date(TERMS_UPDATED_AT)
   );
+  const needsOnboarding = !onboardingDone && (needsAgreementWeb || (native && !user));
 
-  if (needsAgreement && !onboardingDone) {
+  if (needsOnboarding) {
     return (
-      <div className="mx-auto max-w-md min-h-dvh border-x border-border shadow-sm bg-background">
+      <div className={`min-h-dvh border-x border-border shadow-sm bg-background ${native ? "w-full" : "mx-auto max-w-md"}`}>
         <Onboarding
-          isReagreement={!!user.agreed_terms_at}
+          isReagreement={!!user?.agreed_terms_at}
           onComplete={async () => {
-            await apiFetch("/api/auth/agree", { method: "POST" });
+            localStorage.setItem("onboarding_done", "1");
+            if (user) {
+              await apiFetch("/api/auth/agree", { method: "POST" });
+            }
             setOnboardingDone(true);
           }}
         />
@@ -119,7 +129,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   // Normal app
-  const native = isNative();
   const isPublicPage = pathname.startsWith("/p/");
   const hideChrome = isPublicPage || (!user && !native);
   return (
