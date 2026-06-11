@@ -84,23 +84,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // Show loading
-  if (isLoading) {
-    return (
-      <div className="mx-auto max-w-md min-h-dvh flex items-center justify-center bg-[#ebf1eb]">
-        <Loading />
-      </div>
-    );
-  }
+  const native = isNative();
 
   // Show onboarding:
-  // - Native: on first launch (localStorage flag)
-  // - Web: when user hasn't agreed to terms
-  const native = isNative();
-  const needsAgreementWeb = user && (
+  // - Native: on first launch (localStorage flag, no login needed)
+  // - Web: when logged-in user hasn't agreed to terms
+  const needsAgreementWeb = !native && user && (
     !user.agreed_terms_at || new Date(user.agreed_terms_at) < new Date(TERMS_UPDATED_AT)
   );
-  const needsOnboarding = !onboardingDone && (needsAgreementWeb || (native && !user));
+  const needsOnboarding = !onboardingDone && (needsAgreementWeb || native);
 
   if (needsOnboarding) {
     return (
@@ -115,6 +107,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             setOnboardingDone(true);
           }}
         />
+      </div>
+    );
+  }
+
+  // Show loading (web only, after onboarding check)
+  if (isLoading && !native) {
+    return (
+      <div className="mx-auto max-w-md min-h-dvh flex items-center justify-center bg-[#ebf1eb]">
+        <Loading />
       </div>
     );
   }
