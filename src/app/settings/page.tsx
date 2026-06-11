@@ -117,22 +117,19 @@ export default function SettingsPage() {
                   setConflictProcessing(true);
                   try {
                     const source = conflictSelected === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
-                    const loser = conflictSelected === "a" ? conflictInfo.sourceB : conflictInfo.sourceA;
-                    const resolveBody: any = { scenario: conflictInfo.scenario, provider: conflictInfo.provider, providerUserId: conflictInfo.providerUserId };
-                    if (conflictInfo.scenario === "first-signin") {
-                      const isLocal = source.wid === null;
-                      resolveBody.choice = isLocal ? "local" : "server";
-                      if (isLocal) { const { collectLocalData } = await import("@/lib/sync"); resolveBody.localData = await collectLocalData(); }
-                    } else {
-                      resolveBody.choice = source.wid === conflictInfo.sourceA.wid ? "current" : "existing";
-                      resolveBody.winnerWid = source.wid; resolveBody.loserWid = loser.wid;
+                    const isLocal = source.wid === null;
+                    const resolveBody: any = {
+                      choice: isLocal ? "local" : "server",
+                      existingUserId: conflictInfo.sourceB.wid,
+                      provider: conflictInfo.provider,
+                      providerSub: conflictInfo.providerSub,
+                    };
+                    if (isLocal) {
+                      const { collectLocalData } = await import("@/lib/sync");
+                      resolveBody.localData = await collectLocalData();
                     }
-                    const { createClient } = await import("@/lib/supabase/client");
-                    const supabase = createClient();
-                    const res = await apiFetch("/api/auth/resolve-conflict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(resolveBody) });
+                    const res = await apiFetch("/api/auth/resolve-session", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(resolveBody) });
                     if (!res.ok) { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); return; }
-                    const result = await res.json();
-                    if (result.access_token) { await supabase.auth.setSession({ access_token: result.access_token, refresh_token: result.refresh_token }); }
                     // Upload local images to cloud storage (local URLs don't work on server)
                     if (resolveBody.choice === "local" && resolveBody.localData) {
                       const { uploadLocalImages } = await import("@/lib/sync");
@@ -182,12 +179,28 @@ export default function SettingsPage() {
                 try {
                   const { signInWithGoogle } = await import("@/lib/native-auth");
                   const result = await signInWithGoogle();
-                  if (result.error === "__CONFLICT__") {
-                    const stored = localStorage.getItem("conflict_info");
-                    if (stored) {
-                      setConflictInfo(JSON.parse(stored));
-                      setSigningIn(false);
-                    }
+                  if (result.conflict) {
+                    const conflictInfo = {
+                      scenario: "first-signin",
+                      provider: result.conflict.provider,
+                      providerSub: result.conflict.providerSub,
+                      sourceA: {
+                        label: "ローカルのデータ",
+                        isNew: true,
+                        wid: null,
+                        lastUpdated: result.conflict.localSummary.lastUpdated,
+                        counts: result.conflict.localSummary.counts,
+                      },
+                      sourceB: {
+                        label: "サーバーのデータ",
+                        isNew: false,
+                        wid: result.conflict.existingUser.userId,
+                        lastUpdated: result.conflict.existingUser.lastUpdated,
+                        counts: result.conflict.existingUser.counts,
+                      },
+                    };
+                    setConflictInfo(conflictInfo);
+                    setSigningIn(false);
                     return;
                   }
                   if (result.user) {
@@ -442,22 +455,36 @@ function ExportSection() {
 }
 
 function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: () => void; onConflict: (info: any) => void }) {
-  const hasLine = user.line_user_id && !user.line_user_id.startsWith("google-") && !user.line_user_id.startsWith("oauth-") && !user.line_user_id.startsWith("dev-");
-  const hasGoogle = !!user.google_id;
-  const hasBoth = hasLine && hasGoogle;
-  const loginMethod = typeof window !== "undefined" ? localStorage.getItem("login_method") : null;
-  const canUnlinkLine = hasBoth && loginMethod === "google";
-  const canUnlinkGoogle = hasBoth && loginMethod === "line";
+  const [providers, setProviders] = useState<{ provider: string; provider_email?: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiFetch("/api/auth/providers")
+      .then((r) => r.ok ? r.json() : [])
+      .then(setProviders)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const hasLine = providers.some((p) => p.provider === "line");
+  const hasGoogle = providers.some((p) => p.provider === "google");
+  const canUnlink = providers.length >= 2;
 
   async function unlinkProvider(provider: "line" | "google") {
     if (!confirm(`${provider === "line" ? "LINE" : "Google"}の連携を解除しますか？`)) return;
-    const { apiFetch } = await import("@/lib/api-client");
-    const res = await apiFetch("/api/auth/link", {
+    const res = await apiFetch("/api/auth/link-provider", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ provider }),
     });
     if (res.ok) {
+      const result = await res.json();
+      if (result.needsRelogin) {
+        const { createClient } = await import("@/lib/supabase/client");
+        createClient().auth.signOut();
+        window.location.href = "/";
+        return;
+      }
       onUpdate();
     } else {
       const err = await res.json();
@@ -467,21 +494,18 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
 
   async function linkLine() {
     if (isNative()) {
-      // Native: use LINE SDK directly
       const { nativeLineLogin } = await import("@/lib/native-auth");
       const result = await nativeLineLogin();
       if (result.error) {
         if (!result.error.includes("cancel")) alert(result.error);
         return;
       }
-      // Call link API with the LINE userId
-      const res = await apiFetch("/api/auth/link", {
+      const res = await apiFetch("/api/auth/link-provider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: "line",
-          providerId: result.userId,
-          originalUserId: user.id,
+          accessToken: result.accessToken,
         }),
       });
       if (!res.ok) {
@@ -491,45 +515,13 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
       }
       const linkResult = await res.json();
       if (linkResult.needsConfirm) {
-        const summaryRes = await apiFetch("/api/auth/data-summary");
-        const currentSummary = summaryRes.ok ? await summaryRes.json() : { counts: { clubs: 0, practices: 0, accessories: 0 }, lastUpdated: null };
-        const existingSummary = {
-          lastUpdated: linkResult.existingAccount.lastUpdated ?? null,
-          counts: linkResult.existingAccount.counts ?? { clubs: 0, practices: 0, accessories: 0 },
-        };
-
-        const currentDate = currentSummary.lastUpdated ? new Date(currentSummary.lastUpdated).getTime() : 0;
-        const existingDate = existingSummary.lastUpdated ? new Date(existingSummary.lastUpdated).getTime() : 0;
-        const currentIsNewer = currentDate >= existingDate;
-
-        onConflict({
-          scenario: "account-linking",
-          provider: "line",
-          providerUserId: result.userId,
-          sourceA: {
-            label: "現在のアカウントのデータ",
-            isNew: currentIsNewer,
-            wid: user.id,
-            lastUpdated: currentSummary.lastUpdated,
-            counts: currentSummary.counts,
-          },
-          sourceB: {
-            label: "LINEアカウントのデータ",
-            isNew: !currentIsNewer,
-            wid: linkResult.existingAccount.id,
-            lastUpdated: existingSummary.lastUpdated,
-            counts: existingSummary.counts,
-          },
-        });
+        handleLinkConflict("line", linkResult);
         return;
       }
-      // Force full reload to reset WebView state after LINE SDK return
       window.location.href = "/settings";
       return;
     }
-
-    // Web: OAuth redirect flow
-    sessionStorage.setItem("link_original_user", user.id);
+    // Web: LINE OAuth redirect
     const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
     const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
     const state = crypto.randomUUID();
@@ -549,6 +541,29 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
     });
   }
 
+  function handleLinkConflict(provider: string, linkResult: any) {
+    onConflict({
+      scenario: "account-linking",
+      provider,
+      sourceA: {
+        label: "現在のアカウントのデータ",
+        isNew: true,
+        wid: user.id,
+        lastUpdated: linkResult.currentAccount.lastUpdated,
+        counts: linkResult.currentAccount.counts,
+      },
+      sourceB: {
+        label: `${provider === "google" ? "Google" : "LINE"}アカウントのデータ`,
+        isNew: false,
+        wid: linkResult.existingAccount.id,
+        lastUpdated: linkResult.existingAccount.lastUpdated,
+        counts: linkResult.existingAccount.counts,
+      },
+    });
+  }
+
+  const googleEmail = user.google_email ?? providers.find((p) => p.provider === "google")?.provider_email;
+
   return (
     <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
       <div className="flex items-center justify-between py-2 border-b border-[#ececec]">
@@ -559,7 +574,7 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
         {hasLine ? (
           <div className="flex items-center gap-2">
             <span className="text-sm text-[#006728] font-bold">連携済み</span>
-            {canUnlinkLine && (
+            {canUnlink && (
               <button onClick={() => unlinkProvider("line")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5">解除</button>
             )}
           </div>
@@ -575,12 +590,12 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
         {hasGoogle ? (
           <div className="flex flex-col items-end gap-0.5">
             <div className="flex items-center gap-2">
-            <span className="text-sm text-[#006728] font-bold shrink-0">連携済み</span>
-            {canUnlinkGoogle && (
-              <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5 shrink-0">解除</button>
-            )}
+              <span className="text-sm text-[#006728] font-bold shrink-0">連携済み</span>
+              {canUnlink && (
+                <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5 shrink-0">解除</button>
+              )}
             </div>
-            {user.google_email && <span className="text-xs text-[#8b8b8b]">{user.google_email}</span>}
+            {googleEmail && <span className="text-xs text-[#8b8b8b]">{googleEmail}</span>}
           </div>
         ) : (
           <button onClick={linkGoogle} className="text-sm font-bold text-[#006728] border border-[#006728] rounded-full px-3 py-1">連携する</button>
