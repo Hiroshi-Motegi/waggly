@@ -114,13 +114,22 @@ export async function POST(request: NextRequest) {
   if (existingUser) {
     // Existing account found — need confirmation
     if (!body.confirmMerge) {
+      const [currentCounts, existingCounts] = await Promise.all([
+        getUserDataSummary(supabaseAdmin, currentUser.id),
+        getUserDataSummary(supabaseAdmin, existingUser.id),
+      ]);
+
       return NextResponse.json({
         needsConfirm: true,
-        currentAccount: { id: currentUser.id, display_name: currentUser.display_name },
+        currentAccount: {
+          id: currentUser.id,
+          display_name: currentUser.display_name,
+          ...currentCounts,
+        },
         existingAccount: {
           id: existingUser.id,
           display_name: existingUser.display_name,
-          lineUserId: provider === "line" ? providerId : undefined,
+          ...existingCounts,
         },
       });
     }
@@ -237,6 +246,35 @@ export async function DELETE(request: NextRequest) {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+async function getUserDataSummary(supabase: any, userId: string) {
+  const [clubsRes, practicesRes, accessoriesRes] = await Promise.all([
+    supabase.from("clubs").select("*", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("practice_sessions").select("*", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("accessories").select("*", { count: "exact", head: true }).eq("user_id", userId),
+  ]);
+
+  const [latestClub, latestPractice, latestAccessory] = await Promise.all([
+    supabase.from("clubs").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("practice_sessions").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("accessories").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+  ]);
+
+  const dates = [
+    latestClub.data?.created_at,
+    latestPractice.data?.created_at,
+    latestAccessory.data?.created_at,
+  ].filter(Boolean) as string[];
+
+  return {
+    lastUpdated: dates.length > 0 ? dates.sort().reverse()[0] : null,
+    counts: {
+      clubs: clubsRes.count ?? 0,
+      practices: practicesRes.count ?? 0,
+      accessories: accessoriesRes.count ?? 0,
+    },
+  };
 }
 
 async function deleteUserData(supabase: any, userId: string) {

@@ -389,14 +389,29 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
       }
       const linkResult = await res.json();
       if (linkResult.needsConfirm) {
-        sessionStorage.setItem("merge_info", JSON.stringify({
+        const summaryRes = await apiFetch("/api/auth/data-summary");
+        const currentSummary = summaryRes.ok ? await summaryRes.json() : { counts: { clubs: 0, practices: 0, accessories: 0 }, lastUpdated: null };
+
+        sessionStorage.setItem("conflict_info", JSON.stringify({
+          scenario: "account-linking",
           provider: "line",
-          providerId: result.userId,
-          originalUserId: user.id,
-          currentAccount: linkResult.currentAccount,
-          existingAccount: linkResult.existingAccount,
+          providerUserId: result.userId,
+          sourceA: {
+            label: "現在のアカウントのデータ",
+            isNew: false,
+            wid: user.id,
+            lastUpdated: currentSummary.lastUpdated,
+            counts: currentSummary.counts,
+          },
+          sourceB: {
+            label: "LINEアカウントのデータ",
+            isNew: true,
+            wid: linkResult.existingAccount.id,
+            lastUpdated: linkResult.existingAccount.lastUpdated ?? null,
+            counts: linkResult.existingAccount.counts ?? { clubs: 0, practices: 0, accessories: 0 },
+          },
         }));
-        window.location.href = "/auth/merge";
+        window.location.href = "/auth/resolve-conflict";
         return;
       }
       // Force full reload to reset WebView state after LINE SDK return

@@ -9,6 +9,35 @@ function getSupabaseAdmin() {
   );
 }
 
+async function getUserDataSummary(supabase: any, userId: string) {
+  const [clubsRes, practicesRes, accessoriesRes] = await Promise.all([
+    supabase.from("clubs").select("*", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("practice_sessions").select("*", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("accessories").select("*", { count: "exact", head: true }).eq("user_id", userId),
+  ]);
+
+  const [latestClub, latestPractice, latestAccessory] = await Promise.all([
+    supabase.from("clubs").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("practice_sessions").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("accessories").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+  ]);
+
+  const dates = [
+    latestClub.data?.created_at,
+    latestPractice.data?.created_at,
+    latestAccessory.data?.created_at,
+  ].filter(Boolean) as string[];
+
+  return {
+    lastUpdated: dates.length > 0 ? dates.sort().reverse()[0] : null,
+    counts: {
+      clubs: clubsRes.count ?? 0,
+      practices: practicesRes.count ?? 0,
+      accessories: accessoriesRes.count ?? 0,
+    },
+  };
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -93,13 +122,39 @@ async function handleGoogleLink(
   }
 
   if (existingUser) {
-    // Conflict — need merge confirmation via client-side merge page
-    console.log("[callback] Conflict found, redirecting to merge page");
-    const url = new URL(`${origin}/auth/link-complete`);
-    url.searchParams.set("provider", "google");
-    url.searchParams.set("providerId", googleId);
-    url.searchParams.set("originalUserId", originalUserId);
-    return NextResponse.redirect(url.toString());
+    const [currentSummary, existingSummary] = await Promise.all([
+      getUserDataSummary(supabaseAdmin, originalUserId),
+      getUserDataSummary(supabaseAdmin, existingUser.id),
+    ]);
+
+    const conflictInfo = JSON.stringify({
+      scenario: "account-linking",
+      provider: "google",
+      providerUserId: googleId,
+      sourceA: {
+        label: "現在のアカウントのデータ",
+        isNew: false,
+        wid: originalUserId,
+        lastUpdated: currentSummary.lastUpdated,
+        counts: currentSummary.counts,
+      },
+      sourceB: {
+        label: "Googleアカウントのデータ",
+        isNew: true,
+        wid: existingUser.id,
+        lastUpdated: existingSummary.lastUpdated,
+        counts: existingSummary.counts,
+      },
+    });
+
+    const url = new URL(`${origin}/auth/resolve-conflict`);
+    const response = NextResponse.redirect(url.toString());
+    response.cookies.set("conflict_info", encodeURIComponent(conflictInfo), {
+      path: "/",
+      maxAge: 300,
+      httpOnly: false,
+    });
+    return response;
   }
 
   // No conflict — do the simple link right here, server-side
