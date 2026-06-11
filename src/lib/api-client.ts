@@ -1,7 +1,7 @@
 import { isNative } from "@/lib/platform";
 import { createClient } from "@/lib/supabase/client";
 
-const API_BASE = "https://www.waggly.jp";
+const API_BASE = "https://waggly.jp";
 
 export function apiUrl(path: string): string {
   return isNative() ? `${API_BASE}${path}` : path;
