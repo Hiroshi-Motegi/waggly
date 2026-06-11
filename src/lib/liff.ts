@@ -38,7 +38,8 @@ export async function getLiffProfile() {
 }
 
 export async function liffLogout() {
-  // Dev mode: clear flag
+  // Clear login method and dev mode flags
+  localStorage.removeItem("login_method");
   localStorage.setItem("dev-logged-in", "false");
 
   // Clear Supabase session

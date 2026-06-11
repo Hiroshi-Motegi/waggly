@@ -83,6 +83,7 @@ export default function LineCallbackPage() {
           const { createClient } = await import("@/lib/supabase/client");
           const supabase = createClient();
           await supabase.auth.setSession({ access_token, refresh_token });
+          localStorage.setItem("login_method", "line");
 
           window.location.href = "/";
         }

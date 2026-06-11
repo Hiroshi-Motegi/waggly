@@ -110,6 +110,7 @@ export default function HomePage() {
             </button>
             <button
               onClick={async () => {
+                localStorage.setItem("login_method", "google");
                 const { createClient } = await import("@/lib/supabase/client");
                 const supabase = createClient();
                 await supabase.auth.signInWithOAuth({

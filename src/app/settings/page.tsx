@@ -320,6 +320,10 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
   const hasGoogle = !!user.google_id;
   const hasBoth = hasLine && hasGoogle;
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
+  const loginMethod = typeof window !== "undefined" ? localStorage.getItem("login_method") : null;
+  const isGoogleLogin = loginMethod === "google";
+  const canUnlinkLine = hasBoth && isGoogleLogin;
+  const canUnlinkGoogle = hasBoth && !isGoogleLogin;
 
   useEffect(() => {
     (async () => {
@@ -424,7 +428,7 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
         {hasLine ? (
           <div className="flex items-center gap-2">
             <span className="text-sm text-[#006728] font-bold">連携済み</span>
-            {hasBoth && (
+            {canUnlinkLine && (
               <button onClick={() => unlinkProvider("line")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5">解除</button>
             )}
           </div>
@@ -441,7 +445,7 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
           <div className="flex flex-col items-end gap-0.5">
             <div className="flex items-center gap-2">
             <span className="text-sm text-[#006728] font-bold shrink-0">連携済み</span>
-            {hasBoth && (
+            {canUnlinkGoogle && (
               <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5 shrink-0">解除</button>
             )}
             </div>
