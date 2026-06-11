@@ -36,7 +36,7 @@ const featureCards = [
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
-  const { profile } = useProfile();
+  const { profile, isLoading: profileLoading } = useProfile();
   const { courses: favCourses } = useFavoriteCourses();
   const { sessions } = usePracticeSessions();
   const searchParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
@@ -167,7 +167,9 @@ export default function HomePage() {
             className="brightness-0 invert"
           />
           <Link href="/settings" className="absolute right-2">
-            {(profile?.avatar_url ?? user?.avatar_url) ? (
+            {profileLoading ? (
+              <div className="h-8 w-8 rounded-full bg-white/20" />
+            ) : (profile?.avatar_url ?? user?.avatar_url) ? (
               <img src={profile?.avatar_url ?? user?.avatar_url ?? ""} alt="" className="h-8 w-8 rounded-full object-cover" />
             ) : (
               <div className="h-8 w-8 rounded-full bg-white/30 flex items-center justify-center text-white text-base font-bold">
