@@ -40,9 +40,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Check for existing Supabase session
-        const { data: { user: existingAuth } } = await supabase.auth.getUser();
+        const { data: { user: existingAuth }, error: authError } = await supabase.auth.getUser();
 
-        if (existingAuth) {
+        // 無効なセッション（削除された auth.users 等）→ クリアして未ログイン扱い
+        if (authError && !existingAuth) {
+          await supabase.auth.signOut();
+          // 以下の LIFF / native フローに進む
+        } else if (existingAuth) {
           // resolve-session を呼んでユーザーを解決
           const { apiFetch } = await import("@/lib/api-client");
           const res = await apiFetch("/api/auth/resolve-session", {
@@ -52,7 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (res.ok) {
             const result = await res.json();
             if (result.conflict) {
-              // 衝突 → native の場合は設定ページの選択UIへ
               if (isNative()) {
                 localStorage.setItem("conflict_info", JSON.stringify(result));
               }
