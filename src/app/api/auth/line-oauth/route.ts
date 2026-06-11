@@ -75,67 +75,61 @@ export async function POST(request: NextRequest) {
 
   let authUserId: string;
 
-  if (existingProvider?.auth_user_id) {
-    // Returning user with existing auth account
-    authUserId = existingProvider.auth_user_id;
+  // LINE 専用の auth user (email/password) を作成/取得
+  const { data: created } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { line_user_id: lineUserId, display_name: displayName },
+  });
+
+  if (created?.user) {
+    authUserId = created.user.id;
+  } else {
+    // 既存 → signInWithPassword で取得
+    const { data: signIn } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+    if (signIn?.user) {
+      authUserId = signIn.user.id;
+    } else {
+      return NextResponse.json({ error: "LINE auth failed" }, { status: 500 });
+    }
+  }
+
+  if (existingProvider) {
+    // 既存ユーザー → プロフィール更新 + auth_user_id を LINE auth user に設定
     await supabaseAdmin
       .from("users")
       .update({ display_name: displayName, avatar_url: avatarUrl })
       .eq("id", existingProvider.user_id);
-    await supabaseAdmin.auth.admin.updateUserById(authUserId, { password });
+    await supabaseAdmin
+      .from("user_providers")
+      .update({ auth_user_id: authUserId })
+      .eq("provider", "line")
+      .eq("provider_sub", lineUserId);
   } else {
-    // Create auth user
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { line_user_id: lineUserId, display_name: displayName },
-    });
+    // 完全新規
+    const { data: newUser } = await supabaseAdmin
+      .from("users")
+      .insert({
+        display_name: displayName,
+        avatar_url: avatarUrl,
+        agreed_terms_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
 
-    if (authError) {
-      console.error("[line-oauth] Create user failed:", authError);
-      return NextResponse.json({ error: authError.message }, { status: 500 });
-    }
-
-    authUserId = authUser.user.id;
-
-    if (existingProvider) {
-      // User exists but no auth account yet - link it
-      await supabaseAdmin
-        .from("user_providers")
-        .update({ auth_user_id: authUserId })
-        .eq("provider", "line")
-        .eq("provider_sub", lineUserId);
-    } else {
-      // Brand new user - create user + provider row
-      const { data: newUser } = await supabaseAdmin
-        .from("users")
-        .insert({
-          display_name: displayName,
-          avatar_url: avatarUrl,
-          agreed_terms_at: new Date().toISOString(),
-        })
-        .select("id")
-        .single();
-
-      if (newUser) {
-        await supabaseAdmin.from("user_providers").insert({
-          user_id: newUser.id,
-          provider: "line",
-          auth_user_id: authUserId,
-          provider_sub: lineUserId,
-        });
-      }
+    if (newUser) {
+      await supabaseAdmin.from("user_providers").insert({
+        user_id: newUser.id,
+        provider: "line",
+        auth_user_id: authUserId,
+        provider_sub: lineUserId,
+      });
     }
   }
 
-  // Create session — use actual auth user email (may differ from LINE email
-  // if this user was originally created via Google OAuth)
-  const { data: { user: signInAuthUser } } = await supabaseAdmin.auth.admin.getUserById(authUserId);
-  const signInEmail = signInAuthUser?.email ?? email;
-
   const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-    email: signInEmail,
+    email,
     password,
   });
 
