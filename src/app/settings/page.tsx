@@ -46,6 +46,25 @@ export default function SettingsPage() {
       window.history.replaceState(null, "", "/settings");
       setTimeout(() => setLinkToast(null), 3000);
     }
+    const conflict = params.get("conflict");
+    if (conflict) {
+      // Read conflict info from cookie
+      const cookieValue = document.cookie
+        .split("; ")
+        .find((c) => c.startsWith("conflict_info="))
+        ?.split("=")
+        .slice(1)
+        .join("=");
+      if (cookieValue) {
+        try {
+          const info = JSON.parse(decodeURIComponent(cookieValue));
+          setConflictInfo(info);
+          // Clear cookie
+          document.cookie = "conflict_info=; path=/; max-age=0";
+        } catch {}
+      }
+      window.history.replaceState(null, "", "/settings");
+    }
   }, []);
   const [usageLoaded, setUsageLoaded] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
@@ -62,7 +81,7 @@ export default function SettingsPage() {
   const [conflictConfirm, setConflictConfirm] = useState(false);
   const [conflictProcessing, setConflictProcessing] = useState(false);
 
-  if (isNative() && conflictInfo) {
+  if (conflictInfo) {
     // Show conflict resolution UI
     const selectedSource = conflictSelected === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
     return (
@@ -530,9 +549,7 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
       }
       const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
       const state = crypto.randomUUID();
-      const url = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
-      console.log("LINE OAuth URL:", url);
-      window.open(url, "_self");
+      window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
     } catch (e: any) {
       console.error("linkLine error:", e);
       alert(e.message || "LINE連携に失敗しました");
