@@ -43,9 +43,9 @@ function Slide1() {
           まとめられます。
         </p>
       </div>
-      {/* Screenshots — extend into the green bottom bar */}
-      <div className="relative z-[60] w-full flex-1 mb-[-70px]">
-        <div className="absolute left-[2%] top-0 w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+      {/* Screenshots — grow up from green bottom bar */}
+      <div className="relative z-[60] w-full flex-1">
+        <div className="absolute left-[2%] bottom-0 w-[58%] border-3 border-white rounded-t-sm overflow-hidden shadow-lg">
           <Image
             src="/onboarding/1-1.png"
             alt="マイバッグ画面"
@@ -54,7 +54,7 @@ function Slide1() {
             className="w-full h-auto"
           />
         </div>
-        <div className="absolute right-[2%] top-[15%] w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+        <div className="absolute right-[2%] bottom-[14%] w-[58%] border-3 border-white rounded-t-sm overflow-hidden shadow-lg">
           <Image
             src="/onboarding/1-2.png"
             alt="練習記録画面"
