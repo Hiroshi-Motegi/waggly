@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { getUserDataSummary } from "@/lib/user-data-summary";
 
 function getSupabaseAdmin() {
   return createAdminClient(
@@ -93,13 +94,39 @@ async function handleGoogleLink(
   }
 
   if (existingUser) {
-    // Conflict — need merge confirmation via client-side merge page
-    console.log("[callback] Conflict found, redirecting to merge page");
-    const url = new URL(`${origin}/auth/link-complete`);
-    url.searchParams.set("provider", "google");
-    url.searchParams.set("providerId", googleId);
-    url.searchParams.set("originalUserId", originalUserId);
-    return NextResponse.redirect(url.toString());
+    const [currentSummary, existingSummary] = await Promise.all([
+      getUserDataSummary(supabaseAdmin, originalUserId),
+      getUserDataSummary(supabaseAdmin, existingUser.id),
+    ]);
+
+    const conflictInfo = JSON.stringify({
+      scenario: "account-linking",
+      provider: "google",
+      providerUserId: googleId,
+      sourceA: {
+        label: "現在のアカウントのデータ",
+        isNew: false,
+        wid: originalUserId,
+        lastUpdated: currentSummary.lastUpdated,
+        counts: currentSummary.counts,
+      },
+      sourceB: {
+        label: "Googleアカウントのデータ",
+        isNew: true,
+        wid: existingUser.id,
+        lastUpdated: existingSummary.lastUpdated,
+        counts: existingSummary.counts,
+      },
+    });
+
+    const url = new URL(`${origin}/auth/resolve-conflict`);
+    const response = NextResponse.redirect(url.toString());
+    response.cookies.set("conflict_info", encodeURIComponent(conflictInfo), {
+      path: "/",
+      maxAge: 300,
+      httpOnly: false,
+    });
+    return response;
   }
 
   // No conflict — do the simple link right here, server-side

@@ -1,0 +1,79 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { getUserDataSummary } from "@/lib/user-data-summary";
+
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const { provider, providerUserId, currentWid } = body;
+
+  if (!provider || !providerUserId) {
+    return NextResponse.json(
+      { error: "Missing provider or providerUserId" },
+      { status: 400 }
+    );
+  }
+
+  const supabaseAdmin = getSupabaseAdmin();
+
+  // Look up existing user by provider ID
+  let existingUser = null;
+  if (provider === "google") {
+    const { data } = await supabaseAdmin
+      .from("users")
+      .select("id")
+      .eq("google_id", providerUserId)
+      .maybeSingle();
+    existingUser = data;
+  } else if (provider === "line") {
+    const { data } = await supabaseAdmin
+      .from("users")
+      .select("id")
+      .eq("line_user_id", providerUserId)
+      .maybeSingle();
+    existingUser = data;
+  } else if (provider === "apple") {
+    return NextResponse.json({ conflict: false });
+  }
+
+  if (!existingUser) {
+    return NextResponse.json({ conflict: false });
+  }
+
+  if (currentWid && existingUser.id === currentWid) {
+    return NextResponse.json({ conflict: false });
+  }
+
+  // Conflict found — return data summary for the existing user
+  const existingSummary = await getUserDataSummary(supabaseAdmin, existingUser.id);
+
+  const result: any = {
+    conflict: true,
+    existingUser: {
+      wid: existingUser.id,
+      ...existingSummary,
+    },
+  };
+
+  if (currentWid) {
+    const currentSummary = await getUserDataSummary(supabaseAdmin, currentWid);
+    const { data: currentUser } = await supabaseAdmin
+      .from("users")
+      .select("display_name")
+      .eq("id", currentWid)
+      .single();
+    result.currentUser = {
+      wid: currentWid,
+      displayName: currentUser?.display_name ?? "",
+      ...currentSummary,
+    };
+  }
+
+  return NextResponse.json(result);
+}

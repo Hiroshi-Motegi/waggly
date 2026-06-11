@@ -87,3 +87,46 @@ export async function fullSync(): Promise<void> {
     ["last_sync", new Date().toISOString()]
   );
 }
+
+export interface DataSummary {
+  lastUpdated: string | null;
+  counts: { clubs: number; practices: number; accessories: number };
+}
+
+export async function getLocalDataSummary(): Promise<DataSummary> {
+  const clubRows = await query<{ count: number }>("SELECT COUNT(*) as count FROM clubs");
+  const practiceRows = await query<{ count: number }>("SELECT COUNT(*) as count FROM practice_sessions");
+  const accessoryRows = await query<{ count: number }>("SELECT COUNT(*) as count FROM accessories");
+  const metaRows = await query<{ value: string }>("SELECT value FROM sync_meta WHERE key = 'last_data_updated'");
+
+  return {
+    lastUpdated: metaRows.length > 0 ? metaRows[0].value : null,
+    counts: {
+      clubs: clubRows[0]?.count ?? 0,
+      practices: practiceRows[0]?.count ?? 0,
+      accessories: accessoryRows[0]?.count ?? 0,
+    },
+  };
+}
+
+export async function collectLocalData(): Promise<{
+  clubs: any[];
+  accessories: any[];
+  practiceSessions: any[];
+}> {
+  const clubs = await query<any>("SELECT * FROM clubs");
+  for (const club of clubs) {
+    club.club_memos = await query<any>("SELECT * FROM club_memos WHERE club_id = ?", [club.id]);
+    club.club_images = await query<any>("SELECT * FROM club_images WHERE club_id = ?", [club.id]);
+    club.maintenances = await query<any>("SELECT * FROM maintenances WHERE club_id = ?", [club.id]);
+  }
+
+  const accessories = await query<any>("SELECT * FROM accessories");
+
+  const practiceSessions = await query<any>("SELECT * FROM practice_sessions");
+  for (const session of practiceSessions) {
+    session.practice_clubs = await query<any>("SELECT * FROM practice_clubs WHERE session_id = ?", [session.id]);
+  }
+
+  return { clubs, accessories, practiceSessions };
+}

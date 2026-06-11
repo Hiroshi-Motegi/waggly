@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { getUserDataSummary } from "@/lib/user-data-summary";
 
 function getSupabaseAdmin() {
   return createClient(
@@ -114,13 +115,22 @@ export async function POST(request: NextRequest) {
   if (existingUser) {
     // Existing account found — need confirmation
     if (!body.confirmMerge) {
+      const [currentCounts, existingCounts] = await Promise.all([
+        getUserDataSummary(supabaseAdmin, currentUser.id),
+        getUserDataSummary(supabaseAdmin, existingUser.id),
+      ]);
+
       return NextResponse.json({
         needsConfirm: true,
-        currentAccount: { id: currentUser.id, display_name: currentUser.display_name },
+        currentAccount: {
+          id: currentUser.id,
+          display_name: currentUser.display_name,
+          ...currentCounts,
+        },
         existingAccount: {
           id: existingUser.id,
           display_name: existingUser.display_name,
-          lineUserId: provider === "line" ? providerId : undefined,
+          ...existingCounts,
         },
       });
     }

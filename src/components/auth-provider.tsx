@@ -55,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const isLinkingFlow = typeof window !== "undefined" && (
             window.location.pathname.startsWith("/auth/link") ||
             window.location.pathname.startsWith("/auth/merge") ||
+            window.location.pathname.startsWith("/auth/resolve-conflict") ||
             window.location.pathname.startsWith("/auth/line/callback")
           );
 

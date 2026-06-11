@@ -77,6 +77,13 @@ export async function mutateData<T = any>(
   const online = await checkOnline();
   const { execute } = await import("@/lib/sqlite/database");
 
+  async function touchLastDataUpdated() {
+    await execute(
+      "INSERT OR REPLACE INTO sync_meta (key, value) VALUES (?, ?)",
+      ["last_data_updated", new Date().toISOString()]
+    );
+  }
+
   if (online) {
     const res = await apiFetch(apiPath, {
       method,
@@ -84,6 +91,7 @@ export async function mutateData<T = any>(
       body: payload ? JSON.stringify(payload) : undefined,
     });
     if (!res.ok) throw new Error(`API error: ${res.status}`);
+    await touchLastDataUpdated();
     if (method === "DELETE") return null;
     return res.json();
   }
@@ -98,6 +106,7 @@ export async function mutateData<T = any>(
       JSON.stringify({ apiPath, method, payload }),
     ]
   );
+  await touchLastDataUpdated();
 
   return payload as T;
 }
