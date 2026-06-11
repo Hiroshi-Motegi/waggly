@@ -76,10 +76,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (existingAuth.app_metadata?.provider === "google") {
             const googleSub = existingAuth.user_metadata?.sub;
 
-            // If profile exists but google_id is null, Google was previously
-            // unlinked. Just continue with the existing profile — don't block.
+            // If profile exists but google_id is null, Google was unlinked.
+            // Clear the stale Google session so LINE login can proceed.
             if (data && !data.google_id) {
-              console.log("[auth] Google was unlinked, continuing with profile");
+              console.log("[auth] Google was unlinked, clearing stale Google session");
+              await supabase.auth.signOut();
+              setIsLoading(false);
+              window.location.href = "/";
+              return;
             }
 
             const isOrphan = !data;
