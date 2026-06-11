@@ -176,7 +176,7 @@ function Slide4({ agreed, setAgreed, showTerms }: { agreed: boolean; setAgreed: 
         className="mb-6"
       />
       <div className="flex-1" />
-      <div className="w-full pb-[100px]">
+      <div className="w-full pb-[120px]">
         <p className="text-base font-bold text-[#2c2c2c] leading-relaxed mb-4">
           ワグリーを利用するためには
           <br />
