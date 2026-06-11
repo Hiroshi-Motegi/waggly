@@ -168,7 +168,7 @@ export default function SettingsPage() {
             <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
           </div>
         </Link>
-        <Link href="/settings/profile/courses">
+        <Link href="/courses/favorites">
           <div className="flex items-center justify-between py-3 border-b border-[#ececec]">
             <span className="text-base">お気に入りコース</span>
             <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />

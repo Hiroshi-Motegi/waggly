@@ -146,7 +146,12 @@ export default function CoursesPage() {
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
-      <PageHeader title="ゴルフ場を探す" backHref="/" variant="dark" />
+      <PageHeader title="ゴルフ場を探す" backHref="/" variant="dark">
+        <Link href="/courses/favorites" className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-sm font-bold text-white">
+          <Heart className="h-4 w-4" />
+          お気に入り一覧
+        </Link>
+      </PageHeader>
 
       <div className="rounded-lg bg-white p-3">
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">

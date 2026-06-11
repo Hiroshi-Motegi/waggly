@@ -32,6 +32,16 @@ const featureCards = [
     label: "練習メニュー",
     sub: "AIに練習メニューを相談",
   },
+  {
+    href: "/practice",
+    icon: "/icons/nav-practice-g.svg",
+    label: "練習記録",
+  },
+  {
+    href: "/settings",
+    icon: "/icons/settings.svg",
+    label: "設定",
+  },
 ];
 
 export default function HomePage() {
@@ -163,20 +173,19 @@ export default function HomePage() {
         {/* Logo */}
         <div className="flex items-center justify-center w-full relative h-14">
           <Image
-            src="/icons/waggly-logo.svg"
+            src="/icons/waggly-logo-white.svg"
             alt="Waggly"
             width={151}
             height={46}
             priority
-            className="brightness-0 invert"
           />
           <Link href="/settings" className="absolute right-2">
             {profileLoading ? (
-              <div className="h-8 w-8 rounded-full bg-white/20" />
+              <div className="h-10 w-10 rounded-full bg-white/20 border-2 border-white/60" />
             ) : (profile?.avatar_url ?? user?.avatar_url) ? (
-              <img src={profile?.avatar_url ?? user?.avatar_url ?? ""} alt="" className="h-8 w-8 rounded-full object-cover" />
+              <img src={profile?.avatar_url ?? user?.avatar_url ?? ""} alt="" className="h-10 w-10 rounded-full object-cover border-2 border-white/60" />
             ) : (
-              <div className="h-8 w-8 rounded-full bg-white/30 flex items-center justify-center text-white text-base font-bold">
+              <div className="h-10 w-10 rounded-full bg-white/30 border-2 border-white/60 flex items-center justify-center text-white text-base font-bold">
                 {(profile?.nickname ?? user?.display_name)?.[0] ?? "G"}
               </div>
             )}
@@ -215,7 +224,7 @@ export default function HomePage() {
         {/* Favorite courses */}
         <div className="flex items-center px-1 mt-4 mb-2">
           <h3 className="flex-1 text-base font-bold text-white">お気に入りコース</h3>
-          <Link href="/settings/profile/courses" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
+          <Link href="/courses/favorites" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
         </div>
         <div className="rounded-lg bg-white p-3">
           {favCourses.length > 0 ? (
