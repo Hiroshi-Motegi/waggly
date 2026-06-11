@@ -43,27 +43,25 @@ function Slide1() {
           まとめられます。
         </p>
       </div>
-      {/* Screenshots on green background */}
-      <div className="relative w-full flex-1 bg-[#026f09] mt-4 px-2 pt-4">
-        <div className="relative w-full h-full">
-          <div className="absolute left-0 top-0 w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
-            <Image
-              src="/onboarding/1-1.png"
-              alt="マイバッグ画面"
-              width={430}
-              height={932}
-              className="w-full h-auto"
-            />
-          </div>
-          <div className="absolute right-0 top-[15%] w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
-            <Image
-              src="/onboarding/1-2.png"
-              alt="練習記録画面"
-              width={430}
-              height={932}
-              className="w-full h-auto"
-            />
-          </div>
+      {/* Screenshots — overflow past bottom, bar overlaps on top */}
+      <div className="flex gap-2 px-2 mt-2">
+        <div className="w-[58%] shrink-0 border-3 border-white rounded-sm overflow-hidden shadow-lg">
+          <Image
+            src="/onboarding/1-1.png"
+            alt="マイバッグ画面"
+            width={430}
+            height={932}
+            className="w-full h-auto"
+          />
+        </div>
+        <div className="w-[58%] shrink-0 border-3 border-white rounded-sm overflow-hidden shadow-lg mt-[15%]">
+          <Image
+            src="/onboarding/1-2.png"
+            alt="練習記録画面"
+            width={430}
+            height={932}
+            className="w-full h-auto"
+          />
         </div>
       </div>
     </div>
