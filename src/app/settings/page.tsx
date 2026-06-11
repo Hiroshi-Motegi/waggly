@@ -493,7 +493,6 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
   }
 
   async function linkLine() {
-    alert(`linkLine called, isNative=${isNative()}`);
     try {
       if (isNative()) {
         const { nativeLineLogin } = await import("@/lib/native-auth");
@@ -531,7 +530,9 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
       }
       const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
       const state = crypto.randomUUID();
-      window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
+      const url = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
+      console.log("LINE OAuth URL:", url);
+      window.open(url, "_self");
     } catch (e: any) {
       console.error("linkLine error:", e);
       alert(e.message || "LINE連携に失敗しました");
