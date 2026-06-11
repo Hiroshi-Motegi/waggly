@@ -45,7 +45,7 @@ export default function AccountLinkingHelpPage() {
             </thead>
             <tbody>
               <tr className="border-b border-[#ececec]">
-                <td className="py-2.5 font-bold">🌐 Webブラウザ</td>
+                <td className="py-2.5 font-bold">Webブラウザ</td>
                 <td className="py-2.5">
                   <span className="rounded-full bg-[#e8f5e9] px-2 py-0.5 text-xs font-bold text-[#2e7d32]">
                     どれでもOK
@@ -53,7 +53,7 @@ export default function AccountLinkingHelpPage() {
                 </td>
               </tr>
               <tr className="border-b border-[#ececec]">
-                <td className="py-2.5 font-bold">🤖 Androidアプリ</td>
+                <td className="py-2.5 font-bold">Androidアプリ</td>
                 <td className="py-2.5">
                   <span className="rounded-full bg-[#fff3e0] px-2 py-0.5 text-xs font-bold text-[#e65100]">
                     Google必須
@@ -61,7 +61,7 @@ export default function AccountLinkingHelpPage() {
                 </td>
               </tr>
               <tr>
-                <td className="py-2.5 font-bold">🍎 iOSアプリ</td>
+                <td className="py-2.5 font-bold">iOSアプリ</td>
                 <td className="py-2.5">
                   <span className="rounded-full bg-[#f5f5f5] px-2 py-0.5 text-xs text-[#8b8b8b]">
                     準備中
@@ -83,7 +83,7 @@ export default function AccountLinkingHelpPage() {
                 <span className="font-bold">Androidアプリで同期したい</span>
               </div>
               <span className="mt-1.5 inline-block rounded-md bg-[#e8f5e9] px-2 py-1 text-xs font-bold text-[#006728]">
-                設定からGoogle連携を追加
+                Web版の設定からGoogle連携を追加
               </span>
             </div>
             <div>
@@ -93,7 +93,7 @@ export default function AccountLinkingHelpPage() {
                 <span className="font-bold">Web版でLINEログインしたい</span>
               </div>
               <span className="mt-1.5 inline-block rounded-md bg-[#e8f5e9] px-2 py-1 text-xs font-bold text-[#006728]">
-                設定からLINE連携を追加
+                Androidアプリの設定からLINE連携を追加
               </span>
             </div>
           </div>
@@ -101,7 +101,7 @@ export default function AccountLinkingHelpPage() {
 
         {/* FAQ */}
         <div className="rounded-lg bg-white p-4">
-          <h3 className="text-base font-bold mb-3">よくある質問</h3>
+          <h3 className="text-base font-bold mb-3">よくあるご質問</h3>
           <div className="space-y-0">
             {[
               {
@@ -117,17 +117,18 @@ export default function AccountLinkingHelpPage() {
                 a: "そのログイン方法が使えなくなるだけで、データは残ります。ただし最低1つのログイン方法は必要です。",
               },
             ].map((item, i, arr) => (
-              <div
+              <details
                 key={i}
+                open
                 className={`py-3 ${i < arr.length - 1 ? "border-b border-[#ececec]" : ""}`}
               >
-                <p className="text-sm font-bold mb-1">
+                <summary className="text-sm font-bold cursor-pointer list-none flex items-center gap-1">
                   <span className="text-[#006728]">Q.</span> {item.q}
-                </p>
-                <p className="text-sm text-[#666] leading-relaxed">
+                </summary>
+                <p className="text-sm text-[#666] leading-relaxed mt-1.5 pl-0.5">
                   <span className="text-[#006728] font-bold">A.</span> {item.a}
                 </p>
-              </div>
+              </details>
             ))}
           </div>
         </div>
