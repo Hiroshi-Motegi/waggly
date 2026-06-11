@@ -74,7 +74,7 @@ function Slide2() {
         </h2>
       </div>
       {/* Content */}
-      <div className="flex flex-col items-center w-full px-4 pt-4 pb-4">
+      <div className="flex flex-col items-center w-full px-4 pt-4 pb-8">
         {/* Club screenshot */}
         <div className="w-[60%] border-3 border-white rounded-sm overflow-hidden">
           <Image
