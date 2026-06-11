@@ -48,7 +48,7 @@ function Slide1() {
         <img
           src="/onboarding/1-1.png"
           alt="マイバッグ画面"
-          className="absolute left-[-10px] top-[calc(12%+5px)] w-[56%] border-3 border-white scale-110 origin-bottom-left"
+          className="absolute left-[-10px] top-[calc(12%+5px)] w-[56%] border-3 border-white scale-[1.2] origin-bottom-left"
         />
         <img
           src="/onboarding/1-2.png"
