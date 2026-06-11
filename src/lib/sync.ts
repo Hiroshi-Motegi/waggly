@@ -144,3 +144,36 @@ export async function collectLocalData(): Promise<{
 
   return { clubs, accessories, practiceSessions };
 }
+
+/**
+ * Upload local images to the server after conflict resolution.
+ * Reads image files from the device filesystem and POSTs them
+ * to the server's image upload API.
+ */
+export async function uploadLocalImages(localData: { clubs: any[] }): Promise<void> {
+  for (const club of localData.clubs) {
+    const images = club.club_images ?? [];
+    for (const img of images) {
+      if (!img.image_url) continue;
+      try {
+        // Fetch the local image (accessible in WebView via capacitor:// URL)
+        const res = await fetch(img.image_url);
+        if (!res.ok) continue;
+        const blob = await res.blob();
+        const ext = img.image_url.split(".").pop()?.split("?")[0] ?? "jpg";
+        const file = new File([blob], `upload.${ext}`, { type: blob.type || "image/jpeg" });
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        await apiFetch(`/api/clubs/${club.id}/images`, {
+          method: "POST",
+          body: formData,
+        });
+      } catch (e) {
+        console.error(`Failed to upload image for club ${club.id}:`, e);
+        // Non-fatal — continue with other images
+      }
+    }
+  }
+}

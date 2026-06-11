@@ -133,6 +133,11 @@ export default function SettingsPage() {
                     if (!res.ok) { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); return; }
                     const result = await res.json();
                     if (result.access_token) { await supabase.auth.setSession({ access_token: result.access_token, refresh_token: result.refresh_token }); }
+                    // Upload local images to cloud storage (local URLs don't work on server)
+                    if (resolveBody.choice === "local" && resolveBody.localData) {
+                      const { uploadLocalImages } = await import("@/lib/sync");
+                      await uploadLocalImages(resolveBody.localData);
+                    }
                     localStorage.removeItem("conflict_info");
                     const { resetLocalModeCache } = await import("@/lib/api-client");
                     resetLocalModeCache();

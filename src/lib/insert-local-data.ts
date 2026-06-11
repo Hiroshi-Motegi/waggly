@@ -13,10 +13,8 @@ export async function insertLocalData(supabase: any, userId: string, localData: 
       const { error } = await supabase.from("club_memos").insert(memo);
       if (error) throw new Error(`Failed to insert club_memo: ${error.message}`);
     }
-    for (const image of club_images) {
-      const { error } = await supabase.from("club_images").insert(image);
-      if (error) throw new Error(`Failed to insert club_image: ${error.message}`);
-    }
+    // club_images are skipped here — local image URLs (capacitor://) don't work
+    // on the server. The client uploads images separately after resolve completes.
     for (const maintenance of maintenances) {
       const { error } = await supabase.from("maintenances").insert(maintenance);
       if (error) throw new Error(`Failed to insert maintenance: ${error.message}`);
