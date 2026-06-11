@@ -493,6 +493,7 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
   }
 
   async function linkLine() {
+    alert(`linkLine called, isNative=${isNative()}`);
     try {
       if (isNative()) {
         const { nativeLineLogin } = await import("@/lib/native-auth");
