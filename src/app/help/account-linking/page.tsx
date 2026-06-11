@@ -129,7 +129,7 @@ export default function AccountLinkingHelpPage() {
                   <ChevronDown className="h-4 w-4 text-[#8b8b8b] shrink-0 transition-transform duration-200 group-open:rotate-180" />
                 </summary>
                 <p className="text-sm text-[#666] leading-relaxed mt-1.5 pl-0.5">
-                  <span className="text-[#006728] font-bold">A.</span> {item.a}
+                  {item.a}
                 </p>
               </details>
             ))}
