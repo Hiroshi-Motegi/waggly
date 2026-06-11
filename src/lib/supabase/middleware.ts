@@ -29,11 +29,22 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/api/auth");
-  const isPublicAsset = request.nextUrl.pathname.startsWith("/_next");
+  // Redirect unauthenticated users to home for protected pages
+  if (!user) {
+    const { pathname } = request.nextUrl;
+    const isPublic =
+      pathname === "/" ||
+      pathname === "/login" ||
+      pathname.startsWith("/auth/") ||
+      pathname.startsWith("/api/") ||
+      pathname.startsWith("/p/") ||
+      pathname === "/terms" ||
+      pathname === "/privacy";
 
-  // API routes handle their own auth — don't block them here
-  // The proxy just refreshes the session cookie
+    if (!isPublic) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
 
   return supabaseResponse;
 }

@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
 
   const targetUserId = originalUserId || auth.userId;
 
+  console.log("[link] POST:", { provider, providerId: providerId?.substring?.(0, 10), authUserId: auth.userId, targetUserId, hasOriginalUserId: !!originalUserId });
+
   if (!provider) {
     return NextResponse.json({ error: "Missing provider" }, { status: 400 });
   }
@@ -87,6 +89,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
     existingUser = data;
   } else if (provider === "google") {
+    // Check by google_id
     const { data } = await supabaseAdmin
       .from("users")
       .select("*")
@@ -94,6 +97,18 @@ export async function POST(request: NextRequest) {
       .neq("id", targetUserId)
       .maybeSingle();
     existingUser = data;
+
+    // Also check if the current auth user has a profile (covers google_id not set)
+    if (!existingUser && auth.userId !== targetUserId) {
+      const { data: authProfile } = await supabaseAdmin
+        .from("users")
+        .select("*")
+        .eq("id", auth.userId)
+        .maybeSingle();
+      if (authProfile) {
+        existingUser = authProfile;
+      }
+    }
   }
 
   if (existingUser) {
@@ -115,22 +130,34 @@ export async function POST(request: NextRequest) {
     const deleteAccountId = keepAccountId === currentUser.id ? existingUser.id : currentUser.id;
     const keepAccount = keepAccountId === currentUser.id ? currentUser : existingUser;
 
-    // Transfer provider IDs to the kept account
+    // Collect the provider IDs to transfer
+    let newLineUserId: string;
+    let newGoogleId: string | null;
     if (provider === "line") {
-      await supabaseAdmin.from("users").update({
-        line_user_id: providerId,
-        google_id: keepAccount.google_id || currentUser.google_id || existingUser.google_id,
-      }).eq("id", keepAccountId);
+      newLineUserId = providerId;
+      newGoogleId = keepAccount.google_id || currentUser.google_id || existingUser.google_id;
     } else {
-      await supabaseAdmin.from("users").update({
-        google_id: providerId,
-        line_user_id: keepAccount.line_user_id?.startsWith("oauth-") ? (currentUser.line_user_id || existingUser.line_user_id) : keepAccount.line_user_id,
-      }).eq("id", keepAccountId);
+      newGoogleId = providerId;
+      const keepLine = keepAccount.line_user_id;
+      newLineUserId = (keepLine && !keepLine.startsWith("oauth-"))
+        ? keepLine
+        : (currentUser.line_user_id || existingUser.line_user_id);
     }
 
-    // Delete the other account
+    // Delete the other account FIRST to avoid unique constraint violations
+    // (line_user_id has a UNIQUE constraint)
     await deleteUserData(supabaseAdmin, deleteAccountId);
     await supabaseAdmin.auth.admin.deleteUser(deleteAccountId);
+
+    // Now transfer provider IDs to the kept account
+    const { error: updateError } = await supabaseAdmin.from("users").update({
+      line_user_id: newLineUserId,
+      google_id: newGoogleId,
+    }).eq("id", keepAccountId);
+
+    if (updateError) {
+      console.error("[link] Merge update failed:", updateError);
+    }
 
     return NextResponse.json({
       merged: true,
@@ -141,15 +168,18 @@ export async function POST(request: NextRequest) {
 
   // No existing account — simple link
   if (provider === "line") {
-    await supabaseAdmin.from("users").update({ line_user_id: providerId }).eq("id", targetUserId);
+    const { error } = await supabaseAdmin.from("users").update({ line_user_id: providerId }).eq("id", targetUserId);
+    console.log("[link] LINE simple link:", { targetUserId, error: error?.message });
   } else if (provider === "google") {
     // Clean up orphan Google user if exists
     const googleAuthUserId = auth.userId;
     if (googleAuthUserId !== targetUserId) {
+      console.log("[link] Cleaning up orphan Google auth user:", googleAuthUserId);
       await deleteUserData(supabaseAdmin, googleAuthUserId);
       await supabaseAdmin.auth.admin.deleteUser(googleAuthUserId);
     }
-    await supabaseAdmin.from("users").update({ google_id: providerId }).eq("id", targetUserId);
+    const { error } = await supabaseAdmin.from("users").update({ google_id: providerId }).eq("id", targetUserId);
+    console.log("[link] Google simple link:", { targetUserId, providerId: providerId?.substring(0, 10), error: error?.message });
   }
 
   return NextResponse.json({ merged: false, message: `${provider === "google" ? "Google" : "LINE"}を連携しました` });

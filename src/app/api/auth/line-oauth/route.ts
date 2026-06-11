@@ -142,9 +142,13 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // Create session
+  // Create session — use actual auth user email (may differ from LINE email
+  // if this user was originally created via Google OAuth)
+  const { data: { user: signInAuthUser } } = await supabaseAdmin.auth.admin.getUserById(userId);
+  const signInEmail = signInAuthUser?.email ?? email;
+
   const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-    email,
+    email: signInEmail,
     password,
   });
 
