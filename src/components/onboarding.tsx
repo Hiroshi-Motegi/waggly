@@ -1,35 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface OnboardingProps {
   onComplete: () => void;
   isReagreement?: boolean;
 }
 
-const slides = [
-  {
-    title: "Wagglyへようこそ",
-    description: "ゴルフクラブを管理し、練習日記とAIで上達をサポートするアプリです。",
-    icon: "🏌️",
-  },
-  {
-    title: "マイバッグ",
-    description: "あなたのクラブセットを登録。スペック、購入情報、メンテナンス履歴を一元管理できます。",
-    icon: "🎒",
-  },
-  {
-    title: "練習記録",
-    description: "練習場での球数や気づきをサクッと記録。番手別の練習量も簡単に入力できます。",
-    icon: "📝",
-  },
-  {
-    title: "AIコーチ",
-    description: "あなたのクラブと練習データを踏まえて、AIがアドバイスや練習メニューを提案します。",
-    icon: "💬",
-  },
-];
+const TOTAL_SLIDES = 4;
 
 const termsContent = [
   { title: "第1条（サービス内容）", body: "Waggly（以下「本サービス」）は、ゴルフクラブの管理、練習記録、AIによるアドバイス機能を提供するWebアプリケーションです。" },
@@ -42,13 +21,212 @@ const termsContent = [
   { title: "第8条（規約の変更）", body: "本規約は予告なく変更することがあります。変更後の規約は本ページに掲載した時点で効力を生じます。" },
 ];
 
+function Slide1() {
+  return (
+    <div className="flex-1 flex flex-col items-center text-center px-6">
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <Image
+          src="/images/onboarding/waggly-logo.png"
+          alt="Waggly"
+          width={185}
+          height={60}
+          priority
+          className="mb-4"
+        />
+        <h2 className="text-xl font-bold text-[#139847] leading-snug mb-6">
+          ゴルファーのための
+          <br />
+          ギア & 練習管理アプリ
+        </h2>
+        <p className="text-xl font-bold text-[#2c2c2c] leading-snug mb-8">
+          ギアのこと、練習のこと、
+          <br />
+          まとめられます。
+        </p>
+      </div>
+      <div className="relative w-full h-[50vh] overflow-hidden">
+        <div className="absolute left-0 bottom-0 w-[55%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+          <Image
+            src="/images/onboarding/slide1-mybag.png"
+            alt="マイバッグ画面"
+            width={430}
+            height={932}
+            className="w-full h-auto"
+          />
+        </div>
+        <div className="absolute right-0 bottom-0 w-[55%] border-3 border-white rounded-sm overflow-hidden shadow-lg -translate-y-4">
+          <Image
+            src="/images/onboarding/slide1-practice.png"
+            alt="練習記録画面"
+            width={430}
+            height={932}
+            className="w-full h-auto"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slide2() {
+  return (
+    <div className="flex-1 flex flex-col items-center text-center overflow-hidden">
+      {/* Header */}
+      <div className="relative w-full py-4 px-6">
+        <div className="absolute inset-0 bg-[#27b135]" />
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
+        <h2 className="relative text-xl font-bold text-white leading-snug">
+          ギアをまとめて管理
+          <br />
+          仲間にかんたんシェア
+        </h2>
+      </div>
+      {/* Content */}
+      <div className="flex-1 flex flex-col items-center w-full px-4 pt-4 gap-2">
+        {/* Club screenshot */}
+        <div className="w-[60%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+          <Image
+            src="/images/onboarding/slide2-club.png"
+            alt="クラブ詳細画面"
+            width={430}
+            height={532}
+            className="w-full h-auto"
+          />
+        </div>
+        {/* Callout 1 */}
+        <div className="w-full border-3 border-[#006728] bg-white rounded p-3">
+          <p className="text-base font-bold text-[#2c2c2c] text-center leading-snug">
+            クラブ詳細や飛距離・使用感、
+            <br />
+            メンテナンス記録などをクラブ単位で登録
+          </p>
+        </div>
+        {/* Share screenshot */}
+        <div className="w-[60%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+          <Image
+            src="/images/onboarding/slide2-share.png"
+            alt="シェア画面"
+            width={430}
+            height={532}
+            className="w-full h-auto"
+          />
+        </div>
+        {/* Callout 2 */}
+        <div className="w-full border-3 border-[#006728] bg-white rounded p-3">
+          <p className="text-base font-bold text-[#2c2c2c] text-center leading-snug">
+            自分のクラブセットをQRコードで簡単シェア
+            <br />
+            名刺代わりに友だちに紹介
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slide3() {
+  return (
+    <div className="flex-1 flex flex-col items-center text-center overflow-hidden">
+      {/* Header */}
+      <div className="relative w-full py-4 px-6">
+        <div className="absolute inset-0 bg-[#27b135]" />
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
+        <h2 className="relative text-xl font-bold text-white leading-snug">
+          練習球数や内容を
+          <br />
+          かんたんに記録できます
+        </h2>
+      </div>
+      {/* Content */}
+      <div className="flex-1 flex flex-col items-center w-full px-4 pt-4">
+        <div className="relative w-full flex-1 overflow-hidden">
+          <div className="absolute left-0 top-0 w-[56%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+            <Image
+              src="/images/onboarding/slide3-calendar.png"
+              alt="練習記録一覧"
+              width={430}
+              height={932}
+              className="w-full h-auto"
+            />
+          </div>
+          <div className="absolute right-0 top-[10%] w-[56%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+            <Image
+              src="/images/onboarding/slide3-input.png"
+              alt="練習記録入力"
+              width={430}
+              height={932}
+              className="w-full h-auto"
+            />
+          </div>
+        </div>
+        {/* Callout */}
+        <div className="w-full border-3 border-[#006728] bg-white rounded p-3 mt-2">
+          <p className="text-base font-bold text-[#2c2c2c] text-center leading-snug">
+            練習結果を元に
+            <br />
+            AIに練習メニューの相談ができます
+          </p>
+        </div>
+        {/* Notes */}
+        <div className="w-full text-left px-1 py-3">
+          <p className="text-xs font-bold text-[#2c2c2c] leading-relaxed">
+            ※ AI機能はベータ公開中となります。
+            <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;正式リリース時にプラン体系が変更される場合があります。
+          </p>
+          <p className="text-xs font-bold text-[#2c2c2c] leading-relaxed mt-2">
+            ※ アカウントログインで利用可能となります。
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slide4({ agreed, setAgreed, showTerms }: { agreed: boolean; setAgreed: (v: boolean) => void; showTerms: () => void }) {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+      <div className="flex-1" />
+      <h2 className="text-[32px] font-bold text-[#139847] mb-6">
+        さあ、はじめよう！
+      </h2>
+      <Image
+        src="/images/onboarding/waggly-ball.png"
+        alt="Waggly"
+        width={128}
+        height={128}
+        className="mb-6"
+      />
+      <div className="flex-1" />
+      <div className="w-full pb-2">
+        <p className="text-base font-bold text-[#2c2c2c] leading-relaxed mb-4">
+          ワグリーを利用するためには
+          <br />
+          利用規約の同意が必要です
+        </p>
+        <label className="flex items-center justify-center gap-2 text-sm cursor-pointer">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="h-5 w-5 rounded accent-[#006728]"
+          />
+          <span className="text-[#666]">
+            <button onClick={showTerms} className="underline text-[#006728]">利用規約</button>
+            に同意します
+          </span>
+        </label>
+      </div>
+    </div>
+  );
+}
+
 export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
-  const [currentSlide, setCurrentSlide] = useState(isReagreement ? slides.length - 1 : 0);
+  const [currentSlide, setCurrentSlide] = useState(isReagreement ? TOTAL_SLIDES - 1 : 0);
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
 
-  const isLastSlide = currentSlide === slides.length - 1;
-  const slide = slides[currentSlide];
+  const isLastSlide = currentSlide === TOTAL_SLIDES - 1;
 
   function handleNext() {
     if (isLastSlide) return;
@@ -63,22 +241,22 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
   // Terms view
   if (showTerms) {
     return (
-      <div className="flex flex-col min-h-dvh bg-background">
+      <div className="flex flex-col min-h-dvh bg-white">
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <span className="text-base font-semibold">利用規約</span>
+          <span className="text-base font-bold">利用規約</span>
           <button
             onClick={() => setShowTerms(false)}
-            className="text-base text-primary"
+            className="text-base text-[#006728] font-bold"
           >
             戻る
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-4 text-base">
-          <p className="text-sm text-muted-foreground">最終更新日: 2026年6月8日</p>
+          <p className="text-sm text-[#8b8b8b]">最終更新日: 2026年6月8日</p>
           {termsContent.map((section, i) => (
             <div key={i} className="space-y-1">
-              <h3 className="font-semibold">{section.title}</h3>
-              <p className="text-muted-foreground">{section.body}</p>
+              <h3 className="font-bold">{section.title}</h3>
+              <p className="text-[#666]">{section.body}</p>
             </div>
           ))}
         </div>
@@ -86,64 +264,74 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
     );
   }
 
+  // Reagreement: only show slide 4
+  if (isReagreement) {
+    return (
+      <div className="flex flex-col min-h-dvh bg-[#f7fff3]">
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+          <span className="text-6xl mb-6">📋</span>
+          <h2 className="text-2xl font-bold mb-3">利用規約が更新されました</h2>
+          <p className="text-[#666] text-base leading-relaxed">引き続きご利用いただくには、更新された利用規約への同意が必要です。</p>
+        </div>
+        <div className="w-full px-6 pb-6 space-y-4">
+          <label className="flex items-center justify-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="h-5 w-5 rounded accent-[#006728]"
+            />
+            <span className="text-[#666]">
+              <button onClick={() => setShowTerms(true)} className="underline text-[#006728]">利用規約</button>
+              に同意します
+            </span>
+          </label>
+          <button
+            disabled={!agreed}
+            onClick={handleStart}
+            className="w-full py-3 rounded-full border border-[#006728] text-[#006728] font-bold text-sm disabled:opacity-40"
+          >
+            はじめる
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Slides view
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh px-6 py-10 bg-background">
-      <div className="flex-1 flex flex-col items-center justify-center text-center max-w-sm">
-        {isReagreement && isLastSlide ? (
-          <>
-            <span className="text-6xl mb-6">📋</span>
-            <h2 className="text-2xl font-bold mb-3">利用規約が更新されました</h2>
-            <p className="text-muted-foreground text-base leading-relaxed">引き続きご利用いただくには、更新された利用規約への同意が必要です。</p>
-          </>
-        ) : (
-          <>
-            <span className="text-6xl mb-6">{slide.icon}</span>
-            <h2 className="text-2xl font-bold mb-3">{slide.title}</h2>
-            <p className="text-muted-foreground text-base leading-relaxed">{slide.description}</p>
-          </>
-        )}
-      </div>
+    <div className="flex flex-col min-h-dvh bg-[#f7fff3]">
+      {currentSlide === 0 && <Slide1 />}
+      {currentSlide === 1 && <Slide2 />}
+      {currentSlide === 2 && <Slide3 />}
+      {currentSlide === 3 && (
+        <Slide4
+          agreed={agreed}
+          setAgreed={setAgreed}
+          showTerms={() => setShowTerms(true)}
+        />
+      )}
 
-      {/* Dots */}
-      {!isReagreement && (
-        <div className="flex gap-2 mb-8">
-          {slides.map((_, i) => (
+      {/* Bottom bar */}
+      <div className="w-full bg-[#026f09] py-3 flex flex-col items-center gap-3">
+        {/* Dots */}
+        <div className="flex gap-1.5">
+          {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
             <div
               key={i}
-              className={`h-2 rounded-full transition-all ${
-                i === currentSlide ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
+              className={`h-1.5 rounded-full transition-all ${
+                i === currentSlide ? "w-5 bg-white" : "w-1.5 bg-white/40"
               }`}
             />
           ))}
         </div>
-      )}
-
-      {/* Actions */}
-      <div className="w-full max-w-sm space-y-4">
-        {isLastSlide ? (
-          <>
-            <label className="flex items-start gap-3 text-base cursor-pointer">
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className="mt-0.5 h-5 w-5 rounded border-input accent-primary"
-              />
-              <span className="text-muted-foreground">
-                <button onClick={() => setShowTerms(true)} className="underline">利用規約</button>
-                に同意します
-              </span>
-            </label>
-            <Button className="w-full" size="lg" disabled={!agreed} onClick={handleStart}>
-              はじめる
-            </Button>
-          </>
-        ) : (
-          <Button className="w-full" size="lg" onClick={handleNext}>
-            次へ
-          </Button>
-        )}
+        <button
+          onClick={isLastSlide ? handleStart : handleNext}
+          disabled={isLastSlide && !agreed}
+          className="px-8 py-2.5 rounded-full border border-[#006728] bg-white text-[#006728] font-bold text-sm disabled:opacity-40"
+        >
+          {isLastSlide ? "はじめる" : "次へ"}
+        </button>
       </div>
     </div>
   );
