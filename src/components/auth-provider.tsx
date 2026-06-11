@@ -77,11 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const googleSub = existingAuth.user_metadata?.sub;
 
             // If profile exists but google_id is null, Google was unlinked.
-            // Treat as orphan — the resolve-google-user API will handle
-            // cleanup or this will fall through to new user creation.
+            // Clear the stale session so other login flows (LINE) can proceed.
             if (data && !data.google_id) {
-              console.log("[auth] Google was unlinked, treating as new user");
-              data = null; // Force new user creation below
+              console.log("[auth] Google was unlinked, clearing stale session");
+              await supabase.auth.signOut();
+              setIsLoading(false);
+              return;
             }
 
             const isOrphan = !data;
