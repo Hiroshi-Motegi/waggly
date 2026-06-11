@@ -62,9 +62,9 @@ function Slide1() {
 
 function Slide2() {
   return (
-    <div className="flex-1 flex flex-col items-center text-center overflow-hidden">
+    <div className="flex-1 flex flex-col items-center text-center overflow-y-auto pb-[70px]">
       {/* Header */}
-      <div className="relative w-full py-4 px-6">
+      <div className="relative w-full py-4 px-6 shrink-0">
         <div className="absolute inset-0 bg-[#27b135]" />
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
         <h2 className="relative text-xl font-bold text-white leading-snug">
@@ -74,7 +74,7 @@ function Slide2() {
         </h2>
       </div>
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center w-full px-4 pt-4">
+      <div className="flex flex-col items-center w-full px-4 pt-4">
         {/* Club screenshot */}
         <div className="w-[60%] border-3 border-white rounded-sm overflow-hidden">
           <Image
@@ -118,9 +118,9 @@ function Slide2() {
 
 function Slide3() {
   return (
-    <div className="flex-1 flex flex-col items-center text-center overflow-hidden">
+    <div className="flex-1 flex flex-col items-center text-center overflow-y-auto pb-[70px]">
       {/* Header */}
-      <div className="relative w-full py-4 px-6">
+      <div className="relative w-full py-4 px-6 shrink-0">
         <div className="absolute inset-0 bg-[#27b135]" />
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
         <h2 className="relative text-xl font-bold text-white leading-snug">
@@ -130,9 +130,9 @@ function Slide3() {
         </h2>
       </div>
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center w-full px-4 pt-4">
-        <div className="relative w-full flex-1 overflow-hidden">
-          <div className="absolute left-0 top-0 w-[56%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+      <div className="flex flex-col items-center w-full px-4 pt-4">
+        <div className="flex w-full gap-2">
+          <div className="w-[56%] shrink-0 border-3 border-white rounded-sm overflow-hidden">
             <Image
               src="/onboarding/3-1.png"
               alt="練習記録一覧"
@@ -141,7 +141,7 @@ function Slide3() {
               className="w-full h-auto"
             />
           </div>
-          <div className="absolute right-0 top-[10%] w-[56%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+          <div className="w-[56%] shrink-0 border-3 border-white rounded-sm overflow-hidden mt-[10%]">
             <Image
               src="/onboarding/3-2.png"
               alt="練習記録入力"
