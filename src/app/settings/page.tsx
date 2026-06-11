@@ -320,6 +320,7 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
   const hasGoogle = !!user.google_id;
   const hasBoth = hasLine && hasGoogle;
   const [loginProvider, setLoginProvider] = useState<string | null>(null);
+  const [googleEmail, setGoogleEmail] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -327,6 +328,13 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
       const supabase = createClient();
       const { data: { user: authUser } } = await supabase.auth.getUser();
       setLoginProvider(authUser?.app_metadata?.provider ?? null);
+      if (authUser?.app_metadata?.provider === "google") {
+        setGoogleEmail(authUser.email ?? null);
+      } else {
+        // Check identities for linked Google account
+        const googleIdentity = authUser?.identities?.find((i: any) => i.provider === "google");
+        setGoogleEmail(googleIdentity?.identity_data?.email ?? null);
+      }
     })();
   }, []);
 
@@ -433,9 +441,10 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
         </div>
         {hasGoogle ? (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-[#006728] font-bold">連携済み</span>
+            {googleEmail && <span className="text-xs text-[#8b8b8b] truncate max-w-[120px]">{googleEmail}</span>}
+            <span className="text-sm text-[#006728] font-bold shrink-0">連携済み</span>
             {canUnlinkGoogle && (
-              <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5">解除</button>
+              <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5 shrink-0">解除</button>
             )}
           </div>
         ) : (
