@@ -6,7 +6,7 @@ import {
   verifyGoogleIdToken,
   verifyLineAccessToken,
   exchangeLineCode,
-  deleteUserCompletely,
+  deleteUserData,
 } from "@/lib/auth-helpers";
 import { getUserDataSummary } from "@/lib/user-data-summary";
 
