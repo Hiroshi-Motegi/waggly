@@ -23,6 +23,14 @@ function checkBasicAuth(request: NextRequest): NextResponse | null {
 }
 
 export async function proxy(request: NextRequest) {
+  // Redirect www to non-www
+  const host = request.headers.get("host") || "";
+  if (host.startsWith("www.")) {
+    const url = request.nextUrl.clone();
+    url.host = host.replace("www.", "");
+    return NextResponse.redirect(url, 301);
+  }
+
   // Basic auth for admin pages and APIs
   const { pathname } = request.nextUrl;
   if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
