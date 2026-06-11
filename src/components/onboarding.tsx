@@ -43,8 +43,8 @@ function Slide1() {
           まとめられます。
         </p>
       </div>
-      <div className="relative w-full h-[55vh] overflow-hidden">
-        <div className="absolute left-0 bottom-0 w-[62%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+      <div className="relative w-full flex-1">
+        <div className="absolute left-[2%] top-0 w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
           <Image
             src="/images/onboarding/slide1-mybag.png"
             alt="マイバッグ画面"
@@ -53,7 +53,7 @@ function Slide1() {
             className="w-full h-auto"
           />
         </div>
-        <div className="absolute right-0 bottom-0 w-[62%] border-3 border-white rounded-sm overflow-hidden shadow-lg -translate-y-6">
+        <div className="absolute right-[2%] top-[15%] w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
           <Image
             src="/images/onboarding/slide1-practice.png"
             alt="練習記録画面"
