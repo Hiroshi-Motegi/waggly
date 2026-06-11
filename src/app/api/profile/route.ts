@@ -15,11 +15,21 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Create if not exists
+  // Create if not exists — users テーブルの表示名・アバターを初期値に
   if (!data) {
+    const { data: user } = await supabase
+      .from("users")
+      .select("display_name, avatar_url")
+      .eq("id", userId)
+      .single();
+
     const { data: created, error: createError } = await supabase
       .from("profiles")
-      .insert({ id: userId })
+      .insert({
+        id: userId,
+        nickname: user?.display_name ?? null,
+        avatar_url: user?.avatar_url ?? null,
+      })
       .select()
       .single();
     if (createError) return NextResponse.json({ error: createError.message }, { status: 500 });
