@@ -43,8 +43,8 @@ function Slide1() {
           まとめられます。
         </p>
       </div>
-      {/* Screenshots — overlapping, cut off at bottom */}
-      <div className="relative w-full flex-1 min-h-0">
+      {/* Screenshots — overlapping, extend past bottom edge */}
+      <div className="relative w-full h-[120%] shrink-0">
         <img
           src="/onboarding/1-1.png"
           alt="マイバッグ画面"
