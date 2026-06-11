@@ -291,9 +291,11 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
       )}
 
       {/* Bottom bar — fixed at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#026f09] py-3 flex flex-col items-center gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-50 py-3 flex flex-col items-center gap-3 overflow-hidden">
+        <div className="absolute inset-0 bg-[#139847]" />
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         {/* Dots */}
-        <div className="flex gap-1.5">
+        <div className="relative flex gap-1.5">
           {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
             <div
               key={i}
@@ -306,7 +308,7 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
         <button
           onClick={isLastSlide ? handleStart : handleNext}
           disabled={isLastSlide && !agreed}
-          className="px-8 py-2.5 rounded-full border border-[#006728] bg-white text-[#006728] font-bold text-sm disabled:opacity-40"
+          className="relative px-8 py-2.5 rounded-full border border-[#006728] bg-white text-[#006728] font-bold text-sm disabled:opacity-40"
         >
           {isLastSlide ? "はじめる" : "次へ"}
         </button>
