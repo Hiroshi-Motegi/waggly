@@ -96,5 +96,39 @@ describe("DataStore", () => {
         expect.any(Array)
       );
     });
+
+    it("updates last_data_updated in sync_meta on successful mutation (native + online)", async () => {
+      vi.mocked(Network.getStatus).mockResolvedValue({
+        connected: true,
+        connectionType: "wifi",
+      });
+      const newClub = { id: "2", club_number: "PW" };
+      vi.mocked(apiFetch).mockResolvedValue(
+        new Response(JSON.stringify(newClub), { status: 200 })
+      );
+
+      const { mutateData } = await import("@/lib/data-store");
+      await mutateData("/api/clubs", "POST", newClub);
+
+      expect(execute).toHaveBeenCalledWith(
+        "INSERT OR REPLACE INTO sync_meta (key, value) VALUES (?, ?)",
+        ["last_data_updated", expect.any(String)]
+      );
+    });
+
+    it("updates last_data_updated in sync_meta on offline mutation (native + offline)", async () => {
+      vi.mocked(Network.getStatus).mockResolvedValue({
+        connected: false,
+        connectionType: "none",
+      });
+
+      const { mutateData } = await import("@/lib/data-store");
+      await mutateData("/api/clubs", "POST", { id: "3", club_number: "5W" });
+
+      expect(execute).toHaveBeenCalledWith(
+        "INSERT OR REPLACE INTO sync_meta (key, value) VALUES (?, ?)",
+        ["last_data_updated", expect.any(String)]
+      );
+    });
   });
 });
