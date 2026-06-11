@@ -65,7 +65,7 @@ function Slide2() {
     <div className="flex-1 flex flex-col items-center text-center overflow-y-auto pb-[70px]">
       {/* Header */}
       <div className="relative w-full py-4 px-6 shrink-0">
-        <div className="absolute inset-0 bg-[#27b135]" />
+        <div className="absolute inset-0 bg-[#139847]" />
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
         <h2 className="relative text-xl font-bold text-white leading-snug">
           ギアをまとめて管理
@@ -121,7 +121,7 @@ function Slide3() {
     <div className="flex-1 flex flex-col items-center text-center overflow-y-auto pb-[70px]">
       {/* Header */}
       <div className="relative w-full py-4 px-6 shrink-0">
-        <div className="absolute inset-0 bg-[#27b135]" />
+        <div className="absolute inset-0 bg-[#139847]" />
         <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
         <h2 className="relative text-xl font-bold text-white leading-snug">
           練習球数や内容を
@@ -168,15 +168,15 @@ function Slide4({ agreed, setAgreed, showTerms }: { agreed: boolean; setAgreed: 
       <h2 className="text-[32px] font-bold text-[#139847] mb-6">
         さあ、はじめよう！
       </h2>
-      <Image
-        src="/images/onboarding/waggly-ball.png"
+      <img
+        src="/images/onboarding/waggly-ball.svg"
         alt="Waggly"
         width={128}
         height={128}
         className="mb-6"
       />
       <div className="flex-1" />
-      <div className="w-full pb-2">
+      <div className="w-full pb-[80px]">
         <p className="text-base font-bold text-[#2c2c2c] leading-relaxed mb-4">
           ワグリーを利用するためには
           <br />
