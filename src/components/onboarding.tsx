@@ -25,12 +25,11 @@ function Slide1() {
   return (
     <div className="flex-1 flex flex-col items-center text-center px-6">
       <div className="flex-1 flex flex-col items-center justify-center">
-        <Image
-          src="/images/onboarding/waggly-logo.png"
+        <img
+          src="/images/onboarding/waggly-logo.svg"
           alt="Waggly"
           width={185}
           height={60}
-          priority
           className="mb-4"
         />
         <h2 className="text-xl font-bold text-[#139847] leading-snug mb-6">
@@ -44,8 +43,8 @@ function Slide1() {
           まとめられます。
         </p>
       </div>
-      <div className="relative w-full h-[50vh] overflow-hidden">
-        <div className="absolute left-0 bottom-0 w-[55%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
+      <div className="relative w-full h-[55vh] overflow-hidden">
+        <div className="absolute left-0 bottom-0 w-[62%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
           <Image
             src="/images/onboarding/slide1-mybag.png"
             alt="マイバッグ画面"
@@ -54,7 +53,7 @@ function Slide1() {
             className="w-full h-auto"
           />
         </div>
-        <div className="absolute right-0 bottom-0 w-[55%] border-3 border-white rounded-sm overflow-hidden shadow-lg -translate-y-4">
+        <div className="absolute right-0 bottom-0 w-[62%] border-3 border-white rounded-sm overflow-hidden shadow-lg -translate-y-6">
           <Image
             src="/images/onboarding/slide1-practice.png"
             alt="練習記録画面"

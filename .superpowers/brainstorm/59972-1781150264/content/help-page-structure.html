@@ -1,0 +1,42 @@
+<h2>ヘルプページの構成案</h2>
+<p class="subtitle">アカウント連携の「なぜ必要か」をユーザーにどう伝えるか</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>フロー図メイン</h3>
+      <p>図解中心で説明。「LINEで使っていた人 → Androidアプリ使いたい → Google連携が必要」のようなフローチャートを大きく見せる。テキストは最小限。</p>
+      <div style="margin-top:12px; padding:16px; background:#f8f8f8; border-radius:8px; font-size:13px; color:#666;">
+        <strong>イメージ:</strong> 矢印付きの図 → 「あなたのケースはこれ」で該当箇所をハイライト
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>シナリオカード型</h3>
+      <p>「こんな時は？」形式のカード型FAQ。ユーザーが自分のケースに該当するカードをタップすると、必要な手順が展開される。</p>
+      <div style="margin-top:12px; padding:16px; background:#f8f8f8; border-radius:8px; font-size:13px; color:#666;">
+        <strong>イメージ:</strong><br>
+        📱 LINEで使っていて → Androidアプリで同期したい<br>
+        📱 Androidアプリで使っていて → Web版でLINE使いたい<br>
+        → タップで手順展開
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>一枚まとめ + FAQ</h3>
+      <p>まず一覧表で「プラットフォーム × 必要なアカウント」を見せて、その下によくある質問（データは消える？解除したらどうなる？）を並べる。</p>
+      <div style="margin-top:12px; padding:16px; background:#f8f8f8; border-radius:8px; font-size:13px; color:#666;">
+        <strong>イメージ:</strong><br>
+        [対応表] Web=どれでもOK / Android=Google必須 / iOS=Apple必須<br>
+        [FAQ] Q: データは消えますか？ A: いいえ…
+      </div>
+    </div>
+  </div>
+</div>

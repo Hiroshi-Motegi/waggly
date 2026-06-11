@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>オンボーディング原稿</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f0f0f0; padding: 24px; }
+  .slides { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .slide {
+    background: #fff;
+    border-radius: 24px;
+    width: 320px;
+    min-height: 580px;
+    padding: 40px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    position: relative;
+  }
+  .slide-num {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    font-size: 12px;
+    color: #8b8b8b;
+    font-weight: bold;
+  }
+  .slide-note {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 10px;
+    color: #fff;
+    background: #006728;
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+  .icon-area {
+    width: 120px;
+    height: 120px;
+    border-radius: 24px;
+    background: #e8f5e9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+    font-size: 48px;
+  }
+  .icon-area.hero {
+    width: 140px;
+    height: 140px;
+    border-radius: 32px;
+    background: #139847;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  h2 { font-size: 22px; font-weight: 800; color: #222; margin-bottom: 12px; line-height: 1.3; }
+  .subtitle { font-size: 15px; color: #006728; font-weight: bold; margin-bottom: 16px; }
+  .desc { font-size: 14px; color: #666; line-height: 1.8; margin-bottom: 8px; }
+  .features { text-align: left; width: 100%; margin-top: 16px; }
+  .feature { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+  .feature:last-child { border-bottom: none; }
+  .feature-icon { font-size: 20px; margin-top: 2px; }
+  .feature-text { font-size: 13px; color: #444; line-height: 1.6; }
+  .feature-text strong { color: #222; }
+  .dots { display: flex; gap: 6px; margin-top: 24px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; }
+  .dot.active { width: 20px; border-radius: 4px; background: #006728; }
+  .btn { margin-top: 24px; width: 100%; padding: 14px; border-radius: 999px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; }
+  .btn-primary { background: #006728; color: #fff; }
+  .btn-outline { background: #fff; color: #006728; border: 2px solid #006728; }
+  .beta-badge { display: inline-block; background: #fff3e0; color: #e65100; font-size: 12px; font-weight: bold; padding: 3px 10px; border-radius: 99px; margin-bottom: 16px; }
+  .terms { font-size: 13px; color: #666; margin-top: 16px; display: flex; align-items: center; gap: 8px; }
+  .terms a { color: #006728; text-decoration: underline; }
+  .divider { width: 40px; height: 3px; background: #006728; border-radius: 2px; margin-bottom: 20px; }
+  .field-label { font-size: 10px; color: #c4c4c4; text-transform: uppercase; letter-spacing: 1px; margin-top: 24px; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<h1 style="text-align:center; font-size:18px; color:#333; margin-bottom:24px;">オンボーディング原稿（4スライド）</h1>
+
+<div class="slides">
+
+  <!-- Slide 1 -->
+  <div class="slide">
+    <div class="slide-num">1 / 4</div>
+    <div class="icon-area hero">
+      <div style="text-align:center;">
+        <div style="font-size:36px;">⛳</div>
+        <div style="margin-top:4px; font-size:11px;">Waggly</div>
+      </div>
+    </div>
+    <h2>ゴルファーのための<br>ギア&練習管理アプリ</h2>
+    <div class="divider"></div>
+    <p class="desc">
+      クラブやアイテムの管理、練習記録まで。<br>
+      あなたのゴルフライフを<br>まとめてサポートします。
+    </p>
+    <div class="dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="btn btn-primary">次へ</button>
+
+    <div class="field-label" style="margin-top:32px;">デザインメモ</div>
+    <p style="font-size:11px; color:#999; line-height:1.6;">
+      ロゴ or アプリアイコンを配置。<br>
+      キャッチコピーでアプリの全体像を伝える。
+    </p>
+  </div>
+
+  <!-- Slide 2 -->
+  <div class="slide">
+    <div class="slide-num">2 / 4</div>
+    <div class="icon-area">🏌️</div>
+    <h2>ギアをまとめて管理<br>仲間にかんたんシェア</h2>
+    <div class="divider"></div>
+    <div class="features">
+      <div class="feature">
+        <span class="feature-icon">🎒</span>
+        <div class="feature-text">
+          <strong>マイバッグ</strong><br>
+          クラブのスペックや購入情報をまとめて登録・管理
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">👕</span>
+        <div class="feature-text">
+          <strong>アイテム管理</strong><br>
+          ウェア、シューズ、ボールなどのギアも一元管理
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🔗</span>
+        <div class="feature-text">
+          <strong>かんたんシェア</strong><br>
+          自分のセッティングをリンクひとつで仲間に共有
+        </div>
+      </div>
+    </div>
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="btn btn-primary">次へ</button>
+
+    <div class="field-label" style="margin-top:32px;">デザインメモ</div>
+    <p style="font-size:11px; color:#999; line-height:1.6;">
+      マイバッグ画面やシェアカードの<br>スクリーンショットを使うと◎
+    </p>
+  </div>
+
+  <!-- Slide 3 -->
+  <div class="slide">
+    <div class="slide-num">3 / 4</div>
+    <div class="icon-area">📝</div>
+    <h2>練習を記録して<br>上達につなげよう</h2>
+    <div class="divider"></div>
+    <div class="features">
+      <div class="feature">
+        <span class="feature-icon">⏱️</span>
+        <div class="feature-text">
+          <strong>サクッと練習記録</strong><br>
+          球数や練習内容をかんたんに記録
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🤖</span>
+        <div class="feature-text">
+          <strong>AIに相談</strong><br>
+          あなたのデータをもとに練習メニューを提案<br>
+          <span style="font-size:11px; color:#8b8b8b;">※ログインで利用可能</span>
+        </div>
+      </div>
+    </div>
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="btn btn-primary">次へ</button>
+
+    <div class="field-label" style="margin-top:32px;">デザインメモ</div>
+    <p style="font-size:11px; color:#999; line-height:1.6;">
+      練習記録画面やAIコーチ画面の<br>スクリーンショットを使うと◎
+    </p>
+  </div>
+
+  <!-- Slide 4 -->
+  <div class="slide">
+    <div class="slide-num">4 / 4</div>
+    <div class="icon-area" style="background:#139847;">
+      <span style="font-size:48px;">🚀</span>
+    </div>
+    <h2>さあ、はじめよう</h2>
+    <div class="divider"></div>
+    <div class="beta-badge">ベータ版 — 全機能を無料提供中</div>
+    <p class="desc">
+      現在ベータ版として提供しています。<br>
+      正式リリース時にプラン体系が<br>変更される場合があります。
+    </p>
+
+    <div style="width:100%; margin-top:20px; text-align:left;">
+      <label style="display:flex; align-items:flex-start; gap:8px; font-size:14px; color:#666; cursor:pointer;">
+        <input type="checkbox" style="margin-top:3px; width:18px; height:18px;">
+        <span><a href="#" style="color:#006728; text-decoration:underline;">利用規約</a>に同意します</span>
+      </label>
+    </div>
+
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot active"></div>
+    </div>
+    <button class="btn btn-primary" style="opacity:0.5;">はじめる</button>
+
+    <div class="field-label" style="margin-top:32px;">デザインメモ</div>
+    <p style="font-size:11px; color:#999; line-height:1.6;">
+      チェックボックスONで「はじめる」が活性化。<br>
+      ベータ版バッジで無料であることを明示。
+    </p>
+  </div>
+
+</div>
+
+</body>
+</html>

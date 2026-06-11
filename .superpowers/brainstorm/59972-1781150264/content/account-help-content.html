@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アカウント連携ヘルプ — モックアップ</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #139847; min-height: 100vh; }
+  .container { max-width: 420px; margin: 0 auto; padding: 8px; }
+
+  /* Header */
+  .header { display: flex; align-items: center; gap: 12px; padding: 12px 4px 16px; }
+  .back-btn { color: #fff; font-size: 20px; text-decoration: none; }
+  .header h1 { color: #fff; font-size: 18px; font-weight: bold; }
+
+  /* Cards */
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 8px; }
+  .card h2 { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 8px; }
+  .card p { font-size: 14px; color: #666; line-height: 1.6; }
+  .card p.lead { font-size: 14px; color: #333; line-height: 1.7; margin-bottom: 12px; }
+
+  /* Table */
+  .platform-table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  .platform-table th { text-align: left; font-size: 12px; color: #8b8b8b; font-weight: normal; padding: 8px 0; border-bottom: 1px solid #ececec; }
+  .platform-table td { padding: 10px 0; border-bottom: 1px solid #ececec; font-size: 14px; vertical-align: middle; }
+  .platform-table tr:last-child td { border-bottom: none; }
+  .platform-label { display: flex; align-items: center; gap: 8px; font-weight: bold; color: #333; }
+  .platform-icon { font-size: 18px; }
+  .badge { display: inline-block; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 999px; }
+  .badge-required { background: #fff3e0; color: #e65100; }
+  .badge-any { background: #e8f5e9; color: #2e7d32; }
+  .badge-provider { background: #f5f5f5; color: #333; font-weight: normal; }
+
+  /* Scenario */
+  .scenario { display: flex; align-items: center; gap: 8px; padding: 12px 0; border-bottom: 1px solid #ececec; font-size: 14px; }
+  .scenario:last-child { border-bottom: none; }
+  .scenario-from { font-weight: bold; color: #333; white-space: nowrap; }
+  .scenario-arrow { color: #006728; font-weight: bold; flex-shrink: 0; }
+  .scenario-to { font-weight: bold; color: #333; white-space: nowrap; }
+  .scenario-action { font-size: 12px; color: #006728; background: #e8f5e9; border-radius: 6px; padding: 4px 8px; margin-top: 4px; display: inline-block; }
+
+  /* FAQ */
+  .faq-item { padding: 12px 0; border-bottom: 1px solid #ececec; }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 6px; }
+  .faq-q::before { content: "Q. "; color: #006728; }
+  .faq-a { font-size: 13px; color: #666; line-height: 1.6; padding-left: 2px; }
+  .faq-a::before { content: "A. "; color: #006728; font-weight: bold; }
+
+  /* Note */
+  .note { font-size: 12px; color: #8b8b8b; text-align: center; padding: 16px 0 32px; }
+
+  .section-title { font-size: 13px; font-weight: bold; color: #8b8b8b; margin-bottom: 8px; letter-spacing: 0.5px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <a href="#" class="back-btn">‹</a>
+    <h1>アカウント連携について</h1>
+  </div>
+
+  <!-- 概要 -->
+  <div class="card">
+    <p class="lead">Wagglyはクラウド同期により、Webブラウザとスマホアプリで同じデータを使えます。<br>アプリで同期するには、各プラットフォームに対応したアカウントの連携が必要です。</p>
+  </div>
+
+  <!-- 対応表 -->
+  <div class="card">
+    <h2>プラットフォーム別の対応</h2>
+    <table class="platform-table">
+      <thead>
+        <tr>
+          <th>プラットフォーム</th>
+          <th>同期に必要なアカウント</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="platform-label"><span class="platform-icon">🌐</span> Webブラウザ</div></td>
+          <td><span class="badge badge-any">どれでもOK</span></td>
+        </tr>
+        <tr>
+          <td><div class="platform-label"><span class="platform-icon">🤖</span> Androidアプリ</div></td>
+          <td><span class="badge badge-required">Google必須</span></td>
+        </tr>
+        <tr>
+          <td><div class="platform-label"><span class="platform-icon">🍎</span> iOSアプリ</div></td>
+          <td><span class="badge badge-provider">準備中</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- こんなときは -->
+  <div class="card">
+    <h2>こんなときは</h2>
+    <div class="scenario">
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <span class="scenario-from">LINEで利用中</span>
+          <span class="scenario-arrow">→</span>
+          <span class="scenario-to">Androidアプリで同期したい</span>
+        </div>
+        <div class="scenario-action">設定からGoogle連携を追加</div>
+      </div>
+    </div>
+    <div class="scenario">
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <span class="scenario-from">Googleで利用中</span>
+          <span class="scenario-arrow">→</span>
+          <span class="scenario-to">Web版でLINEログインしたい</span>
+        </div>
+        <div class="scenario-action">設定からLINE連携を追加</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="card">
+    <h2>よくある質問</h2>
+    <div class="faq-item">
+      <div class="faq-q">連携するとデータはどうなる？</div>
+      <div class="faq-a">今のデータはそのまま残ります。アカウントに別のログイン方法を追加するだけです。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">連携先にすでにアカウントがある場合は？</div>
+      <div class="faq-a">どちらのデータを残すか選べる画面が表示されます。選ばなかった方のデータは削除されます。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">連携を解除したらどうなる？</div>
+      <div class="faq-a">そのログイン方法が使えなくなるだけで、データは残ります。ただし最低1つのログイン方法は必要です。</div>
+    </div>
+  </div>
+
+  <p class="note">ご不明な点があればお問い合わせください。</p>
+</div>
+</body>
+</html>

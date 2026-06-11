@@ -234,7 +234,7 @@ export default function BagPage() {
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader
         title="マイバッグ"
-        showBack={false}
+        backHref="/"
         variant="dark"
       >
         <div className="flex items-center gap-2 ml-auto">

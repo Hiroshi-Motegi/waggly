@@ -207,35 +207,38 @@ export default function HomePage() {
         <RecentPractice sessions={sessions} />
 
         {/* Favorite courses */}
-        {favCourses.length > 0 && (
-          <>
-            <div className="flex items-center px-1 mt-4 mb-2">
+        <div className="flex items-center px-1 mt-4 mb-2">
           <h3 className="flex-1 text-base font-bold text-white">お気に入りコース</h3>
-          <Link href="/settings/profile/courses" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">管理</Link>
+          <Link href="/settings/profile/courses" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
         </div>
-            <div className="rounded-lg bg-white p-3">
-              {favCourses.map((c, i) => {
-                const goraUrl = c.gora_course_id
-                  ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/gora/detail/id=${c.gora_course_id}/`
-                  : null;
-                return (
-                  <a key={c.id} href={goraUrl ?? "#"} target={goraUrl ? "_blank" : undefined} rel="noopener" className={`flex items-center gap-2 py-2 ${i < favCourses.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                    {c.course_image_url && (
-                      <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold truncate">{c.course_name}</p>
-                      {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
-                    </div>
-                    {c.evaluation != null && (
-                      <span className="text-xs text-amber-500 shrink-0">★{c.evaluation.toFixed(1)}</span>
-                    )}
-                  </a>
-                );
-              })}
+        <div className="rounded-lg bg-white p-3">
+          {favCourses.length > 0 ? (
+            favCourses.map((c, i) => {
+              const goraUrl = c.gora_course_id
+                ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/gora/detail/id=${c.gora_course_id}/`
+                : null;
+              return (
+                <a key={c.id} href={goraUrl ?? "#"} target={goraUrl ? "_blank" : undefined} rel="noopener" className={`flex items-center gap-2 py-2 ${i < favCourses.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                  {c.course_image_url && (
+                    <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">{c.course_name}</p>
+                    {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
+                  </div>
+                  {c.evaluation != null && (
+                    <span className="text-xs text-amber-500 shrink-0">★{c.evaluation.toFixed(1)}</span>
+                  )}
+                </a>
+              );
+            })
+          ) : (
+            <div className="flex flex-col items-center px-4 py-2 gap-3">
+              <p className="text-sm text-[#8b8b8b]">お気に入りはありません。</p>
+              <Link href="/courses" className="w-full text-center text-sm font-bold text-[#006728] border border-[#006728] rounded-full py-2">お気に入りコースを登録する</Link>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

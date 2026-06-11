@@ -96,16 +96,14 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
             backHref={nativeHref(`/bag/${clubId}`)}
             variant="dark"
           />
-          <div className="rounded-lg bg-white p-3">
-            <StructuredMemoForm
-              clubId={clubId}
-              clubNumber={club.club_number}
-              clubModel={club.model}
-              defaultDistance={club.distance}
-              onSaved={() => router.push(nativeHref(`/bag/${clubId}`))}
-              onCancel={() => router.back()}
-            />
-          </div>
+          <StructuredMemoForm
+            clubId={clubId}
+            clubNumber={club.club_number}
+            clubModel={club.model}
+            defaultDistance={club.distance}
+            onSaved={() => router.replace(nativeHref(`/bag/${clubId}`))}
+            onCancel={() => router.replace(nativeHref(`/bag/${clubId}`))}
+          />
         </div>
       </div>
     );
@@ -140,19 +138,17 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
       </div>
 
       {showMemoForm && (
-        <div className="rounded-lg bg-white p-3">
-          <StructuredMemoForm
-            clubId={clubId}
-            clubNumber={club.club_number}
-            clubModel={club.model}
-            defaultDistance={club.distance}
-            onSaved={() => {
-              fetchHistory();
-              setShowMemoForm(false);
-            }}
-            onCancel={() => setShowMemoForm(false)}
-          />
-        </div>
+        <StructuredMemoForm
+          clubId={clubId}
+          clubNumber={club.club_number}
+          clubModel={club.model}
+          defaultDistance={club.distance}
+          onSaved={() => {
+            fetchHistory();
+            setShowMemoForm(false);
+          }}
+          onCancel={() => setShowMemoForm(false)}
+        />
       )}
 
       <div className="flex flex-col rounded-lg bg-white p-3">

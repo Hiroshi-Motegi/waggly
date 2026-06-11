@@ -19,7 +19,10 @@ export function RecentPractice({ sessions }: RecentPracticeProps) {
     <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
       <div className="flex flex-col gap-1.5">
         {sessions.length === 0 ? (
-          <p className="py-2 text-base text-muted-foreground">まだ記録がありません</p>
+          <div className="flex flex-col items-center px-4 py-2 gap-3">
+            <p className="text-sm text-[#8b8b8b]">まだ記録がありません。</p>
+            <Link href={nativeHref("/practice/new")} className="w-full text-center text-sm font-bold text-[#006728] border border-[#006728] rounded-full py-2">練習を記録する</Link>
+          </div>
         ) : (
           <div className="flex flex-col">
             {sessions.slice(0, 3).map((s, i) => (

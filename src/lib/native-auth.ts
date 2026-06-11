@@ -1,10 +1,25 @@
 import { createClient } from "@/lib/supabase/client";
+import { registerPlugin } from "@capacitor/core";
 import type { User } from "@/types/database";
 
 interface NativeSignInResult {
   user: User | null;
   error: string | null;
 }
+
+interface LineLoginResult {
+  userId: string;
+  displayName: string;
+  pictureUrl?: string;
+  accessToken?: string;
+  idToken?: string;
+}
+
+interface LineLoginPlugin {
+  login(options: { channelId: string }): Promise<LineLoginResult>;
+}
+
+const LineLogin = registerPlugin<LineLoginPlugin>("LineLogin");
 
 /**
  * Sign in with Google on native platform.
@@ -16,6 +31,7 @@ export async function signInWithGoogle(): Promise<NativeSignInResult> {
       "@codetrix-studio/capacitor-google-auth"
     );
 
+    await GoogleAuth.initialize();
     const result = await GoogleAuth.signIn();
     const idToken = result.authentication.idToken;
 
@@ -113,5 +129,32 @@ export async function signInWithApple(): Promise<NativeSignInResult> {
     return { user: profile, error: null };
   } catch (e: any) {
     return { user: null, error: e.message ?? "Apple sign-in failed" };
+  }
+}
+
+/**
+ * Link LINE account on native platform.
+ * Uses custom LineLogin Capacitor plugin → LINE SDK.
+ * Returns LINE userId and profile for account linking.
+ */
+export async function nativeLineLogin(): Promise<{
+  userId: string;
+  displayName: string;
+  pictureUrl?: string;
+  error: string | null;
+}> {
+  try {
+    const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
+    if (!channelId) throw new Error("LINE channel ID not configured");
+
+    const result = await LineLogin.login({ channelId });
+    return {
+      userId: result.userId,
+      displayName: result.displayName,
+      pictureUrl: result.pictureUrl,
+      error: null,
+    };
+  } catch (e: any) {
+    return { userId: "", displayName: "", error: e.message ?? "LINE login failed" };
   }
 }

@@ -57,7 +57,8 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
   const tagSet = condition ? getTagsByCondition(condition) : null;
 
   return (
-    <div className="flex flex-col gap-3">
+    <>
+    <div className="flex flex-col gap-3 rounded-lg bg-white p-3">
       <div className="flex items-center gap-2">
         <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">{clubNumber}</span>
         {clubModel && <span className="text-base text-[#6c6c6c]">{clubModel}</span>}
@@ -249,19 +250,21 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
         />
       </div>
 
-      {/* Buttons — rendered outside white card visually via negative margin */}
-      <div className="flex flex-col items-center gap-2 -mx-3 -mb-3 pt-4 pb-2 px-3">
-        <button
-          onClick={handleSubmit}
-          disabled={!hasContent || isSaving}
-          className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50"
-        >
-          {isSaving ? "保存中..." : "保存する"}
-        </button>
-        <button onClick={onCancel} className="text-base font-bold text-white">
-          キャンセル
-        </button>
-      </div>
     </div>
+
+    {/* Save / Cancel buttons — outside card */}
+    <div className="flex flex-col items-center gap-2 pt-2">
+      <button
+        onClick={handleSubmit}
+        disabled={!hasContent || isSaving}
+        className="w-full max-w-xs rounded-full bg-[#006728] py-2.5 text-base font-bold text-white disabled:opacity-50"
+      >
+        {isSaving ? "保存中..." : "保存する"}
+      </button>
+      <button onClick={onCancel} className="text-base font-bold text-white/70">
+        キャンセル
+      </button>
+    </div>
+    </>
   );
 }

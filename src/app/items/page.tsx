@@ -110,7 +110,7 @@ export default function ItemsPage() {
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col space-y-2">
-      <PageHeader title="アイテム" showBack={false} variant="dark">
+      <PageHeader title="アイテム" backHref="/" variant="dark">
         <ViewModeToggle mode={viewMode} onChange={setViewMode} />
         <Link href={filter === "all" || filter === "active" ? "/items/new" : `/items/new?status=${filter}`}>
           <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
