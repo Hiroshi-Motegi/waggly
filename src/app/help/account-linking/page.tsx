@@ -94,7 +94,7 @@ export default function AccountLinkingHelpPage() {
                 <span className="font-bold">Web版でLINEログインしたい</span>
               </div>
               <span className="mt-1.5 inline-block rounded-md bg-[#e8f5e9] px-2 py-1 text-xs font-bold text-[#006728]">
-                Androidアプリの設定からLINE連携を追加
+                Web版またはアプリの設定からLINE連携を追加
               </span>
             </div>
           </div>
