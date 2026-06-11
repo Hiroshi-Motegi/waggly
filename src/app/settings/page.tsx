@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { User } from "@/types/database";
 import Image from "next/image";
 import Link from "next/link";
-import { Download, Loader2 } from "lucide-react";
+import { Download, HelpCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api-client";
@@ -91,8 +91,12 @@ export default function SettingsPage() {
                 <span className="text-base">利用規約</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
               </Link>
-              <Link href="/privacy" className="flex items-center justify-between py-2">
+              <Link href="/privacy" className="flex items-center justify-between py-2 border-b border-[#dfdfdf]">
                 <span className="text-base">プライバシーポリシー</span>
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
+              </Link>
+              <Link href="/help" className="flex items-center justify-between py-2">
+                <span className="text-base">ヘルプ</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
               </Link>
             </div>
@@ -151,7 +155,12 @@ export default function SettingsPage() {
       </div>
 
       {/* アカウント連携 */}
-      <p className="text-base font-bold text-white px-1 pt-4">アカウント連携</p>
+      <div className="flex items-center justify-between px-1 pt-4">
+        <p className="text-base font-bold text-white">アカウント連携</p>
+        <Link href="/help/account-linking">
+          <HelpCircle className="h-5 w-5 text-white opacity-80" />
+        </Link>
+      </div>
       <AccountLinking user={user} onUpdate={() => window.location.reload()} />
 
       {/* プラン */}
@@ -214,6 +223,7 @@ export default function SettingsPage() {
           {[
             { href: "/terms", label: "利用規約" },
             { href: "/privacy", label: "プライバシーポリシー" },
+            { href: "/help", label: "ヘルプ" },
           ].map((item, i, arr) => (
             <Link key={item.href} href={item.href}>
               <div className={`flex items-center gap-2.5 py-2.5 ${i < arr.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
