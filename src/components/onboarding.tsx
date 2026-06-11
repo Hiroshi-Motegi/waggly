@@ -43,17 +43,17 @@ function Slide1() {
           まとめられます。
         </p>
       </div>
-      {/* Screenshots — overlapping, cut off by bottom bar */}
-      <div className="relative w-full flex-1 min-h-0 px-2 mt-2">
+      {/* Screenshots — overlapping, cut off at bottom */}
+      <div className="relative w-full flex-1 min-h-0">
         <img
           src="/onboarding/1-1.png"
           alt="マイバッグ画面"
-          className="absolute left-[2%] top-0 w-[56%] border-3 border-white rounded-sm shadow-lg"
+          className="absolute left-0 top-0 w-[56%] border-3 border-white shadow-lg"
         />
         <img
           src="/onboarding/1-2.png"
           alt="練習記録画面"
-          className="absolute right-[2%] top-[14%] w-[56%] border-3 border-white rounded-sm shadow-lg"
+          className="absolute left-[40%] top-[12%] w-[56%] border-3 border-white shadow-lg"
         />
       </div>
     </div>
