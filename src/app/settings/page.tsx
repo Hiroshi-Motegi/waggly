@@ -321,9 +321,8 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
   const hasBoth = hasLine && hasGoogle;
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
   const loginMethod = typeof window !== "undefined" ? localStorage.getItem("login_method") : null;
-  const isGoogleLogin = loginMethod === "google";
-  const canUnlinkLine = hasBoth && isGoogleLogin;
-  const canUnlinkGoogle = hasBoth && !isGoogleLogin;
+  const canUnlinkLine = hasBoth && loginMethod === "google";
+  const canUnlinkGoogle = hasBoth && loginMethod === "line";
 
   useEffect(() => {
     (async () => {
