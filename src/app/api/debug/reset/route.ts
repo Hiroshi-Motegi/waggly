@@ -12,25 +12,48 @@ export async function POST() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
+  // Find user_ids that have a "dev" provider (these are the dev users to keep)
+  const { data: devProviders } = await supabase
+    .from("user_providers")
+    .select("user_id")
+    .eq("provider", "dev");
+
+  const devUserIds = new Set((devProviders ?? []).map((p: any) => p.user_id));
+
   const { data: users } = await supabase
     .from("users")
-    .select("id, display_name, line_user_id")
-    .not("line_user_id", "like", "dev-%");
+    .select("id, display_name");
 
-  if (!users?.length) {
+  const nonDevUsers = (users ?? []).filter((u: any) => !devUserIds.has(u.id));
+
+  if (!nonDevUsers.length) {
     return NextResponse.json({ message: "No users to delete" });
   }
 
-  for (const u of users) {
+  for (const u of nonDevUsers) {
+    // Get auth_user_ids for this user before deleting
+    const { data: userProviders } = await supabase
+      .from("user_providers")
+      .select("auth_user_id")
+      .eq("user_id", u.id);
+
+    // Delete user data (CASCADE handles most, but explicit for clarity)
     await supabase.from("favorite_courses").delete().eq("user_id", u.id);
     await supabase.from("profiles").delete().eq("id", u.id);
     await supabase.from("practice_sessions").delete().eq("user_id", u.id);
     await supabase.from("accessories").delete().eq("user_id", u.id);
     await supabase.from("clubs").delete().eq("user_id", u.id);
     await supabase.from("users").delete().eq("id", u.id);
-    await supabase.auth.admin.deleteUser(u.id);
+
+    // Delete auth users
+    for (const p of userProviders ?? []) {
+      if (p.auth_user_id) {
+        await supabase.auth.admin.deleteUser(p.auth_user_id);
+      }
+    }
+
     console.log("[reset] Deleted:", u.id, u.display_name);
   }
 
-  return NextResponse.json({ deleted: users.length, users: users.map(u => u.display_name) });
+  return NextResponse.json({ deleted: nonDevUsers.length, users: nonDevUsers.map((u: any) => u.display_name) });
 }

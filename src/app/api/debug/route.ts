@@ -13,20 +13,29 @@ export async function GET() {
 
   const { data: users } = await supabase
     .from("users")
-    .select("id, display_name, line_user_id, google_id, created_at");
+    .select("id, display_name, created_at");
+
+  const { data: providers } = await supabase
+    .from("user_providers")
+    .select("user_id, provider, provider_sub");
+
+  // Group providers by user_id
+  const providersByUser: Record<string, Array<{ provider: string; provider_sub: string }>> = {};
+  for (const p of providers ?? []) {
+    if (!providersByUser[p.user_id]) providersByUser[p.user_id] = [];
+    providersByUser[p.user_id].push({ provider: p.provider, provider_sub: p.provider_sub });
+  }
 
   // Mask sensitive IDs but show enough to identify
   const masked = (users ?? []).map((u: any) => ({
     id: u.id?.substring(0, 8) + "...",
     display_name: u.display_name,
-    line_user_id: u.line_user_id
-      ? (u.line_user_id.startsWith("oauth-") || u.line_user_id.startsWith("google-")
-        ? u.line_user_id.substring(0, 15) + "..."
-        : "U" + u.line_user_id.substring(1, 8) + "... (real LINE)")
-      : null,
-    google_id: u.google_id
-      ? u.google_id.substring(0, 10) + "..."
-      : null,
+    providers: (providersByUser[u.id] ?? []).map((p) => ({
+      provider: p.provider,
+      provider_sub: p.provider_sub
+        ? p.provider_sub.substring(0, 10) + "..."
+        : null,
+    })),
     created_at: u.created_at,
   }));
 
