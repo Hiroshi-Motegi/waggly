@@ -50,11 +50,15 @@
       ↓
     ┌─「ローカルデータを使う」
     │   POST /api/auth/resolve-conflict { choice: "local", localData: {...} }
-    │   → 敗者WID完全削除、ローカルデータを勝者WIDでINSERT、fullSync、ホーム
+    │   → 既存WIDのデータを削除（WID自体は残す）
+    │   → ローカルデータをその既存WIDでINSERT
+    │   → 既存WIDのセッションでfullSync、ホーム
+    │   ※ 初回サインインではローカル側にWIDがないため、
+    │     既存WIDを引き継いでデータだけ入れ替える
     │
     ├─「サーバーデータを使う」
     │   POST /api/auth/resolve-conflict { choice: "server" }
-    │   → ローカルは捨てる、fullSyncで上書き、ホーム
+    │   → ローカルは捨てる、既存WIDのセッションでfullSync、ホーム
     │
     └─「キャンセル」
         → 認証セッション破棄、元の状態に戻る
@@ -207,11 +211,17 @@ OAuth認証成功 → サーバーに衝突チェック要求
 
 **サーバー処理（トランザクション内）:**
 
+初回サインイン（WID衝突あり）:
+1. 既存WIDのデータを削除（ローカル選択時のみ）
+2. ローカルデータ選択時: localDataを既存WIDでINSERT
+3. 既存WIDのセッションを返す
+※ 初回サインインではローカル側にWIDがないため、敗者ユーザー削除は発生しない
+
+アカウント連携（WID衝突あり）:
 1. 敗者のデータ削除（clubs, accessories, practice_sessions + 子テーブルはCASCADE）
 2. 敗者のユーザー削除（usersテーブル + auth.users）
 3. 勝者にプロバイダ情報付与（google_id, line_user_id等を更新）
-4. ローカルデータ選択時: localDataを勝者のWIDでINSERT
-5. 必要に応じて新規セッション発行
+4. 必要に応じて新規セッション発行（勝者が連携先の場合）
 
 ### GET /api/auth/data-summary
 
