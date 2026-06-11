@@ -70,8 +70,10 @@ export default function SettingsPage() {
                 const { signInWithGoogle } = await import("@/lib/native-auth");
                 const result = await signInWithGoogle();
                 if (result.user) {
+                  const { resetLocalModeCache } = await import("@/lib/api-client");
+                  resetLocalModeCache();
                   setUser?.(result.user);
-                  window.location.reload();
+                  window.location.href = "/settings";
                 }
               }}
               className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#006728] text-white text-base font-bold"
