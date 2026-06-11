@@ -43,26 +43,18 @@ function Slide1() {
           まとめられます。
         </p>
       </div>
-      {/* Screenshots — overflow past bottom, bar overlaps on top */}
-      <div className="flex gap-2 px-2 mt-2">
-        <div className="w-[58%] shrink-0 border-3 border-white rounded-sm overflow-hidden shadow-lg">
-          <Image
-            src="/onboarding/1-1.png"
-            alt="マイバッグ画面"
-            width={430}
-            height={932}
-            className="w-full h-auto"
-          />
-        </div>
-        <div className="w-[58%] shrink-0 border-3 border-white rounded-sm overflow-hidden shadow-lg mt-[15%]">
-          <Image
-            src="/onboarding/1-2.png"
-            alt="練習記録画面"
-            width={430}
-            height={932}
-            className="w-full h-auto"
-          />
-        </div>
+      {/* Screenshots — overlapping, cut off by bottom bar */}
+      <div className="relative w-full flex-1 min-h-0 px-2 mt-2">
+        <img
+          src="/onboarding/1-1.png"
+          alt="マイバッグ画面"
+          className="absolute left-[2%] top-0 w-[56%] border-3 border-white rounded-sm shadow-lg"
+        />
+        <img
+          src="/onboarding/1-2.png"
+          alt="練習記録画面"
+          className="absolute right-[2%] top-[14%] w-[56%] border-3 border-white rounded-sm shadow-lg"
+        />
       </div>
     </div>
   );
@@ -300,7 +292,7 @@ export function Onboarding({ onComplete, isReagreement }: OnboardingProps) {
 
   // Slides view
   return (
-    <div className="flex flex-col min-h-dvh bg-[#f7fff3] overflow-hidden">
+    <div className="flex flex-col h-dvh bg-[#f7fff3] overflow-hidden">
       {currentSlide === 0 && <Slide1 />}
       {currentSlide === 1 && <Slide2 />}
       {currentSlide === 2 && <Slide3 />}
