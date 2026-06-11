@@ -43,8 +43,8 @@ function Slide1() {
           まとめられます。
         </p>
       </div>
-      {/* Screenshots — extend into and behind the green bottom bar */}
-      <div className="relative w-full flex-1 mb-[-70px]">
+      {/* Screenshots — extend into the green bottom bar */}
+      <div className="relative z-[60] w-full flex-1 mb-[-70px]">
         <div className="absolute left-[2%] top-0 w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
           <Image
             src="/onboarding/1-1.png"
