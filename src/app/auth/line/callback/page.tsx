@@ -47,14 +47,32 @@ export default function LineCallbackPage() {
           const result = await res.json();
 
           if (result.needsConfirm) {
-            sessionStorage.setItem("merge_info", JSON.stringify({
+            const currentDate = result.currentAccount?.lastUpdated ? new Date(result.currentAccount.lastUpdated).getTime() : 0;
+            const existingDate = result.existingAccount?.lastUpdated ? new Date(result.existingAccount.lastUpdated).getTime() : 0;
+            const currentIsNewer = currentDate >= existingDate;
+
+            const conflictInfo = JSON.stringify({
+              scenario: "account-linking",
               provider: "line",
-              providerId: result.existingAccount?.lineUserId,
-              originalUserId,
-              currentAccount: result.currentAccount,
-              existingAccount: result.existingAccount,
-            }));
-            window.location.href = "/auth/merge";
+              providerUserId: result.existingAccount?.lineUserId,
+              sourceA: {
+                label: "現在のアカウントのデータ",
+                isNew: currentIsNewer,
+                wid: originalUserId,
+                lastUpdated: result.currentAccount?.lastUpdated ?? null,
+                counts: result.currentAccount?.counts ?? { clubs: 0, practices: 0, accessories: 0 },
+              },
+              sourceB: {
+                label: "LINEアカウントのデータ",
+                isNew: !currentIsNewer,
+                wid: result.existingAccount?.id,
+                lastUpdated: result.existingAccount?.lastUpdated ?? null,
+                counts: result.existingAccount?.counts ?? { clubs: 0, practices: 0, accessories: 0 },
+              },
+            });
+            sessionStorage.setItem("conflict_info", conflictInfo);
+            localStorage.setItem("conflict_info", conflictInfo);
+            window.location.href = "/auth/resolve-conflict";
             return;
           }
 
