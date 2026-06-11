@@ -159,6 +159,45 @@ export async function verifyGoogleIdToken(
 }
 
 /**
+ * プロバイダのアバター URL をダウンロードして Supabase Storage に保存する。
+ * 保存先: avatars/{userId}/avatar.{ext}
+ * 失敗した場合は元の URL をそのまま返す。
+ */
+export async function uploadAvatarFromUrl(
+  supabase: any,
+  userId: string,
+  avatarUrl: string
+): Promise<string> {
+  try {
+    const res = await fetch(avatarUrl);
+    if (!res.ok) return avatarUrl;
+
+    const blob = await res.blob();
+    const contentType = blob.type || "image/jpeg";
+    const ext = contentType.includes("png") ? "png" : "jpg";
+    const path = `${userId}/avatar.${ext}`;
+
+    const { error } = await supabase.storage
+      .from("avatars")
+      .upload(path, blob, { contentType, upsert: true });
+
+    if (error) {
+      console.error("[uploadAvatar] Storage upload failed:", error.message);
+      return avatarUrl;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(path);
+
+    return publicUrl;
+  } catch (e) {
+    console.error("[uploadAvatar] Failed:", e);
+    return avatarUrl;
+  }
+}
+
+/**
  * ユーザーのデータを全削除する（user_providers と auth.users は含まない）。
  */
 export async function deleteUserData(supabase: any, userId: string) {

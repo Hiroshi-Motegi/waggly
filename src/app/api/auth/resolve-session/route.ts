@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuthWithAuthUserId } from "@/lib/supabase/api";
-import { extractProviderInfo, deleteUserData } from "@/lib/auth-helpers";
+import { extractProviderInfo, deleteUserData, uploadAvatarFromUrl } from "@/lib/auth-helpers";
 import { getUserDataSummary } from "@/lib/user-data-summary";
 import { insertLocalData } from "@/lib/insert-local-data";
 
@@ -112,16 +112,24 @@ export async function POST(request: NextRequest) {
   const googleEmail =
     providerInfo.provider === "google" ? (providerInfo.providerEmail ?? null) : null;
 
+  // まず仮の avatar_url でユーザー作成（user_id が必要なため）
   const { data: newUser, error: userError } = await supabase
     .from("users")
     .insert({
       display_name: displayName,
-      avatar_url: avatarUrl,
+      avatar_url: null,
       google_email: googleEmail,
       agreed_terms_at: new Date().toISOString(),
     })
     .select("*")
     .single();
+
+  // アバターを Storage に保存して URL を更新
+  if (newUser && avatarUrl) {
+    const storedUrl = await uploadAvatarFromUrl(supabase, newUser.id, avatarUrl);
+    await supabase.from("users").update({ avatar_url: storedUrl }).eq("id", newUser.id);
+    newUser.avatar_url = storedUrl;
+  }
 
   if (userError || !newUser) {
     console.error("[resolve-session] Failed to create user:", userError);
