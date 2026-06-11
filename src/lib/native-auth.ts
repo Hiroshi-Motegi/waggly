@@ -55,27 +55,29 @@ export async function signInWithGoogle(): Promise<NativeSignInResult> {
     }
 
     // No profile for this auth user — check if linked via google_id
+    // Use server API to bypass RLS (client can't query other users' rows)
     const googleSub = data.user.user_metadata?.sub;
     if (googleSub) {
-      const { data: linkedProfile } = await supabase
-        .from("users")
-        .select("*")
-        .eq("google_id", googleSub)
-        .maybeSingle();
-
-      if (linkedProfile) {
-        // Found linked account — return it, let auth-provider handle session
-        return { user: linkedProfile, error: null };
+      try {
+        const { apiFetch } = await import("@/lib/api-client");
+        const res = await apiFetch("/api/auth/resolve-google-user", {
+          method: "POST",
+        });
+        const result = await res.json();
+        if (res.ok && result.found && result.user) {
+          return { user: result.user, error: null };
+        }
+      } catch (e) {
+        console.error("resolve-google-user failed:", e);
       }
     }
 
-    // Truly new user: create profile
+    // Truly new user: create profile (no google_id to avoid UNIQUE conflict)
     const { data: newProfile } = await supabase
       .from("users")
       .insert({
         id: data.user.id,
         line_user_id: `google-${data.user.id}`,
-        google_id: googleSub ?? null,
         google_email: data.user.email ?? null,
         display_name:
           data.user.user_metadata?.full_name ??
