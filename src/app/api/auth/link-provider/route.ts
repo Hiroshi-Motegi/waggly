@@ -103,42 +103,54 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
     const currentAuthUserId = currentProvider?.auth_user_id ?? null;
 
-    // 敗者のデータ + user_providers + users を削除（auth.users はそのまま）
-    await deleteUserData(supabaseAdmin, deleteId);
-    const { error: delProvErr } = await supabaseAdmin.from("user_providers").delete().eq("user_id", deleteId);
-    console.log("[link-provider] delete loser providers:", { deleteId, error: delProvErr?.message });
-    const { error: delUserErr } = await supabaseAdmin.from("users").delete().eq("id", deleteId);
-    console.log("[link-provider] delete loser user:", { deleteId, error: delUserErr?.message });
+    // 敗者のプロバイダを勝者に移動（重複は敗者側を削除）
+    const { data: loserProviders } = await supabaseAdmin
+      .from("user_providers")
+      .select("*")
+      .eq("user_id", deleteId);
 
-    // 勝者にプロバイダを紐づけ
-    // 勝者が既にこのプロバイダを持っている場合は auth_user_id を更新するだけ
-    const { data: winnerProvider } = await supabaseAdmin
+    for (const lp of loserProviders ?? []) {
+      const { data: dup } = await supabaseAdmin
+        .from("user_providers")
+        .select("id")
+        .eq("user_id", keepId)
+        .eq("provider", lp.provider)
+        .maybeSingle();
+
+      if (dup) {
+        // 勝者が同じプロバイダを持っている → 敗者側を削除
+        await supabaseAdmin.from("user_providers").delete().eq("id", lp.id);
+      } else {
+        // 勝者にない → 移動
+        await supabaseAdmin
+          .from("user_providers")
+          .update({ user_id: keepId })
+          .eq("id", lp.id);
+      }
+    }
+
+    // 現在のセッションの auth_user_id が勝者側に紐づいているか確認
+    const { data: sessionProvider } = await supabaseAdmin
       .from("user_providers")
       .select("id")
+      .eq("auth_user_id", currentAuthUserId)
       .eq("user_id", keepId)
-      .eq("provider", provider)
-      .eq("provider_sub", providerSub)
       .maybeSingle();
 
-    if (winnerProvider) {
-      // 既存 → auth_user_id だけ更新
+    if (!sessionProvider) {
+      // セッションが勝者に紐づいていない → 既存行の auth_user_id を更新
       await supabaseAdmin
         .from("user_providers")
         .update({ auth_user_id: currentAuthUserId })
-        .eq("id", winnerProvider.id);
-    } else {
-      // 新規 → INSERT
-      const { error: insertErr } = await supabaseAdmin.from("user_providers").insert({
-        user_id: keepId,
-        provider,
-        provider_sub: providerSub,
-        provider_email: providerEmail,
-        auth_user_id: currentAuthUserId,
-      });
-      if (insertErr) {
-        return NextResponse.json({ error: `Failed to link: ${insertErr.message}` }, { status: 500 });
-      }
+        .eq("user_id", keepId)
+        .eq("provider", provider)
+        .eq("provider_sub", providerSub);
     }
+
+    // 敗者のデータ + users を削除（user_providers は移動済み、auth.users はそのまま）
+    await deleteUserData(supabaseAdmin, deleteId);
+    await supabaseAdmin.from("user_providers").delete().eq("user_id", deleteId);
+    await supabaseAdmin.from("users").delete().eq("id", deleteId);
 
     return NextResponse.json({ linked: true, merged: true, mergedInto: keepId });
   }
