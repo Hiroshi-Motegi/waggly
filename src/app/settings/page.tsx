@@ -127,7 +127,7 @@ export default function SettingsPage() {
           </Avatar>
           <div>
             <p className="text-base font-bold">{profile?.nickname || user.display_name}</p>
-            <p className="text-sm text-[#8b8b8b]">ログイン中</p>
+            <p className="text-sm text-[#8b8b8b]">ID: W-{user.id.replace(/-/g, "").substring(0, 12).toUpperCase()}</p>
           </div>
         </div>
       </div>
@@ -332,11 +332,51 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
     }
   }
 
-  function linkLine() {
+  async function linkLine() {
+    if (isNative()) {
+      // Native: use LINE SDK directly
+      const { nativeLineLogin } = await import("@/lib/native-auth");
+      const result = await nativeLineLogin();
+      if (result.error) {
+        if (!result.error.includes("cancel")) alert(result.error);
+        return;
+      }
+      // Call link API with the LINE userId
+      const res = await apiFetch("/api/auth/link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: "line",
+          providerId: result.userId,
+          originalUserId: user.id,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "連携に失敗しました");
+        return;
+      }
+      const linkResult = await res.json();
+      if (linkResult.needsConfirm) {
+        sessionStorage.setItem("merge_info", JSON.stringify({
+          provider: "line",
+          providerId: result.userId,
+          originalUserId: user.id,
+          currentAccount: linkResult.currentAccount,
+          existingAccount: linkResult.existingAccount,
+        }));
+        window.location.href = "/auth/merge";
+        return;
+      }
+      // Force full reload to reset WebView state after LINE SDK return
+      window.location.href = "/settings";
+      return;
+    }
+
+    // Web: OAuth redirect flow
     sessionStorage.setItem("link_original_user", user.id);
     const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
-    const baseUrl = isNative() ? "https://waggly.jp" : window.location.origin;
-    const redirectUri = encodeURIComponent(`${baseUrl}/auth/line/callback?link=1&originalUser=${user.id}`);
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
     const state = crypto.randomUUID();
     window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
   }
