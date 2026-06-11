@@ -2,7 +2,7 @@
 
 ## 概要
 
-マルチプロバイダ認証（Google/LINE/Apple）の根本的な設計問題を解決するため、認証アーキテクチャを全面的に再設計する。
+マルチプロバイダ認証（Google/LINE/Apple + 将来の楽天/X/FB/Insta）の根本的な設計問題を解決するため、認証アーキテクチャを全面的に再設計する。
 
 ## 背景と問題
 
@@ -14,40 +14,54 @@
 2. **孤児auth user**: 連携解除時にauth.usersを削除しないため、古いセッション（JWT）が有効なまま残る
 3. **ID結合の脆弱性**: `auth.users.id = users.id`の前提がマージ後に壊れる
 4. **auth-providerの複雑化**: 孤児解決、プロバイダ判定、プロフィール作成がクライアント側に散在
+5. **LINE Nativeのセキュリティ**: クライアントからのuserIdを検証なしで信頼している
+6. **callback認証不足**: OAuth callbackでoriginalUserIdの認可チェックがない
 
 ## 設計方針
 
 - `users.id`を独自UUID化し、`auth.users.id`とは別管理
-- プロバイダ情報はusersテーブルにカラムで保持
+- プロバイダ情報は`user_providers`ジャンクションテーブルで管理（拡張性重視）
 - 連携時に`signInWithOAuth`を使わない（セッション上書き防止）
 - 連携解除時にauth.usersを削除（孤児防止）
 - 認証ロジックをサーバーAPIに集約（auth-providerはシンプルに）
-- RLSは使わず、APIレイヤーで`users.id`ベースのアクセス制御
+- RLSはusers.idベースに書き換えて多層防御を維持
+- 全APIリクエストでサーバー側がJWT→users.id逆引き（クライアント自己申告はしない）
+- 全プロバイダの認証情報をサーバー側で検証（LINE Native含む）
 
 ## 新テーブル構造
 
 ```sql
-users:
-  id              UUID PRIMARY KEY  -- 独自生成（auth.users.idとは無関係）
-  google_auth_id  TEXT NULL         -- auth.users.id (Google)
-  line_auth_id    TEXT NULL         -- auth.users.id (LINE)
-  apple_auth_id   TEXT NULL         -- auth.users.id (Apple)
-  google_sub      TEXT NULL         -- Google sub（プロバイダ側ユーザーID）
-  line_user_id    TEXT NULL         -- LINE userId
-  apple_sub       TEXT NULL         -- Apple sub
-  display_name    TEXT NOT NULL
-  avatar_url      TEXT NULL
-  google_email    TEXT NULL
-  agreed_terms_at TEXT NULL
-  created_at      TEXT NOT NULL
+-- ユーザー本体（プロバイダ非依存）
+CREATE TABLE users (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  display_name    TEXT NOT NULL,
+  avatar_url      TEXT,
+  google_email    TEXT,
+  agreed_terms_at TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- プロバイダ紐づけ（ジャンクションテーブル）
+CREATE TABLE user_providers (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider        TEXT NOT NULL,          -- 'google', 'line', 'apple', etc.
+  auth_user_id    UUID,                   -- Supabase auth.users.id
+  provider_sub    TEXT NOT NULL,           -- プロバイダ側ユーザーID (google sub, LINE userId, etc.)
+  provider_email  TEXT,                    -- プロバイダのメールアドレス
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(provider, provider_sub),         -- 同じプロバイダIDは1つだけ
+  UNIQUE(provider, auth_user_id)          -- 同じauth userは1つだけ
+);
 ```
 
 ### 今との違い
 
-- `id`がauth.users.idではなく独自UUID
-- `xxx_auth_id`カラム追加（auth.users.idとの紐づけ用）
-- `xxx_sub`/`xxx_user_id`カラムでプロバイダ側IDを保持（連携検出用）
-- 将来のプロバイダ追加（楽天/X/FB/Insta）はカラム追加で対応
+- `users.id`がauth.users.idではなく独自UUID
+- プロバイダ情報がジャンクションテーブルに分離
+- プロバイダ追加時にスキーマ変更不要（行追加のみ）
+- `google_id`, `line_user_id`等の個別カラムは廃止
+- 将来の楽天/X/FB/Insta追加もテーブル変更なし
 
 ## ログインフロー
 
@@ -57,17 +71,22 @@ users:
 1. プロバイダ認証（Google/LINE/Apple）
    → Supabase auth.users にセッション作成（auth_user_id取得）
    ↓
-2. POST /api/auth/resolve-session { auth_user_id, provider }
+2. POST /api/auth/resolve-session
+   （クライアントはbodyを送らない。サーバーがJWTからauth_user_idを取得）
    ↓
    サーバー側:
-   ├─ google_auth_id / line_auth_id / apple_auth_id で users 検索
+   ├─ user_providers.auth_user_id で検索
    ├─ 見つかった → users.id + プロフィール返却
-   ├─ 見つからないが provider_sub で別ユーザーが見つかる → 衝突検出（データ選択UIへ）
-   └─ 完全に見つからない → 新規ユーザー作成 → 返却
+   ├─ 見つからない → JWTメタデータからprovider_subを抽出
+   │   ├─ provider_sub で user_providers 検索 → 別ユーザーが見つかる → 衝突検出
+   │   └─ 誰も見つからない → 新規ユーザー + user_providers 作成 → 返却
    ↓
 3. クライアント: React state に users.id + プロフィール保持
    ↓
-4. 以降のAPIリクエスト: JWT(認証) + users.id(ビジネスロジック)
+4. 以降のAPIリクエスト:
+   JWT のみ送信。サーバー側の getApiAuth() が
+   JWT → auth_user_id → user_providers → users.id を逆引き
+   （リクエスト内キャッシュで1回のみDB問い合わせ）
 ```
 
 ### auth-providerの変更
@@ -83,10 +102,6 @@ async function authenticate() {
 
   const res = await apiFetch("/api/auth/resolve-session", {
     method: "POST",
-    body: JSON.stringify({
-      auth_user_id: authUser.id,
-      provider: authUser.app_metadata?.provider,
-    }),
   });
 
   if (res.ok) {
@@ -102,6 +117,28 @@ async function authenticate() {
 
 今のauth-providerにある孤児解決、プロバイダ判定、プロフィール作成ロジックは全て`resolve-session`API側に移動する。
 
+### getApiAuth()の変更
+
+```typescript
+// 新しい getApiAuth()（概念）
+async function getApiAuth(): Promise<{ supabase: any; userId: string } | null> {
+  // JWTからauth_user_idを取得（既存ロジック）
+  const authUserId = ... ;
+
+  // auth_user_id → users.id 逆引き（リクエスト内キャッシュ）
+  const { data } = await supabaseAdmin
+    .from("user_providers")
+    .select("user_id")
+    .eq("auth_user_id", authUserId)
+    .single();
+
+  if (!data) return null;
+  return { supabase: supabaseAdmin, userId: data.user_id };
+}
+```
+
+全データAPIはこの`userId`（= users.id）を使って`.eq("user_id", userId)`でフィルタ。クライアントからusers.idを自己申告することはない。
+
 ## アカウント連携フロー
 
 ### Google連携
@@ -109,50 +146,56 @@ async function authenticate() {
 ```
 Web:
 1. Google OAuth URL に直接リダイレクト（signInWithOAuth は使わない）
+   → state パラメータにCSRFトークン + 暗号化されたuser_id を含める
 2. callback でサーバーがコード交換 → google_sub 取得
-3. POST /api/auth/link-provider で users テーブル更新
-4. 元のセッション（LINE等）は一切触らない
-5. /settings にリダイレクト
+3. state を検証（CSRF + user_id の認可チェック）
+4. user_providers テーブルに行追加
+5. 元のセッション（LINE等）は一切触らない
+6. /settings にリダイレクト
 
 Native:
 1. GoogleAuth.signIn() → idToken 取得
 2. POST /api/auth/link-provider { provider: "google", idToken }
-3. サーバーが idToken 検証 → google_sub 取得 → users テーブル更新
-4. 完了（セッション変更なし）
+3. サーバーが Google API で idToken を検証 → google_sub 取得
+4. user_providers テーブルに行追加
+5. 完了（セッション変更なし）
 ```
 
 ### LINE連携
 
 ```
 Web:
-1. LINE OAuth URL にリダイレクト
+1. LINE OAuth URL にリダイレクト（stateにCSRFトークン含む）
 2. callback でサーバーがコード交換 → line_user_id 取得
-3. POST /api/auth/link-provider で users テーブル更新
+3. state 検証 + user_providers テーブル更新
 4. 元のセッション触らない
 
 Native:
-1. LineLogin.login() → userId 取得
-2. POST /api/auth/link-provider { provider: "line", userId }
-3. サーバーが users テーブル更新
+1. LineLogin.login() → accessToken 取得
+2. POST /api/auth/link-provider { provider: "line", accessToken }
+3. サーバーが LINE API (GET /v2/profile) でaccessToken検証 → line_user_id 取得
+4. user_providers テーブルに行追加
 ```
 
-### Apple連携
+### Apple連携（Web + Native）
 
 Google連携と同じパターン。idToken検証でapple_subを取得。
 
 ### 連携時の衝突検出
 
-link-provider API内で、連携先のプロバイダIDが既に別ユーザーに紐づいている場合：
+link-provider API内で、連携先のprovider_subがuser_providersに既に存在する場合：
 1. 衝突を検出
 2. 両ユーザーのデータサマリー（件数 + 最終更新）を返す
 3. クライアントが選択UIを表示（設定ページ内インライン）
-4. ユーザーが選択 → 敗者のユーザー + データ + auth.users を完全削除 → 勝者にプロバイダ情報付与
+4. ユーザーが選択 → 敗者のユーザー + データ + user_providers + auth.users を完全削除 → 勝者にプロバイダ行追加
 
 ### 今との最大の違い
 
 - 連携時に`signInWithOAuth`を使わない → 現在のセッションが上書きされない
 - 新しいauth.usersは連携時には作らない。ログイン時に初めて作られる
-- 連携は純粋に「usersテーブルにプロバイダIDを書く」だけ
+- 連携は純粋に「user_providersに行を追加」するだけ
+- LINE NativeはaccessTokenをサーバーで検証（userIdの自己申告を信頼しない）
+- OAuth callbackはstateパラメータでCSRF + 認可を検証
 
 ## 連携解除フロー
 
@@ -160,14 +203,14 @@ link-provider API内で、連携先のプロバイダIDが既に別ユーザー�
 1. DELETE /api/auth/link-provider { provider: "google" }
    ↓
 2. サーバー側:
-   a. users: google_sub = null, google_auth_id = null, google_email = null
-   b. auth.users: google の auth user を削除（admin API）
+   a. user_providers: 該当行を削除
+   b. auth.users: 該当プロバイダの auth user を admin API で削除
       → 古いJWTも自動無効化
-   c. 最低1つのプロバイダが残ってるか検証（全解除禁止）
+   c. 最低1つのプロバイダが user_providers に残ってるか検証（全解除禁止）
    ↓
 3. 現在のセッションが解除対象の場合:
    → 現在のJWTが無効になる
-   → クライアント: サインアウト → 別プロバイダで再ログインを促す
+   → クライアントにサインアウト指示を返す → 別プロバイダで再ログインを促す
    ↓
 4. 現在のセッションが別プロバイダの場合:
    → セッションに影響なし。完了
@@ -185,22 +228,22 @@ link-provider API内で、連携先のプロバイダIDが既に別ユーザー�
 ### 初回サインイン（衝突あり）
 
 ```
-1. resolve-session: auth_user_id で users 検索 → 見つからない
-2. provider_sub（google_sub等）で検索 → 別ユーザーが見つかる → 衝突
+1. resolve-session: auth_user_id で user_providers 検索 → 見つからない
+2. JWTメタデータから provider_sub を抽出 → user_providers で検索 → 別ユーザーが見つかる → 衝突
 3. 選択UI表示
 4. ユーザーが選択:
    ├─ ローカル → 既存ユーザーのデータ削除、ローカルデータアップロード
    └─ サーバー → ローカル捨てて fullSync
-5. auth_user_id を勝者ユーザーに紐づけ
+5. user_providers に auth_user_id を勝者ユーザーに紐づけ
 ```
 
 ### アカウント連携（衝突あり）
 
 ```
-1. link-provider: provider_sub が別ユーザーに紐づいてる → 衝突
+1. link-provider: provider_sub が user_providers に既存 → 衝突
 2. 選択UI表示
-3. 敗者ユーザー + データ + auth.users を完全削除
-4. 勝者に新プロバイダ情報付与
+3. 敗者ユーザー + データ + user_providers + auth.users を完全削除
+4. 勝者にプロバイダ行追加
 ```
 
 ## API設計
@@ -209,12 +252,7 @@ link-provider API内で、連携先のプロバイダIDが既に別ユーザー�
 
 #### POST /api/auth/resolve-session
 
-ログイン後のユーザー解決。
-
-リクエスト:
-```typescript
-{ auth_user_id: string; provider: string; }
-```
+ログイン後のユーザー解決。認証はJWTから自動取得（bodyでauth_user_idを送らない）。
 
 レスポンス（正常）:
 ```typescript
@@ -235,11 +273,11 @@ link-provider API内で、連携先のプロバイダIDが既に別ユーザー�
 ```
 
 処理:
-1. `xxx_auth_id = auth_user_id` で users 検索
-2. 見つかった → ユーザー返却
-3. 見つからない → `xxx_sub`でプロバイダメタデータから検索
-4. 別ユーザーが見つかった → 衝突レスポンス
-5. 誰も見つからない → 新規ユーザー作成
+1. JWTからauth_user_idを取得
+2. `user_providers.auth_user_id` で検索 → 見つかればユーザー返却
+3. JWTメタデータからprovider + provider_subを抽出
+4. `user_providers.provider_sub` で検索 → 別ユーザーが見つかれば衝突
+5. 誰も見つからない → 新規ユーザー + user_providers作成
 
 #### POST /api/auth/link-provider
 
@@ -249,11 +287,11 @@ link-provider API内で、連携先のプロバイダIDが既に別ユーザー�
 ```typescript
 {
   provider: "google" | "line" | "apple";
-  // Google/Apple: idToken で検証
+  // Google/Apple: idToken（サーバー側で検証）
   idToken?: string;
-  // LINE Native: userId 直接
-  userId?: string;
-  // LINE Web: OAuth code
+  // LINE Native: accessToken（サーバーがLINE APIで検証）
+  accessToken?: string;
+  // LINE/Google/Apple Web: OAuth code（サーバーがコード交換）
   code?: string;
   redirectUri?: string;
 }
@@ -268,17 +306,17 @@ link-provider API内で、連携先のプロバイダIDが既に別ユーザー�
 ```typescript
 {
   needsConfirm: true;
+  providerId: string;
   currentAccount: { id: string; lastUpdated: string; counts: {...}; };
   existingAccount: { id: string; lastUpdated: string; counts: {...}; };
-  providerId: string;
 }
 ```
 
 処理:
-1. idToken/code/userIdを検証してプロバイダIDを取得
-2. そのプロバイダIDが別ユーザーに紐づいてるか検索
+1. idToken/accessToken/codeをサーバー側で検証してprovider_subを取得
+2. user_providersでprovider_subが既に別ユーザーに紐づいてるか検索
 3. 衝突あり → データサマリー付きで返却
-4. 衝突なし → usersテーブル更新
+4. 衝突なし → user_providersに行追加
 
 #### DELETE /api/auth/link-provider
 
@@ -289,11 +327,16 @@ link-provider API内で、連携先のプロバイダIDが既に別ユーザー�
 { provider: "google" | "line" | "apple"; }
 ```
 
+レスポンス:
+```typescript
+{ unlinked: true; needsRelogin: boolean; }
+```
+
 処理:
-1. 最低1つのプロバイダが残るか検証
-2. usersテーブル: xxx_sub, xxx_auth_id, xxx_email を null
+1. user_providersに最低2行あるか検証（残り1つなら拒否）
+2. 該当行を削除
 3. auth.users: 該当プロバイダの auth user を admin API で削除
-4. 現在のセッションが解除対象 → クライアントにサインアウト指示
+4. 現在のセッションが解除対象 → `needsRelogin: true` を返す
 
 ### 廃止するAPI
 
@@ -311,7 +354,8 @@ link-provider API内で、連携先のプロバイダIDが既に別ユーザー�
 | `/api/auth/line` | resolve-sessionパターンに合わせる |
 | `/api/auth/line-oauth` | 同上 |
 | `/api/auth/callback` | signInWithOAuth廃止、直接OAuth + link-provider |
-| 全データAPI | RLS依存をやめ、resolve済みusers.idでフィルタ |
+| `supabase/api.ts` | getApiAuth()でJWT→user_providers→users.id逆引き（リクエスト内キャッシュ） |
+| 全データAPI | getApiAuth()のusers.idでフィルタ（変更少ない） |
 
 ### 変更するクライアント
 
@@ -322,29 +366,49 @@ link-provider API内で、連携先のプロバイダIDが既に別ユーザー�
 | `settings/page.tsx` | AccountLinkingがlink-provider APIを使う |
 | `liff.ts` | 変更なし（signOutで十分。auth.users削除は解除時に済み） |
 | `supabase/client.ts` | 変更なし |
-| `supabase/api.ts` | getApiAuth()でauth_user_id→users.id変換を追加 |
+
+## RLS方針
+
+完全撤廃ではなく、多層防御としてusers.idベースに書き換える。
+
+```sql
+-- 例: clubs テーブルのRLS
+CREATE POLICY "Users can CRUD own clubs" ON clubs
+  FOR ALL USING (
+    user_id IN (
+      SELECT user_id FROM user_providers
+      WHERE auth_user_id = auth.uid()
+    )
+  );
+```
+
+APIレイヤー（getApiAuth）がメインの防御、RLSがバックアップ。
 
 ## マイグレーション戦略
 
-既存データの移行:
+未公開のため、DB全クリア＋新規作成でクリーンに実施する。
 
-1. usersテーブルに新カラム追加（google_auth_id, line_auth_id, apple_auth_id, google_sub, apple_sub）
-2. 既存データを移行:
-   - 現在の`id`（= auth.users.id）を`google_auth_id`または`line_auth_id`にコピー
-   - 現在の`google_id`を`google_sub`にコピー
-   - 現在の`line_user_id`のうちプレースホルダでないものをそのまま保持
-3. 新しい独自UUIDで`id`を付け替え
-4. 全データテーブル（clubs, accessories等）の`user_id`を新しいIDに更新
-5. RLSポリシーを削除（APIレイヤーで制御に移行）
+### 手順
 
-### 注意
+1. 既存テーブルを全削除（users, clubs, accessories, practice_sessions等）
+2. 既存auth.usersを全削除（Supabase admin API）
+3. 新スキーマで再作成:
+   - `users`テーブル（独自UUID、プロバイダカラムなし）
+   - `user_providers`テーブル（ジャンクション）
+   - 既存データテーブル（clubs等）はuser_idカラムのみ変更（UUID参照先が変わるだけ）
+4. RLSポリシーを新形式で作成
+5. 既存のRLSポリシーは削除
 
-- マイグレーションはダウンタイムが必要（IDの付け替えが発生）
-- または段階的移行：新カラム追加 → デュアル対応 → 旧カラム削除
+### ローカルSQLiteも同時にリセット
+
+- スキーマバージョンをリセット
+- usersテーブルの構造を新設計に合わせる
+- user_providersに相当するローカルテーブルは不要（ローカルモードではプロバイダ管理しない）
 
 ## セキュリティ改善
 
-1. **callback認証**: OAuth callbackでoriginalUserIdを検証（JWTまたはサーバーサイドstate）
-2. **CSRF対策**: 連携リダイレクト時にstateパラメータで検証
+1. **プロバイダ認証の検証**: 全プロバイダのトークン/コードをサーバー側で検証（LINE Native含む）
+2. **callback認証**: OAuth callbackでstateパラメータによるCSRF防止 + user_idの暗号化検証
 3. **auth.users削除**: 連携解除時に確実に削除してJWTを無効化
-4. **APIレイヤー認証**: 全データAPIでresolve済みusers.idを使用、RLS不要
+4. **users.id自己申告禁止**: 全APIでサーバー側がJWT→users.id逆引き。クライアントはJWTのみ送信
+5. **RLS多層防御**: APIレイヤー + RLSの二重チェック
