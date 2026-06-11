@@ -241,7 +241,9 @@ CREATE TABLE public.favorite_courses (
 CREATE INDEX favorite_courses_user_id_idx ON public.favorite_courses(user_id);
 ALTER TABLE public.favorite_courses ENABLE ROW LEVEL SECURITY;
 
--- knowledge_base
+-- knowledge_base (pgvector 拡張が必要)
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;
+
 CREATE TABLE IF NOT EXISTS public.knowledge_base (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   category TEXT NOT NULL,
