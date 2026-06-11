@@ -110,7 +110,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
             }
           } else {
-            console.log("[auth] Not a Google login, skipping resolve");
+            // LINE or other provider — check if unlinked
+            if (data) {
+              const hasLine = data.line_user_id && !data.line_user_id.startsWith("google-") && !data.line_user_id.startsWith("oauth-");
+              if (!hasLine) {
+                console.log("[auth] LINE was unlinked, clearing stale session");
+                await supabase.auth.signOut();
+                setIsLoading(false);
+                return;
+              }
+            }
           }
 
           // First OAuth login (Google/LINE OIDC): create user profile
