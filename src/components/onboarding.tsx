@@ -86,7 +86,7 @@ function Slide2() {
           />
         </div>
         {/* Callout 1 */}
-        <div className="w-full border-3 border-[#006728] bg-white rounded p-3 mb-4">
+        <div className="w-full border-3 border-[#006728] bg-white rounded p-3 mb-8">
           <p className="text-base font-bold text-[#2c2c2c] text-center leading-snug">
             クラブ詳細や飛距離・使用感、
             <br />
