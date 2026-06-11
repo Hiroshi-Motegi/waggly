@@ -4,6 +4,7 @@ import type { User } from "@/types/database";
 
 interface NativeSignInResult {
   user: User | null;
+  conflict: any | null;
   error: string | null;
 }
 
@@ -23,108 +24,35 @@ const LineLogin = registerPlugin<LineLoginPlugin>("LineLogin");
 
 /**
  * Sign in with Google on native platform.
- * Uses @codetrix-studio/capacitor-google-auth → Supabase signInWithIdToken.
+ * signInWithIdToken → resolve-session で完結。
  */
 export async function signInWithGoogle(): Promise<NativeSignInResult> {
   try {
-    const { GoogleAuth } = await import(
-      "@codetrix-studio/capacitor-google-auth"
-    );
-
+    const { GoogleAuth } = await import("@codetrix-studio/capacitor-google-auth");
     await GoogleAuth.initialize();
     const result = await GoogleAuth.signIn();
     const idToken = result.authentication.idToken;
 
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithIdToken({
+    const { error } = await supabase.auth.signInWithIdToken({
       provider: "google",
       token: idToken,
     });
 
-    if (error) return { user: null, error: error.message };
+    if (error) return { user: null, conflict: null, error: error.message };
 
-    let loadedProfile: User | null = null;
-
-    // Load user profile by auth user ID
-    const { data: profile } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", data.user.id)
-      .single();
-
-    if (profile && profile.google_id) {
-      // Profile exists and Google is still linked
-      loadedProfile = profile;
-    } else if (profile && !profile.google_id) {
-      // Google was unlinked — treat as new user (fall through to orphan/new user logic)
-    } else {
-      // No profile for this auth user — check if linked via google_id
-      // Use server API to bypass RLS (client can't query other users' rows)
-      const googleSub = data.user.user_metadata?.sub;
-      if (googleSub) {
-        try {
-          const { apiFetch } = await import("@/lib/api-client");
-          const res = await apiFetch("/api/auth/resolve-google-user", {
-            method: "POST",
-          });
-          const resolveResult = await res.json();
-          if (res.ok && resolveResult.found && resolveResult.user) {
-            // Switch session to the linked account
-            if (resolveResult.access_token) {
-              await supabase.auth.setSession({
-                access_token: resolveResult.access_token,
-                refresh_token: resolveResult.refresh_token,
-              });
-            }
-            loadedProfile = resolveResult.user;
-          }
-        } catch (e) {
-          console.error("resolve-google-user failed:", e);
-        }
-      }
-
-      if (!loadedProfile) {
-        // Truly new user: create profile (no google_id to avoid UNIQUE conflict)
-        const { data: newProfile } = await supabase
-          .from("users")
-          .insert({
-            id: data.user.id,
-            line_user_id: `google-${data.user.id}`,
-            google_email: data.user.email ?? null,
-            display_name:
-              data.user.user_metadata?.full_name ??
-              data.user.email ??
-              "ゲスト",
-            avatar_url: data.user.user_metadata?.avatar_url ?? null,
-          })
-          .select()
-          .single();
-        loadedProfile = newProfile;
-      }
-    }
-
-    // Check for WID conflict
-    const googleSub = data.user.user_metadata?.sub ?? data.user.id;
-    const resolvedUser = await handlePostSignIn("google", googleSub, loadedProfile);
-    if (!resolvedUser) {
-      return { user: null, error: "__CONFLICT__" };
-    }
-    return { user: resolvedUser, error: null };
+    return await resolveSessionAfterSignIn();
   } catch (e: any) {
-    return { user: null, error: e.message ?? "Google sign-in failed" };
+    return { user: null, conflict: null, error: e.message ?? "Google sign-in failed" };
   }
 }
 
 /**
  * Sign in with Apple on native platform.
- * Uses Capacitor Apple Sign In plugin → Supabase signInWithIdToken.
  */
 export async function signInWithApple(): Promise<NativeSignInResult> {
   try {
-    const { SignInWithApple } = await import(
-      "@capacitor-community/apple-sign-in"
-    );
-
+    const { SignInWithApple } = await import("@capacitor-community/apple-sign-in");
     const result = await SignInWithApple.authorize({
       clientId: "jp.waggly.app",
       redirectURI: "https://waggly.jp/auth/callback",
@@ -134,64 +62,29 @@ export async function signInWithApple(): Promise<NativeSignInResult> {
     const idToken = result.response.identityToken;
 
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithIdToken({
+    const { error } = await supabase.auth.signInWithIdToken({
       provider: "apple",
       token: idToken,
     });
 
-    if (error) return { user: null, error: error.message };
+    if (error) return { user: null, conflict: null, error: error.message };
 
-    let loadedProfile: User | null = null;
-
-    // Load user profile
-    const { data: profile } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", data.user.id)
-      .single();
-
-    if (profile) {
-      loadedProfile = profile;
-    } else {
-      // First login: create user profile
-      const displayName =
-        result.response.givenName && result.response.familyName
-          ? `${result.response.familyName} ${result.response.givenName}`
-          : data.user.email ?? "ゲスト";
-      const { data: newProfile } = await supabase
-        .from("users")
-        .insert({
-          id: data.user.id,
-          line_user_id: `apple-${data.user.id}`,
-          display_name: displayName,
-          avatar_url: null,
-        })
-        .select()
-        .single();
-      loadedProfile = newProfile;
-    }
-
-    // Check for WID conflict
-    const appleSub = data.user.user_metadata?.sub ?? data.user.id;
-    const resolvedUser = await handlePostSignIn("apple", appleSub, loadedProfile);
-    if (!resolvedUser) {
-      return { user: null, error: "__CONFLICT__" };
-    }
-    return { user: resolvedUser, error: null };
+    return await resolveSessionAfterSignIn();
   } catch (e: any) {
-    return { user: null, error: e.message ?? "Apple sign-in failed" };
+    return { user: null, conflict: null, error: e.message ?? "Apple sign-in failed" };
   }
 }
 
 /**
- * Link LINE account on native platform.
- * Uses custom LineLogin Capacitor plugin → LINE SDK.
- * Returns LINE userId and profile for account linking.
+ * Native LINE login — アカウント連携用。
+ * ログインではなく連携なので resolve-session は呼ばない。
+ * accessToken を返し、settings ページが link-provider API に渡す。
  */
 export async function nativeLineLogin(): Promise<{
   userId: string;
   displayName: string;
   pictureUrl?: string;
+  accessToken?: string;
   error: string | null;
 }> {
   try {
@@ -203,6 +96,7 @@ export async function nativeLineLogin(): Promise<{
       userId: result.userId,
       displayName: result.displayName,
       pictureUrl: result.pictureUrl,
+      accessToken: result.accessToken,
       error: null,
     };
   } catch (e: any) {
@@ -211,86 +105,54 @@ export async function nativeLineLogin(): Promise<{
 }
 
 /**
- * After native sign-in, check for WID conflict and handle accordingly.
- * Returns the resolved user, or null if redirecting to conflict page.
+ * signIn 後に resolve-session を呼んでユーザーを解決する。
+ * 全プロバイダ共通。
  */
-export async function handlePostSignIn(
-  provider: "google" | "apple" | "line",
-  providerUserId: string,
-  authUser: any
-): Promise<User | null> {
+async function resolveSessionAfterSignIn(): Promise<NativeSignInResult> {
   const { apiFetch, resetLocalModeCache } = await import("@/lib/api-client");
   const { getLocalDataSummary, collectLocalData, fullSync } = await import("@/lib/sync");
 
   resetLocalModeCache();
 
+  // ローカルデータの有無を確認
   const localSummary = await getLocalDataSummary();
+  const hasLocalData =
+    localSummary.counts.clubs > 0 ||
+    localSummary.counts.practices > 0 ||
+    localSummary.counts.accessories > 0;
 
-  const checkRes = await apiFetch("/api/auth/check-conflict", {
+  // resolve-session を呼ぶ
+  const res = await apiFetch("/api/auth/resolve-session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ provider, providerUserId }),
+    body: JSON.stringify({ hasLocalData }),
   });
 
-  if (!checkRes.ok) {
-    await fullSync();
-    return authUser;
+  if (!res.ok) {
+    return { user: null, conflict: null, error: "resolve-session failed" };
   }
 
-  const checkResult = await checkRes.json();
+  const result = await res.json();
 
-  if (!checkResult.conflict) {
-    const hasLocalData =
-      localSummary.counts.clubs > 0 ||
-      localSummary.counts.practices > 0 ||
-      localSummary.counts.accessories > 0;
-
-    if (hasLocalData) {
-      const localData = await collectLocalData();
-      await apiFetch("/api/auth/upload-local-data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ localData }),
-      });
-    }
-
-    await fullSync();
-    return authUser;
+  if (result.conflict) {
+    return {
+      user: null,
+      conflict: { ...result, localSummary },
+      error: null,
+    };
   }
 
-  // Conflict detected — navigate to resolve-conflict page
-  const providerLabel =
-    provider === "google" ? "Googleアカウント" :
-    provider === "apple" ? "Appleアカウント" : "LINEアカウント";
+  // 衝突なし → ローカルデータがあればアップロード
+  if (hasLocalData && result.isNew) {
+    const localData = await collectLocalData();
+    await apiFetch("/api/auth/upload-local-data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ localData }),
+    });
+  }
 
-  const localDate = localSummary.lastUpdated ? new Date(localSummary.lastUpdated).getTime() : 0;
-  const serverDate = checkResult.existingUser.lastUpdated ? new Date(checkResult.existingUser.lastUpdated).getTime() : 0;
-  const localIsNewer = localDate >= serverDate;
+  await fullSync();
 
-  const conflictInfo = {
-    scenario: "first-signin",
-    provider,
-    providerUserId,
-    sourceA: {
-      label: "ローカルのデータ",
-      isNew: localIsNewer,
-      wid: null,
-      lastUpdated: localSummary.lastUpdated,
-      counts: localSummary.counts,
-    },
-    sourceB: {
-      label: `${providerLabel}のデータ`,
-      isNew: !localIsNewer,
-      wid: checkResult.existingUser.wid,
-      lastUpdated: checkResult.existingUser.lastUpdated,
-      counts: checkResult.existingUser.counts,
-    },
-  };
-
-  // Store in both sessionStorage and localStorage for resilience
-  const encoded = JSON.stringify(conflictInfo);
-  sessionStorage.setItem("conflict_info", encoded);
-  localStorage.setItem("conflict_info", encoded);
-
-  return null;
+  return { user: result.user, conflict: null, error: null };
 }
