@@ -229,9 +229,9 @@ export async function DELETE(request: NextRequest) {
   }
 
   if (provider === "line") {
-    await supabaseAdmin.from("users").update({ line_user_id: `oauth-${userId}` }).eq("id", userId);
+    await supabaseAdmin.from("users").update({ line_user_id: `oauth-${currentUser.id}` }).eq("id", currentUser.id);
   } else if (provider === "google") {
-    await supabaseAdmin.from("users").update({ google_id: null }).eq("id", userId);
+    await supabaseAdmin.from("users").update({ google_id: null }).eq("id", currentUser.id);
   } else {
     return NextResponse.json({ error: "Unknown provider" }, { status: 400 });
   }
