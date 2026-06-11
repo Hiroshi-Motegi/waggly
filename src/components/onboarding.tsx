@@ -23,7 +23,7 @@ const termsContent = [
 
 function Slide1() {
   return (
-    <div className="flex-1 flex flex-col items-center text-center px-6 pb-[70px] overflow-hidden">
+    <div className="flex-1 flex flex-col items-center text-center px-6">
       <div className="flex flex-col items-center justify-center pt-10 pb-4">
         <img
           src="/images/onboarding/waggly-logo.svg"
@@ -43,7 +43,8 @@ function Slide1() {
           まとめられます。
         </p>
       </div>
-      <div className="relative w-full flex-1">
+      {/* Screenshots — extend into and behind the green bottom bar */}
+      <div className="relative w-full flex-1 mb-[-70px]">
         <div className="absolute left-[2%] top-0 w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
           <Image
             src="/onboarding/1-1.png"
