@@ -329,6 +329,16 @@ function AccountLinking({ user, onUpdate }: { user: User; onUpdate: () => void }
       body: JSON.stringify({ provider }),
     });
     if (res.ok) {
+      // If we're logged in via Google and unlinking Google,
+      // sign out to prevent orphan session from recreating the link
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (provider === "google" && authUser?.app_metadata?.provider === "google") {
+        await supabase.auth.signOut();
+        window.location.href = "/";
+        return;
+      }
       onUpdate();
     } else {
       const err = await res.json();
