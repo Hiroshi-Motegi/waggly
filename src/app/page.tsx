@@ -181,7 +181,7 @@ export default function HomePage() {
 
         {/* Greeting */}
         <p className="text-lg font-medium text-white text-center mt-2">
-          {(() => { const h = new Date().getHours(); return h >= 18 || h < 4 ? "こんばんは" : "こんにちは"; })()}{user ? `、${profile?.nickname || user.display_name}さん` : ""}
+          {(() => { const h = new Date().getHours(); return h >= 18 || h < 4 ? "こんばんは" : "こんにちは"; })()}{user && !profileLoading ? `、${profile?.nickname || user.display_name}さん` : ""}
         </p>
 
         {/* Feature cards */}
