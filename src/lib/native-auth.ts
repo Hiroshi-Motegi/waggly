@@ -43,32 +43,49 @@ export async function signInWithGoogle(): Promise<NativeSignInResult> {
 
     if (error) return { user: null, error: error.message };
 
-    // Load user profile
+    // Load user profile by auth user ID
     const { data: profile } = await supabase
       .from("users")
       .select("*")
       .eq("id", data.user.id)
       .single();
 
-    if (!profile) {
-      // First login: create user profile
-      const { data: newProfile } = await supabase
-        .from("users")
-        .insert({
-          id: data.user.id,
-          line_user_id: `google-${data.user.id}`,
-          display_name:
-            data.user.user_metadata?.full_name ??
-            data.user.email ??
-            "ゲスト",
-          avatar_url: data.user.user_metadata?.avatar_url ?? null,
-        })
-        .select()
-        .single();
-      return { user: newProfile, error: null };
+    if (profile) {
+      return { user: profile, error: null };
     }
 
-    return { user: profile, error: null };
+    // No profile for this auth user — check if linked via google_id
+    const googleSub = data.user.user_metadata?.sub;
+    if (googleSub) {
+      const { data: linkedProfile } = await supabase
+        .from("users")
+        .select("*")
+        .eq("google_id", googleSub)
+        .maybeSingle();
+
+      if (linkedProfile) {
+        // Found linked account — return it, let auth-provider handle session
+        return { user: linkedProfile, error: null };
+      }
+    }
+
+    // Truly new user: create profile
+    const { data: newProfile } = await supabase
+      .from("users")
+      .insert({
+        id: data.user.id,
+        line_user_id: `google-${data.user.id}`,
+        google_id: googleSub ?? null,
+        google_email: data.user.email ?? null,
+        display_name:
+          data.user.user_metadata?.full_name ??
+          data.user.email ??
+          "ゲスト",
+        avatar_url: data.user.user_metadata?.avatar_url ?? null,
+      })
+      .select()
+      .single();
+    return { user: newProfile, error: null };
   } catch (e: any) {
     return { user: null, error: e.message ?? "Google sign-in failed" };
   }
