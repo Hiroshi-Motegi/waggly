@@ -46,7 +46,7 @@ function Slide1() {
       <div className="relative w-full flex-1">
         <div className="absolute left-[2%] top-0 w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
           <Image
-            src="/images/onboarding/slide1-mybag.png"
+            src="/onboarding/1-1.png"
             alt="マイバッグ画面"
             width={430}
             height={932}
@@ -55,7 +55,7 @@ function Slide1() {
         </div>
         <div className="absolute right-[2%] top-[15%] w-[58%] border-3 border-white rounded-sm overflow-hidden shadow-lg">
           <Image
-            src="/images/onboarding/slide1-practice.png"
+            src="/onboarding/1-2.png"
             alt="練習記録画面"
             width={430}
             height={932}
