@@ -231,7 +231,7 @@ export async function handlePostSignIn(
   const checkRes = await apiFetch("/api/auth/check-conflict", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ provider, providerUserId, currentWid: authUser?.id }),
+    body: JSON.stringify({ provider, providerUserId }),
   });
 
   if (!checkRes.ok) {
