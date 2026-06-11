@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { getSupabaseAdmin } from "@/lib/auth-helpers";
+import { getSupabaseAdmin, uploadAvatarFromUrl } from "@/lib/auth-helpers";
 
 function derivePassword(lineUserId: string): string {
   return crypto
@@ -96,11 +96,19 @@ export async function POST(request: NextRequest) {
   }
 
   if (existingProvider) {
-    // 既存ユーザー → プロフィール更新 + auth_user_id を LINE auth user に設定
-    await supabaseAdmin
+    // 既存ユーザー → 表示名更新 + auth_user_id を LINE auth user に設定
+    const { data: currentUser } = await supabaseAdmin
       .from("users")
-      .update({ display_name: displayName, avatar_url: avatarUrl })
-      .eq("id", existingProvider.user_id);
+      .select("avatar_url")
+      .eq("id", existingProvider.user_id)
+      .single();
+    const hasStoredAvatar = currentUser?.avatar_url?.includes("supabase");
+    const updateData: any = { display_name: displayName };
+    if (!hasStoredAvatar && avatarUrl) {
+      const storedUrl = await uploadAvatarFromUrl(supabaseAdmin, existingProvider.user_id, avatarUrl);
+      updateData.avatar_url = storedUrl;
+    }
+    await supabaseAdmin.from("users").update(updateData).eq("id", existingProvider.user_id);
     await supabaseAdmin
       .from("user_providers")
       .update({ auth_user_id: authUserId })
@@ -112,11 +120,17 @@ export async function POST(request: NextRequest) {
       .from("users")
       .insert({
         display_name: displayName,
-        avatar_url: avatarUrl,
+        avatar_url: null,
         agreed_terms_at: new Date().toISOString(),
       })
       .select("id")
       .single();
+
+    // アバターを Storage に保存
+    if (newUser && avatarUrl) {
+      const storedUrl = await uploadAvatarFromUrl(supabaseAdmin, newUser.id, avatarUrl);
+      await supabaseAdmin.from("users").update({ avatar_url: storedUrl }).eq("id", newUser.id);
+    }
 
     if (newUser) {
       await supabaseAdmin.from("user_providers").insert({
