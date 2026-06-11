@@ -1,5 +1,18 @@
 /** Schema version — increment when adding migrations. */
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
+
+export const SCHEMA_V4 = `
+-- Auth redesign: reset local data (user_id references changed to independent UUIDs)
+DELETE FROM pending_sync;
+DELETE FROM sync_meta;
+DELETE FROM maintenances;
+DELETE FROM club_images;
+DELETE FROM club_memos;
+DELETE FROM practice_clubs;
+DELETE FROM practice_sessions;
+DELETE FROM accessories;
+DELETE FROM clubs;
+`;
 
 export const SCHEMA_V3 = `
 ALTER TABLE clubs ADD COLUMN rating INTEGER;

@@ -15,75 +15,73 @@ function isDevMode() {
   );
 }
 
+function getAdminClient() {
+  return createRawClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
+/**
+ * auth_user_id → users.id 逆引き（user_providers 経由）。
+ */
+async function resolveUserId(authUserId: string): Promise<string | null> {
+  const adminClient = getAdminClient();
+  const { data } = await adminClient
+    .from("user_providers")
+    .select("user_id")
+    .eq("auth_user_id", authUserId)
+    .limit(1)
+    .maybeSingle();
+  return data?.user_id ?? null;
+}
+
 /**
  * Get Supabase client and userId for API routes.
  * Returns null if not authenticated (caller should return 401).
+ * userId is users.id (independent UUID), NOT auth.users.id.
  */
 export async function getApiAuth(): Promise<{
   supabase: any;
   userId: string;
 } | null> {
   if (isDevMode()) {
-    const supabase = createRawClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = getAdminClient();
 
-    // Use cached ID if available
     if (cachedDevUserId) {
       return { supabase, userId: cachedDevUserId };
     }
 
-    // Check if dev user exists by email
-    const { data: existingUsers } = await supabase
-      .from("users")
-      .select("id")
-      .eq("line_user_id", "dev-line-id")
-      .limit(1);
+    // Check if dev user exists via user_providers
+    const { data: existingProvider } = await supabase
+      .from("user_providers")
+      .select("user_id")
+      .eq("provider", "dev")
+      .eq("provider_sub", "dev-user")
+      .maybeSingle();
 
-    if (existingUsers && existingUsers.length > 0) {
-      cachedDevUserId = existingUsers[0].id;
+    if (existingProvider) {
+      cachedDevUserId = existingProvider.user_id;
       return { supabase, userId: cachedDevUserId! };
     }
 
-    // Create auth user first (Supabase assigns the UUID)
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: DEV_EMAIL,
-      password: DEV_PASSWORD,
-      email_confirm: true,
-      user_metadata: { display_name: "開発ユーザー" },
+    // Create dev user + provider
+    const { data: newUser } = await supabase
+      .from("users")
+      .insert({ display_name: "開発ユーザー" })
+      .select("id")
+      .single();
+
+    if (!newUser) return null;
+
+    await supabase.from("user_providers").insert({
+      user_id: newUser.id,
+      provider: "dev",
+      provider_sub: "dev-user",
     });
 
-    if (authError) {
-      // User might already exist in auth but not in users table
-      const { data: { users } } = await supabase.auth.admin.listUsers();
-      const existing = users?.find((u: any) => u.email === DEV_EMAIL);
-      if (existing) {
-        // Insert profile with auth user's ID
-        await supabase.from("users").upsert({
-          id: existing.id,
-          line_user_id: "dev-line-id",
-          display_name: "開発ユーザー",
-          avatar_url: null,
-        });
-        cachedDevUserId = existing.id;
-        return { supabase, userId: cachedDevUserId! };
-      }
-      return null;
-    }
-
-    const authUserId = authData.user.id;
-
-    // Create profile using the auth-assigned UUID
-    await supabase.from("users").insert({
-      id: authUserId,
-      line_user_id: "dev-line-id",
-      display_name: "開発ユーザー",
-      avatar_url: null,
-    });
-
-    cachedDevUserId = authUserId;
-    return { supabase, userId: authUserId };
+    cachedDevUserId = newUser.id;
+    return { supabase, userId: newUser.id };
   }
 
   // Native app: Bearer token auth
@@ -92,23 +90,17 @@ export async function getApiAuth(): Promise<{
 
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7);
-    // Verify token with admin client
-    const adminClient = createRawClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const adminClient = getAdminClient();
     const {
       data: { user },
       error,
     } = await adminClient.auth.getUser(token);
     if (error || !user) return null;
-    // Return user-scoped client (RLS enforced) instead of service role
-    const supabase = createRawClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { global: { headers: { Authorization: `Bearer ${token}` } } }
-    );
-    return { supabase, userId: user.id };
+
+    const userId = await resolveUserId(user.id);
+    if (!userId) return null;
+
+    return { supabase: adminClient, userId };
   }
 
   // Production: cookie-based auth
@@ -119,7 +111,46 @@ export async function getApiAuth(): Promise<{
 
   if (!user) return null;
 
-  return { supabase: supabase as any, userId: user.id };
+  const userId = await resolveUserId(user.id);
+  if (!userId) return null;
+
+  return { supabase: getAdminClient(), userId };
+}
+
+/**
+ * getApiAuth() variant that also returns auth_user_id.
+ * Used by auth APIs (resolve-session, etc.) that need both IDs.
+ */
+export async function getApiAuthWithAuthUserId(): Promise<{
+  supabase: any;
+  authUserId: string;
+  userId: string | null;
+} | null> {
+  const headersList = await headers();
+  const authHeader = headersList.get("authorization");
+
+  const adminClient = getAdminClient();
+
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const {
+      data: { user },
+      error,
+    } = await adminClient.auth.getUser(token);
+    if (error || !user) return null;
+
+    const userId = await resolveUserId(user.id);
+    return { supabase: adminClient, authUserId: user.id, userId };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const userId = await resolveUserId(user.id);
+  return { supabase: adminClient, authUserId: user.id, userId };
 }
 
 export function unauthorized() {
