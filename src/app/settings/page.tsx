@@ -56,7 +56,20 @@ export default function SettingsPage() {
     apiFetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch(() => {});
   }, [user]);
 
+  const [signingIn, setSigningIn] = useState(false);
+
   if (!user && isNative()) {
+    if (signingIn) {
+      return (
+        <div className="flex items-center justify-center bg-[#139847]" style={{ minHeight: "100dvh" }}>
+          <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+          <div className="relative z-10 flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 text-white animate-spin" />
+            <p className="text-white font-bold">ログイン中...</p>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
@@ -67,13 +80,20 @@ export default function SettingsPage() {
             <p className="text-sm text-[#8b8b8b] mb-3">サインインするとプロフィール公開・共有、AIコーチ、データのバックアップ・Web版との同期が使えます。</p>
             <button
               onClick={async () => {
-                const { signInWithGoogle } = await import("@/lib/native-auth");
-                const result = await signInWithGoogle();
-                if (result.user) {
-                  const { resetLocalModeCache } = await import("@/lib/api-client");
-                  resetLocalModeCache();
-                  setUser?.(result.user);
-                  window.location.href = "/settings";
+                setSigningIn(true);
+                try {
+                  const { signInWithGoogle } = await import("@/lib/native-auth");
+                  const result = await signInWithGoogle();
+                  if (result.user) {
+                    const { resetLocalModeCache } = await import("@/lib/api-client");
+                    resetLocalModeCache();
+                    setUser?.(result.user);
+                    window.location.href = "/";
+                  } else {
+                    setSigningIn(false);
+                  }
+                } catch {
+                  setSigningIn(false);
                 }
               }}
               className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#006728] text-white text-base font-bold"
