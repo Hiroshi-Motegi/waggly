@@ -148,7 +148,6 @@ export async function getLocalDataSummary(): Promise<DataSummary> {
         UNION ALL SELECT MAX(created_at) FROM club_memos
         UNION ALL SELECT MAX(created_at) FROM maintenances
         UNION ALL SELECT MAX(created_at) FROM practice_sessions
-        UNION ALL SELECT MAX(created_at) FROM practice_clubs
         UNION ALL SELECT MAX(created_at) FROM accessories
       )`
     );
