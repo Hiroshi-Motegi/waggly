@@ -31,13 +31,28 @@ export async function GET(request: NextRequest) {
       const { data: { user } } = await admin.auth.getUser(token);
       authUserId = user?.id ?? null;
     } else {
-      // Cookie-based auth: extract access token from sb-* cookie
+      // Cookie-based auth: extract access token from sb-* chunked cookies
       const cookies = request.headers.get("cookie") ?? "";
+      const cookieParts = cookies.split(";").map(c => c.trim());
       const supabaseHost = new URL(supabaseUrl).hostname.split(".")[0];
-      const tokenCookie = cookies.split(";").map(c => c.trim()).find(c => c.startsWith(`sb-${supabaseHost}-auth-token=`));
-      if (tokenCookie) {
+      const prefix = `sb-${supabaseHost}-auth-token`;
+
+      // Reassemble chunked cookies (.0, .1, .2, ...) or single cookie
+      let raw = "";
+      const singleCookie = cookieParts.find(c => c.startsWith(`${prefix}=`));
+      if (singleCookie) {
+        raw = decodeURIComponent(singleCookie.split("=").slice(1).join("="));
+      } else {
+        // Chunked: prefix.0, prefix.1, ...
+        for (let i = 0; ; i++) {
+          const chunk = cookieParts.find(c => c.startsWith(`${prefix}.${i}=`));
+          if (!chunk) break;
+          raw += decodeURIComponent(chunk.split("=").slice(1).join("="));
+        }
+      }
+
+      if (raw) {
         try {
-          const raw = decodeURIComponent(tokenCookie.split("=").slice(1).join("="));
           const parsed = JSON.parse(raw);
           const accessToken = Array.isArray(parsed) ? parsed[0] : parsed?.access_token;
           if (accessToken) {
@@ -49,12 +64,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!authUserId) {
-      const cookies = request.headers.get("cookie") ?? "";
-      const cookieNames = cookies.split(";").map(c => c.trim().split("=")[0]);
-      return new Response(JSON.stringify({
-        error: "Unauthorized",
-        debug: { cookieNames, hasAuth: !!authHeader },
-      }), { status: 401 });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
 
     // Resolve users.id from auth_user_id via user_providers
