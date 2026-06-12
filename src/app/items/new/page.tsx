@@ -169,13 +169,13 @@ export default function NewItemPage() {
 
             <div data-field="brand" className="flex flex-col gap-0.5 py-1">
               <span className={labelClass}>ブランド・メーカー</span>
-              <input value={form.brand} onChange={(e) => update("brand", e.target.value)} placeholder="例: Titleist" className={`${inputClass} ${fieldError("brand") ? "!border-red-400" : ""}`} />
+              <input value={form.brand} onChange={(e) => update("brand", e.target.value)} placeholder="メーカー名" className={`${inputClass} ${fieldError("brand") ? "!border-red-400" : ""}`} />
               <FieldError message={fieldError("brand")} />
             </div>
 
             <div data-field="model" className="flex flex-col gap-0.5 py-1">
               <span className={labelClass}>商品名・モデル</span>
-              <input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="例: Pro V1" className={`${inputClass} ${fieldError("model") ? "!border-red-400" : ""}`} />
+              <input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="モデル名" className={`${inputClass} ${fieldError("model") ? "!border-red-400" : ""}`} />
               <FieldError message={fieldError("model")} />
             </div>
 

@@ -255,14 +255,14 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
         {/* メーカー */}
         <div className="flex flex-col gap-0.5 py-1" data-field="maker">
           <span className={labelClass}>メーカー</span>
-          <input value={form.maker ?? ""} onChange={(e) => update("maker", e.target.value)} placeholder="例: YAMAHA" className={`${inputClass} ${fieldError("maker") ? "!border-red-400" : ""}`} />
+          <input value={form.maker ?? ""} onChange={(e) => update("maker", e.target.value)} placeholder="メーカー名" className={`${inputClass} ${fieldError("maker") ? "!border-red-400" : ""}`} />
           <FieldError message={fieldError("maker")} />
         </div>
 
         {/* モデル */}
         <div className="flex flex-col gap-0.5 py-1" data-field="model">
           <span className={labelClass}>モデル</span>
-          <input value={form.model ?? ""} onChange={(e) => update("model", e.target.value)} placeholder="例: RMX VD/F" className={`${inputClass} ${fieldError("model") ? "!border-red-400" : ""}`} />
+          <input value={form.model ?? ""} onChange={(e) => update("model", e.target.value)} placeholder="モデル名" className={`${inputClass} ${fieldError("model") ? "!border-red-400" : ""}`} />
           <FieldError message={fieldError("model")} />
         </div>
 
@@ -271,7 +271,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
           <>
             <div className="flex flex-col gap-0.5 py-1" data-field="shaft_name">
               <span className={labelClass}>シャフト</span>
-              <input value={form.shaft_name ?? ""} onChange={(e) => update("shaft_name", e.target.value)} placeholder="例: TENSEI TR f" className={`${inputClass} ${fieldError("shaft_name") ? "!border-red-400" : ""}`} />
+              <input value={form.shaft_name ?? ""} onChange={(e) => update("shaft_name", e.target.value)} placeholder="シャフト名" className={`${inputClass} ${fieldError("shaft_name") ? "!border-red-400" : ""}`} />
               <FieldError message={fieldError("shaft_name")} />
             </div>
 

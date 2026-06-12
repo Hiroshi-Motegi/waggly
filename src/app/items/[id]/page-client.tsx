@@ -259,14 +259,14 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           {/* ブランド・メーカー */}
           <div data-field="brand" className="flex flex-col gap-0.5 py-1">
             <span className="text-sm">ブランド・メーカー</span>
-            <input value={editForm.brand ?? ""} onChange={(e) => updateEdit("brand", e.target.value)} placeholder="例: Titleist" className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("brand") ? "!border-red-400" : ""}`} />
+            <input value={editForm.brand ?? ""} onChange={(e) => updateEdit("brand", e.target.value)} placeholder="メーカー名" className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("brand") ? "!border-red-400" : ""}`} />
             <FieldError message={fieldError("brand")} />
           </div>
 
           {/* 商品名・モデル */}
           <div data-field="model" className="flex flex-col gap-0.5 py-1">
             <span className="text-sm">商品名・モデル</span>
-            <input value={editForm.model ?? ""} onChange={(e) => updateEdit("model", e.target.value)} placeholder="例: Pro V1" className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("model") ? "!border-red-400" : ""}`} />
+            <input value={editForm.model ?? ""} onChange={(e) => updateEdit("model", e.target.value)} placeholder="モデル名" className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("model") ? "!border-red-400" : ""}`} />
             <FieldError message={fieldError("model")} />
           </div>
 
