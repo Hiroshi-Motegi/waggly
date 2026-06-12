@@ -549,6 +549,10 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
           if (!result.error.includes("cancel")) alert(result.error);
           return;
         }
+        if (!result.accessToken) {
+          alert(`LINE accessToken が取得できませんでした。userId=${result.userId}`);
+          return;
+        }
         const res = await apiFetch("/api/auth/link-provider", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
