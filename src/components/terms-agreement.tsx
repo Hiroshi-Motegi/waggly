@@ -23,10 +23,7 @@ export function TermsAgreement({ onAgree, isReagreement }: TermsAgreementProps) 
 
   return (
     <div className="flex flex-col min-h-dvh bg-[#f7fff3]">
-      <div className="flex flex-col items-center px-6 pt-8 pb-4">
-        {isReagreement && (
-          <h2 className="text-xl font-bold mb-2">利用規約が更新されました</h2>
-        )}
+      <div className="flex flex-col items-center px-6 pt-8 pb-4 text-center">
         <img
           src="/images/onboarding/waggly-ball.svg"
           alt="Waggly"
@@ -35,6 +32,19 @@ export function TermsAgreement({ onAgree, isReagreement }: TermsAgreementProps) 
           className="mb-4"
           style={{ animation: "smallBounce 1.2s ease-in-out infinite" }}
         />
+        {isReagreement ? (
+          <p className="text-base font-bold text-[#2c2c2c] leading-relaxed">
+            利用規約が更新されました。
+            <br />
+            下記利用規約をご確認ください。
+          </p>
+        ) : (
+          <p className="text-base font-bold text-[#2c2c2c] leading-relaxed">
+            ワグリーを利用するには利用規約の同意が必要です。
+            <br />
+            下記利用規約をご確認ください。
+          </p>
+        )}
       </div>
 
       {/* 利用規約インライン表示 */}
