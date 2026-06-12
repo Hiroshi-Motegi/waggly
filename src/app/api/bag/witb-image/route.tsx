@@ -49,7 +49,12 @@ export async function GET(request: NextRequest) {
     }
 
     if (!authUserId) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+      const cookies = request.headers.get("cookie") ?? "";
+      const cookieNames = cookies.split(";").map(c => c.trim().split("=")[0]);
+      return new Response(JSON.stringify({
+        error: "Unauthorized",
+        debug: { cookieNames, hasAuth: !!authHeader },
+      }), { status: 401 });
     }
 
     // Resolve users.id from auth_user_id via user_providers
