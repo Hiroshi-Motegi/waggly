@@ -111,11 +111,12 @@ async function routeLocal(
     const conds: string[] = [];
     const status = params.get("status");
     const bagNum = params.get("bag_number");
-    if (status) conds.push(`status = '${status}'`);
-    if (bagNum) conds.push(`bag_number = ${bagNum}`);
+    const values: any[] = [];
+    if (status) { conds.push("status = ?"); values.push(status); }
+    if (bagNum) { conds.push("bag_number = ?"); values.push(Number(bagNum)); }
     if (conds.length) sql += " WHERE " + conds.join(" AND ");
     sql += " ORDER BY sort_order ASC";
-    const clubs = await q(sql);
+    const clubs = await q(sql, values);
     // Attach images for each club
     for (const c of clubs) {
       const imgs = await q("SELECT * FROM club_images WHERE club_id = ? ORDER BY is_primary DESC", [c.id]);
@@ -152,7 +153,14 @@ async function routeLocal(
   // PATCH /api/clubs/:id
   if (match && method === "PATCH") {
     const clubId = match[1];
-    const fields = Object.keys(body).filter((k) => k !== "id");
+    const CLUB_COLUMNS = new Set([
+      "category", "club_number", "maker", "model", "shaft_name", "shaft_flex",
+      "loft", "lie", "length", "distance", "release_year", "memo",
+      "purchase_date", "purchase_shop", "purchase_price", "status", "bag_number",
+      "weight", "swing_weight", "frequency", "kick_point", "head_volume",
+      "head_weight", "rating", "sort_order",
+    ]);
+    const fields = Object.keys(body).filter((k) => k !== "id" && CLUB_COLUMNS.has(k));
     if (fields.length > 0) {
       const sets = fields.map((k) => `${k} = ?`).join(", ");
       const vals = fields.map((k) => body[k]);
@@ -442,9 +450,10 @@ async function routeLocal(
     const params = new URLSearchParams(path.split("?")[1] ?? "");
     const status = params.get("status");
     let sql = "SELECT * FROM accessories";
-    if (status) sql += ` WHERE status = '${status}'`;
+    const params2: any[] = [];
+    if (status) { sql += " WHERE status = ?"; params2.push(status); }
     sql += " ORDER BY created_at DESC";
-    return q(sql);
+    return q(sql, params2);
   }
 
   // POST /api/accessories
@@ -468,7 +477,10 @@ async function routeLocal(
 
   // PATCH /api/accessories/:id
   if (match && method === "PATCH") {
-    const fields = Object.keys(body).filter((k) => k !== "id");
+    const ACCESSORY_COLUMNS = new Set([
+      "category", "brand", "model", "memo", "rating", "status", "purchase_url", "image_url",
+    ]);
+    const fields = Object.keys(body).filter((k) => k !== "id" && ACCESSORY_COLUMNS.has(k));
     if (fields.length > 0) {
       const sets = fields.map((k) => `${k} = ?`).join(", ");
       const vals = fields.map((k) => body[k]);
