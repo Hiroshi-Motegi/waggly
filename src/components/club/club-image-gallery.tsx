@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import type { ClubImage } from "@/types/database";
+import { ImagePicker } from "@/components/ui/image-picker";
 
 interface ClubImageGalleryProps {
   clubId: string;
@@ -12,13 +13,9 @@ interface ClubImageGalleryProps {
 }
 
 export function ClubImageGallery({ clubId, images, onUpload }: ClubImageGalleryProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  async function handlePick(file: File) {
     setIsUploading(true);
     try {
       const formData = new FormData();
@@ -35,7 +32,6 @@ export function ClubImageGallery({ clubId, images, onUpload }: ClubImageGalleryP
       }
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -57,21 +53,16 @@ export function ClubImageGallery({ clubId, images, onUpload }: ClubImageGalleryP
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]"
-          >
-            <Plus className="h-6 w-6" />
-          </button>
+          <ImagePicker onPick={handlePick}>
+            <button
+              type="button"
+              className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]"
+            >
+              <Plus className="h-6 w-6" />
+            </button>
+          </ImagePicker>
         )}
       </div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
     </div>
   );
 }
