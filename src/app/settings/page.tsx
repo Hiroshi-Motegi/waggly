@@ -267,7 +267,7 @@ export default function SettingsPage() {
                     return;
                   }
                   if (result.error) {
-                    alert(`サインインエラー: ${result.error}`);
+                    alert("サインインに失敗しました");
                     setSigningIn(false);
                     return;
                   }
@@ -278,7 +278,7 @@ export default function SettingsPage() {
                     setSigningIn(false);
                   }
                 } catch (e: any) {
-                  alert(`サインイン例外: ${e.message}`);
+                  alert("サインインに失敗しました");
                   setSigningIn(false);
                 }
               }}
@@ -328,7 +328,7 @@ export default function SettingsPage() {
                     return;
                   }
                   if (result.error) {
-                    alert(`サインインエラー: ${result.error}`);
+                    alert("サインインに失敗しました");
                     setSigningIn(false);
                     return;
                   }
@@ -339,7 +339,7 @@ export default function SettingsPage() {
                     setSigningIn(false);
                   }
                 } catch (e: any) {
-                  alert(`サインイン例外: ${e.message}`);
+                  alert("サインインに失敗しました");
                   setSigningIn(false);
                 }
               }}
@@ -633,7 +633,7 @@ function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: a
           return;
         }
         if (!result.accessToken) {
-          alert(`LINE accessToken が取得できませんでした。userId=${result.userId}`);
+          alert("LINE accessToken が取得できませんでした");
           return;
         }
         const res = await apiFetch("/api/auth/link-provider", {
