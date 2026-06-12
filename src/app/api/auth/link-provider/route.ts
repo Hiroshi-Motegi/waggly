@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
   const { userId } = auth;
 
   const body = await request.json();
-  console.log("[link-provider POST] body keys:", Object.keys(body), "accessToken?", !!body.accessToken, "provider:", body.provider);
   const { provider, idToken, accessToken, code, redirectUri, confirmMerge, keepAccountId } = body;
 
   if (!provider) {

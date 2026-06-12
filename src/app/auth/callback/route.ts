@@ -91,18 +91,12 @@ async function handleGoogleLink(
   }
 
   // No conflict → insert user_providers row
-  const { error: insertErr } = await supabaseAdmin.from("user_providers").insert({
+  await supabaseAdmin.from("user_providers").insert({
     user_id: originalUserId,
     provider: "google",
     provider_sub: googleSub,
     provider_email: googleEmail,
     auth_user_id: googleUser.id,
-  });
-  console.log("[callback] Google link insert:", {
-    originalUserId,
-    googleSub: googleSub?.substring(0, 10),
-    googleAuthUserId: googleUser.id,
-    error: insertErr?.message,
   });
 
   // Update google_email on users table too
