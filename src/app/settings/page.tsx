@@ -84,11 +84,10 @@ export default function SettingsPage() {
     apiFetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch(() => {});
   }, [user]);
 
-  const [signingIn, setSigningIn] = useState(false);
+  const [processing, setProcessing] = useState<string | null>(null);
   const [conflictInfo, setConflictInfo] = useState<any>(null);
   const [conflictSelected, setConflictSelected] = useState<"a" | "b" | null>(null);
   const [conflictConfirm, setConflictConfirm] = useState(false);
-  const [conflictProcessing, setConflictProcessing] = useState(false);
 
   if (conflictInfo) {
     // Show conflict resolution UI
@@ -96,6 +95,7 @@ export default function SettingsPage() {
     return (
       <div className="relative flex flex-col px-4 py-4 space-y-4 bg-[#139847]" style={{ minHeight: "100dvh" }}>
         <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        {processing && <ProcessingOverlay message={processing} />}
         <div className="relative z-10 flex flex-col space-y-4 pt-4">
           <h1 className="text-xl font-bold text-white text-center">使用するデータを選んでください</h1>
           {["a", "b"].map((side) => {
@@ -103,7 +103,7 @@ export default function SettingsPage() {
             const isSel = conflictSelected === side;
             const hasData = src.counts.clubs > 0 || src.counts.practices > 0 || src.counts.accessories > 0;
             return (
-              <button key={side} onClick={() => { setConflictSelected(side as "a" | "b"); setConflictConfirm(true); }} disabled={conflictProcessing}
+              <button key={side} onClick={() => { setConflictSelected(side as "a" | "b"); setConflictConfirm(true); }} disabled={!!processing}
                 className={`w-full text-left rounded-xl p-4 transition-all disabled:opacity-50 ${isSel ? "bg-white ring-2 ring-[#006728] shadow-lg" : "bg-white/90 shadow"}`}>
                 <div className="flex items-center gap-2 mb-2">
                   {src.isNew && <span className="text-xs font-bold text-white bg-[#006728] rounded-full px-2 py-0.5">NEW</span>}
@@ -132,7 +132,7 @@ export default function SettingsPage() {
             localStorage.removeItem("conflict_info");
             sessionStorage.removeItem("conflict_info");
             setConflictInfo(null); setConflictSelected(null); setConflictConfirm(false);
-          }} disabled={conflictProcessing} className="text-sm text-white/80 py-2 text-center disabled:opacity-50">キャンセル</button>
+          }} disabled={!!processing} className="text-sm text-white/80 py-2 text-center disabled:opacity-50">キャンセル</button>
         </div>
         {conflictConfirm && selectedSource && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
@@ -140,9 +140,9 @@ export default function SettingsPage() {
               <p className="text-base font-bold text-center">{selectedSource.label}を使用します</p>
               <p className="text-sm text-[#666] text-center">もう一方のデータは削除されます。よろしいですか？</p>
               <div className="flex gap-3">
-                <button onClick={() => setConflictConfirm(false)} disabled={conflictProcessing} className="flex-1 py-2.5 rounded-lg border border-[#ccc] text-sm disabled:opacity-50">戻る</button>
+                <button onClick={() => setConflictConfirm(false)} disabled={!!processing} className="flex-1 py-2.5 rounded-lg border border-[#ccc] text-sm disabled:opacity-50">戻る</button>
                 <button onClick={async () => {
-                  setConflictProcessing(true);
+                  setProcessing("データを処理中...");
                   try {
                     const source = conflictSelected === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
                     let res: Response;
@@ -178,7 +178,7 @@ export default function SettingsPage() {
                     if (!res.ok) {
                       const err = await res.json().catch(() => ({}));
                       alert(err.error || "処理に失敗しました");
-                      setConflictProcessing(false); setConflictConfirm(false);
+                      setProcessing(null); setConflictConfirm(false);
                       return;
                     }
                     const resolveResult = await res.json();
@@ -203,10 +203,10 @@ export default function SettingsPage() {
                         await fullSync();
                       } catch {}
                     }
-                    setConflictInfo(null); setConflictSelected(null); setConflictConfirm(false); setConflictProcessing(false);
-                  } catch { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); }
-                }} disabled={conflictProcessing} className="flex-1 py-2.5 rounded-lg bg-[#006728] text-white text-sm font-bold disabled:opacity-50">
-                  {conflictProcessing ? "処理中..." : "OK"}
+                    setConflictInfo(null); setConflictSelected(null); setConflictConfirm(false); setProcessing(null);
+                  } catch { alert("処理に失敗しました"); setProcessing(null); setConflictConfirm(false); }
+                }} disabled={!!processing} className="flex-1 py-2.5 rounded-lg bg-[#006728] text-white text-sm font-bold disabled:opacity-50">
+                  {processing ? "処理中..." : "OK"}
                 </button>
               </div>
             </div>
@@ -217,20 +217,10 @@ export default function SettingsPage() {
   }
 
   if (!user && isNative()) {
-    if (signingIn) {
-      return (
-        <div className="flex items-center justify-center bg-[#139847]" style={{ minHeight: "100dvh" }}>
-          <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
-          <div className="relative z-10 flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 text-white animate-spin" />
-            <p className="text-white font-bold">ログイン中...</p>
-          </div>
-        </div>
-      );
-    }
     return (
       <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        {processing && <ProcessingOverlay message={processing} />}
         <div className="relative z-10 flex flex-col space-y-2">
           <PageHeader title="設定" variant="dark" />
           <div className="rounded-lg bg-white p-4">
@@ -238,7 +228,7 @@ export default function SettingsPage() {
             <p className="text-sm text-[#8b8b8b] mb-3">サインインするとプロフィール公開・共有、AIコーチ、データのバックアップ・Web版との同期が使えます。</p>
             <button
               onClick={async () => {
-                setSigningIn(true);
+                setProcessing("ログイン中...");
                 try {
                   const { signInWithGoogle } = await import("@/lib/native-auth");
                   const result = await signInWithGoogle();
@@ -263,23 +253,23 @@ export default function SettingsPage() {
                       },
                     };
                     setConflictInfo(conflictInfo);
-                    setSigningIn(false);
+                    setProcessing(null);
                     return;
                   }
                   if (result.error) {
                     alert("サインインに失敗しました");
-                    setSigningIn(false);
+                    setProcessing(null);
                     return;
                   }
                   if (result.user) {
                     setUser?.(result.user);
                     router.push("/");
                   } else {
-                    setSigningIn(false);
+                    setProcessing(null);
                   }
                 } catch (e: any) {
                   alert("サインインに失敗しました");
-                  setSigningIn(false);
+                  setProcessing(null);
                 }
               }}
               className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#006728] text-white text-base font-bold"
@@ -294,13 +284,13 @@ export default function SettingsPage() {
             </button>
             <button
               onClick={async () => {
-                setSigningIn(true);
+                setProcessing("ログイン中...");
                 try {
                   const { signInWithLine } = await import("@/lib/native-auth");
                   const result = await signInWithLine();
                   if (!result.error && !result.conflict && !result.user) {
                     // キャンセル
-                    setSigningIn(false);
+                    setProcessing(null);
                     return;
                   }
                   if (result.conflict) {
@@ -324,23 +314,23 @@ export default function SettingsPage() {
                       },
                     };
                     setConflictInfo(conflictInfo);
-                    setSigningIn(false);
+                    setProcessing(null);
                     return;
                   }
                   if (result.error) {
                     alert("サインインに失敗しました");
-                    setSigningIn(false);
+                    setProcessing(null);
                     return;
                   }
                   if (result.user) {
                     setUser?.(result.user);
                     router.push("/");
                   } else {
-                    setSigningIn(false);
+                    setProcessing(null);
                   }
                 } catch (e: any) {
                   alert("サインインに失敗しました");
-                  setSigningIn(false);
+                  setProcessing(null);
                 }
               }}
               className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#06C755] text-white text-base font-bold"
@@ -379,6 +369,7 @@ export default function SettingsPage() {
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      {processing && <ProcessingOverlay message={processing} />}
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="設定" variant="dark" />
 
@@ -429,7 +420,7 @@ export default function SettingsPage() {
           <HelpCircle className="h-5 w-5 text-white opacity-80" />
         </Link>
       </div>
-      <AccountLinking user={user} onConflict={setConflictInfo} />
+      <AccountLinking user={user} onConflict={setConflictInfo} setProcessing={setProcessing} />
 
       {/* プラン */}
       <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
@@ -506,7 +497,10 @@ export default function SettingsPage() {
       {/* ログアウト */}
       <div className="flex flex-col items-center pt-4 pb-8">
         <button
-          onClick={liffLogout}
+          onClick={async () => {
+            setProcessing("ログアウト中...");
+            await liffLogout();
+          }}
           className="w-full max-w-xs rounded-full border border-white py-2.5 text-base font-bold text-white"
         >
           ログアウト
@@ -579,7 +573,15 @@ function ExportSection() {
   );
 }
 
-function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: any) => void }) {
+function AccountLinking({
+  user,
+  onConflict,
+  setProcessing,
+}: {
+  user: User;
+  onConflict: (info: any) => void;
+  setProcessing: (msg: string | null) => void;
+}) {
   const { setUser } = useAuth();
   const router = useRouter();
   const [providers, setProviders] = useState<{ provider: string; provider_email?: string; is_current?: boolean }[]>([]);
@@ -600,66 +602,72 @@ function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: a
 
   async function unlinkProvider(provider: "line" | "google") {
     if (!confirm(`${provider === "line" ? "LINE" : "Google"}の連携を解除しますか？`)) return;
-    const res = await apiFetch("/api/auth/link-provider", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provider }),
-    });
-    if (res.ok) {
-      const result = await res.json();
-      if (result.needsRelogin) {
-        const { createClient } = await import("@/lib/supabase/client");
-        await createClient().auth.signOut();
-        setUser?.(null);
-        router.push("/");
-        return;
+    setProcessing("解除中...");
+    try {
+      const res = await apiFetch("/api/auth/link-provider", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider }),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        if (result.needsRelogin) {
+          const { createClient } = await import("@/lib/supabase/client");
+          await createClient().auth.signOut();
+          setUser?.(null);
+          router.push("/");
+          return;
+        }
+        const updated = await apiFetch("/api/auth/providers").then(r => r.ok ? r.json() : []);
+        setProviders(updated);
+      } else {
+        const err = await res.json();
+        alert(err.error || "解除に失敗しました");
       }
-      // プロバイダ一覧を再取得して表示更新（リロードしない）
-      const updated = await apiFetch("/api/auth/providers").then(r => r.ok ? r.json() : []);
-      setProviders(updated);
-    } else {
-      const err = await res.json();
-      alert(err.error || "解除に失敗しました");
+    } finally {
+      setProcessing(null);
     }
   }
 
   async function linkLine() {
     try {
       if (isNative()) {
+        setProcessing("連携中...");
         const { nativeLineLogin } = await import("@/lib/native-auth");
         const result = await nativeLineLogin();
         if (result.error) {
           if (!result.error.includes("cancel")) alert(result.error);
+          setProcessing(null);
           return;
         }
         if (!result.accessToken) {
           alert("LINE accessToken が取得できませんでした");
+          setProcessing(null);
           return;
         }
         const res = await apiFetch("/api/auth/link-provider", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            provider: "line",
-            accessToken: result.accessToken,
-          }),
+          body: JSON.stringify({ provider: "line", accessToken: result.accessToken }),
         });
         if (!res.ok) {
           const err = await res.json();
           alert(err.error || "連携に失敗しました");
+          setProcessing(null);
           return;
         }
         const linkResult = await res.json();
         if (linkResult.needsConfirm) {
+          setProcessing(null);
           handleLinkConflict("line", linkResult);
           return;
         }
-        // LINE SDK のネイティブUI復帰後、プロバイダ一覧を再取得
         const updated = await apiFetch("/api/auth/providers").then(r => r.ok ? r.json() : []);
         setProviders(updated);
+        setProcessing(null);
         return;
       }
-      // Web: LINE OAuth redirect
+      // Web: LINE OAuth redirect — no processing state needed (browser navigates)
       const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
       if (!channelId) {
         alert("LINE Channel ID が設定されていません");
@@ -671,10 +679,12 @@ function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: a
     } catch (e: any) {
       console.error("linkLine error:", e);
       alert(e.message || "LINE連携に失敗しました");
+      setProcessing(null);
     }
   }
 
   async function linkGoogle() {
+    setProcessing("連携中...");
     sessionStorage.setItem("link_original_user", user.id);
     const { createClient } = await import("@/lib/supabase/client");
     const supabase = createClient();
@@ -685,6 +695,7 @@ function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: a
         queryParams: { prompt: "select_account" },
       },
     });
+    // No setProcessing(null) — browser navigates away
   }
 
   function handleLinkConflict(provider: string, linkResult: any) {
@@ -751,6 +762,17 @@ function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: a
         ) : (
           <button onClick={linkGoogle} className="text-sm font-bold text-[#006728] border border-[#006728] rounded-full px-3 py-1">連携する</button>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ProcessingOverlay({ message }: { message: string }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="h-8 w-8 text-white animate-spin" />
+        <p className="text-white font-bold">{message}</p>
       </div>
     </div>
   );
