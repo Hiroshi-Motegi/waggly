@@ -187,6 +187,15 @@ export default function SettingsPage() {
                     if (resolveResult.user) {
                       setUser?.(resolveResult.user);
                     }
+                    // ローカルを選んだ場合、画像をアップロード
+                    const isLocal = source.wid === null;
+                    if (isNative() && isLocal) {
+                      try {
+                        const { collectLocalData, uploadLocalImages } = await import("@/lib/sync");
+                        const localData = await collectLocalData();
+                        await uploadLocalImages(localData);
+                      } catch {}
+                    }
                     // fullSync でサーバーとローカルを同期
                     if (isNative()) {
                       try {
