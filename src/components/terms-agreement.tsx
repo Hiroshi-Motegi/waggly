@@ -53,7 +53,6 @@ export function TermsAgreement({ onAgree, isReagreement }: TermsAgreementProps) 
       <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
         {isReagreement ? (
           <>
-            <span className="text-6xl mb-6">📋</span>
             <h2 className="text-2xl font-bold mb-3">利用規約が更新されました</h2>
             <p className="text-[#666] text-base leading-relaxed">引き続きご利用いただくには、更新された利用規約への同意が必要です。</p>
           </>
