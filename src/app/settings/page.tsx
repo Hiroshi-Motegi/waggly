@@ -35,6 +35,7 @@ interface SubscriptionData {
 export default function SettingsPage() {
   const { user, setUser } = useAuth();
   const { profile, isLoading: profileLoading } = useProfile();
+  const router = useRouter();
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [linkToast, setLinkToast] = useState<string | null>(null);
 
@@ -182,7 +183,7 @@ export default function SettingsPage() {
                     }
                     localStorage.removeItem("conflict_info");
                     sessionStorage.removeItem("conflict_info");
-                    window.location.href = "/settings";
+                    setConflictInfo(null); setConflictSelected(null); setConflictConfirm(false); setConflictProcessing(false);
                   } catch { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); }
                 }} disabled={conflictProcessing} className="flex-1 py-2.5 rounded-lg bg-[#006728] text-white text-sm font-bold disabled:opacity-50">
                   {conflictProcessing ? "処理中..." : "OK"}
@@ -252,7 +253,7 @@ export default function SettingsPage() {
                   }
                   if (result.user) {
                     setUser?.(result.user);
-                    window.location.href = "/";
+                    router.push("/");
                   } else {
                     setSigningIn(false);
                   }
@@ -313,7 +314,7 @@ export default function SettingsPage() {
                   }
                   if (result.user) {
                     setUser?.(result.user);
-                    window.location.href = "/";
+                    router.push("/");
                   } else {
                     setSigningIn(false);
                   }
@@ -559,6 +560,8 @@ function ExportSection() {
 }
 
 function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: any) => void }) {
+  const { setUser } = useAuth();
+  const router = useRouter();
   const [providers, setProviders] = useState<{ provider: string; provider_email?: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -585,8 +588,9 @@ function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: a
       const result = await res.json();
       if (result.needsRelogin) {
         const { createClient } = await import("@/lib/supabase/client");
-        createClient().auth.signOut();
-        window.location.href = "/";
+        await createClient().auth.signOut();
+        setUser?.(null);
+        router.push("/");
         return;
       }
       // プロバイダ一覧を再取得して表示更新（リロードしない）
