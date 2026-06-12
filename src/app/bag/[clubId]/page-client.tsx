@@ -82,27 +82,24 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 
   useEffect(() => {
     if (!club) return;
-    apiFetch(`/api/clubs/${clubId}/summary`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && (data.totalBalls > 0 || data.memoCount > 0)) setHasSummary(true);
-      })
-      .catch(() => {});
-    apiFetch(`/api/clubs/${clubId}/history`)
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data: ActivityItem[]) => {
-        setActivityCount(data.length);
-        setActivity(data.slice(0, 3));
-        const dist = data.find((d) =>
-          (d.type === "memo" && d.distance != null) ||
-          (d.type === "practice" && d.avg_distance != null)
-        );
-        if (dist) {
-          setLatestDistance(dist.type === "memo" ? dist.distance! : dist.avg_distance!);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setActivityLoading(false));
+    Promise.all([
+      apiFetch(`/api/clubs/${clubId}/summary`).then((r) => r.ok ? r.json() : null),
+      apiFetch(`/api/clubs/${clubId}/history`).then((r) => r.ok ? r.json() : []),
+    ]).then(([summaryData, historyData]) => {
+      if (summaryData && (summaryData.totalBalls > 0 || summaryData.memoCount > 0)) {
+        setHasSummary(true);
+      }
+      const data = historyData as ActivityItem[];
+      setActivityCount(data.length);
+      setActivity(data.slice(0, 3));
+      const dist = data.find((d) =>
+        (d.type === "memo" && d.distance != null) ||
+        (d.type === "practice" && d.avg_distance != null)
+      );
+      if (dist) {
+        setLatestDistance(dist.type === "memo" ? dist.distance! : dist.avg_distance!);
+      }
+    }).catch(() => {}).finally(() => setActivityLoading(false));
   }, [clubId, club]);
 
   async function handleStatusChange(newStatus: string, bagNumber?: number) {

@@ -111,15 +111,30 @@ async function routeLocal(
     const conds: string[] = [];
     const status = params.get("status");
     const bagNum = params.get("bag_number");
-    if (status) conds.push(`status = '${status}'`);
-    if (bagNum) conds.push(`bag_number = ${bagNum}`);
+    const values: any[] = [];
+    if (status) { conds.push("status = ?"); values.push(status); }
+    if (bagNum) { conds.push("bag_number = ?"); values.push(Number(bagNum)); }
     if (conds.length) sql += " WHERE " + conds.join(" AND ");
     sql += " ORDER BY sort_order ASC";
-    const clubs = await q(sql);
-    // Attach images for each club
-    for (const c of clubs) {
-      const imgs = await q("SELECT * FROM club_images WHERE club_id = ? ORDER BY is_primary DESC", [c.id]);
-      c.club_images = imgs;
+    const clubs = await q(sql, values);
+    // Attach images for each club (single IN query instead of N+1)
+    const clubIds = clubs.map((c: any) => c.id);
+    if (clubIds.length > 0) {
+      const placeholders = clubIds.map(() => "?").join(",");
+      const allImages = await q(
+        `SELECT * FROM club_images WHERE club_id IN (${placeholders}) ORDER BY is_primary DESC`,
+        clubIds
+      );
+      const imagesByClub = new Map<string, any[]>();
+      for (const img of allImages) {
+        if (!imagesByClub.has(img.club_id)) imagesByClub.set(img.club_id, []);
+        imagesByClub.get(img.club_id)!.push(img);
+      }
+      for (const c of clubs) {
+        c.club_images = imagesByClub.get(c.id) ?? [];
+      }
+    } else {
+      for (const c of clubs) c.club_images = [];
     }
     return clubs;
   }
@@ -144,15 +159,24 @@ async function routeLocal(
   if (match && method === "GET") {
     const rows = await q("SELECT * FROM clubs WHERE id = ?", [match[1]]);
     if (!rows.length) return null;
-    const images = await q("SELECT * FROM club_images WHERE club_id = ? ORDER BY is_primary DESC", [match[1]]);
-    const maintenances = await q("SELECT * FROM maintenances WHERE club_id = ? ORDER BY done_at DESC", [match[1]]);
+    const [images, maintenances] = await Promise.all([
+      q("SELECT * FROM club_images WHERE club_id = ? ORDER BY is_primary DESC", [match[1]]),
+      q("SELECT * FROM maintenances WHERE club_id = ? ORDER BY done_at DESC", [match[1]]),
+    ]);
     return { ...rows[0], club_images: images, maintenances };
   }
 
   // PATCH /api/clubs/:id
   if (match && method === "PATCH") {
     const clubId = match[1];
-    const fields = Object.keys(body).filter((k) => k !== "id");
+    const CLUB_COLUMNS = new Set([
+      "category", "club_number", "maker", "model", "shaft_name", "shaft_flex",
+      "loft", "lie", "length", "distance", "release_year", "memo",
+      "purchase_date", "purchase_shop", "purchase_price", "status", "bag_number",
+      "weight", "swing_weight", "frequency", "kick_point", "head_volume",
+      "head_weight", "rating", "sort_order",
+    ]);
+    const fields = Object.keys(body).filter((k) => k !== "id" && CLUB_COLUMNS.has(k));
     if (fields.length > 0) {
       const sets = fields.map((k) => `${k} = ?`).join(", ");
       const vals = fields.map((k) => body[k]);
@@ -442,9 +466,10 @@ async function routeLocal(
     const params = new URLSearchParams(path.split("?")[1] ?? "");
     const status = params.get("status");
     let sql = "SELECT * FROM accessories";
-    if (status) sql += ` WHERE status = '${status}'`;
+    const params2: any[] = [];
+    if (status) { sql += " WHERE status = ?"; params2.push(status); }
     sql += " ORDER BY created_at DESC";
-    return q(sql);
+    return q(sql, params2);
   }
 
   // POST /api/accessories
@@ -468,7 +493,10 @@ async function routeLocal(
 
   // PATCH /api/accessories/:id
   if (match && method === "PATCH") {
-    const fields = Object.keys(body).filter((k) => k !== "id");
+    const ACCESSORY_COLUMNS = new Set([
+      "category", "brand", "model", "memo", "rating", "status", "purchase_url", "image_url",
+    ]);
+    const fields = Object.keys(body).filter((k) => k !== "id" && ACCESSORY_COLUMNS.has(k));
     if (fields.length > 0) {
       const sets = fields.map((k) => `${k} = ?`).join(", ");
       const vals = fields.map((k) => body[k]);
