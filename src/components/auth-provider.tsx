@@ -92,6 +92,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setUser(result.user);
             } else if (result.user) {
               setUser(result.user);
+              // 衝突なし・アップロード不要 → 通常 sync
+              if (isNative()) {
+                try {
+                  const { fullSync } = await import("@/lib/sync");
+                  await fullSync();
+                } catch {}
+              }
             }
           }
 

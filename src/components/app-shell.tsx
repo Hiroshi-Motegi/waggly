@@ -37,19 +37,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       // Run SQLite migrations on startup
       await runMigrations();
 
-      // Initial sync
-      try {
-        await fullSync();
-      } catch (e) {
-        console.error("Initial sync failed:", e);
-      }
+      // Initial sync — auth-provider が衝突判定を行うので、
+      // ここでの fullSync はスキップ。auth-provider / resolveSessionAfterSignIn が
+      // 衝突なしと判断した後に fullSync を呼ぶ。
 
-      // Sync on network recovery
+      // Sync on network recovery (衝突未解決の場合はスキップ)
       const { Network } = await import("@capacitor/network");
       const networkHandle = await Network.addListener(
         "networkStatusChange",
         async (status) => {
-          if (status.connected) {
+          if (status.connected && !localStorage.getItem("conflict_info")) {
             try {
               await fullSync();
             } catch (e) {
@@ -60,10 +57,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       );
       removeNetworkListener = () => networkHandle.remove();
 
-      // Sync on app resume
+      // Sync on app resume (衝突未解決の場合はスキップ)
       const { App } = await import("@capacitor/app");
       const appHandle = await App.addListener("appStateChange", async (state) => {
-        if (state.isActive) {
+        if (state.isActive && !localStorage.getItem("conflict_info")) {
           const networkStatus = await Network.getStatus();
           if (networkStatus.connected) {
             try {
