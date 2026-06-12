@@ -73,6 +73,7 @@ interface ImagePickerProps {
 interface ImageCropperProps {
   imageUrl: string;          // トリミング元の画像URL（プレリサイズ済み）
   onCrop: (file: File) => void;
+  onRetake: () => void;       // 撮り直す → 画像取得フローを再実行
   onCancel: () => void;
   aspectRatio?: number;      // デフォルト1（1:1）
 }
@@ -81,7 +82,8 @@ interface ImageCropperProps {
 - フルスクリーンモーダル（背景暗転）
 - `react-cropper` で画像を表示、ピンチズーム/ドラッグで範囲選択
 - `cropperjs/dist/cropper.css` をインポート（必須）
-- 下部に「キャンセル」「決定」ボタン
+- 下部に「撮り直す」「キャンセル」「決定」ボタン
+- 「撮り直す」→ cropperを閉じてImagePickerの画像取得フローを再実行（カメラ/ファイル選択に直接戻る）
 - 決定 → `canvas.toBlob()` → File化 → `onCrop` 発火
 - 出力フォーマット: **WebP (quality 0.85)**、`canvas.toBlob('image/webp')` 非対応ブラウザでは **JPEG fallback**（`toBlob('image/jpeg', 0.85)`）
 - 最大出力幅: **1200px**（元画像が小さい場合はそのまま）
