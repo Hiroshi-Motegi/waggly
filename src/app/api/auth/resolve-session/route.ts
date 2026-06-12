@@ -144,7 +144,6 @@ export async function POST(request: NextRequest) {
       display_name: displayName,
       avatar_url: null,
       google_email: googleEmail,
-      agreed_terms_at: new Date().toISOString(),
     })
     .select("*")
     .single();

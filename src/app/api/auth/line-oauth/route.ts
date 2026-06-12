@@ -109,7 +109,6 @@ export async function POST(request: NextRequest) {
       .insert({
         display_name: displayName,
         avatar_url: null,
-        agreed_terms_at: new Date().toISOString(),
       })
       .select("id")
       .single();
