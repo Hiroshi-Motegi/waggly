@@ -106,14 +106,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Gate 1: Onboarding — use max(localStorage, DB) for flicker-free judgment
-  const localOnboardingVersion =
-    typeof window !== "undefined"
-      ? parseInt(localStorage.getItem("onboarding_version") || "0", 10)
-      : 0;
+  // Gate 1: Onboarding — DB only for logged-in, localStorage for unsigned only
   const effectiveOnboardingVersion = user
-    ? Math.max(localOnboardingVersion, user.onboarding_version ?? 0)
-    : localOnboardingVersion;
+    ? (user.onboarding_version ?? 0)
+    : (typeof window !== "undefined"
+        ? parseInt(localStorage.getItem("onboarding_version") || "0", 10)
+        : 0);
   const needsOnboarding = effectiveOnboardingVersion < ONBOARDING_VERSION;
 
   // Wait for user data before judging (prevents flash of onboarding for logged-in users)
