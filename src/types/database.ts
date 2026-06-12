@@ -14,6 +14,7 @@ export interface User {
   avatar_url: string | null;
   google_email: string | null;
   agreed_terms_at: string | null;
+  onboarding_version: number;
   created_at: string;
 }
 

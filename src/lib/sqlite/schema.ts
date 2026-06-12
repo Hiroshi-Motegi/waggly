@@ -1,5 +1,10 @@
 /** Schema version — increment when adding migrations. */
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
+
+export const SCHEMA_V5 = `
+ALTER TABLE users ADD COLUMN onboarding_version INTEGER DEFAULT 0;
+UPDATE users SET onboarding_version = 2;
+`;
 
 export const SCHEMA_V4 = `
 -- Auth redesign: reset local data (user_id references changed to independent UUIDs)
