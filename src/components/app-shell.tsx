@@ -41,6 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     let removeNetworkListener: (() => void) | undefined;
     let removeAppListener: (() => void) | undefined;
+    let unmounted = false;
 
     (async () => {
       const { runMigrations } = await import("@/lib/sqlite/migrations");
@@ -48,10 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       // Run SQLite migrations on startup
       await runMigrations();
-
-      // Initial sync — auth-provider が衝突判定を行うので、
-      // ここでの fullSync はスキップ。auth-provider / resolveSessionAfterSignIn が
-      // 衝突なしと判断した後に fullSync を呼ぶ。
+      if (unmounted) return;
 
       // Sync on network recovery (衝突未解決の場合はスキップ)
       const { Network } = await import("@capacitor/network");
@@ -67,6 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           }
         }
       );
+      if (unmounted) { networkHandle.remove(); return; }
       removeNetworkListener = () => networkHandle.remove();
 
       // Sync on app resume (衝突未解決の場合はスキップ)
@@ -83,10 +82,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           }
         }
       });
+      if (unmounted) { appHandle.remove(); return; }
       removeAppListener = () => appHandle.remove();
     })();
 
     return () => {
+      unmounted = true;
       removeNetworkListener?.();
       removeAppListener?.();
     };

@@ -1,7 +1,7 @@
 "use client";
 import { Loading } from "@/components/loading";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { nativeHref } from "@/lib/native-routes";
@@ -27,6 +27,8 @@ const statusColors: Record<string, string> = {
 export default function PlansPage() {
   const { user } = useAuth();
   const { plans, isLoading, refetch } = usePlans();
+  const refetchRef = useRef(refetch);
+  refetchRef.current = refetch;
   const searchParams = useSearchParams();
   const isGenerating = searchParams.get("generating") === "true";
   const [generating, setGenerating] = useState(isGenerating);
@@ -44,10 +46,10 @@ export default function PlansPage() {
       return;
     }
     const interval = setInterval(() => {
-      refetch();
+      refetchRef.current();
     }, 3000);
     return () => clearInterval(interval);
-  }, [generating, isLoading, plans.length, prevCount, refetch]);
+  }, [generating, isLoading, plans.length, prevCount]);
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>

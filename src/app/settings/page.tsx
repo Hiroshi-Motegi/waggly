@@ -46,7 +46,8 @@ export default function SettingsPage() {
     if (linked) {
       setLinkToast(`${linked === "google" ? "Google" : "LINE"}を連携しました`);
       window.history.replaceState(null, "", "/settings");
-      setTimeout(() => setLinkToast(null), 3000);
+      const timer = setTimeout(() => setLinkToast(null), 3000);
+      return () => clearTimeout(timer);
     }
     const conflict = params.get("conflict");
     if (conflict) {

@@ -31,6 +31,7 @@ export default function ShareSettingsPage() {
   const [isSavingUsername, setIsSavingUsername] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +83,8 @@ export default function ShareSettingsPage() {
     if (!profileUrl) return;
     navigator.clipboard.writeText(profileUrl);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
   }
 
   async function handleShowQR() {

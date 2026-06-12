@@ -22,20 +22,28 @@ export function useNetwork() {
 
     // Native: use Capacitor Network plugin
     let removeListener: (() => void) | undefined;
+    let unmounted = false;
 
     (async () => {
       const { Network } = await import("@capacitor/network");
+      if (unmounted) return;
       const status = await Network.getStatus();
+      if (unmounted) return;
       setIsOnline(status.connected);
 
       const handle = await Network.addListener(
         "networkStatusChange",
         (s) => setIsOnline(s.connected)
       );
+      if (unmounted) {
+        handle.remove();
+        return;
+      }
       removeListener = () => handle.remove();
     })();
 
     return () => {
+      unmounted = true;
       removeListener?.();
     };
   }, []);
