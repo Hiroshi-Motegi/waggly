@@ -553,6 +553,7 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
           alert(`LINE accessToken が取得できませんでした。userId=${result.userId}`);
           return;
         }
+        alert(`LINE accessToken OK: ${result.accessToken.substring(0, 20)}...`);
         const res = await apiFetch("/api/auth/link-provider", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
