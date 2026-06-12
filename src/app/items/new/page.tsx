@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, X, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { accessoryValidationSchema } from "@/lib/form-validation";
 import { FieldError } from "@/components/ui/field-error";
+import { ImagePicker } from "@/components/ui/image-picker";
 import type { AccessoryCategory, AccessoryStatus } from "@/types/database";
 
 const categories: { value: AccessoryCategory; label: string }[] = [
@@ -38,7 +39,6 @@ export default function NewItemPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     category: "" as AccessoryCategory | "",
     brand: "",
@@ -54,15 +54,6 @@ export default function NewItemPage() {
   function update(field: string, value: string | number | null | undefined) {
     setForm((prev) => ({ ...prev, [field]: value }));
     validateOnChange(field, value);
-  }
-
-  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setPendingFile(file);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(URL.createObjectURL(file));
-    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   function removeImage() {
@@ -138,22 +129,20 @@ export default function NewItemPage() {
                   </div>
                 )}
                 {!previewUrl && (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]"
-                  >
-                    <Plus className="h-6 w-6" />
-                  </button>
+                  <ImagePicker onPick={(file) => {
+                    setPendingFile(file);
+                    if (previewUrl) URL.revokeObjectURL(previewUrl);
+                    setPreviewUrl(URL.createObjectURL(file));
+                  }}>
+                    <button
+                      type="button"
+                      className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]"
+                    >
+                      <Plus className="h-6 w-6" />
+                    </button>
+                  </ImagePicker>
                 )}
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileSelect}
-              />
             </div>
 
             <div data-field="category" className="flex flex-col gap-0.5 py-1">
