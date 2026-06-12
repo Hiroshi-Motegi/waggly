@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useFormValidation } from "@/hooks/use-form-validation";
+import { accessoryValidationSchema } from "@/lib/form-validation";
+import { FieldError } from "@/components/ui/field-error";
 import type { Accessory, AccessoryCategory, AccessoryStatus } from "@/types/database";
 
 const categoryLabels: Record<AccessoryCategory, string> = {
@@ -80,6 +83,8 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [deleteImage, setDeleteImage] = useState(false);
 
+  const { validateOnChange, validateOnSubmit, fieldError } = useFormValidation(accessoryValidationSchema);
+
   useEffect(() => {
     async function load() {
       try {
@@ -99,11 +104,12 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
   function updateEdit(field: string, value: string | number | null | undefined) {
     setEditForm((prev) => ({ ...prev, [field]: value }));
+    validateOnChange(field, value);
   }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!editForm.category) return;
+    if (!validateOnSubmit(editForm as any)) return;
     setIsSubmitting(true);
     try {
       // Handle image delete
@@ -236,36 +242,39 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           </div>
 
           {/* カテゴリ */}
-          <div className="flex flex-col gap-0.5 py-1">
+          <div data-field="category" className="flex flex-col gap-0.5 py-1">
             <span className="text-sm">カテゴリ</span>
             <select
               value={editForm.category ?? ""}
               onChange={(e) => updateEdit("category", e.target.value)}
-              required
-              className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+              className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("category") ? "!border-red-400" : ""}`}
             >
               {categories.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
+            <FieldError message={fieldError("category")} />
           </div>
 
           {/* ブランド・メーカー */}
-          <div className="flex flex-col gap-0.5 py-1">
+          <div data-field="brand" className="flex flex-col gap-0.5 py-1">
             <span className="text-sm">ブランド・メーカー</span>
-            <input value={editForm.brand ?? ""} onChange={(e) => updateEdit("brand", e.target.value)} placeholder="例: Titleist" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+            <input value={editForm.brand ?? ""} onChange={(e) => updateEdit("brand", e.target.value)} placeholder="例: Titleist" className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("brand") ? "!border-red-400" : ""}`} />
+            <FieldError message={fieldError("brand")} />
           </div>
 
           {/* 商品名・モデル */}
-          <div className="flex flex-col gap-0.5 py-1">
+          <div data-field="model" className="flex flex-col gap-0.5 py-1">
             <span className="text-sm">商品名・モデル</span>
-            <input value={editForm.model ?? ""} onChange={(e) => updateEdit("model", e.target.value)} placeholder="例: Pro V1" className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+            <input value={editForm.model ?? ""} onChange={(e) => updateEdit("model", e.target.value)} placeholder="例: Pro V1" className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("model") ? "!border-red-400" : ""}`} />
+            <FieldError message={fieldError("model")} />
           </div>
 
           {/* メモ */}
-          <div className="flex flex-col gap-0.5 py-1">
+          <div data-field="memo" className="flex flex-col gap-0.5 py-1">
             <span className="text-sm">メモ</span>
-            <textarea value={editForm.memo ?? ""} onChange={(e) => updateEdit("memo", e.target.value)} placeholder="使用感など..." rows={5} className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+            <textarea value={editForm.memo ?? ""} onChange={(e) => updateEdit("memo", e.target.value)} placeholder="使用感など..." rows={5} className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("memo") ? "!border-red-400" : ""}`} />
+            <FieldError message={fieldError("memo")} />
           </div>
 
           {/* 評価 */}
@@ -288,9 +297,10 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           </div>
 
           {/* 購入URL */}
-          <div className="flex flex-col gap-0.5 py-1">
+          <div data-field="purchase_url" className="flex flex-col gap-0.5 py-1">
             <span className="text-sm">購入URL</span>
-            <input type="url" value={editForm.purchase_url ?? ""} onChange={(e) => updateEdit("purchase_url", e.target.value)} placeholder="https://..." className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+            <input type="url" value={editForm.purchase_url ?? ""} onChange={(e) => updateEdit("purchase_url", e.target.value)} placeholder="https://..." className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("purchase_url") ? "!border-red-400" : ""}`} />
+            <FieldError message={fieldError("purchase_url")} />
           </div>
 
           {/* ステータス */}

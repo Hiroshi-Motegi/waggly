@@ -6,6 +6,9 @@ import { Plus, X, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { nativeHref } from "@/lib/native-routes";
 import { PageHeader } from "@/components/layout/page-header";
+import { useFormValidation } from "@/hooks/use-form-validation";
+import { accessoryValidationSchema } from "@/lib/form-validation";
+import { FieldError } from "@/components/ui/field-error";
 import type { AccessoryCategory, AccessoryStatus } from "@/types/database";
 
 const categories: { value: AccessoryCategory; label: string }[] = [
@@ -46,8 +49,11 @@ export default function NewItemPage() {
     purchase_url: "",
   });
 
+  const { validateOnChange, validateOnSubmit, fieldError } = useFormValidation(accessoryValidationSchema);
+
   function update(field: string, value: string | number | null | undefined) {
     setForm((prev) => ({ ...prev, [field]: value }));
+    validateOnChange(field, value);
   }
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -67,7 +73,7 @@ export default function NewItemPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.category) return;
+    if (!validateOnSubmit(form as any)) return;
     setIsSubmitting(true);
     try {
       const body = {
@@ -150,29 +156,33 @@ export default function NewItemPage() {
               />
             </div>
 
-            <div className="flex flex-col gap-0.5 py-1">
+            <div data-field="category" className="flex flex-col gap-0.5 py-1">
               <span className={labelClass}>カテゴリ</span>
-              <select value={form.category} onChange={(e) => update("category", e.target.value)} required className={inputClass}>
+              <select value={form.category} onChange={(e) => update("category", e.target.value)} className={`${inputClass} ${fieldError("category") ? "!border-red-400" : ""}`}>
                 <option value="">選択してください</option>
                 {categories.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </select>
+              <FieldError message={fieldError("category")} />
             </div>
 
-            <div className="flex flex-col gap-0.5 py-1">
+            <div data-field="brand" className="flex flex-col gap-0.5 py-1">
               <span className={labelClass}>ブランド・メーカー</span>
-              <input value={form.brand} onChange={(e) => update("brand", e.target.value)} placeholder="例: Titleist" className={inputClass} />
+              <input value={form.brand} onChange={(e) => update("brand", e.target.value)} placeholder="例: Titleist" className={`${inputClass} ${fieldError("brand") ? "!border-red-400" : ""}`} />
+              <FieldError message={fieldError("brand")} />
             </div>
 
-            <div className="flex flex-col gap-0.5 py-1">
+            <div data-field="model" className="flex flex-col gap-0.5 py-1">
               <span className={labelClass}>商品名・モデル</span>
-              <input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="例: Pro V1" className={inputClass} />
+              <input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="例: Pro V1" className={`${inputClass} ${fieldError("model") ? "!border-red-400" : ""}`} />
+              <FieldError message={fieldError("model")} />
             </div>
 
-            <div className="flex flex-col gap-0.5 py-1">
+            <div data-field="memo" className="flex flex-col gap-0.5 py-1">
               <span className={labelClass}>メモ</span>
-              <textarea value={form.memo} onChange={(e) => update("memo", e.target.value)} placeholder="使用感など..." rows={5} className={inputClass} />
+              <textarea value={form.memo} onChange={(e) => update("memo", e.target.value)} placeholder="使用感など..." rows={5} className={`${inputClass} ${fieldError("memo") ? "!border-red-400" : ""}`} />
+              <FieldError message={fieldError("memo")} />
             </div>
 
             <div className="flex flex-col gap-0.5 py-1">
@@ -197,9 +207,10 @@ export default function NewItemPage() {
           {/* Section 2: その他 */}
           <h3 className="px-1 pt-2 text-base font-bold text-white">その他</h3>
           <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
-            <div className="flex flex-col gap-0.5 py-1">
+            <div data-field="purchase_url" className="flex flex-col gap-0.5 py-1">
               <span className={labelClass}>購入URL</span>
-              <input type="url" value={form.purchase_url} onChange={(e) => update("purchase_url", e.target.value)} placeholder="https://..." className={inputClass} />
+              <input type="url" value={form.purchase_url} onChange={(e) => update("purchase_url", e.target.value)} placeholder="https://..." className={`${inputClass} ${fieldError("purchase_url") ? "!border-red-400" : ""}`} />
+              <FieldError message={fieldError("purchase_url")} />
             </div>
 
             <div className="flex flex-col gap-0.5 py-1">
