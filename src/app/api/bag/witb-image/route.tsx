@@ -64,7 +64,16 @@ export async function GET(request: NextRequest) {
     }
 
     if (!authUserId) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+      // Debug: show what we found
+      const cookies = request.headers.get("cookie") ?? "";
+      const cookieParts = cookies.split(";").map(c => c.trim());
+      const supabaseHost2 = new URL(supabaseUrl).hostname.split(".")[0];
+      const prefix2 = `sb-${supabaseHost2}-auth-token`;
+      const matchingCookies = cookieParts.filter(c => c.startsWith(prefix2)).map(c => c.substring(0, 60) + "...");
+      return new Response(JSON.stringify({
+        error: "Unauthorized",
+        debug: { prefix: prefix2, matchingCookies },
+      }), { status: 401 });
     }
 
     // Resolve users.id from auth_user_id via user_providers
