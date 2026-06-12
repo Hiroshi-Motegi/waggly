@@ -58,22 +58,28 @@ export function extractProviderInfo(authUser: {
 export async function verifyLineIdToken(
   idToken: string
 ): Promise<{ sub: string; name: string; picture?: string } | null> {
-  try {
-    const res = await fetch("https://api.line.me/oauth2/v2.1/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        id_token: idToken,
-        client_id: process.env.NEXT_PUBLIC_LIFF_CHANNEL_ID!,
-      }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.sub) return null;
-    return { sub: data.sub, name: data.name, picture: data.picture };
-  } catch {
-    return null;
+  // LIFF チャネルとLINE Login チャネルの両方で検証を試みる
+  const channelIds = [
+    process.env.NEXT_PUBLIC_LIFF_CHANNEL_ID,
+    process.env.NEXT_PUBLIC_LINE_CHANNEL_ID,
+  ].filter(Boolean) as string[];
+
+  for (const clientId of channelIds) {
+    try {
+      const res = await fetch("https://api.line.me/oauth2/v2.1/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ id_token: idToken, client_id: clientId }),
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (!data.sub) continue;
+      return { sub: data.sub, name: data.name, picture: data.picture };
+    } catch {
+      continue;
+    }
   }
+  return null;
 }
 
 /**
