@@ -8,10 +8,12 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./__tests__/setup.ts"],
     globals: true,
+    css: true,
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "cropperjs/dist/cropper.css": path.resolve(__dirname, "./__tests__/helpers/empty-module.ts"),
     },
   },
 });
