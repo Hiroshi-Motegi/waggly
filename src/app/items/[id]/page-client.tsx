@@ -1,7 +1,7 @@
 "use client";
 import { Loading } from "@/components/loading";
 
-import { use, useState, useEffect, useRef } from "react";
+import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { accessoryValidationSchema } from "@/lib/form-validation";
 import { FieldError } from "@/components/ui/field-error";
+import { ImagePicker } from "@/components/ui/image-picker";
 import type { Accessory, AccessoryCategory, AccessoryStatus } from "@/types/database";
 
 const categoryLabels: Record<AccessoryCategory, string> = {
@@ -78,7 +79,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Accessory>>({});
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [deleteImage, setDeleteImage] = useState(false);
@@ -180,16 +180,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     }
   }
 
-  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPendingFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-    setDeleteImage(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }
-
   if (isLoading) return <Loading variant="light" />;
   if (!item) return <p className="p-4 text-center text-muted-foreground">アイテムが見つかりません</p>;
 
@@ -217,19 +207,32 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                   {displayUrl ? (
                     <img src={displayUrl} alt="" className="max-h-[229px] rounded object-contain" />
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="h-32 w-full rounded border-2 border-dashed border-[#c4c4c4] flex items-center justify-center text-base text-[#8b8b8b]"
-                    >
-                      写真を追加
-                    </button>
+                    <ImagePicker onPick={(file) => {
+                      if (previewUrl) URL.revokeObjectURL(previewUrl);
+                      setPendingFile(file);
+                      setPreviewUrl(URL.createObjectURL(file));
+                      setDeleteImage(false);
+                    }}>
+                      <button
+                        type="button"
+                        className="h-32 w-full rounded border-2 border-dashed border-[#c4c4c4] flex items-center justify-center text-base text-[#8b8b8b]"
+                      >
+                        写真を追加
+                      </button>
+                    </ImagePicker>
                   )}
                   {displayUrl && (
                     <div className="flex gap-2.5">
-                      <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]">
-                        変更する
-                      </button>
+                      <ImagePicker onPick={(file) => {
+                        if (previewUrl) URL.revokeObjectURL(previewUrl);
+                        setPendingFile(file);
+                        setPreviewUrl(URL.createObjectURL(file));
+                        setDeleteImage(false);
+                      }}>
+                        <button type="button" className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]">
+                          変更する
+                        </button>
+                      </ImagePicker>
                       <button type="button" onClick={handleImageDelete} className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]">
                         削除する
                       </button>
@@ -238,7 +241,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                 </div>
               );
             })()}
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
           </div>
 
           {/* カテゴリ */}
