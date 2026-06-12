@@ -334,7 +334,7 @@ export default function BagPage() {
             )}
           </div>
         )}
-        {showCharts && !isReordering && (
+        {showCharts && !isReordering && bagClubs.length > 0 && (
           <div className="flex justify-end pb-3 border-b border-[#ececec]">
             <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />
           </div>
