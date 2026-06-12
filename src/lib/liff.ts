@@ -38,6 +38,17 @@ export async function getLiffProfile() {
 }
 
 export async function liffLogout() {
+  // ログアウト前にサーバーデータをローカルに同期
+  try {
+    const { isNative } = await import("@/lib/platform");
+    if (isNative()) {
+      const { fullSync } = await import("@/lib/sync");
+      await fullSync();
+    }
+  } catch {
+    // sync 失敗してもログアウトは続行
+  }
+
   // Clear login method and dev mode flags
   localStorage.removeItem("login_method");
   localStorage.setItem("dev-logged-in", "false");
