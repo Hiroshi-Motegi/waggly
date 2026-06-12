@@ -106,7 +106,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className={`min-h-dvh border-x border-border shadow-sm bg-background ${native ? "w-full" : "mx-auto max-w-md"}`}>
         <Onboarding
-          isReagreement={!!user?.agreed_terms_at}
           onComplete={async () => {
             localStorage.setItem("onboarding_version", String(ONBOARDING_VERSION));
             if (user) {
