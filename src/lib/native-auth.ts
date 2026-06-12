@@ -76,6 +76,48 @@ export async function signInWithApple(): Promise<NativeSignInResult> {
 }
 
 /**
+ * Sign in with LINE on native platform.
+ * LINE SDK → idToken/accessToken → /api/auth/line → セッション作成 → resolve-session。
+ */
+export async function signInWithLine(): Promise<NativeSignInResult> {
+  try {
+    const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
+    if (!channelId) throw new Error("LINE channel ID not configured");
+
+    const result = await LineLogin.login({ channelId });
+
+    // LINE API でセッション作成
+    const { apiFetch: directFetch } = await import("@/lib/api-client");
+    const lineRes = await fetch(`https://waggly.jp/api/auth/line`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idToken: result.idToken,
+        displayName: result.displayName,
+        avatarUrl: result.pictureUrl,
+      }),
+    });
+
+    if (!lineRes.ok) {
+      const err = await lineRes.json().catch(() => ({}));
+      return { user: null, conflict: null, error: err.error ?? "LINE auth failed" };
+    }
+
+    const { access_token, refresh_token } = await lineRes.json();
+
+    const supabase = createClient();
+    await supabase.auth.setSession({ access_token, refresh_token });
+
+    return await resolveSessionAfterSignIn();
+  } catch (e: any) {
+    if (e.message?.includes("cancel") || e.message?.includes("CANCELLED")) {
+      return { user: null, conflict: null, error: null };
+    }
+    return { user: null, conflict: null, error: e.message ?? "LINE sign-in failed" };
+  }
+}
+
+/**
  * Native LINE login — アカウント連携用。
  * ログインではなく連携なので resolve-session は呼ばない。
  * accessToken を返し、settings ページが link-provider API に渡す。
