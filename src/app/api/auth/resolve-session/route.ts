@@ -22,6 +22,8 @@ export async function POST(request: NextRequest) {
 
   const { supabase, authUserId, userId } = auth;
 
+  console.log("[resolve-session] authUserId:", authUserId, "userId:", userId);
+
   // Case 1: auth_user_id で既存ユーザーが見つかった
   if (userId) {
     const { data: user } = await supabase
@@ -42,6 +44,7 @@ export async function POST(request: NextRequest) {
   }
 
   const providerInfo = extractProviderInfo(authUser);
+  console.log("[resolve-session] providerInfo:", providerInfo);
   if (!providerInfo) {
     return NextResponse.json({ error: "Cannot determine provider" }, { status: 400 });
   }
