@@ -4,8 +4,15 @@ import { useState } from "react";
 import { ClubBallsInput, type ClubBallsValue } from "./club-balls-input";
 import type { Club } from "@/types/database";
 import type { InlineClubMemoValue } from "@/components/club/inline-club-memo";
+import { useFormValidation } from "@/hooks/use-form-validation";
+import { FieldError } from "@/components/ui/field-error";
+import type { ValidationSchema } from "@/lib/form-validation";
 
 type BallsTab = "total" | "per_club";
+
+const practiceValidationSchema: ValidationSchema = {
+  location: { required: "練習場を入力してください" },
+};
 
 interface SessionFormProps {
   clubs: Club[];
@@ -50,8 +57,11 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
     initialData?.practice_clubs && initialData.practice_clubs.length > 0 ? "per_club" : "total"
   );
 
+  const { validateOnChange, validateOnSubmit, fieldError } = useFormValidation(practiceValidationSchema);
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validateOnSubmit({ location } as any)) return;
     const computedTotal = ballsTab === "per_club"
       ? clubBalls.reduce((sum, cb) => sum + cb.balls, 0)
       : totalBalls;
@@ -78,15 +88,16 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
             className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
           />
         </div>
-        <div className="flex flex-col gap-0.5 py-1">
+        <div className="flex flex-col gap-0.5 py-1" data-field="location">
           <span className="text-sm">練習場</span>
           <input
             list="past-locations"
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={(e) => { setLocation(e.target.value); validateOnChange("location", e.target.value); }}
             placeholder="練習場名を入力"
-            className="w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
+            className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("location") ? "!border-red-400" : ""}`}
           />
+          <FieldError message={fieldError("location")} />
           {pastLocations && pastLocations.length > 0 && (
             <datalist id="past-locations">
               {pastLocations.map((loc) => (
