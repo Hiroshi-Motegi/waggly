@@ -30,8 +30,11 @@ export async function preResizeImage(
   ctx.drawImage(bitmap, 0, 0, targetW, targetH);
   bitmap.close();
 
-  const blob = await new Promise<Blob>((resolve) => {
-    canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.95);
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((b) => {
+      if (!b) reject(new Error("canvas.toBlob returned null"));
+      else resolve(b);
+    }, "image/jpeg", 0.95);
   });
 
   return URL.createObjectURL(blob);

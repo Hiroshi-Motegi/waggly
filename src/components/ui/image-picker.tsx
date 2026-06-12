@@ -27,6 +27,7 @@ type PickerState =
 
 export function ImagePicker({ onPick, children }: ImagePickerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isPickingRef = useRef(false);
   const [state, setState] = useState<PickerState>({ step: "idle" });
   const [permissionToast, setPermissionToast] = useState(false);
 
@@ -40,27 +41,34 @@ export function ImagePicker({ onPick, children }: ImagePickerProps) {
     }
   }, []);
 
+  const pickNativeAndProcess = useCallback(async () => {
+    try {
+      const file = await pickImageNative();
+      await handleImageFile(file);
+    } catch (error) {
+      if (isCameraPermissionError(error)) {
+        setPermissionToast(true);
+        setTimeout(() => setPermissionToast(false), 3000);
+      }
+      if (!isCameraUserCancel(error)) {
+        console.error("Camera error:", error);
+      }
+      setState({ step: "idle" });
+    } finally {
+      isPickingRef.current = false;
+    }
+  }, [handleImageFile]);
+
   const handleTriggerClick = useCallback(async () => {
-    if (state.step !== "idle") return;
+    if (state.step !== "idle" || isPickingRef.current) return;
 
     if (isNative()) {
-      try {
-        const file = await pickImageNative();
-        await handleImageFile(file);
-      } catch (error) {
-        if (isCameraPermissionError(error)) {
-          setPermissionToast(true);
-          setTimeout(() => setPermissionToast(false), 3000);
-        }
-        if (!isCameraUserCancel(error)) {
-          console.error("Camera error:", error);
-        }
-        setState({ step: "idle" });
-      }
+      isPickingRef.current = true;
+      await pickNativeAndProcess();
     } else {
       fileInputRef.current?.click();
     }
-  }, [state.step, handleImageFile]);
+  }, [state.step, pickNativeAndProcess]);
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,16 +105,27 @@ export function ImagePicker({ onPick, children }: ImagePickerProps) {
     setState({ step: "idle" });
     setTimeout(() => {
       if (isNative()) {
-        handleTriggerClick();
+        isPickingRef.current = true;
+        pickNativeAndProcess();
       } else {
         fileInputRef.current?.click();
       }
     }, 0);
-  }, [state, handleTriggerClick]);
+  }, [state, pickNativeAndProcess]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleTriggerClick();
+      }
+    },
+    [handleTriggerClick]
+  );
 
   return (
     <>
-      <div onClick={handleTriggerClick} role="button" tabIndex={0}>
+      <div onClick={handleTriggerClick} onKeyDown={handleKeyDown} role="button" tabIndex={0}>
         {children}
       </div>
 
