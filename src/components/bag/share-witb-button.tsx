@@ -18,7 +18,11 @@ export function ShareWitbButton({ bagNumber }: Props) {
     setIsOpen(true);
     try {
       const res = await apiFetch(`/api/bag/witb-image?bag=${bagNumber}`);
-      if (!res.ok) throw new Error("Failed to generate image");
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        console.error(`WITB image error: ${res.status}`, errText);
+        throw new Error("Failed to generate image");
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       setImageUrl(url);
