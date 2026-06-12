@@ -9,6 +9,7 @@ import { ClubImageGallery } from "@/components/club/club-image-gallery";
 import { useClub, updateClub } from "@/hooks/use-clubs";
 import type { Club, ClubImage } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
+import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 
 export default function EditClubPageClient({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
@@ -49,6 +50,7 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      {isSubmitting && <ProcessingOverlay />}
       <div className="relative z-10 flex flex-col space-y-2">
         <PageHeader title="クラブを編集" variant="dark" />
         <div className="px-3 pt-3">

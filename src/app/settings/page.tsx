@@ -6,6 +6,7 @@ import type { User } from "@/types/database";
 import Image from "next/image";
 import Link from "next/link";
 import { Download, HelpCircle, Loader2 } from "lucide-react";
+import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api-client";
@@ -761,13 +762,4 @@ function AccountLinking({
   );
 }
 
-function ProcessingOverlay({ message }: { message: string }) {
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
-      <div className="flex flex-col items-center gap-3">
-        <Loader2 className="h-8 w-8 text-white animate-spin" />
-        <p className="text-white font-bold">{message}</p>
-      </div>
-    </div>
-  );
-}
+// ProcessingOverlay is now imported from @/components/ui/processing-overlay

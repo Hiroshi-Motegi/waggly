@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile, updateProfile, setUsername as setUsernameApi } from "@/hooks/use-profile";
 import { Loading } from "@/components/loading";
+import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 
 const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 
@@ -99,6 +100,7 @@ export default function ShareSettingsPage() {
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      {isSavingUsername && <ProcessingOverlay />}
       <div className="relative z-10 flex flex-col space-y-2">
         <PageHeader title="名刺・共有設定" variant="dark" />
 

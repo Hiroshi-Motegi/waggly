@@ -5,6 +5,7 @@ import { apiFetch } from "@/lib/api-client";
 import type { MemoCondition } from "@/types/database";
 import { getTagsByCondition } from "@/lib/memo-tags";
 import { conditionOptions } from "@/components/club/inline-club-memo";
+import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 
 interface Props {
   clubId: string;
@@ -58,6 +59,7 @@ export function StructuredMemoForm({ clubId, clubNumber, clubModel, defaultDista
 
   return (
     <>
+    {isSaving && <ProcessingOverlay />}
     <div className="flex flex-col gap-3 rounded-lg bg-white p-3">
       <div className="flex items-center gap-2">
         <span className="bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">{clubNumber}</span>

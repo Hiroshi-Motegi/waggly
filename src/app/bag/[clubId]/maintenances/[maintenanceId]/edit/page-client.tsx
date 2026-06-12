@@ -10,6 +10,7 @@ import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
+import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 
 const maintenanceTypes = [
   { value: "grip_change", label: "グリップ交換" },
@@ -82,6 +83,7 @@ export default function MaintenanceEditPage({
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      {submitting && <ProcessingOverlay />}
       <div className="relative z-10 flex flex-col space-y-2">
       <div className="px-1">
         <span className="text-sm font-bold text-white">{club?.club_number}</span>

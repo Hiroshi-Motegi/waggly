@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { nativeHref } from "@/lib/native-routes";
+import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import { PageHeader } from "@/components/layout/page-header";
 import { ClubForm } from "@/components/club/club-form";
 import { createClub } from "@/hooks/use-clubs";
@@ -46,6 +47,7 @@ export default function NewClubPage() {
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      {isSubmitting && <ProcessingOverlay />}
       <div className="relative z-10 flex flex-col space-y-2">
         <PageHeader title="クラブを追加" variant="dark" />
         <ClubForm onSubmit={handleSubmit} isSubmitting={isSubmitting} showImagePicker />

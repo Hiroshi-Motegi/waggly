@@ -11,6 +11,7 @@ import { useClubs } from "@/hooks/use-clubs";
 import { updatePracticeSession, deletePracticeSession } from "@/hooks/use-practice";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
+import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import type { PracticeSessionWithClubs } from "@/types/database";
 
 export default function EditPracticePage({ overrideSessionId }: { overrideSessionId?: string } = {}) {
@@ -124,6 +125,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      {(isSubmitting || isDeleting) && <ProcessingOverlay message={isDeleting ? "削除中..." : "保存中..."} />}
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="練習記録を編集" variant="dark" />
 
