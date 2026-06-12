@@ -22,6 +22,7 @@ const categoryLabels: Record<string, string> = {
 const categoryOrder = ["driver", "fairway_wood", "utility", "iron", "wedge", "putter"];
 
 export async function GET(request: NextRequest) {
+  try {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -151,4 +152,10 @@ export async function GET(request: NextRequest) {
       height: 810,
     }
   );
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e.message, stack: e.stack }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
