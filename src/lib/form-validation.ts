@@ -54,8 +54,8 @@ const currentYear = new Date().getFullYear();
 export const clubValidationSchema: ValidationSchema = {
   category: { required: "カテゴリを選択してください" },
   club_number: { required: "番手を選択してください" },
-  maker: { maxLength: { value: 50, message: "50文字以内で入力してください" } },
-  model: { maxLength: { value: 50, message: "50文字以内で入力してください" } },
+  maker: { required: "メーカーを入力してください", maxLength: { value: 50, message: "50文字以内で入力してください" } },
+  model: { required: "モデルを入力してください", maxLength: { value: 50, message: "50文字以内で入力してください" } },
   shaft_name: { maxLength: { value: 50, message: "50文字以内で入力してください" } },
   loft: { range: { min: 0, max: 90, message: "0〜90の範囲で入力してください" } },
   lie: { range: { min: 0, max: 90, message: "0〜90の範囲で入力してください" } },
