@@ -117,10 +117,24 @@ async function routeLocal(
     if (conds.length) sql += " WHERE " + conds.join(" AND ");
     sql += " ORDER BY sort_order ASC";
     const clubs = await q(sql, values);
-    // Attach images for each club
-    for (const c of clubs) {
-      const imgs = await q("SELECT * FROM club_images WHERE club_id = ? ORDER BY is_primary DESC", [c.id]);
-      c.club_images = imgs;
+    // Attach images for each club (single IN query instead of N+1)
+    const clubIds = clubs.map((c: any) => c.id);
+    if (clubIds.length > 0) {
+      const placeholders = clubIds.map(() => "?").join(",");
+      const allImages = await q(
+        `SELECT * FROM club_images WHERE club_id IN (${placeholders}) ORDER BY is_primary DESC`,
+        clubIds
+      );
+      const imagesByClub = new Map<string, any[]>();
+      for (const img of allImages) {
+        if (!imagesByClub.has(img.club_id)) imagesByClub.set(img.club_id, []);
+        imagesByClub.get(img.club_id)!.push(img);
+      }
+      for (const c of clubs) {
+        c.club_images = imagesByClub.get(c.id) ?? [];
+      }
+    } else {
+      for (const c of clubs) c.club_images = [];
     }
     return clubs;
   }
@@ -145,8 +159,10 @@ async function routeLocal(
   if (match && method === "GET") {
     const rows = await q("SELECT * FROM clubs WHERE id = ?", [match[1]]);
     if (!rows.length) return null;
-    const images = await q("SELECT * FROM club_images WHERE club_id = ? ORDER BY is_primary DESC", [match[1]]);
-    const maintenances = await q("SELECT * FROM maintenances WHERE club_id = ? ORDER BY done_at DESC", [match[1]]);
+    const [images, maintenances] = await Promise.all([
+      q("SELECT * FROM club_images WHERE club_id = ? ORDER BY is_primary DESC", [match[1]]),
+      q("SELECT * FROM maintenances WHERE club_id = ? ORDER BY done_at DESC", [match[1]]),
+    ]);
     return { ...rows[0], club_images: images, maintenances };
   }
 
