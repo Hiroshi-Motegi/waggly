@@ -61,10 +61,19 @@ export async function fullSync(): Promise<void> {
 
       const rows: any[] = await res.json();
 
-      // Clear local table and re-insert
+      // Clear local table and child tables
       await execute(`DELETE FROM ${table}`);
+      if (table === "clubs") {
+        await execute("DELETE FROM club_images");
+        await execute("DELETE FROM club_memos");
+        await execute("DELETE FROM maintenances");
+      }
+      if (table === "practice_sessions") {
+        await execute("DELETE FROM practice_clubs");
+      }
 
       for (const row of rows) {
+        // Insert parent row (scalar fields only)
         const keys = Object.keys(row).filter(
           (k) => !Array.isArray(row[k]) && typeof row[k] !== "object"
         );
@@ -75,6 +84,35 @@ export async function fullSync(): Promise<void> {
           `INSERT OR REPLACE INTO ${table} (${cols}) VALUES (${placeholders})`,
           values
         );
+
+        // Insert nested child rows
+        const childTables: Record<string, string> = {
+          club_images: "club_images",
+          club_memos: "club_memos",
+          maintenances: "maintenances",
+          practice_clubs: "practice_clubs",
+        };
+        for (const [key, childTable] of Object.entries(childTables)) {
+          if (Array.isArray(row[key])) {
+            for (const child of row[key]) {
+              const childKeys = Object.keys(child).filter(
+                (k) => !Array.isArray(child[k]) && typeof child[k] !== "object"
+              );
+              if (childKeys.length === 0) continue;
+              const childPlaceholders = childKeys.map(() => "?").join(", ");
+              const childValues = childKeys.map((k) => {
+                const v = child[k];
+                // JSON arrays stored as strings in SQLite
+                return typeof v === "object" ? JSON.stringify(v) : v;
+              });
+              const childCols = childKeys.join(", ");
+              await execute(
+                `INSERT OR REPLACE INTO ${childTable} (${childCols}) VALUES (${childPlaceholders})`,
+                childValues
+              );
+            }
+          }
+        }
       }
     } catch (e) {
       console.error(`Sync failed for ${table}:`, e);
