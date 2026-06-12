@@ -1,4 +1,3 @@
-// src/components/terms-agreement.tsx
 "use client";
 
 import { useState } from "react";
@@ -21,63 +20,39 @@ const termsContent = [
 
 export function TermsAgreement({ onAgree, isReagreement }: TermsAgreementProps) {
   const [agreed, setAgreed] = useState(false);
-  const [showTerms, setShowTerms] = useState(false);
 
-  if (showTerms) {
-    return (
-      <div className="flex flex-col min-h-dvh bg-white">
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <span className="text-base font-bold">利用規約</span>
-          <button
-            onClick={() => setShowTerms(false)}
-            className="text-base text-[#006728] font-bold"
-          >
-            戻る
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 text-base">
-          <p className="text-sm text-[#8b8b8b]">最終更新日: 2026年6月8日</p>
+  return (
+    <div className="flex flex-col min-h-dvh bg-[#f7fff3]">
+      <div className="flex flex-col items-center px-6 pt-8 pb-4">
+        {isReagreement && (
+          <h2 className="text-xl font-bold mb-2">利用規約が更新されました</h2>
+        )}
+        <img
+          src="/images/onboarding/waggly-ball.svg"
+          alt="Waggly"
+          width={80}
+          height={80}
+          className="mb-4"
+          style={{ animation: "smallBounce 1.2s ease-in-out infinite" }}
+        />
+      </div>
+
+      {/* 利用規約インライン表示 */}
+      <div className="flex-1 overflow-y-auto px-6 pb-4">
+        <h3 className="text-base font-bold mb-2">利用規約</h3>
+        <p className="text-xs text-[#8b8b8b] mb-3">最終更新日: 2026年6月8日</p>
+        <div className="space-y-3">
           {termsContent.map((section, i) => (
-            <div key={i} className="space-y-1">
-              <h3 className="font-bold">{section.title}</h3>
-              <p className="text-[#666]">{section.body}</p>
+            <div key={i} className="space-y-0.5">
+              <h4 className="text-sm font-bold">{section.title}</h4>
+              <p className="text-sm text-[#666] leading-relaxed">{section.body}</p>
             </div>
           ))}
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="flex flex-col min-h-dvh bg-[#f7fff3]">
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-        {isReagreement ? (
-          <>
-            <h2 className="text-2xl font-bold mb-3">利用規約が更新されました</h2>
-            <p className="text-[#666] text-base leading-relaxed">引き続きご利用いただくには、更新された利用規約への同意が必要です。</p>
-          </>
-        ) : (
-          <>
-            <h2 className="text-[32px] font-bold text-[#139847] mb-6">
-              さあ、はじめよう！
-            </h2>
-            <img
-              src="/images/onboarding/waggly-ball.svg"
-              alt="Waggly"
-              width={128}
-              height={128}
-              className="mt-4 mb-6"
-              style={{ animation: "smallBounce 1.2s ease-in-out infinite" }}
-            />
-            <p className="text-base font-bold text-[#2c2c2c] leading-relaxed">
-              ワグリーを利用するためには
-              <br />
-              利用規約の同意が必要です
-            </p>
-          </>
-        )}
-      </div>
-      <div className="w-full px-6 pb-6 space-y-4">
+      {/* 同意 + ボタン */}
+      <div className="sticky bottom-0 w-full px-6 pb-6 pt-3 bg-[#f7fff3] border-t border-[#e0e0e0] space-y-3">
         <label className="flex items-center justify-center gap-2 text-sm cursor-pointer">
           <input
             type="checkbox"
@@ -85,10 +60,7 @@ export function TermsAgreement({ onAgree, isReagreement }: TermsAgreementProps) 
             onChange={(e) => setAgreed(e.target.checked)}
             className="h-5 w-5 rounded accent-[#006728]"
           />
-          <span className="text-[#666]">
-            <button onClick={() => setShowTerms(true)} className="underline text-[#006728]">利用規約</button>
-            に同意します
-          </span>
+          <span className="text-[#666]">利用規約に同意します</span>
         </label>
         <button
           disabled={!agreed}
