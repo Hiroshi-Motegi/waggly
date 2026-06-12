@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, lazy, Suspense } from "react";
+import { createPortal } from "react-dom";
 import { isNative } from "@/lib/platform";
 import {
   pickImageNative,
@@ -139,30 +140,34 @@ export function ImagePicker({ onPick, children }: ImagePickerProps) {
         />
       )}
 
-      {state.step === "cropping" && (
-        <Suspense
-          fallback={
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
-              <div className="text-white">読み込み中...</div>
-            </div>
-          }
-        >
-          <ImageCropper
-            imageUrl={state.imageUrl}
-            onCrop={handleCrop}
-            onRetake={handleRetake}
-            onCancel={handleCancel}
-          />
-        </Suspense>
-      )}
+      {state.step === "cropping" &&
+        createPortal(
+          <Suspense
+            fallback={
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
+                <div className="text-white">読み込み中...</div>
+              </div>
+            }
+          >
+            <ImageCropper
+              imageUrl={state.imageUrl}
+              onCrop={handleCrop}
+              onRetake={handleRetake}
+              onCancel={handleCancel}
+            />
+          </Suspense>,
+          document.body
+        )}
 
-      {permissionToast && (
-        <div className="fixed bottom-[calc(var(--bottom-nav-height)+16px)] left-1/2 -translate-x-1/2 z-50">
-          <div className="rounded-full bg-[#333] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
-            カメラの使用を許可してください
-          </div>
-        </div>
-      )}
+      {permissionToast &&
+        createPortal(
+          <div className="fixed bottom-[calc(var(--bottom-nav-height)+16px)] left-1/2 -translate-x-1/2 z-50">
+            <div className="rounded-full bg-[#333] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
+              カメラの使用を許可してください
+            </div>
+          </div>,
+          document.body
+        )}
     </>
   );
 }
