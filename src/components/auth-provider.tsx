@@ -49,8 +49,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (existingAuth) {
           // resolve-session を呼んでユーザーを解決
           const { apiFetch } = await import("@/lib/api-client");
+
+          // ネイティブの場合、ローカルデータの有無を確認
+          let hasLocalData = false;
+          if (isNative()) {
+            try {
+              const { getLocalDataSummary } = await import("@/lib/sync");
+              const localSummary = await getLocalDataSummary();
+              hasLocalData =
+                localSummary.counts.clubs > 0 ||
+                localSummary.counts.practices > 0 ||
+                localSummary.counts.accessories > 0;
+            } catch {}
+          }
+
           const res = await apiFetch("/api/auth/resolve-session", {
             method: "POST",
+            ...(hasLocalData ? {
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ hasLocalData: true }),
+            } : {}),
           });
 
           if (res.ok) {
@@ -59,6 +77,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               if (isNative()) {
                 localStorage.setItem("conflict_info", JSON.stringify(result));
               }
+            } else if (result.uploadLocal && isNative()) {
+              // サーバーにデータがない → ローカルデータをアップロード
+              try {
+                const { collectLocalData, fullSync } = await import("@/lib/sync");
+                const localData = await collectLocalData();
+                await apiFetch("/api/auth/upload-local-data", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ localData }),
+                });
+                await fullSync();
+              } catch {}
+              setUser(result.user);
             } else if (result.user) {
               setUser(result.user);
             }
