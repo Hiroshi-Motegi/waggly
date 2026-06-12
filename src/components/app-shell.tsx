@@ -95,12 +95,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   // Show onboarding:
-  // - Native: on first launch (localStorage flag, no login needed)
-  // - Web: when logged-in user hasn't agreed to terms
-  const needsAgreementWeb = !native && user && (
+  // - Logged-in (any platform): check agreed_terms_at in DB (cross-device)
+  // - Not logged-in (native only): fallback to localStorage flag
+  const needsAgreement = user && (
     !user.agreed_terms_at || new Date(user.agreed_terms_at) < new Date(TERMS_UPDATED_AT)
   );
-  const needsOnboarding = !onboardingDone && (needsAgreementWeb || native);
+  const needsOnboarding = needsAgreement || (!user && native && !onboardingDone);
 
   if (needsOnboarding) {
     return (
