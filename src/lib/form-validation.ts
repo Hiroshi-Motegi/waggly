@@ -75,7 +75,7 @@ export const clubValidationSchema: ValidationSchema = {
 export const accessoryValidationSchema: ValidationSchema = {
   category: { required: "カテゴリを選択してください" },
   brand: { maxLength: { value: 50, message: "50文字以内で入力してください" } },
-  model: { maxLength: { value: 50, message: "50文字以内で入力してください" } },
+  model: { required: "商品名・モデルを入力してください", maxLength: { value: 50, message: "50文字以内で入力してください" } },
   memo: { maxLength: { value: 500, message: "500文字以内で入力してください" } },
   purchase_url: { pattern: { value: /^https?:\/\/.+/, message: "有効なURLを入力してください" } },
 };
