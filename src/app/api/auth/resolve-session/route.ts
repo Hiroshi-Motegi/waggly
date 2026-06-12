@@ -188,7 +188,7 @@ export async function PUT(request: NextRequest) {
   const body = await request.json();
   const { choice, existingUserId, provider, providerSub, localData } = body;
 
-  if (!choice || !existingUserId || !provider || !providerSub) {
+  if (!choice || !existingUserId) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -197,12 +197,15 @@ export async function PUT(request: NextRequest) {
     await insertLocalData(supabase, existingUserId, localData);
   }
 
-  // auth_user_id を既存ユーザーの user_providers に紐づけ
-  await supabase
-    .from("user_providers")
-    .update({ auth_user_id: authUserId })
-    .eq("provider", provider)
-    .eq("provider_sub", providerSub);
+  // provider + providerSub がある場合のみ user_providers を更新
+  // (Case 2 の初回サインイン衝突解決時のみ。Case 1 の再ログイン衝突では不要)
+  if (provider && providerSub) {
+    await supabase
+      .from("user_providers")
+      .update({ auth_user_id: authUserId })
+      .eq("provider", provider)
+      .eq("provider_sub", providerSub);
+  }
 
   const { data: user } = await supabase
     .from("users")
