@@ -181,8 +181,19 @@ export default function SettingsPage() {
                       setConflictProcessing(false); setConflictConfirm(false);
                       return;
                     }
+                    const resolveResult = await res.json();
                     localStorage.removeItem("conflict_info");
                     sessionStorage.removeItem("conflict_info");
+                    if (resolveResult.user) {
+                      setUser?.(resolveResult.user);
+                    }
+                    // fullSync でサーバーとローカルを同期
+                    if (isNative()) {
+                      try {
+                        const { fullSync } = await import("@/lib/sync");
+                        await fullSync();
+                      } catch {}
+                    }
                     setConflictInfo(null); setConflictSelected(null); setConflictConfirm(false); setConflictProcessing(false);
                   } catch { alert("処理に失敗しました"); setConflictProcessing(false); setConflictConfirm(false); }
                 }} disabled={conflictProcessing} className="flex-1 py-2.5 rounded-lg bg-[#006728] text-white text-sm font-bold disabled:opacity-50">
