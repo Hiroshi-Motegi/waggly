@@ -252,6 +252,14 @@ export async function DELETE(request: NextRequest) {
   }
 
   const needsRelogin = !sessionStillValid;
+  console.log("[link-provider DELETE]", {
+    provider,
+    currentAuthUserId,
+    targetAuthUserId: targetProvider.auth_user_id,
+    remainingAuthUserIds: remainingProviders.map((p: any) => p.auth_user_id),
+    sessionStillValid,
+    needsRelogin,
+  });
 
   // Google 解除時は google_email もクリア
   if (provider === "google") {
