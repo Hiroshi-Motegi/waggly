@@ -51,16 +51,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const { apiFetch } = await import("@/lib/api-client");
 
           // ネイティブの場合、ローカルデータの有無を確認
+          // ログアウト前に fullSync 済みならデータは同一 → 衝突チェック不要
           let hasLocalData = false;
           if (isNative()) {
-            try {
-              const { getLocalDataSummary } = await import("@/lib/sync");
-              const localSummary = await getLocalDataSummary();
-              hasLocalData =
-                localSummary.counts.clubs > 0 ||
-                localSummary.counts.practices > 0 ||
-                localSummary.counts.accessories > 0;
-            } catch {}
+            const syncedBeforeLogout = localStorage.getItem("synced_before_logout");
+            if (syncedBeforeLogout) {
+              localStorage.removeItem("synced_before_logout");
+              // ローカルは最新 → 衝突チェックスキップ
+            } else {
+              try {
+                const { getLocalDataSummary } = await import("@/lib/sync");
+                const localSummary = await getLocalDataSummary();
+                hasLocalData =
+                  localSummary.counts.clubs > 0 ||
+                  localSummary.counts.practices > 0 ||
+                  localSummary.counts.accessories > 0;
+              } catch {}
+            }
           }
 
           const res = await apiFetch("/api/auth/resolve-session", {

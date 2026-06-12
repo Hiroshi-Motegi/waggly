@@ -156,12 +156,19 @@ async function resolveSessionAfterSignIn(): Promise<NativeSignInResult> {
 
   resetLocalModeCache();
 
+  // ログアウト前に fullSync 済みならデータは同一 → 衝突チェック不要
+  const syncedBeforeLogout = localStorage.getItem("synced_before_logout");
+  if (syncedBeforeLogout) {
+    localStorage.removeItem("synced_before_logout");
+  }
+
   // ローカルデータの有無を確認
   const localSummary = await getLocalDataSummary();
-  const hasLocalData =
+  const hasLocalData = !syncedBeforeLogout && (
     localSummary.counts.clubs > 0 ||
     localSummary.counts.practices > 0 ||
-    localSummary.counts.accessories > 0;
+    localSummary.counts.accessories > 0
+  );
 
   // resolve-session を呼ぶ
   const res = await apiFetch("/api/auth/resolve-session", {

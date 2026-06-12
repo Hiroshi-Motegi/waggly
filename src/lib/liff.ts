@@ -44,6 +44,8 @@ export async function liffLogout() {
     if (isNative()) {
       const { fullSync } = await import("@/lib/sync");
       await fullSync();
+      // sync 成功 → ローカルは最新。再ログイン時の衝突チェックをスキップするためフラグ
+      localStorage.setItem("synced_before_logout", "true");
     }
   } catch {
     // sync 失敗してもログアウトは続行
