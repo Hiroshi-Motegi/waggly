@@ -1,5 +1,5 @@
 // src/app/api/bag/witb-image/route.tsx
-import { ImageResponse } from "@vercel/og";
+import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
