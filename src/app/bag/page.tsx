@@ -1,7 +1,7 @@
 "use client";
 import { Loading } from "@/components/loading";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -184,11 +184,14 @@ export default function BagPage() {
 
   const isBagView = statusFilter === "bag1" || statusFilter === "bag2";
 
-  const bagClubs = clubs.filter((c) => c.status === "bag" && c.bag_number === (statusFilter === "bag2" ? 2 : 1));
-  const distanceData = getDistanceStaircaseData(bagClubs);
-  const weightData = getWeightFlowData(bagClubs);
-  const distanceInsights = getDistanceInsights(distanceData);
-  const weightInsights = getWeightInsights(weightData);
+  const bagClubs = useMemo(
+    () => clubs.filter((c) => c.status === "bag" && c.bag_number === (statusFilter === "bag2" ? 2 : 1)),
+    [clubs, statusFilter]
+  );
+  const distanceData = useMemo(() => getDistanceStaircaseData(bagClubs), [bagClubs]);
+  const weightData = useMemo(() => getWeightFlowData(bagClubs), [bagClubs]);
+  const distanceInsights = useMemo(() => getDistanceInsights(distanceData), [distanceData]);
+  const weightInsights = useMemo(() => getWeightInsights(weightData), [weightData]);
   const showCharts = statusFilter === "bag1" || statusFilter === "bag2";
 
   const displayClubs = isReordering
