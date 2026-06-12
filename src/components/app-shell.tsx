@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
@@ -24,6 +24,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setOnboardingDone(seenVersion >= ONBOARDING_VERSION);
     setOnboardingChecked(true);
   }, []);
+
+  // Merge localStorage → DB on login (one-time)
+  const mergedRef = useRef(false);
+  useEffect(() => {
+    if (!user || mergedRef.current) return;
+    mergedRef.current = true;
+    const localVersion = parseInt(localStorage.getItem("onboarding_version") || "0", 10);
+    if (localVersion > (user.onboarding_version ?? 0)) {
+      apiFetch("/api/auth/onboarding-complete", { method: "POST" }).catch(() => {});
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isNative()) return;
@@ -95,14 +106,42 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Gate 1: Onboarding (app intro) — localStorage only, login state irrelevant
-  if (!onboardingDone) {
+  // Gate 1: Onboarding — use max(localStorage, DB) for flicker-free judgment
+  const localOnboardingVersion =
+    typeof window !== "undefined"
+      ? parseInt(localStorage.getItem("onboarding_version") || "0", 10)
+      : 0;
+  const effectiveOnboardingVersion = user
+    ? Math.max(localOnboardingVersion, user.onboarding_version ?? 0)
+    : localOnboardingVersion;
+  const needsOnboarding = effectiveOnboardingVersion < ONBOARDING_VERSION;
+
+  // Wait for user data before judging (prevents flash of onboarding for logged-in users)
+  if (!native && isLoading) {
+    return (
+      <div className="mx-auto max-w-md min-h-dvh flex items-center justify-center bg-[#ebf1eb]">
+        <Loading />
+      </div>
+    );
+  }
+
+  if (needsOnboarding) {
     return (
       <div className={`min-h-dvh border-x border-border shadow-sm bg-background ${native ? "w-full" : "mx-auto max-w-md"}`}>
         <Onboarding
-          onComplete={() => {
-            localStorage.setItem("onboarding_version", String(ONBOARDING_VERSION));
-            setOnboardingDone(true);
+          onComplete={async () => {
+            if (user) {
+              try {
+                await apiFetch("/api/auth/onboarding-complete", { method: "POST" });
+                localStorage.setItem("onboarding_version", String(ONBOARDING_VERSION));
+              } catch {
+                // API failed — don't update localStorage, retry next time
+              }
+              window.location.reload();
+            } else {
+              localStorage.setItem("onboarding_version", String(ONBOARDING_VERSION));
+              setOnboardingDone(true);
+            }
           }}
         />
       </div>
@@ -125,15 +164,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             window.location.reload();
           }}
         />
-      </div>
-    );
-  }
-
-  // Show loading (web only, after onboarding check)
-  if (isLoading && !native) {
-    return (
-      <div className="mx-auto max-w-md min-h-dvh flex items-center justify-center bg-[#ebf1eb]">
-        <Loading />
       </div>
     );
   }
