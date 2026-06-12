@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, X, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
@@ -40,6 +40,13 @@ export default function NewItemPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
   const [form, setForm] = useState({
     category: "" as AccessoryCategory | "",
     brand: "",

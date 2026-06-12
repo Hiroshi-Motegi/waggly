@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, lazy, Suspense } from "react";
+import { useRef, useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { isNative } from "@/lib/platform";
 import {
@@ -29,8 +29,15 @@ type PickerState =
 export function ImagePicker({ onPick, children }: ImagePickerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isPickingRef = useRef(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [state, setState] = useState<PickerState>({ step: "idle" });
   const [permissionToast, setPermissionToast] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   const handleImageFile = useCallback(async (file: File) => {
     setState({ step: "loading" });
@@ -49,7 +56,7 @@ export function ImagePicker({ onPick, children }: ImagePickerProps) {
     } catch (error) {
       if (isCameraPermissionError(error)) {
         setPermissionToast(true);
-        setTimeout(() => setPermissionToast(false), 3000);
+        toastTimerRef.current = setTimeout(() => setPermissionToast(false), 3000);
       }
       if (!isCameraUserCancel(error)) {
         console.error("Camera error:", error);

@@ -84,6 +84,12 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [deleteImage, setDeleteImage] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
   const { validateOnChange, validateOnSubmit, fieldError } = useFormValidation(accessoryValidationSchema);
 
   useEffect(() => {

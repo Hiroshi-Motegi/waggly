@@ -99,11 +99,11 @@ function ClubAccordion({ club, entry, onUpdate, isLast, open, onToggle }: {
   const headerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (open && headerRef.current) {
-      setTimeout(() => {
-        headerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 50);
-    }
+    if (!open || !headerRef.current) return;
+    const timer = setTimeout(() => {
+      headerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+    return () => clearTimeout(timer);
   }, [open]);
 
   return (

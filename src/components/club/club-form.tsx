@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, X } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/hooks/use-auth";
@@ -70,6 +70,12 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
   const { user } = useAuth();
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const [useCustomNumber, setUseCustomNumber] = useState(() => {
     if (!initialData?.club_number || !initialData?.category) return false;

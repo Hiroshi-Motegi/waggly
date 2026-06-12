@@ -39,12 +39,13 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       document.documentElement.scrollTop = 0;
     };
 
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
     if (prev !== pathname) {
       scrollToTop();
-      // Beat Next.js router scroll restoration with multiple delayed attempts
       requestAnimationFrame(scrollToTop);
-      setTimeout(scrollToTop, 50);
-      setTimeout(scrollToTop, 150);
+      timers.push(setTimeout(scrollToTop, 50));
+      timers.push(setTimeout(scrollToTop, 150));
     }
 
     if (shouldSlide(prev, pathname)) {
@@ -53,7 +54,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       requestAnimationFrame(() => {
         setAnimClass("translate-x-0 opacity-100 transition-all duration-250 ease-out");
       });
-      return;
+      return () => timers.forEach(clearTimeout);
     }
 
     // Fade in for all other navigations (including initial load)
@@ -61,6 +62,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     requestAnimationFrame(() => {
       setAnimClass("opacity-100 transition-opacity duration-300 ease-out");
     });
+
+    return () => timers.forEach(clearTimeout);
   }, [pathname]);
 
   return (
