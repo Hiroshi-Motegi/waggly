@@ -7,7 +7,7 @@ interface OnboardingProps {
   onComplete: () => void;
 }
 
-const TOTAL_SLIDES = 3;
+const TOTAL_SLIDES = 4;
 
 function Slide1() {
   return (
@@ -149,6 +149,24 @@ function Slide3() {
   );
 }
 
+function Slide4() {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+      <h2 className="text-[32px] font-bold text-[#139847] mb-6">
+        さあ、はじめよう！
+      </h2>
+      <img
+        src="/images/onboarding/waggly-ball.svg"
+        alt="Waggly"
+        width={128}
+        height={128}
+        className="mt-4 mb-6"
+        style={{ animation: "smallBounce 1.2s ease-in-out infinite" }}
+      />
+    </div>
+  );
+}
+
 export function Onboarding({ onComplete }: OnboardingProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -167,6 +185,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       {currentSlide === 0 && <Slide1 />}
       {currentSlide === 1 && <Slide2 />}
       {currentSlide === 2 && <Slide3 />}
+      {currentSlide === 3 && <Slide4 />}
 
       <div className="fixed bottom-0 left-0 right-0 z-50 py-3 flex flex-col items-center gap-3 overflow-hidden">
         <div className="absolute inset-0 bg-[#139847]" />
