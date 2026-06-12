@@ -571,8 +571,10 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
           handleLinkConflict("line", linkResult);
           return;
         }
-        // LINE SDK のネイティブUI復帰後、WebView の状態をリセット
-        setTimeout(() => window.location.reload(), 100);
+        // LINE SDK のネイティブUI復帰後、WebView のタッチ状態をリセット
+        // window.location.reload() ではタッチインターセプトが残るため、
+        // 別URLに一旦遷移してから戻す
+        window.location.href = "/settings?linked=line&t=" + Date.now();
         return;
       }
       // Web: LINE OAuth redirect
