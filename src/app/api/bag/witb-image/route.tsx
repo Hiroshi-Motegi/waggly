@@ -1,13 +1,12 @@
 // src/app/api/bag/witb-image/route.tsx
 import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
-import { readFile } from "fs/promises";
-import { join } from "path";
 
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
-async function loadImageBase64(path: string, mime: string): Promise<string> {
-  const buf = await readFile(join(process.cwd(), path));
+async function loadImageBase64(url: string, mime: string): Promise<string> {
+  const res = await fetch(url);
+  const buf = Buffer.from(await res.arrayBuffer());
   return `data:${mime};base64,${buf.toString("base64")}`;
 }
 
@@ -57,10 +56,11 @@ export async function GET(request: NextRequest) {
     }))
     .filter((g) => g.clubs.length > 0);
 
+  const origin = request.nextUrl.origin;
   const [grassBg, ballLogo, wagglyText] = await Promise.all([
-    loadImageBase64("public/images/grass-bg.jpg", "image/jpeg"),
-    loadImageBase64("public/images/witb-ball-logo.png", "image/png"),
-    loadImageBase64("public/images/witb-waggly-text.png", "image/png"),
+    loadImageBase64(`${origin}/images/grass-bg.jpg`, "image/jpeg"),
+    loadImageBase64(`${origin}/images/witb-ball-logo.png`, "image/png"),
+    loadImageBase64(`${origin}/images/witb-waggly-text.png`, "image/png"),
   ]);
 
   return new ImageResponse(
