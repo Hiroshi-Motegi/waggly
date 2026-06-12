@@ -22,11 +22,13 @@ export async function POST(request: NextRequest) {
 
   const { supabase, authUserId, userId } = auth;
 
-  // request body の hasLocalData を先に読む
+  // request body を先に読む
   let hasLocalData = false;
+  let localLastUpdated: string | null = null;
   try {
     const body = await request.json();
     hasLocalData = body?.hasLocalData ?? false;
+    localLastUpdated = body?.localLastUpdated ?? null;
   } catch {
     // bodyなし = Web or ローカルデータなし
   }
@@ -49,7 +51,13 @@ export async function POST(request: NextRequest) {
           serverSummary.counts.accessories > 0;
 
         if (serverHasData) {
-          // 両方にデータがある → 衝突
+          // 最終更新日時が同じならデータは同一 → 衝突スキップ
+          if (localLastUpdated && serverSummary.lastUpdated &&
+              localLastUpdated === serverSummary.lastUpdated) {
+            return NextResponse.json({ user, conflict: false });
+          }
+
+          // 両方にデータがあり日時が異なる → 衝突
           return NextResponse.json({
             conflict: true,
             existingUser: {

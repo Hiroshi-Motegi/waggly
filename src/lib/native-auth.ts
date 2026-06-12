@@ -156,25 +156,18 @@ async function resolveSessionAfterSignIn(): Promise<NativeSignInResult> {
 
   resetLocalModeCache();
 
-  // ログアウト前に fullSync 済みならデータは同一 → 衝突チェック不要
-  const syncedBeforeLogout = localStorage.getItem("synced_before_logout");
-  if (syncedBeforeLogout) {
-    localStorage.removeItem("synced_before_logout");
-  }
-
-  // ローカルデータの有無を確認
+  // ローカルデータの有無と最終更新日時を確認
   const localSummary = await getLocalDataSummary();
-  const hasLocalData = !syncedBeforeLogout && (
+  const hasLocalData =
     localSummary.counts.clubs > 0 ||
     localSummary.counts.practices > 0 ||
-    localSummary.counts.accessories > 0
-  );
+    localSummary.counts.accessories > 0;
 
-  // resolve-session を呼ぶ
+  // resolve-session を呼ぶ（日時比較でサーバー側が衝突判定）
   const res = await apiFetch("/api/auth/resolve-session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ hasLocalData }),
+    body: JSON.stringify({ hasLocalData, localLastUpdated: localSummary.lastUpdated }),
   });
 
   if (!res.ok) {

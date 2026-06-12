@@ -50,31 +50,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // resolve-session を呼んでユーザーを解決
           const { apiFetch } = await import("@/lib/api-client");
 
-          // ネイティブの場合、ローカルデータの有無を確認
-          // ログアウト前に fullSync 済みならデータは同一 → 衝突チェック不要
+          // ネイティブの場合、ローカルデータの有無と最終更新日時を確認
           let hasLocalData = false;
+          let localLastUpdated: string | null = null;
           if (isNative()) {
-            const syncedBeforeLogout = localStorage.getItem("synced_before_logout");
-            if (syncedBeforeLogout) {
-              localStorage.removeItem("synced_before_logout");
-              // ローカルは最新 → 衝突チェックスキップ
-            } else {
-              try {
-                const { getLocalDataSummary } = await import("@/lib/sync");
-                const localSummary = await getLocalDataSummary();
-                hasLocalData =
-                  localSummary.counts.clubs > 0 ||
-                  localSummary.counts.practices > 0 ||
-                  localSummary.counts.accessories > 0;
-              } catch {}
-            }
+            try {
+              const { getLocalDataSummary } = await import("@/lib/sync");
+              const localSummary = await getLocalDataSummary();
+              hasLocalData =
+                localSummary.counts.clubs > 0 ||
+                localSummary.counts.practices > 0 ||
+                localSummary.counts.accessories > 0;
+              localLastUpdated = localSummary.lastUpdated;
+            } catch {}
           }
 
           const res = await apiFetch("/api/auth/resolve-session", {
             method: "POST",
             ...(hasLocalData ? {
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ hasLocalData: true }),
+              body: JSON.stringify({ hasLocalData: true, localLastUpdated }),
             } : {}),
           });
 
