@@ -81,20 +81,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (existingProvider) {
-    // 既存ユーザー → 表示名更新 + auth_user_id を LINE auth user に設定
-    // アバターは既に Storage に保存済みなら上書きしない
-    const { data: currentUser } = await supabaseAdmin
-      .from("users")
-      .select("avatar_url")
-      .eq("id", existingProvider.user_id)
-      .single();
-    const hasStoredAvatar = currentUser?.avatar_url?.includes("supabase");
-    const updateData: any = { display_name: displayName };
-    if (!hasStoredAvatar && avatarUrl) {
-      const storedUrl = await uploadAvatarFromUrl(supabaseAdmin, existingProvider.user_id, avatarUrl);
-      updateData.avatar_url = storedUrl;
-    }
-    await supabaseAdmin.from("users").update(updateData).eq("id", existingProvider.user_id);
+    // 既存ユーザー → プロフィールは上書きしない。auth_user_id の更新のみ。
     await supabaseAdmin
       .from("user_providers")
       .update({ auth_user_id: authUserId })
