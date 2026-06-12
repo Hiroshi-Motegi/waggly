@@ -567,7 +567,8 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
           handleLinkConflict("line", linkResult);
           return;
         }
-        window.location.href = "/settings";
+        // LINE SDK のネイティブUI復帰後、WebView の状態をリセット
+        setTimeout(() => window.location.reload(), 100);
         return;
       }
       // Web: LINE OAuth redirect
