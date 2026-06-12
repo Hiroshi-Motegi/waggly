@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { PageTransition } from "@/components/layout/page-transition";
 import { Onboarding } from "@/components/onboarding";
+import { TermsAgreement } from "@/components/terms-agreement";
 import { Loading } from "@/components/loading";
 import { TERMS_UPDATED_AT, ONBOARDING_VERSION } from "@/lib/constants";
 import { isNative } from "@/lib/platform";
@@ -94,24 +95,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show onboarding:
-  // - Logged-in (any platform): check agreed_terms_at in DB (cross-device)
-  // - Not logged-in (native only): fallback to localStorage flag
-  const needsAgreement = user && (
-    !user.agreed_terms_at || new Date(user.agreed_terms_at) < new Date(TERMS_UPDATED_AT)
-  );
-  const needsOnboarding = needsAgreement || (!user && native && !onboardingDone);
-
-  if (needsOnboarding) {
+  // Gate 1: Onboarding (app intro) — localStorage only, login state irrelevant
+  if (!onboardingDone) {
     return (
       <div className={`min-h-dvh border-x border-border shadow-sm bg-background ${native ? "w-full" : "mx-auto max-w-md"}`}>
         <Onboarding
-          onComplete={async () => {
+          onComplete={() => {
             localStorage.setItem("onboarding_version", String(ONBOARDING_VERSION));
-            if (user) {
-              await apiFetch("/api/auth/agree", { method: "POST" });
-            }
             setOnboardingDone(true);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Gate 2: Terms agreement — logged-in users only, DB agreed_terms_at
+  // Onboarding and terms are fully independent; children not rendered until both pass
+  const needsTermsAgreement = user && (
+    !user.agreed_terms_at || new Date(user.agreed_terms_at) < new Date(TERMS_UPDATED_AT)
+  );
+
+  if (needsTermsAgreement) {
+    return (
+      <div className={`min-h-dvh border-x border-border shadow-sm bg-background ${native ? "w-full" : "mx-auto max-w-md"}`}>
+        <TermsAgreement
+          isReagreement={!!user.agreed_terms_at}
+          onAgree={async () => {
+            await apiFetch("/api/auth/agree", { method: "POST" });
+            window.location.reload();
           }}
         />
       </div>
