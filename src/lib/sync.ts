@@ -139,12 +139,16 @@ export async function getLocalDataSummary(): Promise<DataSummary> {
 
   let lastUpdated: string | null = metaRows.length > 0 ? metaRows[0].value : null;
 
-  // Fallback: if no sync_meta entry, use MAX(created_at) from tables
+  // Fallback: if no sync_meta entry, use MAX(created_at) from all tables
   if (!lastUpdated) {
     const dates = await query<{ latest: string | null }>(
       `SELECT MAX(latest) as latest FROM (
         SELECT MAX(created_at) as latest FROM clubs
+        UNION ALL SELECT MAX(created_at) FROM club_images
+        UNION ALL SELECT MAX(created_at) FROM club_memos
+        UNION ALL SELECT MAX(created_at) FROM maintenances
         UNION ALL SELECT MAX(created_at) FROM practice_sessions
+        UNION ALL SELECT MAX(created_at) FROM practice_clubs
         UNION ALL SELECT MAX(created_at) FROM accessories
       )`
     );

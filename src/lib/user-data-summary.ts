@@ -9,16 +9,23 @@ export async function getUserDataSummary(supabase: any, userId: string) {
     supabase.from("accessories").select("*", { count: "exact", head: true }).eq("user_id", userId),
   ]);
 
-  const [latestClub, latestPractice, latestAccessory] = await Promise.all([
+  // 全テーブルの最終更新を取得（子テーブルはクラブ経由）
+  const [latestClub, latestPractice, latestAccessory, latestClubImage, latestClubMemo, latestMaintenance] = await Promise.all([
     supabase.from("clubs").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("practice_sessions").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("accessories").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("club_images").select("created_at, club:clubs!inner(user_id)").eq("club.user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("club_memos").select("created_at, club:clubs!inner(user_id)").eq("club.user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("maintenances").select("created_at, club:clubs!inner(user_id)").eq("club.user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   const dates = [
     latestClub.data?.created_at,
     latestPractice.data?.created_at,
     latestAccessory.data?.created_at,
+    latestClubImage.data?.created_at,
+    latestClubMemo.data?.created_at,
+    latestMaintenance.data?.created_at,
   ].filter(Boolean) as string[];
 
   return {
