@@ -245,13 +245,19 @@ export default function SettingsPage() {
                     setSigningIn(false);
                     return;
                   }
+                  if (result.error) {
+                    alert(`サインインエラー: ${result.error}`);
+                    setSigningIn(false);
+                    return;
+                  }
                   if (result.user) {
                     setUser?.(result.user);
                     window.location.href = "/";
                   } else {
                     setSigningIn(false);
                   }
-                } catch {
+                } catch (e: any) {
+                  alert(`サインイン例外: ${e.message}`);
                   setSigningIn(false);
                 }
               }}
