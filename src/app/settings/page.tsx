@@ -562,7 +562,7 @@ function ExportSection() {
 function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: any) => void }) {
   const { setUser } = useAuth();
   const router = useRouter();
-  const [providers, setProviders] = useState<{ provider: string; provider_email?: string }[]>([]);
+  const [providers, setProviders] = useState<{ provider: string; provider_email?: string; is_current?: boolean }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -575,7 +575,8 @@ function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: a
 
   const hasLine = providers.some((p) => p.provider === "line");
   const hasGoogle = providers.some((p) => p.provider === "google");
-  const canUnlink = providers.length >= 2;
+  const canUnlinkLine = providers.length >= 2 && !providers.find((p) => p.provider === "line")?.is_current;
+  const canUnlinkGoogle = providers.length >= 2 && !providers.find((p) => p.provider === "google")?.is_current;
 
   async function unlinkProvider(provider: "line" | "google") {
     if (!confirm(`${provider === "line" ? "LINE" : "Google"}の連携を解除しますか？`)) return;
@@ -702,7 +703,7 @@ function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: a
         ) : hasLine ? (
           <div className="flex items-center gap-2">
             <span className="text-sm text-[#006728] font-bold">連携済み</span>
-            {canUnlink && (
+            {canUnlinkLine && (
               <button onClick={() => unlinkProvider("line")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5">解除</button>
             )}
           </div>
@@ -721,7 +722,7 @@ function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: a
           <div className="flex flex-col items-end gap-0.5">
             <div className="flex items-center gap-2">
               <span className="text-sm text-[#006728] font-bold shrink-0">連携済み</span>
-              {canUnlink && (
+              {canUnlinkGoogle && (
                 <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5 shrink-0">解除</button>
               )}
             </div>

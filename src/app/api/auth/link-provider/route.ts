@@ -213,14 +213,35 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Provider not linked" }, { status: 404 });
   }
 
+  // 現在のセッションの auth_user_id を取得
+  let currentAuthUserId: string | null = null;
+  const { headers: h } = await import("next/headers");
+  const headersList = await h();
+  const authHeader = headersList.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const { data: { user: au } } = await supabaseAdmin.auth.getUser(token);
+    currentAuthUserId = au?.id ?? null;
+  } else {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data: { user: au } } = await supabase.auth.getUser();
+    currentAuthUserId = au?.id ?? null;
+  }
+
+  // 現在のセッションのプロバイダは解除不可
+  if (targetProvider.auth_user_id === currentAuthUserId) {
+    return NextResponse.json({
+      error: `現在${provider === "google" ? "Google" : "LINE"}でログイン中のため解除できません。別のアカウントでログインしてから解除してください。`,
+    }, { status: 400 });
+  }
+
   // user_providers から行削除
   await supabaseAdmin
     .from("user_providers")
     .delete()
     .eq("id", targetProvider.id);
 
-  // auth.users は削除しない（孤児は無害、セッション破壊のリスクが大きい）
-  // needsRelogin は常に false（getApiAuth が userId を返せる = セッション有効）
   const needsRelogin = false;
 
   // Google 解除時は google_email もクリア

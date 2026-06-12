@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { getSupabaseAdmin } from "@/lib/auth-helpers";
 
@@ -9,8 +10,29 @@ export async function GET() {
   const supabaseAdmin = getSupabaseAdmin();
   const { data } = await supabaseAdmin
     .from("user_providers")
-    .select("provider, provider_email")
+    .select("provider, provider_email, auth_user_id")
     .eq("user_id", auth.userId);
 
-  return NextResponse.json(data ?? []);
+  // 現在のセッションの auth_user_id を取得
+  let currentAuthUserId: string | null = null;
+  const headersList = await headers();
+  const authHeader = headersList.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const { data: { user } } = await supabaseAdmin.auth.getUser(token);
+    currentAuthUserId = user?.id ?? null;
+  } else {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    currentAuthUserId = user?.id ?? null;
+  }
+
+  const result = (data ?? []).map((p: any) => ({
+    provider: p.provider,
+    provider_email: p.provider_email,
+    is_current: p.auth_user_id === currentAuthUserId,
+  }));
+
+  return NextResponse.json(result);
 }
