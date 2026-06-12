@@ -184,8 +184,8 @@ async function resolveSessionAfterSignIn(): Promise<NativeSignInResult> {
     };
   }
 
-  // 衝突なし → ローカルデータがあればアップロード
-  if (hasLocalData && result.isNew) {
+  // 衝突なし → ローカルデータがあればアップロード（新規 or サーバーが空）
+  if (hasLocalData && (result.isNew || result.uploadLocal)) {
     const localData = await collectLocalData();
     await apiFetch("/api/auth/upload-local-data", {
       method: "POST",

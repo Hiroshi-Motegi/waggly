@@ -22,6 +22,15 @@ export async function POST(request: NextRequest) {
 
   const { supabase, authUserId, userId } = auth;
 
+  // request body の hasLocalData を先に読む
+  let hasLocalData = false;
+  try {
+    const body = await request.json();
+    hasLocalData = body?.hasLocalData ?? false;
+  } catch {
+    // bodyなし = Web or ローカルデータなし
+  }
+
   // Case 1: auth_user_id で既存ユーザーが見つかった
   if (userId) {
     const { data: user } = await supabase
@@ -31,6 +40,31 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (user) {
+      // ローカルデータがある場合は衝突チェック
+      if (hasLocalData) {
+        const serverSummary = await getUserDataSummary(supabase, userId);
+        const serverHasData =
+          serverSummary.counts.clubs > 0 ||
+          serverSummary.counts.practices > 0 ||
+          serverSummary.counts.accessories > 0;
+
+        if (serverHasData) {
+          // 両方にデータがある → 衝突
+          return NextResponse.json({
+            conflict: true,
+            existingUser: {
+              userId,
+              lastUpdated: serverSummary.lastUpdated,
+              counts: serverSummary.counts,
+            },
+            provider: "returning",
+            providerSub: null,
+            authUserId,
+          });
+        }
+        // サーバーにデータがない → ローカルデータをアップロードすればいいだけ（衝突ではない）
+        return NextResponse.json({ user, conflict: false, isNew: false, uploadLocal: true });
+      }
       return NextResponse.json({ user, conflict: false });
     }
   }
@@ -55,15 +89,6 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (existingProvider) {
-    // request body に hasLocalData があれば衝突判定
-    let hasLocalData = false;
-    try {
-      const body = await request.json();
-      hasLocalData = body?.hasLocalData ?? false;
-    } catch {
-      // bodyなし = Web or ローカルデータなし
-    }
-
     if (hasLocalData) {
       // パターンB: ローカルデータとの衝突
       const existingSummary = await getUserDataSummary(supabase, existingProvider.user_id);
