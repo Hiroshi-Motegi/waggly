@@ -61,21 +61,23 @@ export function TermsAgreement({ onAgree, isReagreement }: TermsAgreementProps) 
         </div>
       </div>
 
-      {/* 同意 + ボタン */}
-      <div className="sticky bottom-0 w-full px-6 pb-6 pt-3 bg-[#f7fff3] border-t border-[#e0e0e0] space-y-3">
-        <label className="flex items-center justify-center gap-2 text-sm cursor-pointer">
+      {/* 同意 + ボタン — オンボーディングと同じデザイン */}
+      <div className="sticky bottom-0 left-0 right-0 z-50 py-3 flex flex-col items-center gap-3 overflow-hidden">
+        <div className="absolute inset-0 bg-[#139847]" />
+        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+        <label className="relative flex items-center justify-center gap-2 text-sm cursor-pointer">
           <input
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
             className="h-5 w-5 rounded accent-[#006728]"
           />
-          <span className="text-[#666]">利用規約に同意します</span>
+          <span className="text-white">利用規約に同意します</span>
         </label>
         <button
           disabled={!agreed}
           onClick={onAgree}
-          className="w-full py-3 rounded-full border border-[#006728] text-[#006728] font-bold text-sm disabled:opacity-40"
+          className="relative px-8 py-2.5 rounded-full border border-[#006728] bg-white text-[#006728] font-bold text-sm disabled:opacity-40"
         >
           はじめる
         </button>
