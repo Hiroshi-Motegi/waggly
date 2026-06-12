@@ -352,7 +352,7 @@ export default function SettingsPage() {
           <HelpCircle className="h-5 w-5 text-white opacity-80" />
         </Link>
       </div>
-      <AccountLinking user={user} onUpdate={() => window.location.reload()} onConflict={setConflictInfo} />
+      <AccountLinking user={user} onConflict={setConflictInfo} />
 
       {/* プラン */}
       <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
@@ -502,7 +502,7 @@ function ExportSection() {
   );
 }
 
-function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: () => void; onConflict: (info: any) => void }) {
+function AccountLinking({ user, onConflict }: { user: User; onConflict: (info: any) => void }) {
   const [providers, setProviders] = useState<{ provider: string; provider_email?: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -533,7 +533,9 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
         window.location.href = "/";
         return;
       }
-      onUpdate();
+      // プロバイダ一覧を再取得して表示更新（リロードしない）
+      const updated = await apiFetch("/api/auth/providers").then(r => r.ok ? r.json() : []);
+      setProviders(updated);
     } else {
       const err = await res.json();
       alert(err.error || "解除に失敗しました");
@@ -571,10 +573,9 @@ function AccountLinking({ user, onUpdate, onConflict }: { user: User; onUpdate: 
           handleLinkConflict("line", linkResult);
           return;
         }
-        // LINE SDK のネイティブUI復帰後、WebView のタッチ状態をリセット
-        // window.location.reload() ではタッチインターセプトが残るため、
-        // 別URLに一旦遷移してから戻す
-        window.location.href = "/settings?linked=line&t=" + Date.now();
+        // LINE SDK のネイティブUI復帰後、プロバイダ一覧を再取得
+        const updated = await apiFetch("/api/auth/providers").then(r => r.ok ? r.json() : []);
+        setProviders(updated);
         return;
       }
       // Web: LINE OAuth redirect
