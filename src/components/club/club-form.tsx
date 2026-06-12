@@ -6,6 +6,9 @@ import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/hooks/use-auth";
 import type { Club, ClubCategory } from "@/types/database";
 import { ClubDetailSpecs } from "@/components/club/club-detail-specs";
+import { useFormValidation } from "@/hooks/use-form-validation";
+import { clubValidationSchema } from "@/lib/form-validation";
+import { FieldError } from "@/components/ui/field-error";
 
 const categories: { value: ClubCategory; label: string }[] = [
   { value: "driver", label: "ドライバー" },
@@ -62,6 +65,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
     rating: null,
     ...initialData,
   });
+  const { validateOnChange, validateOnSubmit, fieldError } = useFormValidation(clubValidationSchema);
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -75,7 +79,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.category || !form.club_number) return;
+    if (!validateOnSubmit(form as any)) return;
     const cleaned = Object.fromEntries(
       Object.entries(form).map(([k, v]) => [k, v === "" ? null : v])
     );
@@ -105,6 +109,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
 
   function update(field: string, value: string | number | undefined | null) {
     setForm((prev) => ({ ...prev, [field]: value }));
+    validateOnChange(field, value);
   }
 
   async function handleAutofill() {
@@ -188,7 +193,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
         )}
 
         {/* 種類 */}
-        <div className="flex flex-col gap-0.5 py-1">
+        <div className="flex flex-col gap-0.5 py-1" data-field="category">
           <span className={labelClass}>種類</span>
           <select value={form.category ?? ""} onChange={(e) => {
             const cat = e.target.value || undefined;
@@ -197,17 +202,18 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
             if (cat === "driver") { update("club_number", "1W"); }
             else if (cat === "putter") { update("club_number", "PT"); }
             else { update("club_number", ""); }
-          }} className={selectClass}>
+          }} className={`${selectClass} ${fieldError("category") ? "!border-red-400" : ""}`}>
             <option value="">選択してください</option>
             {categories.map((c) => (
               <option key={c.value} value={c.value}>{c.label}</option>
             ))}
           </select>
+          <FieldError message={fieldError("category")} />
         </div>
 
         {/* 番手 */}
         {form.category && form.category !== "driver" && form.category !== "putter" && (
-          <div className="flex flex-col gap-1 py-1">
+          <div className="flex flex-col gap-1 py-1" data-field="club_number">
             <span className={labelClass}>番手</span>
             <div className="flex flex-wrap gap-2">
               {presetNumbers.map((num) => (
@@ -242,33 +248,38 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
                 className="flex-1 rounded-r-lg border border-l-0 border-[#c4c4c4] bg-white px-3 py-1.5 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
               />
             </div>
+            <FieldError message={fieldError("club_number")} />
           </div>
         )}
 
         {/* メーカー */}
-        <div className="flex flex-col gap-0.5 py-1">
+        <div className="flex flex-col gap-0.5 py-1" data-field="maker">
           <span className={labelClass}>メーカー</span>
-          <input value={form.maker ?? ""} onChange={(e) => update("maker", e.target.value)} placeholder="例: YAMAHA" className={inputClass} />
+          <input value={form.maker ?? ""} onChange={(e) => update("maker", e.target.value)} placeholder="例: YAMAHA" className={`${inputClass} ${fieldError("maker") ? "!border-red-400" : ""}`} />
+          <FieldError message={fieldError("maker")} />
         </div>
 
         {/* モデル */}
-        <div className="flex flex-col gap-0.5 py-1">
+        <div className="flex flex-col gap-0.5 py-1" data-field="model">
           <span className={labelClass}>モデル</span>
-          <input value={form.model ?? ""} onChange={(e) => update("model", e.target.value)} placeholder="例: RMX VD/F" className={inputClass} />
+          <input value={form.model ?? ""} onChange={(e) => update("model", e.target.value)} placeholder="例: RMX VD/F" className={`${inputClass} ${fieldError("model") ? "!border-red-400" : ""}`} />
+          <FieldError message={fieldError("model")} />
         </div>
 
         {/* シャフト */}
         {form.category !== "putter" && (
           <>
-            <div className="flex flex-col gap-0.5 py-1">
+            <div className="flex flex-col gap-0.5 py-1" data-field="shaft_name">
               <span className={labelClass}>シャフト</span>
-              <input value={form.shaft_name ?? ""} onChange={(e) => update("shaft_name", e.target.value)} placeholder="例: TENSEI TR f" className={inputClass} />
+              <input value={form.shaft_name ?? ""} onChange={(e) => update("shaft_name", e.target.value)} placeholder="例: TENSEI TR f" className={`${inputClass} ${fieldError("shaft_name") ? "!border-red-400" : ""}`} />
+              <FieldError message={fieldError("shaft_name")} />
             </div>
 
             {/* 発売年 */}
-            <div className="flex flex-col gap-0.5 py-1">
+            <div className="flex flex-col gap-0.5 py-1" data-field="release_year">
               <span className={labelClass}>発売年</span>
-              <input type="number" value={form.release_year ?? ""} onChange={(e) => update("release_year", e.target.value ? Number(e.target.value) : undefined)} placeholder="2024" className={inputClass} />
+              <input type="number" min={1950} max={2028} value={form.release_year ?? ""} onChange={(e) => update("release_year", e.target.value ? Number(e.target.value) : undefined)} placeholder="2024" className={`${inputClass} ${fieldError("release_year") ? "!border-red-400" : ""}`} />
+              <FieldError message={fieldError("release_year")} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -334,22 +345,31 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
         )}
 
         {/* Inline spec rows */}
-        <div className="flex items-center gap-0.5 py-2.5">
-          <span className="flex-1 text-base">ロフト角</span>
-          <input type="number" step="0.5" value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none" />
-          <span className="w-[30px] text-sm">°</span>
+        <div data-field="loft">
+          <div className="flex items-center gap-0.5 py-2.5">
+            <span className="flex-1 text-base">ロフト角</span>
+            <input type="number" step="0.5" min={0} max={90} value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className={`w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none ${fieldError("loft") ? "!border-b-red-400" : ""}`} />
+            <span className="w-[30px] text-sm">°</span>
+          </div>
+          {fieldError("loft") && <FieldError message={fieldError("loft")} />}
         </div>
-        <div className="flex items-center gap-0.5 py-2.5">
-          <span className="flex-1 text-base">ライ角</span>
-          <input type="number" step="0.5" value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none" />
-          <span className="w-[30px] text-sm">°</span>
+        <div data-field="lie">
+          <div className="flex items-center gap-0.5 py-2.5">
+            <span className="flex-1 text-base">ライ角</span>
+            <input type="number" step="0.5" min={0} max={90} value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className={`w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none ${fieldError("lie") ? "!border-b-red-400" : ""}`} />
+            <span className="w-[30px] text-sm">°</span>
+          </div>
+          {fieldError("lie") && <FieldError message={fieldError("lie")} />}
         </div>
-        <div className="flex items-center gap-0.5 py-2.5">
-          <span className="flex-1 text-base">長さ</span>
-          <input type="number" step="0.25" value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className="w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none" />
-          <span className="w-[30px] text-sm">inch</span>
+        <div data-field="length">
+          <div className="flex items-center gap-0.5 py-2.5">
+            <span className="flex-1 text-base">長さ</span>
+            <input type="number" step="0.25" min={0} max={60} value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className={`w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none ${fieldError("length") ? "!border-b-red-400" : ""}`} />
+            <span className="w-[30px] text-sm">inch</span>
+          </div>
+          {fieldError("length") && <FieldError message={fieldError("length")} />}
         </div>
-        <ClubDetailSpecs form={form} onChange={update} />
+        <ClubDetailSpecs form={form} onChange={update} fieldError={fieldError} />
       </div>
 
       {/* Section 3: 購入情報 */}
@@ -359,13 +379,15 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
           <span className={labelClass}>購入日</span>
           <input type="date" value={form.purchase_date ?? ""} onChange={(e) => update("purchase_date", e.target.value || undefined)} className={inputClass} />
         </div>
-        <div className="flex flex-col gap-0.5 py-1">
+        <div className="flex flex-col gap-0.5 py-1" data-field="purchase_shop">
           <span className={labelClass}>購入店</span>
-          <input value={form.purchase_shop ?? ""} onChange={(e) => update("purchase_shop", e.target.value)} placeholder="" className={inputClass} />
+          <input value={form.purchase_shop ?? ""} onChange={(e) => update("purchase_shop", e.target.value)} placeholder="" className={`${inputClass} ${fieldError("purchase_shop") ? "!border-red-400" : ""}`} />
+          <FieldError message={fieldError("purchase_shop")} />
         </div>
-        <div className="flex flex-col gap-0.5 py-1">
+        <div className="flex flex-col gap-0.5 py-1" data-field="purchase_price">
           <span className={labelClass}>価格（円）</span>
-          <input type="number" value={form.purchase_price ?? ""} onChange={(e) => update("purchase_price", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className={inputClass} />
+          <input type="number" min={0} value={form.purchase_price ?? ""} onChange={(e) => update("purchase_price", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className={`${inputClass} ${fieldError("purchase_price") ? "!border-red-400" : ""}`} />
+          <FieldError message={fieldError("purchase_price")} />
         </div>
       </div>
 
