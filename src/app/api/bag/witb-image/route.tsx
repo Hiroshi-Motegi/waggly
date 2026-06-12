@@ -53,8 +53,10 @@ export async function GET(request: NextRequest) {
 
       if (raw) {
         try {
-          const parsed = JSON.parse(raw);
-          const accessToken = Array.isArray(parsed) ? parsed[0] : parsed?.access_token;
+          // Supabase v2 prefixes cookie values with "base64-"
+          const decoded = raw.startsWith("base64-") ? atob(raw.slice(7)) : raw;
+          const parsed = JSON.parse(decoded);
+          const accessToken = parsed?.access_token ?? (Array.isArray(parsed) ? parsed[0] : null);
           if (accessToken) {
             const { data: { user } } = await admin.auth.getUser(accessToken);
             authUserId = user?.id ?? null;
@@ -64,16 +66,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!authUserId) {
-      // Debug: show what we found
-      const cookies = request.headers.get("cookie") ?? "";
-      const cookieParts = cookies.split(";").map(c => c.trim());
-      const supabaseHost2 = new URL(supabaseUrl).hostname.split(".")[0];
-      const prefix2 = `sb-${supabaseHost2}-auth-token`;
-      const matchingCookies = cookieParts.filter(c => c.startsWith(prefix2)).map(c => c.substring(0, 60) + "...");
-      return new Response(JSON.stringify({
-        error: "Unauthorized",
-        debug: { prefix: prefix2, matchingCookies },
-      }), { status: 401 });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
 
     // Resolve users.id from auth_user_id via user_providers
