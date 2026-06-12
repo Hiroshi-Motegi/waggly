@@ -85,7 +85,7 @@ interface ImageCropperProps {
 - 下部に「撮り直す」「キャンセル」「決定」ボタン
 - 「撮り直す」→ cropperを閉じてImagePickerの画像取得フローを再実行（カメラ/ファイル選択に直接戻る）
 - 決定 → `canvas.toBlob()` → File化 → `onCrop` 発火
-- 出力フォーマット: **WebP (quality 0.85)**、`canvas.toBlob('image/webp')` 非対応ブラウザでは **JPEG fallback**（`toBlob('image/jpeg', 0.85)`）
+- 出力フォーマット: **WebP (quality 0.85)**、`canvas.toBlob('image/webp')` 非対応ブラウザでは **JPEG fallback**（`toBlob` の結果Blobの `type` で判定し、WebPでなければJPEGで再生成）
 - 最大出力幅: **1200px**（元画像が小さい場合はそのまま）
 
 ### `src/lib/camera.ts`
@@ -101,7 +101,10 @@ export async function pickImageNative(): Promise<File>
 // 最終出力1200pxなので入力に4000px以上は不要
 export async function preResizeImage(file: File, maxSize?: number): Promise<string>
 // デフォルト maxSize = 2400px
-// createImageBitmap + canvas で縮小し、data URL を返す
+// createImageBitmap + canvas で縮小し、Object URL (URL.createObjectURL) を返す
+// ※ data URLは数MBの文字列がメモリに載るため、Blobへの参照のみのObject URLを使用
+// ※ 呼び出し側で不要になったら URL.revokeObjectURL() で解放すること
+// 前提: createImageBitmap は iOS 16+ / モダンブラウザで対応済み（Capacitor 8 は iOS 16+ 必須）
 ```
 
 - `@capacitor/camera` を動的import（Web環境ではロードしない）
@@ -113,7 +116,7 @@ export async function preResizeImage(file: File, maxSize?: number): Promise<stri
 
 | ファイル | 変更内容 |
 |----------|----------|
-| `src/components/club/club-form.tsx` | file input + handleFileSelect → `ImagePicker` に置換 |
+| `src/components/club/club-form.tsx` | file input + handleFileSelect → `ImagePicker` に置換。**注意**: この画面のみクラブ作成前に `pendingFile` をstateに保持し、作成後にアップロードする2段階フロー。他の3箇所（即時アップロード）とはパターンが異なる |
 | `src/components/club/club-image-gallery.tsx` | file input + handleFileChange → `ImagePicker` に置換 |
 | `src/app/items/new/page.tsx` | file input + handleFileSelect → `ImagePicker` に置換 |
 | `src/app/items/[id]/page-client.tsx` | file input + handleImageSelect → `ImagePicker` に置換 |
@@ -189,4 +192,6 @@ Camera: {
 - **camera.ts**: Capacitor Cameraのモック → File変換が正しいことのユニットテスト
 - **preResizeImage**: 大画像（4000px超）が2400px以下にリサイズされること、小画像はそのままであることのユニットテスト
 - **WebP fallback**: `canvas.toBlob('image/webp')` 非対応時にJPEGにフォールバックすることのテスト
+- **ImagePicker分岐**: `isNative()` のモック切替でネイティブ/Webそれぞれの画像取得パスが動作することのテスト
+- **出力サイズ検証**: cropper出力が1200px以下であることのテスト
 - **統合テスト**: 実機でカメラ撮影 → トリミング → アップロード → 画像表示の一連フローを手動確認（iOS/Android/Webブラウザ）
