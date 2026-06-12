@@ -49,8 +49,9 @@ export async function liffLogout() {
     // sync 失敗してもログアウトは続行
   }
 
-  // Clear login method and dev mode flags
+  // Clear login method, dev mode, and onboarding flags
   localStorage.removeItem("login_method");
+  localStorage.removeItem("onboarding_version");
   localStorage.setItem("dev-logged-in", "false");
 
   // Clear Supabase session
