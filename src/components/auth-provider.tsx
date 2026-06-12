@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 avatar_url: null,
                 google_email: null,
                 agreed_terms_at: new Date().toISOString(),
+                onboarding_version: 1,
                 created_at: new Date().toISOString(),
               });
             }
