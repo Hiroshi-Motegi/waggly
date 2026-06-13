@@ -162,13 +162,7 @@ export default function HomePage() {
 
   return (
     <div className="relative" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-      {/* Background image covers entire page */}
-      <img
-        src="/images/home-bg.jpg"
-        alt=""
-        className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none"
-      />
-      <div className="relative z-10 flex flex-col px-2 pt-2 pb-4">
+      <div className="relative flex flex-col px-2 pt-2 pb-4">
         {/* Logo */}
         <div className="flex items-center justify-center w-full relative h-14">
           <Image
@@ -215,14 +209,14 @@ export default function HomePage() {
 
         {/* Recent practice */}
         <div className="flex items-center px-1 mt-4 mb-2">
-          <h3 className="flex-1 text-base font-bold text-white">最近の練習記録</h3>
+          <h3 className="flex-1 text-lg font-bold text-white">最近の練習記録</h3>
           <Link href="/practice" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
         </div>
         <RecentPractice sessions={sessions} />
 
         {/* Favorite courses */}
         <div className="flex items-center px-1 mt-4 mb-2">
-          <h3 className="flex-1 text-base font-bold text-white">お気に入りコース</h3>
+          <h3 className="flex-1 text-lg font-bold text-white">お気に入りコース</h3>
           <Link href="/courses/favorites" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
         </div>
         <div className="rounded-lg bg-white p-3">
@@ -232,13 +226,13 @@ export default function HomePage() {
                 ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/gora/detail/id=${c.gora_course_id}/`
                 : null;
               return (
-                <a key={c.id} href={goraUrl ?? "#"} target={goraUrl ? "_blank" : undefined} rel="noopener" className={`flex items-center gap-2 py-2 ${i < favCourses.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                <a key={c.id} href={goraUrl ?? "#"} target={goraUrl ? "_blank" : undefined} rel="noopener" className={`flex items-center gap-2.5 py-2 ${i < favCourses.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
                   {c.course_image_url && (
-                    <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
+                    <img src={c.course_image_url} alt="" className="h-14 w-14 rounded-lg object-cover shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate">{c.course_name}</p>
-                    {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
+                    <p className="text-base font-bold truncate">{c.course_name}</p>
+                    {c.address && <p className="text-sm text-[#8b8b8b] truncate">{c.address}</p>}
                   </div>
                   {c.evaluation != null && (
                     <span className="text-xs text-amber-500 shrink-0">★{c.evaluation.toFixed(1)}</span>

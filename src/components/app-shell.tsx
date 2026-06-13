@@ -118,8 +118,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Wait for user data before judging (prevents flash of onboarding for logged-in users)
   if (!native && isLoading) {
     return (
-      <div className="mx-auto max-w-md min-h-dvh flex items-center justify-center bg-[#ebf1eb]">
-        <Loading />
+      <div className="mx-auto max-w-md min-h-dvh">
+        <Loading variant="light" />
       </div>
     );
   }
@@ -180,7 +180,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isPublicPage = pathname.startsWith("/p/");
   const hideChrome = isPublicPage || (!user && !native);
   return (
-    <div className={`min-h-dvh relative animate-fade-in ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-md shadow-sm"}`}>
+    <div className={`min-h-dvh relative animate-fade-in bg-black/20 ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-md shadow-sm"}`}>
       {!hideChrome && <Header />}
       <main style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>

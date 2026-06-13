@@ -16,16 +16,16 @@ import { todayString, monthKey } from "@/lib/calendar-utils";
 
 function ViewToggle({ mode, onChange }: { mode: "calendar" | "list"; onChange: (m: "calendar" | "list") => void }) {
   return (
-    <div className="flex h-[34px] rounded-full border border-white/30 overflow-hidden">
+    <div className="flex h-[40px] rounded-full border border-white/30 overflow-hidden">
       <button
         onClick={() => onChange("calendar")}
-        className={`flex items-center justify-center w-[34px] ${mode === "calendar" ? "bg-white" : ""}`}
+        className={`flex items-center justify-center w-[40px] ${mode === "calendar" ? "bg-white" : ""}`}
       >
         <Calendar className={`h-4 w-4 ${mode === "calendar" ? "text-[#006728]" : "text-white/60"}`} />
       </button>
       <button
         onClick={() => onChange("list")}
-        className={`flex items-center justify-center w-[34px] ${mode === "list" ? "bg-white" : ""}`}
+        className={`flex items-center justify-center w-[40px] ${mode === "list" ? "bg-white" : ""}`}
       >
         <List className={`h-4 w-4 ${mode === "list" ? "text-[#006728]" : "text-white/60"}`} />
       </button>
@@ -89,15 +89,15 @@ export default function PracticePage() {
           <>
             {/* Sticky header + calendar together */}
             <div data-sticky-calendar className="sticky top-0 z-20 -mx-2 -mt-2 px-2"
-              style={{ backgroundImage: "url(/images/home-bg.jpg)", backgroundSize: "cover", backgroundPosition: "center" }}
+              style={{ background: "#7cb668 url(/images/home-bg.jpg) center / cover fixed", backgroundBlendMode: "soft-light" }}
             >
-              <div className="absolute inset-0/60 pointer-events-none" />
+              <div className="absolute inset-0 bg-black/20 pointer-events-none" />
               <div className="relative">
                 <PageHeader title="練習記録" backHref="/" variant="dark">
                   <div className="flex items-center gap-2">
                     <ViewToggle mode={viewMode} onChange={setViewMode} />
                     <Link href="/practice/new">
-                      <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
+                      <button className="flex items-center gap-1 rounded-full bg-white px-4 h-[40px] text-sm font-bold text-[#006728]">
                         <Plus className="h-4 w-4" />
                         記録する
                       </button>
@@ -145,7 +145,7 @@ export default function PracticePage() {
               <div className="flex items-center gap-2">
                 <ViewToggle mode={viewMode} onChange={setViewMode} />
                 <Link href="/practice/new">
-                  <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
+                  <button className="flex items-center gap-1 rounded-full bg-white px-4 h-[40px] text-sm font-bold text-[#006728]">
                     <Plus className="h-4 w-4" />
                     記録する
                   </button>

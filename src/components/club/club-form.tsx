@@ -34,13 +34,14 @@ interface ClubFormProps {
   onSubmit: (data: Partial<Club>, pendingImage?: File) => void;
   isSubmitting?: boolean;
   showImagePicker?: boolean;
+  onCancel?: () => void;
 }
 
 const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 const selectClass = inputClass;
-const labelClass = "text-sm";
+const labelClass = "text-sm flex items-center";
 
-export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker }: ClubFormProps) {
+export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker, onCancel }: ClubFormProps) {
   const [form, setForm] = useState<Partial<Club>>({
     category: undefined,
     club_number: "",
@@ -150,7 +151,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
       {/* Section 1: クラブ詳細 */}
-      <h3 className="px-1 pt-2 text-base font-bold text-white">クラブ詳細</h3>
+      <h3 className="px-1 text-lg font-bold text-white">クラブ詳細</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* 写真 */}
         {showImagePicker && (
@@ -189,7 +190,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
 
         {/* 種類 */}
         <div className="flex flex-col gap-0.5 py-1" data-field="category">
-          <span className={labelClass}>種類</span>
+          <span className={labelClass}>種類 <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
           <select value={form.category ?? ""} onChange={(e) => {
             const cat = e.target.value || undefined;
             update("category", cat);
@@ -209,7 +210,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
         {/* 番手 */}
         {form.category && form.category !== "driver" && form.category !== "putter" && (
           <div className="flex flex-col gap-1 py-1" data-field="club_number">
-            <span className={labelClass}>番手</span>
+            <span className={labelClass}>番手 <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
             <div className="flex flex-wrap gap-2">
               {presetNumbers.map((num) => (
                 <button
@@ -249,14 +250,14 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
 
         {/* メーカー */}
         <div className="flex flex-col gap-0.5 py-1" data-field="maker">
-          <span className={labelClass}>メーカー</span>
+          <span className={labelClass}>メーカー <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
           <input value={form.maker ?? ""} onChange={(e) => update("maker", e.target.value)} placeholder="メーカー名" className={`${inputClass} ${fieldError("maker") ? "!border-red-400" : ""}`} />
           <FieldError message={fieldError("maker")} />
         </div>
 
         {/* モデル */}
         <div className="flex flex-col gap-0.5 py-1" data-field="model">
-          <span className={labelClass}>モデル</span>
+          <span className={labelClass}>モデル <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
           <input value={form.model ?? ""} onChange={(e) => update("model", e.target.value)} placeholder="モデル名" className={`${inputClass} ${fieldError("model") ? "!border-red-400" : ""}`} />
           <FieldError message={fieldError("model")} />
         </div>
@@ -320,7 +321,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
       </div>
 
       {/* Section 2: スペック */}
-      <h3 className="px-1 pt-2 text-base font-bold text-white">スペック</h3>
+      <h3 className="px-1 pt-2 text-lg font-bold text-white">スペック</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* 自動入力（サインイン時のみ） */}
         {user && (
@@ -328,6 +329,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
             <p className="text-sm text-black w-full">
               公開情報からスペックを自動入力します。内容に誤りがある場合があります。
             </p>
+            <p className="text-xs text-[#8b8b8b] w-full">※ AIトークンを消費します</p>
             <button
               type="button"
               disabled={isSearching || (!form.maker && !form.model)}
@@ -340,35 +342,75 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
         )}
 
         {/* Inline spec rows */}
-        <div data-field="loft">
-          <div className="flex items-center gap-0.5 py-2.5">
+        <div data-field="loft" className="border-b border-[#ececec]">
+          <div className="flex items-center py-3">
             <span className="flex-1 text-base">ロフト角</span>
-            <input type="number" step="0.5" min={0} max={90} value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className={`w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none ${fieldError("loft") ? "!border-b-red-400" : ""}`} />
-            <span className="w-[30px] text-sm">°</span>
+            <input type="number" step="0.5" min={0} max={90} value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("loft") ? "!border-red-400" : ""}`} />
+            <span className="w-[32px] text-sm text-left pl-1">°</span>
           </div>
           {fieldError("loft") && <FieldError message={fieldError("loft")} />}
         </div>
-        <div data-field="lie">
-          <div className="flex items-center gap-0.5 py-2.5">
+        <div data-field="lie" className="border-b border-[#ececec]">
+          <div className="flex items-center py-3">
             <span className="flex-1 text-base">ライ角</span>
-            <input type="number" step="0.5" min={0} max={90} value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className={`w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none ${fieldError("lie") ? "!border-b-red-400" : ""}`} />
-            <span className="w-[30px] text-sm">°</span>
+            <input type="number" step="0.5" min={0} max={90} value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("lie") ? "!border-red-400" : ""}`} />
+            <span className="w-[32px] text-sm text-left pl-1">°</span>
           </div>
           {fieldError("lie") && <FieldError message={fieldError("lie")} />}
         </div>
-        <div data-field="length">
-          <div className="flex items-center gap-0.5 py-2.5">
+        <div data-field="length" className={form.category === "wedge" || form.category === "driver" ? "border-b border-[#ececec]" : ""}>
+          <div className="flex items-center py-3">
             <span className="flex-1 text-base">長さ</span>
-            <input type="number" step="0.25" min={0} max={60} value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className={`w-[100px] border-b border-[#c4c4c4] bg-white px-3 py-1 text-center text-base focus-visible:outline-none ${fieldError("length") ? "!border-b-red-400" : ""}`} />
-            <span className="w-[30px] text-sm">inch</span>
+            <input type="number" step="0.25" min={0} max={60} value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("length") ? "!border-red-400" : ""}`} />
+            <span className="w-[32px] text-sm text-left pl-1">inch</span>
           </div>
           {fieldError("length") && <FieldError message={fieldError("length")} />}
         </div>
-        <ClubDetailSpecs form={form} onChange={update} fieldError={fieldError} />
+
+        {/* ウェッジ専用 */}
+        {form.category === "wedge" && (
+          <>
+            <div data-field="bounce" className="border-b border-[#ececec]">
+              <div className="flex items-center py-3">
+                <span className="flex-1 text-base">バウンス角</span>
+                <input type="number" step="1" min={0} max={30} value={form.bounce ?? ""} onChange={(e) => update("bounce", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]`} />
+                <span className="w-[32px] text-sm text-left pl-1">°</span>
+              </div>
+            </div>
+            <div data-field="sole_shape">
+              <div className="flex items-center py-3">
+                <span className="flex-1 text-base">ソール形状</span>
+                <select value={form.sole_shape ?? ""} onChange={(e) => update("sole_shape", e.target.value || undefined)} className="w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]">
+                  <option value="">—</option>
+                  <option value="ワイド">ワイド</option>
+                  <option value="セミワイド">セミワイド</option>
+                  <option value="ナロー">ナロー</option>
+                  <option value="Cグラインド">Cグラインド</option>
+                  <option value="Sグラインド">Sグラインド</option>
+                  <option value="Wグラインド">Wグラインド</option>
+                </select>
+                <span className="w-[32px] text-sm text-left pl-1"></span>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ドライバー専用 */}
+        {form.category === "driver" && (
+          <div data-field="face_angle">
+            <div className="flex items-center py-3">
+              <span className="flex-1 text-base">フェース角</span>
+              <input type="number" step="0.5" min={-5} max={5} value={form.face_angle ?? ""} onChange={(e) => update("face_angle", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className="w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
+              <span className="w-[32px] text-sm text-left pl-1">°</span>
+            </div>
+          </div>
+        )}
+
+        <ClubDetailSpecs form={form} onChange={update} fieldError={fieldError} category={form.category} />
       </div>
 
       {/* Section 3: 購入情報 */}
-      <h3 className="px-1 pt-2 text-base font-bold text-white">購入情報</h3>
+      <h3 className="px-1 pt-2 text-lg font-bold text-white">購入情報</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         <div className="flex flex-col gap-0.5 py-1">
           <span className={labelClass}>購入日</span>
@@ -387,10 +429,15 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker 
       </div>
 
       {/* Buttons */}
-      <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
-        <button type="submit" disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50">
+      <div className="flex flex-col items-center gap-4 px-4 pt-6 pb-8">
+        <button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-white py-3 text-base font-bold text-[#006728] disabled:opacity-50">
           {isSubmitting ? "保存中..." : "保存する"}
         </button>
+        {onCancel && (
+          <button type="button" onClick={onCancel} className="text-base font-bold text-white">
+            キャンセル
+          </button>
+        )}
       </div>
     </form>
   );

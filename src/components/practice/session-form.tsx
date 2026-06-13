@@ -109,7 +109,7 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
       </div>
 
       {/* Section title: 練習球数 */}
-      <h3 className="px-1 pt-4 text-base font-bold text-white">練習球数</h3>
+      <h3 className="px-1 pt-4 text-lg font-bold text-white">練習球数</h3>
 
       {/* Card 2: Balls (tabbed) */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">

@@ -246,7 +246,7 @@ export default function BagPage() {
           {isBagView && !isReordering && clubs.length > 1 && (
             <button
               onClick={startReorder}
-              className="flex items-center gap-1 rounded-full border border-white px-3 h-[34px] text-sm font-bold text-white"
+              className="flex items-center gap-1 rounded-full border border-white px-3 h-[40px] text-sm font-bold text-white"
             >
               <GripVertical className="h-4 w-4" />
               並替
@@ -256,7 +256,7 @@ export default function BagPage() {
             const isFull = isBagView && (bagCount ?? 0) >= MAX_BAG_CLUBS;
             const btn = (
               <button
-                className={`flex items-center gap-1 rounded-full px-4 h-[34px] text-sm font-bold ${isFull ? "bg-white/50 text-[#006728]/40" : "bg-white text-[#006728]"}`}
+                className={`flex items-center gap-1 rounded-full px-4 h-[40px] text-sm font-bold ${isFull ? "bg-white/50 text-[#006728]/40" : "bg-white text-[#006728]"}`}
                 disabled={isFull}
               >
                 <Plus className="h-4 w-4" />
@@ -297,8 +297,8 @@ export default function BagPage() {
 
         {/* Charts */}
         {showCharts && !isReordering && (
-          <div className="rounded-lg bg-white p-3">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="rounded-lg bg-white px-0 pt-3">
+            <div className="flex items-center gap-2 px-3">
               <button
                 onClick={() => setChartTab("distance")}
                 className={`rounded-full px-3 py-1 text-sm font-bold ${
@@ -333,16 +333,15 @@ export default function BagPage() {
             )}
           </div>
         )}
-        {showCharts && !isReordering && bagClubs.length > 0 && (
-          <div className="flex justify-end pb-3 border-b border-[#ececec]">
-            <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />
-          </div>
-        )}
-
-        {/* Count */}
+        {/* Count + WITB */}
         {isBagView && !isReordering && bagCount !== null && (
-          <div className="pt-1 pb-1 text-sm text-[#8b8b8b] text-right">
-            {bagCount} / {MAX_BAG_CLUBS}本
+          <div className="flex items-center pt-3 pb-1 border-t border-[#dfdfdf]">
+            <span className="flex-1 text-base font-bold text-[#8b8b8b]">
+              {bagCount} / {MAX_BAG_CLUBS}本
+            </span>
+            {showCharts && bagClubs.length > 0 && (
+              <ShareWitbButton bagNumber={statusFilter === "bag2" ? 2 : 1} />
+            )}
           </div>
         )}
 
@@ -395,7 +394,7 @@ export default function BagPage() {
                 return (
                   <Link key={club.id} href={nativeHref(`/bag/${club.id}`)}>
                     <div className="flex flex-col gap-1">
-                      <div className="h-[132px] w-full overflow-hidden rounded-md bg-[#f0f0f0] flex items-center justify-center">
+                      <div className="w-full aspect-square overflow-hidden rounded-md bg-[#f0f0f0] flex items-center justify-center">
                         {primaryImage ? (
                           <img src={primaryImage.image_url} alt={club.club_number} className="size-full object-cover" />
                         ) : (

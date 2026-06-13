@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const { text, usage } = await generateText({
-      model: anthropic("claude-sonnet-4-6"),
+      model: anthropic("claude-haiku-4-5-20251001"),
       prompt,
       maxOutputTokens: 300,
     });
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         user_id: userId,
         input_tokens: usage.inputTokens ?? 0,
         output_tokens: usage.outputTokens ?? 0,
-        model: "claude-sonnet-4-6",
+        model: "claude-haiku-4-5",
         source: "autofill",
       });
     }

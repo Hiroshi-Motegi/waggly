@@ -12,10 +12,10 @@ export function ViewModeToggle({
   onChange: (mode: ViewMode) => void;
 }) {
   return (
-    <div className="flex items-center rounded-full bg-white p-0.5">
+    <div className="flex items-center h-[40px] rounded-full bg-white px-1">
       <button
         onClick={() => onChange("list")}
-        className={`flex items-center justify-center size-[28px] rounded-full ${
+        className={`flex items-center justify-center size-[32px] rounded-full ${
           mode === "list" ? "bg-[#006728]" : ""
         }`}
       >
@@ -27,7 +27,7 @@ export function ViewModeToggle({
       </button>
       <button
         onClick={() => onChange("gallery")}
-        className={`flex items-center justify-center size-[28px] rounded-full ${
+        className={`flex items-center justify-center size-[32px] rounded-full ${
           mode === "gallery" ? "bg-[#006728]" : ""
         }`}
       >

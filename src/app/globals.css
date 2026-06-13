@@ -7,8 +7,8 @@
 
 html, body {
   overscroll-behavior: none;
-  background: #139847 url("/images/home-bg.jpg") center / cover fixed;
-  background-blend-mode: multiply;
+  background: #7cb668 url("/images/home-bg.jpg") center / cover fixed;
+  background-blend-mode: soft-light;
 }
 
 input[type="date"] {

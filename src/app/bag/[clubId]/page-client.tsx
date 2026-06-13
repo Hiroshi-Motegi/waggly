@@ -19,13 +19,45 @@ const statusLabels: Record<string, string> = {
   sold: "アーカイブ",
 };
 
-const specs: { key: string; label: string; suffix?: string }[] = [
-  { key: "shaft_name", label: "シャフト" },
-  { key: "shaft_flex", label: "フレックス" },
-  { key: "loft", label: "ロフト角", suffix: "°" },
-  { key: "lie", label: "ライ角", suffix: "°" },
-  { key: "length", label: "長さ", suffix: "inch" },
-];
+function getSpecs(category: string): { key: string; label: string; suffix?: string }[] {
+  const base: { key: string; label: string; suffix?: string }[] = [
+    { key: "shaft_name", label: "シャフト" },
+    { key: "shaft_flex", label: "フレックス" },
+    { key: "loft", label: "ロフト角", suffix: "°" },
+    { key: "lie", label: "ライ角", suffix: "°" },
+    { key: "length", label: "長さ", suffix: "inch" },
+  ];
+  // ウェッジ専用
+  if (category === "wedge") {
+    base.push({ key: "bounce", label: "バウンス角", suffix: "°" });
+    base.push({ key: "sole_shape", label: "ソール形状" });
+  }
+  // ドライバー専用
+  if (category === "driver") {
+    base.push({ key: "face_angle", label: "フェース角", suffix: "°" });
+  }
+  // 詳細スペック
+  base.push({ key: "grip_name", label: "グリップ" });
+  base.push({ key: "grip_size", label: "グリップ太さ" });
+  if (category !== "putter") {
+    base.push({ key: "shaft_weight", label: "シャフト重量", suffix: "g" });
+  }
+  base.push({ key: "weight", label: "総重量", suffix: "g" });
+  base.push({ key: "swing_weight", label: "バランス" });
+  if (category !== "putter") {
+    base.push({ key: "frequency", label: "振動数", suffix: "cpm" });
+    base.push({ key: "kick_point", label: "キックポイント" });
+  }
+  if (category === "driver" || category === "fairway_wood") {
+    base.push({ key: "head_volume", label: "ヘッド体積", suffix: "cc" });
+  }
+  base.push({ key: "head_weight", label: "ヘッド重量", suffix: "g" });
+  // パターはシャフト非表示
+  if (category === "putter") {
+    return base.filter((s) => s.key !== "shaft_name" && s.key !== "shaft_flex");
+  }
+  return base;
+}
 
 interface ActivityItem {
   type: "memo" | "practice" | "maintenance";
@@ -67,6 +99,30 @@ const badgeLabels: Record<string, string> = {
   practice: "練習",
   maintenance: "メンテナンス",
 };
+
+function ClubImageCarousel({ images, clubNumber }: { images: { id: string; image_url: string }[]; clubNumber: string }) {
+  const [index, setIndex] = useState(0);
+  return (
+    <div>
+      <div className="relative w-full aspect-square overflow-hidden rounded-lg">
+        <img
+          src={images[index].image_url}
+          alt={clubNumber}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="flex justify-center gap-2 mt-3">
+        {images.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setIndex(i)}
+            className={`h-2 w-2 rounded-full transition-colors ${i === index ? "bg-[#006728]" : "bg-[#c5c5c5]"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function ClubDetailPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
@@ -116,7 +172,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
   }
 
   if (isLoading) return <Loading variant="light" />;
-  if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
+  if (!club) return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">クラブが見つかりません</p></div></div>;
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
@@ -128,13 +184,13 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       >
         <div className="flex gap-2.5 shrink-0">
           <Link href={nativeHref(`/bag/${clubId}/edit`)}>
-            <button className="flex items-center justify-center rounded-full bg-white p-2.5">
+            <button className="flex items-center justify-center rounded-full bg-white h-[40px] w-[40px]">
               <Pencil className="h-5 w-5 text-[#006728]" />
             </button>
           </Link>
           <button
             onClick={handleDelete}
-            className="flex items-center justify-center rounded-full bg-white p-2.5"
+            className="flex items-center justify-center rounded-full bg-white h-[40px] w-[40px]"
           >
             <Trash2 className="h-5 w-5 text-[#006728]" />
           </button>
@@ -144,20 +200,34 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       {/* Specs card */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {(() => {
-          const primaryImage = club.club_images?.find((img: any) => img.is_primary) ?? club.club_images?.[0];
+          const images = club.club_images ?? [];
           const noImage: Record<string, string> = {
             driver: "/no-images/driver.png", fairway_wood: "/no-images/fw.png", utility: "/no-images/ut.png",
             iron: "/no-images/Iron.png", wedge: "/no-images/wedge.png", putter: "/no-images/putter.png",
           };
-          return (
-            <div className="flex items-center justify-center py-2">
-              <img
-                src={primaryImage?.image_url ?? noImage[club.category] ?? "/no-images/etc.png"}
-                alt={club.club_number}
-                className="max-h-[229px] rounded object-contain"
-              />
-            </div>
-          );
+          if (images.length === 0) {
+            return (
+              <div className="flex items-center justify-center py-2">
+                <img
+                  src={noImage[club.category] ?? "/no-images/etc.png"}
+                  alt={club.club_number}
+                  className="max-h-[229px] rounded object-contain"
+                />
+              </div>
+            );
+          }
+          if (images.length === 1) {
+            return (
+              <div className="relative w-full aspect-square overflow-hidden rounded-lg">
+                <img
+                  src={images[0].image_url}
+                  alt={club.club_number}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            );
+          }
+          return <ClubImageCarousel images={images} clubNumber={club.club_number} />;
         })()}
         <div className="flex flex-col">
           {latestDistance != null && (
@@ -170,7 +240,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             <span className="shrink-0">ステータス</span>
             <span className="flex-1 text-right">{statusLabels[club.status]}</span>
           </div>
-          {specs.map((spec) => {
+          {getSpecs(club.category).map((spec) => {
             const value = (club as any)[spec.key];
             if (value == null || value === "") return null;
             return (
@@ -275,26 +345,26 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       {/* 使用感サマリー */}
       {user && hasSummary && (
         <div className="flex flex-col gap-2 pt-4">
-          <h3 className="text-base font-bold text-white px-1">使用感サマリー</h3>
+          <h3 className="text-lg font-bold text-white px-1">使用感サマリー</h3>
           <ClubUsageSummary clubId={clubId} />
         </div>
       )}
 
       {/* Activity header */}
       <div className="flex items-center gap-2 px-1 pt-4">
-        <h3 className="flex-1 text-base font-bold text-white">アクティビティ</h3>
+        <h3 className="flex-1 text-lg font-bold text-white">アクティビティ</h3>
         <Link
           href={nativeHref(`/bag/${clubId}/memos?add=1`)}
-          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 h-[40px] text-sm font-bold text-white"
         >
-          <Plus className="h-3 w-3" />
+          <Plus className="h-4 w-4" />
           メモ
         </Link>
         <Link
           href={nativeHref(`/bag/${clubId}/maintenances?add=1`)}
-          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 py-1.5 text-xs font-bold text-white"
+          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 h-[40px] text-sm font-bold text-white"
         >
-          <Plus className="h-3 w-3" />
+          <Plus className="h-4 w-4" />
           メンテナンス
         </Link>
       </div>

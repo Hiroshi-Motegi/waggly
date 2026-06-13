@@ -1,4 +1,4 @@
-const DEFAULT_TOKEN_LIMIT = 150000;
+const DEFAULT_TOKEN_LIMIT = 100000;
 
 export async function getMonthlyLimit(supabase: any, userId: string): Promise<number> {
   // Check if user has an active subscription with a plan

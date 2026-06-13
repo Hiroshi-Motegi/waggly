@@ -146,7 +146,7 @@ export default function CoursesPage() {
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="ゴルフ場を探す" backHref="/" variant="dark">
-        <Link href="/courses/favorites" className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-sm font-bold text-white">
+        <Link href="/courses/favorites" className="flex items-center gap-1 rounded-full border border-white px-3 h-[40px] text-sm font-bold text-white">
           <Heart className="h-4 w-4" />
           お気に入り一覧
         </Link>
@@ -180,7 +180,9 @@ export default function CoursesPage() {
       </div>
 
       {error && (
-        <p className="text-base text-red-500 text-center">{error}</p>
+        <div className="rounded-lg bg-white p-4 text-center">
+          <p className="text-base text-[#8b8b8b]">{error}</p>
+        </div>
       )}
 
       {results && (
@@ -210,15 +212,11 @@ export default function CoursesPage() {
                     )}
                     <div className="flex gap-3">
                       {course.golfCourseImageUrl ? (
-                        <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-[#f5f5f5]">
-                          <Image
-                            src={course.golfCourseImageUrl}
-                            alt={course.golfCourseName}
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
-                        </div>
+                        <img
+                          src={course.golfCourseImageUrl}
+                          alt={course.golfCourseName}
+                          className="w-28 flex-shrink-0 rounded-lg object-cover"
+                        />
                       ) : (
                         <div className="h-20 w-28 flex-shrink-0 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
                           <span className="text-sm text-[#8b8b8b]">No Image</span>

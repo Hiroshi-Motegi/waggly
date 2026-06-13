@@ -40,7 +40,7 @@ export default function ShareSettingsPage() {
   }, [profile]);
 
   if (!user) return null;
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading variant="light" />;
 
   const profileUrl = profile?.username ? `https://waggly.jp/p/${profile.username}` : null;
 
@@ -106,7 +106,7 @@ export default function ShareSettingsPage() {
         <PageHeader title="名刺・共有設定" variant="dark" />
 
         {/* Username */}
-        <h3 className="px-1 pt-2 text-base font-bold text-white">ユーザー名</h3>
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">ユーザー名</h3>
         <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
           <p className="text-sm text-[#8b8b8b]">公開ページのURLに使われます（英数字・ハイフン・アンダースコア、3〜20文字）</p>
           {hasUsername && !isEditingUsername ? (
@@ -145,7 +145,7 @@ export default function ShareSettingsPage() {
         </div>
 
         {/* Public toggle */}
-        <h3 className="px-1 pt-2 text-base font-bold text-white">公開設定</h3>
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">公開設定</h3>
         <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
           <div className="flex items-center justify-between">
             <span className="text-base">名刺を公開する</span>
@@ -166,7 +166,7 @@ export default function ShareSettingsPage() {
         </div>
 
         {/* Visible fields */}
-        <h3 className="px-1 pt-2 text-base font-bold text-white">公開する項目</h3>
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">公開する項目</h3>
         <div className="flex flex-col rounded-lg bg-white p-3">
           <p className="text-sm text-[#8b8b8b] pb-2">設定はリアルタイムで反映されます</p>
           {Object.entries(VISIBLE_FIELD_LABELS).map(([field, label]) => {
@@ -192,7 +192,7 @@ export default function ShareSettingsPage() {
         {/* Preview (always if username set) */}
         {profile?.username && (
           <>
-            <h3 className="px-1 pt-2 text-base font-bold text-white">プレビュー</h3>
+            <h3 className="px-1 pt-2 text-lg font-bold text-white">プレビュー</h3>
             <div className="flex flex-col gap-3 rounded-lg bg-white p-3">
               <a href={`/p/${profile.username}?preview=1`} target="_blank" rel="noopener" className="flex items-center gap-2 text-[#006728] text-sm font-bold">
                 <ExternalLink className="h-4 w-4" />
@@ -208,7 +208,7 @@ export default function ShareSettingsPage() {
         {/* Share (only when public) */}
         {profileUrl && profile?.is_public && (
           <>
-            <h3 className="px-1 pt-2 text-base font-bold text-white">シェア</h3>
+            <h3 className="px-1 pt-2 text-lg font-bold text-white">シェア</h3>
             <div className="flex flex-col gap-3 rounded-lg bg-white p-3">
               <button onClick={handleCopy} className="flex items-center gap-2 rounded-full border border-[#006728] px-4 py-2 text-sm font-bold text-[#006728]">
                 {copied ? <><Check className="h-4 w-4" /> コピーしました</> : <><Copy className="h-4 w-4" /> リンクをコピー</>}

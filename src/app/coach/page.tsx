@@ -62,14 +62,14 @@ function ChatView({
         <div className="flex gap-1">
           <button
             onClick={onShowHistory}
-            className="flex items-center gap-1 rounded-full border border-white px-4 py-1.5 text-sm font-bold text-white"
+            className="flex items-center gap-1 rounded-full border border-white px-4 h-[40px] text-sm font-bold text-white"
           >
             <Clock className="h-4 w-4" />
             履歴
           </button>
           <button
             onClick={onNewChat}
-            className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]"
+            className="flex items-center gap-1 rounded-full bg-white px-4 h-[40px] text-sm font-bold text-[#006728]"
           >
             <Plus className="h-4 w-4" />
             新しい会話

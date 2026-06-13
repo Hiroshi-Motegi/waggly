@@ -49,7 +49,7 @@ export default function ProfileSettingsPage() {
   }, [profile]);
 
   if (!user) return null;
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading variant="light" />;
 
   function update(field: string, value: string | number | null) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -99,7 +99,7 @@ export default function ProfileSettingsPage() {
         <PageHeader title="プロフィール設定" variant="dark" />
 
         {/* Avatar */}
-        <h3 className="px-1 pt-2 text-base font-bold text-white">写真</h3>
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">写真</h3>
         <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -127,7 +127,7 @@ export default function ProfileSettingsPage() {
         </div>
 
         {/* Basic info */}
-        <h3 className="px-1 pt-2 text-base font-bold text-white">基本情報</h3>
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">基本情報</h3>
         <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
           <div className="flex flex-col gap-0.5 py-1">
             <span className={labelClass}>ニックネーム</span>
@@ -141,7 +141,7 @@ export default function ProfileSettingsPage() {
         </div>
 
         {/* Golf info */}
-        <h3 className="px-1 pt-2 text-base font-bold text-white">ゴルフ情報</h3>
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">ゴルフ情報</h3>
         <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
           <div className="flex flex-col gap-0.5 py-1">
             <span className={labelClass}>ゴルフを始めた日</span>
@@ -162,7 +162,7 @@ export default function ProfileSettingsPage() {
         </div>
 
         {/* SNS */}
-        <h3 className="px-1 pt-2 text-base font-bold text-white">SNS</h3>
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">SNS</h3>
         <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
           <div className="flex flex-col gap-0.5 py-1">
             <span className={labelClass}>Instagram</span>
@@ -175,7 +175,7 @@ export default function ProfileSettingsPage() {
         </div>
 
         {/* Custom links */}
-        <h3 className="px-1 pt-2 text-base font-bold text-white">その他のリンク</h3>
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">その他のリンク</h3>
         <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
           {form.custom_links.map((link, i) => (
             <div key={i} className={`flex gap-2 items-start pb-2 ${i < form.custom_links.length - 1 ? "border-b border-[#ececec] mb-2" : ""}`}>

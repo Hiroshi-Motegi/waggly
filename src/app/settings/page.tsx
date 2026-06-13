@@ -470,6 +470,7 @@ export default function SettingsPage() {
       <ExportSection />
 
       {/* 法的情報 */}
+      <h3 className="px-1 pt-2 text-lg font-bold text-white">サポート</h3>
       <div className="rounded-lg bg-white p-3">
         <div className="flex flex-col">
           {[

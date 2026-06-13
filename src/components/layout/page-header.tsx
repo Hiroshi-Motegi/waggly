@@ -43,13 +43,12 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
   }
 
   return (
-    <div className={`sticky top-0 z-10 -mx-2 -mt-2 px-3 pt-4 pb-2 overflow-hidden transition-all duration-200 ${isDark ? (scrolled ? "shadow-sm" : "") : "bg-[#ebf1eb]"}`}>
-      {isDark && scrolled && (
-        <>
-          <div className="absolute inset-0/80" />
-        </>
-      )}
-      <div className="relative z-10 flex items-center gap-2 min-h-[40px]">
+    <div
+      className={`sticky top-0 z-20 -mx-2 -mt-2 px-3 pt-4 pb-2 overflow-hidden transition-all duration-200 ${isDark ? (scrolled ? "shadow-sm" : "") : "bg-[#ebf1eb]"}`}
+      style={isDark ? { background: "#7cb668 url(/images/home-bg.jpg) center / cover fixed", backgroundBlendMode: "soft-light" } : undefined}
+    >
+      {isDark && <div className="absolute inset-0 bg-black/20 pointer-events-none" />}
+      <div className="relative z-10 flex items-center gap-2 min-h-[52px]">
         {showBack && (
           <button onClick={handleBack} className="shrink-0 -ml-1 p-1">
             <ChevronLeft className={`h-5 w-5 ${isDark ? "text-white" : "text-[#006728]"}`} />

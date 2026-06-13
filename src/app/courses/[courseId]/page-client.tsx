@@ -79,36 +79,37 @@ function InfoRow({ label, value }: { label: string; value: string | number | nul
   );
 }
 
-function LinkButtons({ layoutUrl, routeMapUrl }: { layoutUrl?: string; routeMapUrl?: string }) {
-  if (!layoutUrl && !routeMapUrl) return null;
+function ActionBox({ layoutUrl, routeMapUrl, reserveUrl }: { layoutUrl?: string; routeMapUrl?: string; reserveUrl?: string }) {
+  const hasLinks = layoutUrl || routeMapUrl;
+  if (!hasLinks && !reserveUrl) return null;
   return (
-    <div className="flex gap-2">
-      {layoutUrl && (
-        <a href={layoutUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-          <button className="w-full rounded-full border border-white py-2 text-base font-bold text-white">
-            コースレイアウト
-          </button>
-        </a>
+    <div className="rounded-lg bg-black/20 p-4 flex flex-col">
+      {hasLinks && (
+        <div className="flex gap-2">
+          {layoutUrl && (
+            <a href={layoutUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+              <button className="w-full rounded-full border border-white py-2 text-base font-bold text-white">
+                コースレイアウト
+              </button>
+            </a>
+          )}
+          {routeMapUrl && (
+            <a href={routeMapUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+              <button className="w-full rounded-full border border-white py-2 text-base font-bold text-white">
+                アクセスマップ
+              </button>
+            </a>
+          )}
+        </div>
       )}
-      {routeMapUrl && (
-        <a href={routeMapUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-          <button className="w-full rounded-full border border-white py-2 text-base font-bold text-white">
-            アクセスマップ
+      {reserveUrl && (
+        <a href={reserveUrl} target="_blank" rel="noopener noreferrer" className={hasLinks ? "mt-2" : ""}>
+          <button className="w-full rounded-full bg-white py-2 text-base font-bold text-[#006728]">
+            予約する
           </button>
         </a>
       )}
     </div>
-  );
-}
-
-function ReserveButton({ url }: { url?: string }) {
-  if (!url) return null;
-  return (
-    <a href={url} target="_blank" rel="noopener noreferrer">
-      <button className="w-full rounded-full bg-white py-2 text-base font-bold text-[#006728]">
-        予約する
-      </button>
-    </a>
   );
 }
 
@@ -170,8 +171,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
 
   if (error || !course) {
     return (
-      <div className="flex flex-col items-center gap-4 py-20 px-4">
-        <p className="text-base text-red-500">{error ?? "コースが見つかりませんでした"}</p>
+      <div className="px-2 pt-16">
+        <div className="rounded-lg bg-white p-6 text-center">
+          <p className="text-base text-[#8b8b8b]">{error ?? "コースが見つかりませんでした"}</p>
+        </div>
       </div>
     );
   }
@@ -192,7 +195,21 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
         subtitle={course.address}
         backHref="/courses"
         variant="dark"
-      />
+      >
+        {user && (
+          <button
+            onClick={toggleFavorite}
+            disabled={favLoading}
+            className="flex items-center justify-center rounded-full bg-white h-[40px] w-[40px]"
+          >
+            {favLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-[#006728]" />
+            ) : (
+              <Heart className={`h-5 w-5 ${isFavorited ? "fill-red-500 text-red-500" : "text-[#006728]"}`} />
+            )}
+          </button>
+        )}
+      </PageHeader>
 
       {/* Image carousel */}
       {images.length > 0 && (
@@ -212,7 +229,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                 <button
                   key={i}
                   onClick={() => setImageIndex(i)}
-                  className={`h-2 w-2 rounded-full transition-colors ${i === imageIndex ? "bg-[#006728]" : "bg-[#c5c5c5]"}`}
+                  className={`h-2 w-2 rounded-full transition-colors ${i === imageIndex ? "bg-white" : "bg-white/40"}`}
                 />
               ))}
             </div>
@@ -220,27 +237,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
         </div>
       )}
 
-      {/* Link buttons + Reserve + Favorite */}
-      <LinkButtons layoutUrl={course.layoutUrl} routeMapUrl={course.routeMapUrl} />
-      <ReserveButton url={course.reserveCalUrl} />
-      {user && (
-        <button
-          onClick={toggleFavorite}
-          disabled={favLoading}
-          className={`flex items-center justify-center gap-2 w-full rounded-full py-2 text-base font-bold ${
-            isFavorited
-              ? "border border-white text-white"
-              : "bg-white/20 text-white"
-          }`}
-        >
-          {favLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Heart className={`h-4 w-4 ${isFavorited ? "fill-white" : ""}`} />
-          )}
-          {isFavorited ? "お気に入り登録済み" : "お気に入りに追加"}
-        </button>
-      )}
+      {/* Link buttons + Reserve */}
+      <div className="pt-2">
+        <ActionBox layoutUrl={course.layoutUrl} routeMapUrl={course.routeMapUrl} reserveUrl={course.reserveCalUrl} />
+      </div>
 
       {/* Introduction */}
       {course.introduction && (
@@ -252,7 +252,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       {/* Price */}
       {(course.weekdayMinPrice > 0 || course.holidayMinPrice > 0) && (
         <>
-          <p className="text-base font-bold text-white px-1 pt-4">料金</p>
+          <p className="text-lg font-bold text-white px-1 pt-4">料金</p>
           <div className="rounded-lg bg-white p-3">
             {course.weekdayMinPrice != null && course.weekdayMinPrice > 0 && (
               <InfoRow label="平日最安値" value={`¥${course.weekdayMinPrice.toLocaleString()}〜`} />
@@ -265,7 +265,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       )}
 
       {/* Course info */}
-      <p className="text-base font-bold text-white px-1 pt-4">コース情報</p>
+      <p className="text-lg font-bold text-white px-1 pt-4">コース情報</p>
       <div className="rounded-lg bg-white p-3">
         <InfoRow label="コースタイプ" value={course.courseType} />
         <InfoRow label="設計者" value={course.designer} />
@@ -278,7 +278,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       {/* Ratings */}
       {course.evaluation > 0 && (
         <>
-          <p className="text-base font-bold text-white px-1 pt-4">評価</p>
+          <p className="text-lg font-bold text-white px-1 pt-4">評価</p>
           <div className="rounded-lg bg-white p-3">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl font-bold">{course.evaluation?.toFixed(1) ?? "—"}</span>
@@ -299,7 +299,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       )}
 
       {/* Facilities */}
-      <p className="text-base font-bold text-white px-1 pt-4">設備・ルール</p>
+      <p className="text-lg font-bold text-white px-1 pt-4">設備・ルール</p>
       <div className="rounded-lg bg-white p-3">
         <InfoRow label="練習場" value={course.praticeFacility} />
         <InfoRow label="宿泊" value={course.lodging} />
@@ -309,7 +309,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       </div>
 
       {/* Location */}
-      <p className="text-base font-bold text-white px-1 pt-4">アクセス</p>
+      <p className="text-lg font-bold text-white px-1 pt-4">アクセス</p>
       <div className="rounded-lg bg-white p-3">
         <InfoRow label="住所" value={course.address} />
         <InfoRow label="高速道路" value={course.highwayName} />
@@ -320,8 +320,9 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       </div>
 
       {/* Bottom link buttons + Reserve */}
-      <LinkButtons layoutUrl={course.layoutUrl} routeMapUrl={course.routeMapUrl} />
-      <ReserveButton url={course.reserveCalUrl} />
+      <div className="pt-6 pb-4">
+        <ActionBox layoutUrl={course.layoutUrl} routeMapUrl={course.routeMapUrl} reserveUrl={course.reserveCalUrl} />
+      </div>
       </div>
     </div>
   );

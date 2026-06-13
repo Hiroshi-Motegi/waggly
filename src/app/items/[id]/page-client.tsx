@@ -14,9 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { accessoryValidationSchema } from "@/lib/form-validation";
 import { FieldError } from "@/components/ui/field-error";
-import { ImagePicker } from "@/components/ui/image-picker";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
-import type { Accessory, AccessoryCategory, AccessoryStatus } from "@/types/database";
+import { ItemImageGallery } from "@/components/item/item-image-gallery";
+import type { Accessory, AccessoryCategory, AccessoryStatus, AccessoryImage } from "@/types/database";
 
 const categoryLabels: Record<AccessoryCategory, string> = {
   ball: "ボール",
@@ -72,23 +72,35 @@ function StarRating({ rating }: { rating: number | null }) {
   );
 }
 
+function ItemImageCarousel({ images, alt }: { images: AccessoryImage[]; alt: string }) {
+  const [index, setIndex] = useState(0);
+  return (
+    <div>
+      <div className="relative w-full aspect-square overflow-hidden rounded-lg">
+        <img src={images[index].image_url} alt={alt} className="w-full h-full object-cover" />
+      </div>
+      <div className="flex justify-center gap-2 mt-3">
+        {images.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setIndex(i)}
+            className={`h-2 w-2 rounded-full transition-colors ${i === index ? "bg-[#006728]" : "bg-[#c5c5c5]"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const [item, setItem] = useState<Accessory | null>(null);
+  const [item, setItem] = useState<(Accessory & { accessory_images?: AccessoryImage[] }) | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Accessory>>({});
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [deleteImage, setDeleteImage] = useState(false);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
+  const [itemImages, setItemImages] = useState<AccessoryImage[]>([]);
 
   const { validateOnChange, validateOnSubmit, fieldError } = useFormValidation(accessoryValidationSchema);
 
@@ -100,6 +112,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         const data = await res.json();
         setItem(data);
         setEditForm(data);
+        setItemImages(data.accessory_images ?? []);
       } catch {
         setItem(null);
       } finally {
@@ -119,17 +132,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     if (!validateOnSubmit(editForm as any)) return;
     setIsSubmitting(true);
     try {
-      // Handle image delete
-      if (deleteImage) {
-        await apiFetch(`/api/accessories/${id}/image`, { method: "DELETE" });
-      }
-      // Handle image upload
-      if (pendingFile) {
-        const formData = new FormData();
-        formData.append("file", pendingFile);
-        await apiFetch(`/api/accessories/${id}/image`, { method: "POST", body: formData });
-      }
-      // Save form data
       const body = {
         category: editForm.category,
         brand: editForm.brand || null,
@@ -145,25 +147,17 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error("Failed to update");
-      // Reload latest data
       const refetchRes = await apiFetch(`/api/accessories/${id}`);
       const updated = await refetchRes.json();
       setItem(updated);
       setEditForm(updated);
-      resetImageState();
+      setItemImages(updated.accessory_images ?? []);
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update accessory:", error);
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  function resetImageState() {
-    setPendingFile(null);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    setDeleteImage(false);
   }
 
   async function handleDelete() {
@@ -188,71 +182,30 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   if (isLoading) return <Loading variant="light" />;
-  if (!item) return <p className="p-4 text-center text-muted-foreground">アイテムが見つかりません</p>;
-
-  function handleImageDelete() {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPendingFile(null);
-    setPreviewUrl(null);
-    setDeleteImage(true);
-  }
+  if (!item) return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">アイテムが見つかりません</p></div></div>;
 
   if (isEditing) {
     return (
       <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         {isSubmitting && <ProcessingOverlay />}
         <div className="relative z-10 flex flex-col space-y-2">
-        <h2 className="px-1 text-lg font-bold text-white">アイテムを編集</h2>
-        <form onSubmit={handleSave} className="flex flex-col rounded-lg bg-white p-3">
-          {/* 画像 */}
-          <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-sm">画像</span>
-            {(() => {
-              const displayUrl = deleteImage ? null : (previewUrl ?? item?.image_url);
-              return (
-                <div className="flex flex-col items-center gap-1">
-                  {displayUrl ? (
-                    <img src={displayUrl} alt="" className="max-h-[229px] rounded object-contain" />
-                  ) : (
-                    <ImagePicker onPick={(file) => {
-                      if (previewUrl) URL.revokeObjectURL(previewUrl);
-                      setPendingFile(file);
-                      setPreviewUrl(URL.createObjectURL(file));
-                      setDeleteImage(false);
-                    }}>
-                      <button
-                        type="button"
-                        className="h-32 w-full rounded border-2 border-dashed border-[#c4c4c4] flex items-center justify-center text-base text-[#8b8b8b]"
-                      >
-                        写真を追加
-                      </button>
-                    </ImagePicker>
-                  )}
-                  {displayUrl && (
-                    <div className="flex gap-2.5">
-                      <ImagePicker onPick={(file) => {
-                        if (previewUrl) URL.revokeObjectURL(previewUrl);
-                        setPendingFile(file);
-                        setPreviewUrl(URL.createObjectURL(file));
-                        setDeleteImage(false);
-                      }}>
-                        <button type="button" className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]">
-                          変更する
-                        </button>
-                      </ImagePicker>
-                      <button type="button" onClick={handleImageDelete} className="rounded-full border border-[#006728] px-5 py-1 text-sm font-bold text-[#006728]">
-                        削除する
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </div>
+        <PageHeader title="アイテムを編集" variant="dark" />
 
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">写真</h3>
+        <div className="rounded-lg bg-white p-3">
+          <ItemImageGallery
+            itemId={id}
+            images={itemImages}
+            onUpload={(newImage) => setItemImages((prev) => [...prev, newImage])}
+            onDelete={(imageId) => setItemImages((prev) => prev.filter((img) => img.id !== imageId))}
+          />
+        </div>
+
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">アイテム情報</h3>
+        <form onSubmit={handleSave} className="flex flex-col rounded-lg bg-white p-3">
           {/* カテゴリ */}
           <div data-field="category" className="flex flex-col gap-0.5 py-1">
-            <span className="text-sm">カテゴリ</span>
+            <span className="text-sm flex items-center">カテゴリ <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
             <select
               value={editForm.category ?? ""}
               onChange={(e) => updateEdit("category", e.target.value)}
@@ -274,7 +227,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
           {/* 商品名・モデル */}
           <div data-field="model" className="flex flex-col gap-0.5 py-1">
-            <span className="text-sm">商品名・モデル</span>
+            <span className="text-sm flex items-center">商品名・モデル <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
             <input value={editForm.model ?? ""} onChange={(e) => updateEdit("model", e.target.value)} placeholder="モデル名" className={`w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("model") ? "!border-red-400" : ""}`} />
             <FieldError message={fieldError("model")} />
           </div>
@@ -328,11 +281,11 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         </form>
 
         {/* Buttons outside card */}
-        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
-          <button onClick={(e) => { e.preventDefault(); handleSave(e); }} disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50">
+        <div className="flex flex-col items-center gap-4 px-4 pt-6 pb-8">
+          <button onClick={(e) => { e.preventDefault(); handleSave(e); }} disabled={isSubmitting} className="w-full rounded-full bg-white py-3 text-base font-bold text-[#006728] disabled:opacity-50">
             {isSubmitting ? "保存中..." : "保存する"}
           </button>
-          <button type="button" onClick={() => { resetImageState(); setIsEditing(false); }} className="text-base font-bold text-white">
+          <button type="button" onClick={() => setIsEditing(false)} className="text-base font-bold text-white">
             キャンセル
           </button>
         </div>
@@ -351,18 +304,18 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         subtitle={categoryLabels[item.category]}
         variant="dark"
       >
-        <div className="flex gap-1 shrink-0">
+        <div className="flex gap-2.5 shrink-0">
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center justify-center rounded-full bg-white p-2"
+            className="flex items-center justify-center rounded-full bg-white h-[40px] w-[40px]"
           >
-            <Pencil className="h-4 w-4 text-[#006728]" />
+            <Pencil className="h-5 w-5 text-[#006728]" />
           </button>
           <button
             onClick={handleDelete}
-            className="flex items-center justify-center rounded-full bg-white p-2"
+            className="flex items-center justify-center rounded-full bg-white h-[40px] w-[40px]"
           >
-            <Trash2 className="h-4 w-4 text-[#006728]" />
+            <Trash2 className="h-5 w-5 text-[#006728]" />
           </button>
         </div>
       </PageHeader>
@@ -370,13 +323,24 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       {/* Card */}
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* Image */}
-        <div className="flex items-center justify-center py-2">
-          {item.image_url ? (
-            <img src={item.image_url} alt={item.model ?? ""} className="max-h-[229px] rounded object-contain" />
-          ) : (
-            <img src={categoryIcons[item.category]} alt="" className="h-[100px] opacity-40" />
-          )}
-        </div>
+        {(() => {
+          const images = item.accessory_images ?? [];
+          if (images.length === 0) {
+            return (
+              <div className="flex items-center justify-center py-2">
+                <img src={categoryIcons[item.category]} alt="" className="h-[100px] opacity-40" />
+              </div>
+            );
+          }
+          if (images.length === 1) {
+            return (
+              <div className="relative w-full aspect-square overflow-hidden rounded-lg">
+                <img src={images[0].image_url} alt={item.model ?? ""} className="w-full h-full object-cover" />
+              </div>
+            );
+          }
+          return <ItemImageCarousel images={images} alt={item.model ?? ""} />;
+        })()}
 
         {/* Detail rows */}
         <div className="flex flex-col">
@@ -431,7 +395,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       })()}
 
       {/* Archive / Restore */}
-      <div className="flex flex-col items-center">
+      <div className="flex justify-center pt-4 pb-4">
         {item.status === "active" ? (
           <button
             onClick={() => handleStatusChange("past")}

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PageHeader } from "@/components/layout/page-header";
 import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
@@ -84,10 +85,7 @@ export default function MaintenanceEditPage({
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       {submitting && <ProcessingOverlay />}
       <div className="relative z-10 flex flex-col space-y-2">
-      <div className="px-1">
-        <span className="text-sm font-bold text-white">{club?.club_number}</span>
-        <h2 className="text-lg font-bold text-white">メンテナンスを編集</h2>
-      </div>
+      <PageHeader title="メンテナンスを編集" subtitle={club?.club_number} variant="dark" />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-lg bg-white p-4">
         <div className="space-y-1">

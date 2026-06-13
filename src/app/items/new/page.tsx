@@ -31,7 +31,7 @@ const statuses: { value: AccessoryStatus; label: string }[] = [
 ];
 
 const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
-const labelClass = "text-sm";
+const labelClass = "text-sm flex items-center";
 
 export default function NewItemPage() {
   const router = useRouter();
@@ -96,7 +96,7 @@ export default function NewItemPage() {
       if (pendingFile) {
         const formData = new FormData();
         formData.append("file", pendingFile);
-        await apiFetch(`/api/accessories/${created.id}/image`, {
+        await apiFetch(`/api/accessories/${created.id}/images`, {
           method: "POST",
           body: formData,
         });
@@ -118,7 +118,7 @@ export default function NewItemPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
           {/* Section 1: アイテム詳細 */}
-          <h3 className="px-1 pt-2 text-base font-bold text-white">アイテム詳細</h3>
+          <h3 className="px-1 pt-2 text-lg font-bold text-white">アイテム情報</h3>
           <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
             {/* 画像 */}
             <div className="flex flex-col gap-0.5 py-1">
@@ -154,7 +154,7 @@ export default function NewItemPage() {
             </div>
 
             <div data-field="category" className="flex flex-col gap-0.5 py-1">
-              <span className={labelClass}>カテゴリ</span>
+              <span className={labelClass}>カテゴリ <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
               <select value={form.category} onChange={(e) => update("category", e.target.value)} className={`${inputClass} ${fieldError("category") ? "!border-red-400" : ""}`}>
                 <option value="">選択してください</option>
                 {categories.map((c) => (
@@ -171,7 +171,7 @@ export default function NewItemPage() {
             </div>
 
             <div data-field="model" className="flex flex-col gap-0.5 py-1">
-              <span className={labelClass}>商品名・モデル</span>
+              <span className={labelClass}>商品名・モデル <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
               <input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="モデル名" className={`${inputClass} ${fieldError("model") ? "!border-red-400" : ""}`} />
               <FieldError message={fieldError("model")} />
             </div>
@@ -202,7 +202,7 @@ export default function NewItemPage() {
           </div>
 
           {/* Section 2: その他 */}
-          <h3 className="px-1 pt-2 text-base font-bold text-white">その他</h3>
+          <h3 className="px-1 pt-2 text-lg font-bold text-white">その他</h3>
           <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
             <div data-field="purchase_url" className="flex flex-col gap-0.5 py-1">
               <span className={labelClass}>購入URL</span>
@@ -221,8 +221,8 @@ export default function NewItemPage() {
           </div>
 
           {/* Buttons */}
-          <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
-            <button type="submit" disabled={isSubmitting} className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50">
+          <div className="flex flex-col items-center gap-4 px-4 pt-6 pb-8">
+            <button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-white py-3 text-base font-bold text-[#006728] disabled:opacity-50">
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />

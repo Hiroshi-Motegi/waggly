@@ -43,7 +43,7 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
   }, []);
 
   if (isLoading) return <Loading variant="light" />;
-  if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
+  if (!club) return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">クラブが見つかりません</p></div></div>;
 
   const { club_images, maintenances, id, user_id, created_at, ...editableData } = club as any;
 
@@ -52,22 +52,18 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
       {isSubmitting && <ProcessingOverlay />}
       <div className="relative z-10 flex flex-col space-y-2">
         <PageHeader title="クラブを編集" variant="dark" />
-        <div className="px-3 pt-3">
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">写真</h3>
+        <div>
           <div className="rounded-lg bg-white p-3">
-            <span className="text-sm">写真</span>
             <ClubImageGallery
               clubId={clubId}
               images={clubImages}
               onUpload={handleImageUpload}
+              onDelete={(imageId) => setClubImages((prev) => prev.filter((img) => img.id !== imageId))}
             />
           </div>
         </div>
-        <ClubForm initialData={editableData} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-        <div className="flex justify-center pb-8 -mt-2">
-          <button onClick={() => router.back()} className="text-base font-bold text-white">
-            キャンセル
-          </button>
-        </div>
+        <ClubForm initialData={editableData} onSubmit={handleSubmit} isSubmitting={isSubmitting} onCancel={() => router.back()} />
       </div>
     </div>
   );

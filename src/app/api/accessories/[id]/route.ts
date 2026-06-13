@@ -16,7 +16,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from("accessories")
-    .select("*")
+    .select("*, accessory_images(*)")
     .eq("id", id)
     .eq("user_id", userId)
     .single();

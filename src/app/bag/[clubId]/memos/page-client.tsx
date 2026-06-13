@@ -82,7 +82,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
   }, [clubId, club, isAddMode]);
 
   if (isLoading) return <Loading variant="light" />;
-  if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
+  if (!club) return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">クラブが見つかりません</p></div></div>;
 
   // Add mode: dedicated form page
   if (isAddMode) {
@@ -120,14 +120,14 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
         <div className="flex gap-1">
           <button
             onClick={() => setShowMemoForm(!showMemoForm)}
-            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-[#006728]"
+            className="flex items-center gap-1 rounded-full bg-white px-3 h-[40px] text-sm font-bold text-[#006728]"
           >
             <Plus className="h-3 w-3" />
             メモ
           </button>
           <Link
             href={nativeHref(`/bag/${clubId}/maintenances?add=1`)}
-            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-[#006728]"
+            className="flex items-center gap-1 rounded-full bg-white px-3 h-[40px] text-sm font-bold text-[#006728]"
           >
             <Plus className="h-3 w-3" />
             メンテナンス

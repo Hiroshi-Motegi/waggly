@@ -63,7 +63,7 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
   }
 
   if (!session) {
-    return <p className="p-4 text-center text-muted-foreground">記録が見つかりません</p>;
+    return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">記録が見つかりません</p></div></div>;
   }
 
   return (
@@ -71,7 +71,7 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="練習記録" backHref="/practice" variant="dark">
         <Link href={nativeHref(`/practice/${sessionId}/edit`)}>
-          <button className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-sm font-bold text-white">
+          <button className="flex items-center gap-1 rounded-full border border-white px-3 h-[40px] text-sm font-bold text-white">
             <Pencil className="h-4 w-4" />
             編集
           </button>
@@ -162,7 +162,7 @@ export default function PracticeDetailPage({ overrideSessionId }: { overrideSess
         </>
       )}
 
-      <div className="flex justify-center pt-2">
+      <div className="flex justify-center pt-4 pb-4">
         <button onClick={handleDelete} className="text-base font-bold text-white">
           この記録を削除
         </button>

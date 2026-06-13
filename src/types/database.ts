@@ -56,6 +56,12 @@ export interface Club {
   kick_point: string | null;      // キックポイント
   head_volume: number | null;     // ヘッド体積 (cc)
   head_weight: number | null;     // ヘッド重量 (g)
+  grip_name: string | null;       // グリップ名
+  grip_size: string | null;       // グリップ太さ (M58, M60, M62等)
+  bounce: number | null;          // バウンス角 (°) — ウェッジ用
+  sole_shape: string | null;      // ソール形状 — ウェッジ用
+  face_angle: number | null;      // フェース角 (°) — ドライバー用
+  shaft_weight: number | null;    // シャフト重量 (g)
   rating: number | null;
   created_at: string;
 }
@@ -154,10 +160,22 @@ export interface Accessory {
   created_at: string;
 }
 
+export interface AccessoryImage {
+  id: string;
+  accessory_id: string;
+  image_url: string;
+  is_primary: boolean;
+  created_at: string;
+}
+
 // Joined types for convenience
 export interface ClubWithImages extends Club {
   club_images: ClubImage[];
   latest_avg_distance?: number | null;
+}
+
+export interface AccessoryWithImages extends Accessory {
+  accessory_images: AccessoryImage[];
 }
 
 export interface PracticeSessionWithClubs extends PracticeSession {

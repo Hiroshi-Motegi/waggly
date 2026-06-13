@@ -5,10 +5,11 @@ import { use, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PageHeader } from "@/components/layout/page-header";
 import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
@@ -94,7 +95,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
   }
 
   if (isLoading) return <Loading variant="light" />;
-  if (!club) return <p className="p-4 text-center text-muted-foreground">クラブが見つかりません</p>;
+  if (!club) return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">クラブが見つかりません</p></div></div>;
 
   const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 
@@ -105,17 +106,11 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
         {submitting && <ProcessingOverlay />}
         <div className="relative z-10 flex flex-col space-y-2">
           <form onSubmit={handleSubmit} className="flex flex-col" style={{ minHeight: "calc(100dvh - var(--bottom-nav-height))" }}>
-            <div className="flex items-center gap-1 px-1 pb-2">
-              <button type="button" onClick={() => router.back()} className="text-white p-1 -ml-1">
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-              <div>
-                <span className="text-sm font-bold text-white">
-                  {club.club_number}{club.maker ? ` / ${club.maker}` : ""}{club.model ? ` ${club.model}` : ""}
-                </span>
-                <h2 className="text-lg font-bold text-white">メンテナンス記録の追加</h2>
-              </div>
-            </div>
+            <PageHeader
+              title="メンテナンス記録の追加"
+              subtitle={`${club.club_number}${club.maker ? ` / ${club.maker}` : ""}${club.model ? ` ${club.model}` : ""}`}
+              variant="dark"
+            />
             <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
               <div className="flex flex-col gap-0.5 py-1">
                 <span className="text-sm">種別</span>
@@ -153,18 +148,18 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
               </div>
             </div>
             <div className="flex-1" />
-            <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
+            <div className="flex flex-col items-center gap-4 px-4 pt-6 pb-8">
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full rounded-full bg-white border border-white py-2 text-base font-bold text-[#006728] disabled:opacity-50"
+                className="w-full rounded-full bg-white py-3 text-base font-bold text-[#006728] disabled:opacity-50"
               >
                 {submitting ? "保存中..." : "保存する"}
               </button>
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-5 py-1 text-base font-bold text-white"
+                className="text-base font-bold text-white"
               >
                 キャンセル
               </button>
@@ -180,19 +175,15 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       {submitting && <ProcessingOverlay />}
       <div className="relative z-10 flex flex-col space-y-2">
-      <div className="flex items-center justify-between px-1">
-        <div>
-          <span className="text-sm font-bold text-white">{club.club_number}</span>
-          <h2 className="text-lg font-bold text-white">メンテナンス履歴</h2>
-        </div>
+      <PageHeader title="メンテナンス履歴" subtitle={club.club_number} variant="dark">
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-[#006728]"
+          className="flex items-center gap-1 rounded-full bg-white px-3 h-[40px] text-sm font-bold text-[#006728]"
         >
           <Plus className="h-3 w-3" />
           追加
         </button>
-      </div>
+      </PageHeader>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-lg bg-white p-3">

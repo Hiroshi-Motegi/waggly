@@ -99,7 +99,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
   }
 
   if (!session) {
-    return <p className="p-4 text-center text-base text-[#8b8b8b]">記録が見つかりません</p>;
+    return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">記録が見つかりません</p></div></div>;
   }
 
   const initialData = {
@@ -171,7 +171,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
         showCancel
         onCancel={() => router.back()}
       />
-      <div className="flex justify-center py-2">
+      <div className="flex justify-center pb-4">
         <button
           onClick={handleDelete}
           disabled={isDeleting}

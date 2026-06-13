@@ -112,7 +112,7 @@ export default function ItemsPage() {
       <PageHeader title="アイテム" backHref="/" variant="dark">
         <ViewModeToggle mode={viewMode} onChange={setViewMode} />
         <Link href={filter === "all" || filter === "active" ? "/items/new" : `/items/new?status=${filter}`}>
-          <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
+          <button className="flex items-center gap-1 rounded-full bg-white px-4 h-[40px] text-sm font-bold text-[#006728]">
             <Plus className="h-4 w-4" />
             追加
           </button>

@@ -55,13 +55,13 @@ export default function FavoriteCoursesPage() {
       <div className="relative z-10 flex flex-col space-y-2">
         <PageHeader title="お気に入りコース" variant="dark">
           {!isReordering && (
-            <Link href="/courses" className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
+            <Link href="/courses" className="flex items-center gap-1 rounded-full bg-white px-4 h-[40px] text-sm font-bold text-[#006728]">
               <Plus className="h-4 w-4" />
               追加
             </Link>
           )}
           {!isReordering && courses.length > 1 && (
-            <button onClick={startReorder} className="flex items-center gap-1 rounded-full border border-white px-3 py-1.5 text-sm font-bold text-white">
+            <button onClick={startReorder} className="flex items-center gap-1 rounded-full border border-white px-3 h-[40px] text-sm font-bold text-white">
               <GripVertical className="h-4 w-4" />
               並替
             </button>
@@ -85,10 +85,10 @@ export default function FavoriteCoursesPage() {
                     </button>
                   </div>
                   {c.course_image_url && (
-                    <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
+                    <img src={c.course_image_url} alt="" className="h-14 w-14 rounded-lg object-cover shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate">{c.course_name}</p>
+                    <p className="text-base font-bold truncate">{c.course_name}</p>
                   </div>
                 </div>
               ))}
@@ -107,17 +107,17 @@ export default function FavoriteCoursesPage() {
                 ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/gora/detail/id=${c.gora_course_id}/`
                 : null;
               return (
-                <div key={c.id} className="flex items-center gap-2 py-2 border-b border-[#ececec] last:border-0">
+                <div key={c.id} className="flex items-center gap-2.5 py-2 border-b border-[#dfdfdf] last:border-0">
                   {c.course_image_url && (
-                    <img src={c.course_image_url} alt="" className="h-10 w-14 rounded object-cover shrink-0" />
+                    <img src={c.course_image_url} alt="" className="h-14 w-14 rounded-lg object-cover shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
                     {goraUrl ? (
-                      <a href={goraUrl} target="_blank" rel="noopener" className="text-sm font-bold truncate block text-[#006728]">{c.course_name}</a>
+                      <a href={goraUrl} target="_blank" rel="noopener" className="text-base font-bold truncate block text-[#006728]">{c.course_name}</a>
                     ) : (
-                      <p className="text-sm font-bold truncate">{c.course_name}</p>
+                      <p className="text-base font-bold truncate">{c.course_name}</p>
                     )}
-                    {c.address && <p className="text-xs text-[#8b8b8b] truncate">{c.address}</p>}
+                    {c.address && <p className="text-sm text-[#8b8b8b] truncate">{c.address}</p>}
                   </div>
                   <button onClick={() => handleRemove(c.id)} className="shrink-0 p-1 text-[#8b8b8b]">
                     <X className="h-4 w-4" />

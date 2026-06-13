@@ -13,12 +13,7 @@ export default function AccountLinkingHelpPage() {
         marginBottom: "calc(-1 * var(--bottom-nav-height))",
       }}
     >
-      <img
-        src="/images/home-bg.jpg"
-        alt=""
-        className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none"
-      />
-      <div className="relative z-10 flex flex-col space-y-2">
+      <div className="relative flex flex-col space-y-2">
         <PageHeader title="アカウント連携について" variant="dark" />
 
         {/* 概要 */}

@@ -67,28 +67,34 @@ export default function NewPracticePage() {
 
   if (saved) {
     return (
-      <div className="relative flex flex-col items-center justify-center px-6 space-y-4 text-center" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <div className="relative flex flex-col items-center justify-center px-4 space-y-4 text-center" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         <div className="relative z-10 flex flex-col items-center space-y-4 w-full">
-          <h2 className="text-lg font-bold text-white">練習お疲れさまでした！</h2>
+          <div className="loading-bounce">
+            <img src="/icons/loading-ball-white.svg" alt="" className="h-16 w-16" />
+          </div>
+          <h2 className="text-xl font-bold text-white">練習お疲れさまでした！</h2>
           <p className="text-base text-white/70">記録を保存しました</p>
 
-          <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-            {planId ? (
-              <Link href={nativeHref(`/coach/plans/${planId}`)} className="w-full">
-                <button className="w-full rounded-full bg-white py-2 text-base font-bold text-[#006728]">
-                  練習メニューを見る
-                </button>
-              </Link>
-            ) : (
-              <Link href="/coach/plans/new" className="w-full">
-                <button className="w-full rounded-full bg-white py-2 text-base font-bold text-[#006728]">
-                  AIに次の練習メニューを提案してもらう
-                </button>
-              </Link>
-            )}
-            <p className="text-sm text-white/60">練習データをもとにAIが最適な練習メニューを提案します</p>
+          <div className="flex flex-col items-center gap-4 w-full">
+            <div className="rounded-lg bg-black/20 p-6 w-full flex flex-col items-center gap-3">
+              {planId ? (
+                <Link href={nativeHref(`/coach/plans/${planId}`)} className="w-full">
+                  <button className="w-full rounded-full bg-white py-3 text-base font-bold text-[#006728]">
+                    練習メニューを見る
+                  </button>
+                </Link>
+              ) : (
+                <Link href="/coach/plans/new" className="w-full">
+                  <button className="w-full rounded-full bg-white py-3 text-base font-bold text-[#006728]">
+                    AIに次の練習メニューを提案してもらう
+                  </button>
+                </Link>
+              )}
+              <p className="text-sm text-white/60 text-center">練習データをもとにAIが最適な練習メニューを提案します</p>
+              <p className="text-xs text-white/40 text-center">※ 1回あたり約3,000〜5,000 AIトークンを消費します</p>
+            </div>
             <Link href="/practice">
-              <button className="px-5 py-1 text-base font-bold text-white">練習記録に戻る</button>
+              <button className="rounded-full border border-white px-6 py-2 text-base font-bold text-white">練習記録に戻る</button>
             </Link>
           </div>
         </div>

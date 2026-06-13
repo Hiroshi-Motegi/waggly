@@ -100,7 +100,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
   }
 
   if (isLoading) return <Loading variant="light" />;
-  if (!plan) return <p className="p-4 text-center text-muted-foreground">見つかりません</p>;
+  if (!plan) return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">見つかりません</p></div></div>;
 
   const totalBalls = plan.practice_plan_items?.reduce((sum: number, i: any) => sum + i.balls, 0) ?? 0;
 
@@ -125,7 +125,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       </div>
 
       {/* Items */}
-      <h3 className="px-1 pt-4 text-base font-bold text-white">練習内容</h3>
+      <h3 className="px-1 pt-4 text-lg font-bold text-white">練習内容</h3>
       <div className="flex flex-col rounded-lg bg-white p-3">
         {plan.practice_plan_items?.map((item: any, index: number) => (
           <PlanItem key={item.id} item={item} isLast={index === (plan.practice_plan_items?.length ?? 0) - 1} />
@@ -133,16 +133,16 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
+      <div className="flex flex-col items-center gap-4 px-4 pt-6 pb-8">
         <button
           onClick={handleDone}
-          className="w-full rounded-full bg-white border border-white py-2 text-base font-bold text-[#006728]"
+          className="w-full rounded-full bg-white py-3 text-base font-bold text-[#006728]"
         >
           この内容で練習を記録する
         </button>
         <button
           onClick={handleDelete}
-          className="px-5 py-1 text-base font-bold text-white"
+          className="text-base font-bold text-white"
         >
           削除
         </button>

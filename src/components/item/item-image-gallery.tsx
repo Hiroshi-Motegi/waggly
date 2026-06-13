@@ -3,17 +3,17 @@
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
-import type { ClubImage } from "@/types/database";
+import type { AccessoryImage } from "@/types/database";
 import { ImagePicker } from "@/components/ui/image-picker";
 
-interface ClubImageGalleryProps {
-  clubId: string;
-  images: ClubImage[];
-  onUpload: (newImage: ClubImage) => void;
+interface ItemImageGalleryProps {
+  itemId: string;
+  images: AccessoryImage[];
+  onUpload: (newImage: AccessoryImage) => void;
   onDelete?: (imageId: string) => void;
 }
 
-export function ClubImageGallery({ clubId, images, onUpload, onDelete }: ClubImageGalleryProps) {
+export function ItemImageGallery({ itemId, images, onUpload, onDelete }: ItemImageGalleryProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -23,7 +23,7 @@ export function ClubImageGallery({ clubId, images, onUpload, onDelete }: ClubIma
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await apiFetch(`/api/clubs/${clubId}/images`, {
+      const res = await apiFetch(`/api/accessories/${itemId}/images`, {
         method: "POST",
         body: formData,
       });
@@ -41,7 +41,7 @@ export function ClubImageGallery({ clubId, images, onUpload, onDelete }: ClubIma
     if (!confirm("この写真を削除しますか？")) return;
     setDeletingId(imageId);
     try {
-      const res = await apiFetch(`/api/clubs/${clubId}/images/${imageId}`, {
+      const res = await apiFetch(`/api/accessories/${itemId}/images/${imageId}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -59,7 +59,7 @@ export function ClubImageGallery({ clubId, images, onUpload, onDelete }: ClubIma
           <div key={img.id} className="flex flex-col items-center gap-2">
             <img
               src={img.image_url}
-              alt="Club"
+              alt="Item"
               className="w-full aspect-square rounded-lg object-cover"
             />
             {onDelete && (

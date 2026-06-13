@@ -1,13 +1,26 @@
 "use client";
 
+import { createPortal } from "react-dom";
+import { useState, useEffect } from "react";
+
 const text = "読み込み中...";
 
+/**
+ * Loading indicator with two variants:
+ * - "light" (page loading): full-screen overlay via portal, dark bg, white text, always centered
+ * - "default" (inline loading): compact, for use inside cards/sections
+ */
 export function Loading({ variant = "default" }: { variant?: "default" | "light" }) {
   const isLight = variant === "light";
   const textColor = isLight ? "text-white" : "text-[#006728]";
+  const [mounted, setMounted] = useState(false);
 
-  const content = (
-    <div className="flex flex-col items-center justify-center gap-0 py-12">
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const ball = (
+    <div className="flex flex-col items-center justify-center gap-0">
       <div className="loading-bounce">
         <img
           src={isLight ? "/icons/loading-ball-white.svg" : "/icons/loading-ball.svg"}
@@ -30,13 +43,18 @@ export function Loading({ variant = "default" }: { variant?: "default" | "light"
     </div>
   );
 
+  // Page loading: portal to body to escape transform ancestors
   if (isLight) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="relative z-10">{content}</div>
+    const overlay = (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+        {ball}
       </div>
     );
+    // SSR safety: portal only after mount
+    if (!mounted) return null;
+    return createPortal(overlay, document.body);
   }
 
-  return content;
+  // Inline loading: compact with padding
+  return <div className="py-12">{ball}</div>;
 }

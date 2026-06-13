@@ -57,7 +57,7 @@ export default function PlansPage() {
       <PageHeader title="練習メニュー" backHref="/" variant="dark">
         {user && (
           <Link href="/coach/plans/new">
-            <button className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-bold text-[#006728]">
+            <button className="flex items-center gap-1 rounded-full bg-white px-4 h-[40px] text-sm font-bold text-[#006728]">
               <Plus className="h-4 w-4" />
               新規作成
             </button>
