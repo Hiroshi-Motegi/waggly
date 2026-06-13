@@ -93,7 +93,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-dvh bg-[#139847]">
-        <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative z-10">
           <Loading variant="light" />
         </div>
@@ -104,7 +103,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
   if (notFound || !profile) {
     return (
       <div className="flex flex-col items-center justify-center min-h-dvh bg-[#139847] text-white gap-4">
-        <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative z-10 text-center">
           <h1 className="text-2xl font-bold">ページが見つかりません</h1>
           <p className="mt-2 text-white/70">このプロフィールは公開されていないか、存在しません。</p>
@@ -117,7 +115,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
 
   return (
     <div className="relative flex flex-col bg-[#139847]" style={{ minHeight: "100dvh" }}>
-      <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       <div className="relative z-10 flex flex-col">
         {/* Header */}
         <div className="flex flex-col items-center gap-2 pt-10 pb-4 px-4">

@@ -47,7 +47,6 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
       {isDark && scrolled && (
         <>
           <div className="absolute inset-0 bg-[#139847]/80" />
-          <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none" />
         </>
       )}
       <div className="relative z-10 flex items-center gap-2 min-h-[40px]">

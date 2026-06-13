@@ -54,7 +54,6 @@ function Slide2() {
       {/* Header */}
       <div className="relative w-full py-4 px-6 shrink-0">
         <div className="absolute inset-0 bg-[#139847]" />
-        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <h2 className="relative text-xl font-bold text-white leading-snug">
           ギアをまとめて管理
           <br />
@@ -110,7 +109,6 @@ function Slide3() {
       {/* Header */}
       <div className="relative w-full py-4 px-6 shrink-0">
         <div className="absolute inset-0 bg-[#139847]" />
-        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <h2 className="relative text-xl font-bold text-white leading-snug">
           練習球数や内容を
           <br />
@@ -189,7 +187,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
       <div className="fixed bottom-0 left-0 right-0 z-50 py-3 flex flex-col items-center gap-3 overflow-hidden">
         <div className="absolute inset-0 bg-[#139847]" />
-        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <div className="relative flex gap-1.5">
           {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
             <div

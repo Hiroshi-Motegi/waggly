@@ -64,7 +64,6 @@ export function TermsAgreement({ onAgree, isReagreement }: TermsAgreementProps) 
       {/* 同意 + ボタン — オンボーディングと同じデザイン */}
       <div className="sticky bottom-0 left-0 right-0 z-50 py-3 flex flex-col items-center gap-3 overflow-hidden">
         <div className="absolute inset-0 bg-[#139847]" />
-        <img src="/images/home-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         <label className="relative flex items-center justify-center gap-2 text-sm cursor-pointer">
           <input
             type="checkbox"

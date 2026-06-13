@@ -96,7 +96,6 @@ export default function SettingsPage() {
     const selectedSource = conflictSelected === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
     return (
       <div className="relative flex flex-col px-4 py-4 space-y-4 bg-[#139847]" style={{ minHeight: "100dvh" }}>
-        <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         {processing && <ProcessingOverlay message={processing} />}
         <div className="relative z-10 flex flex-col space-y-4 pt-4">
           <h1 className="text-xl font-bold text-white text-center">使用するデータを選んでください</h1>
@@ -221,7 +220,6 @@ export default function SettingsPage() {
   if (!user && isNative()) {
     return (
       <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-        <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
         {processing && <ProcessingOverlay message={processing} />}
         <div className="relative z-10 flex flex-col space-y-2">
           <PageHeader title="設定" variant="dark" />
@@ -370,7 +368,6 @@ export default function SettingsPage() {
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-      <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
       {processing && <ProcessingOverlay message={processing} />}
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="設定" variant="dark" />

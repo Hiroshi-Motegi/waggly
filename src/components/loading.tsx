@@ -32,8 +32,7 @@ export function Loading({ variant = "default" }: { variant?: "default" | "light"
 
   if (isLight) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#139847]">
-        <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="relative z-10">{content}</div>
       </div>
     );
