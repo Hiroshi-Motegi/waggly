@@ -180,9 +180,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isPublicPage = pathname.startsWith("/p/");
   const hideChrome = isPublicPage || (!user && !native);
   return (
-    <div className={`min-h-dvh relative animate-fade-in bg-[#ebf1eb] ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-md shadow-sm"}`}>
+    <div className={`min-h-dvh relative animate-fade-in bg-[#139847] ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-md shadow-sm"}`}>
+      <img src="/images/home-bg.jpg" alt="" className="fixed inset-0 w-full h-full object-cover opacity-40 pointer-events-none z-0" />
       {!hideChrome && <Header />}
-      <main style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
+      <main className="relative z-[1]" style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
       </main>
       {!hideChrome && <BottomNav />}
