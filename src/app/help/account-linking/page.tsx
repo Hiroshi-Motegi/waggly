@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 export default function AccountLinkingHelpPage() {
   return (
     <div
-      className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]"
+      className="relative flex flex-col px-2 py-2 space-y-2"
       style={{
         minHeight: "100dvh",
         paddingBottom: "var(--bottom-nav-height)",

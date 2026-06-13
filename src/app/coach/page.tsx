@@ -56,7 +56,7 @@ function ChatView({
   }
 
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ height: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ height: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <div className="relative z-10 flex flex-col flex-1 min-h-0 space-y-2">
       <PageHeader title="AIに相談" backHref="/" variant="dark">
         <div className="flex gap-1">
@@ -113,7 +113,7 @@ function HistoryPanel({
   }
 
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="会話履歴" showBack={false} variant="dark">
         <button
@@ -171,7 +171,7 @@ export default function CoachPage() {
 
   if (isLocalMode) {
     return (
-      <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         <div className="relative z-10 flex flex-col space-y-2">
           <PageHeader title="AIに相談" backHref="/" variant="dark" />
           <div className="rounded-lg bg-white p-6 text-center">
@@ -288,7 +288,7 @@ export default function CoachPage() {
 
   if (!historyLoaded || !conversationId) {
     return (
-      <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         <div className="relative z-10 flex flex-col space-y-2">
         <PageHeader title="AIに相談" backHref="/" variant="dark" />
         <Loading variant="light" />

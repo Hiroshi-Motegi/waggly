@@ -199,7 +199,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
   if (isEditing) {
     return (
-      <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         {isSubmitting && <ProcessingOverlay />}
         <div className="relative z-10 flex flex-col space-y-2">
         <h2 className="px-1 text-lg font-bold text-white">アイテムを編集</h2>
@@ -344,7 +344,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const statusLabel = item.status === "active" ? "使用中" : "アーカイブ";
 
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader
         title={[item.brand, item.model].filter(Boolean).join(" ") || "—"}

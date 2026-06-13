@@ -83,15 +83,15 @@ export default function PracticePage() {
   }
 
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <div className="relative z-10 flex flex-col space-y-2">
         {viewMode === "calendar" ? (
           <>
             {/* Sticky header + calendar together */}
-            <div data-sticky-calendar className="sticky top-0 z-20 -mx-2 -mt-2 px-2 bg-[#139847]"
+            <div data-sticky-calendar className="sticky top-0 z-20 -mx-2 -mt-2 px-2"
               style={{ backgroundImage: "url(/images/home-bg.jpg)", backgroundSize: "cover", backgroundPosition: "center" }}
             >
-              <div className="absolute inset-0 bg-[#139847]/60 pointer-events-none" />
+              <div className="absolute inset-0/60 pointer-events-none" />
               <div className="relative">
                 <PageHeader title="練習記録" backHref="/" variant="dark">
                   <div className="flex items-center gap-2">

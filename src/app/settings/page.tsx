@@ -95,7 +95,7 @@ export default function SettingsPage() {
     // Show conflict resolution UI
     const selectedSource = conflictSelected === "a" ? conflictInfo.sourceA : conflictInfo.sourceB;
     return (
-      <div className="relative flex flex-col px-4 py-4 space-y-4 bg-[#139847]" style={{ minHeight: "100dvh" }}>
+      <div className="relative flex flex-col px-4 py-4 space-y-4" style={{ minHeight: "100dvh" }}>
         {processing && <ProcessingOverlay message={processing} />}
         <div className="relative z-10 flex flex-col space-y-4 pt-4">
           <h1 className="text-xl font-bold text-white text-center">使用するデータを選んでください</h1>
@@ -219,7 +219,7 @@ export default function SettingsPage() {
 
   if (!user && isNative()) {
     return (
-      <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         {processing && <ProcessingOverlay message={processing} />}
         <div className="relative z-10 flex flex-col space-y-2">
           <PageHeader title="設定" variant="dark" />
@@ -367,7 +367,7 @@ export default function SettingsPage() {
   const isFreeTrialActive = subscription?.free_until && new Date(subscription.free_until) > new Date();
 
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       {processing && <ProcessingOverlay message={processing} />}
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="設定" variant="dark" />

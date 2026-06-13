@@ -67,7 +67,7 @@ export default function NewPracticePage() {
 
   if (saved) {
     return (
-      <div className="relative flex flex-col items-center justify-center px-6 space-y-4 text-center bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      <div className="relative flex flex-col items-center justify-center px-6 space-y-4 text-center" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         <div className="relative z-10 flex flex-col items-center space-y-4 w-full">
           <h2 className="text-lg font-bold text-white">練習お疲れさまでした！</h2>
           <p className="text-base text-white/70">記録を保存しました</p>
@@ -97,7 +97,7 @@ export default function NewPracticePage() {
   }
 
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2 bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       {isSubmitting && <ProcessingOverlay />}
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader title="練習を記録" variant="dark" />

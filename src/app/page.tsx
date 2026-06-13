@@ -58,7 +58,7 @@ export default function HomePage() {
 
   if (forceGuest || (!user && !isNative())) {
     return (
-      <div className="relative flex flex-col bg-[#139847]" style={{ minHeight: "100dvh" }}>
+      <div className="relative flex flex-col" style={{ minHeight: "100dvh" }}>
         <div className="relative z-10 flex flex-col items-center w-full">
 
           {/* Hero */}
@@ -161,7 +161,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative bg-[#139847]" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+    <div className="relative" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       {/* Background image covers entire page */}
       <img
         src="/images/home-bg.jpg"
