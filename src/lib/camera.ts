@@ -72,6 +72,9 @@ export async function pickImageNative(): Promise<File> {
     resultType: CameraResultType.DataUrl,
     source: CameraSource.Prompt,
     quality: 95,
+    promptLabelHeader: "写真を追加",
+    promptLabelPhoto: "フォトライブラリから選択",
+    promptLabelPicture: "カメラで撮影",
     saveToGallery: false,
   });
 

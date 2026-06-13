@@ -127,17 +127,17 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         subtitle={`${club.club_number}${club.maker ? ` / ${club.maker}` : ""}`}
         variant="dark"
       >
-        <div className="flex gap-1 shrink-0">
+        <div className="flex gap-2.5 shrink-0">
           <Link href={nativeHref(`/bag/${clubId}/edit`)}>
-            <button className="flex items-center justify-center rounded-full bg-white p-2">
-              <Pencil className="h-4 w-4 text-[#006728]" />
+            <button className="flex items-center justify-center rounded-full bg-white p-2.5">
+              <Pencil className="h-5 w-5 text-[#006728]" />
             </button>
           </Link>
           <button
             onClick={handleDelete}
-            className="flex items-center justify-center rounded-full bg-white p-2"
+            className="flex items-center justify-center rounded-full bg-white p-2.5"
           >
-            <Trash2 className="h-4 w-4 text-[#006728]" />
+            <Trash2 className="h-5 w-5 text-[#006728]" />
           </button>
         </div>
       </PageHeader>

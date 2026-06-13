@@ -31,7 +31,7 @@ export default function ShareSettingsPage() {
   const [isSavingUsername, setIsSavingUsername] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [copied, setCopied] = useState(false);
-  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
 

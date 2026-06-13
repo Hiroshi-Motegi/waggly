@@ -39,5 +39,9 @@ export function Loading({ variant = "default" }: { variant?: "default" | "light"
     );
   }
 
-  return content;
+  return (
+    <div className="flex flex-1 items-center justify-center min-h-[50dvh]">
+      {content}
+    </div>
+  );
 }

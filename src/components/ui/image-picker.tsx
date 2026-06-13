@@ -29,7 +29,7 @@ type PickerState =
 export function ImagePicker({ onPick, children }: ImagePickerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isPickingRef = useRef(false);
-  const toastTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [state, setState] = useState<PickerState>({ step: "idle" });
   const [permissionToast, setPermissionToast] = useState(false);
 

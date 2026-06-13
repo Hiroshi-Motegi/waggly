@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X, Loader2, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -9,6 +9,7 @@ import { useProfile, updateProfile, uploadAvatar } from "@/hooks/use-profile";
 import { Loading } from "@/components/loading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
+import { ImagePicker } from "@/components/ui/image-picker";
 
 const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 const labelClass = "text-sm";
@@ -17,7 +18,6 @@ export default function ProfileSettingsPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { profile, isLoading } = useProfile();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [form, setForm] = useState({
@@ -55,9 +55,7 @@ export default function ProfileSettingsPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function handleAvatarPick(file: File) {
     setIsUploading(true);
     try {
       await uploadAvatar(file);
@@ -65,7 +63,6 @@ export default function ProfileSettingsPage() {
       console.error(err);
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -119,14 +116,14 @@ export default function ProfileSettingsPage() {
                 </div>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="rounded-full border border-[#006728] px-4 py-1.5 text-sm font-bold text-[#006728]"
-            >
-              変更
-            </button>
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
+            <ImagePicker onPick={handleAvatarPick}>
+              <button
+                type="button"
+                className="rounded-full border border-[#006728] px-4 py-1.5 text-sm font-bold text-[#006728]"
+              >
+                変更
+              </button>
+            </ImagePicker>
           </div>
         </div>
 

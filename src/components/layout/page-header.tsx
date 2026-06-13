@@ -20,11 +20,18 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
 
   useEffect(() => {
     if (!isDark) return;
+    let rafId: number;
     function onScroll() {
-      setScrolled(window.scrollY > 10);
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 10);
+      });
     }
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafId);
+    };
   }, [isDark]);
 
   function handleBack() {
