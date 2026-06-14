@@ -22,7 +22,7 @@ export function TermsAgreement({ onAgree, isReagreement }: TermsAgreementProps) 
   const [agreed, setAgreed] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#f7fff3]">
+    <div className="flex flex-col min-h-dvh">
       <div className="flex flex-col items-center px-6 pt-8 pb-4 text-center">
         <img
           src="/images/onboarding/waggly-ball.svg"
@@ -62,8 +62,10 @@ export function TermsAgreement({ onAgree, isReagreement }: TermsAgreementProps) 
       </div>
 
       {/* 同意 + ボタン — オンボーディングと同じデザイン */}
-      <div className="sticky bottom-0 left-0 right-0 z-50 py-3 flex flex-col items-center gap-3 overflow-hidden">
-        <div className="absolute inset-0" />
+      <div className="sticky bottom-0 left-0 right-0 z-50 py-3 flex flex-col items-center gap-3 overflow-hidden"
+        style={{ background: "#7cb668 url(/images/home-bg.jpg) center / cover fixed", backgroundBlendMode: "soft-light" }}
+      >
+        <div className="absolute inset-0 bg-black/20 pointer-events-none" />
         <label className="relative flex items-center justify-center gap-2 text-sm cursor-pointer">
           <input
             type="checkbox"

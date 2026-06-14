@@ -25,13 +25,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setOnboardingChecked(true);
   }, []);
 
-  // Merge localStorage → DB on login (one-time)
+  // Merge localStorage → DB on login (one-time, only after onboarding is done)
   const mergedRef = useRef(false);
   useEffect(() => {
     if (!user || mergedRef.current) return;
+    const dbVersion = user.onboarding_version ?? 0;
+    if (dbVersion < ONBOARDING_VERSION) return; // still needs onboarding — don't merge yet
     mergedRef.current = true;
     const localVersion = parseInt(localStorage.getItem("onboarding_version") || "0", 10);
-    if (localVersion > (user.onboarding_version ?? 0)) {
+    if (localVersion > dbVersion) {
       apiFetch("/api/auth/onboarding-complete", { method: "POST" }).catch(() => {});
     }
   }, [user]);
@@ -94,7 +96,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Skip onboarding for admin pages
-  if (pathname?.startsWith("/admin")) {
+  if (pathname?.startsWith("/admin") || pathname === "/onboarding" || pathname === "/terms-agreement") {
     return <>{children}</>;
   }
 
@@ -107,7 +109,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Gate 1: Onboarding — DB only for logged-in, localStorage for unsigned only
+  // Gate 1: Onboarding — DB for logged-in, localStorage for unsigned only
   const effectiveOnboardingVersion = user
     ? (user.onboarding_version ?? 0)
     : (typeof window !== "undefined"
@@ -126,7 +128,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (needsOnboarding) {
     return (
-      <div className={`min-h-dvh border-x border-border shadow-sm bg-background ${native ? "w-full" : "mx-auto max-w-md"}`}>
+      <div className={`min-h-dvh shadow-sm bg-black/20 ${native ? "w-full" : "mx-auto max-w-md"}`}>
         <Onboarding
           onComplete={async () => {
             if (user) {
@@ -155,7 +157,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (needsTermsAgreement) {
     return (
-      <div className={`min-h-dvh border-x border-border shadow-sm bg-background ${native ? "w-full" : "mx-auto max-w-md"}`}>
+      <div className={`min-h-dvh border-x border-border shadow-sm bg-white ${native ? "w-full" : "mx-auto max-w-md"}`}>
         <TermsAgreement
           isReagreement={!!user.agreed_terms_at}
           onAgree={async () => {
