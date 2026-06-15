@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect, use, useRef } from "react";
+import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { Loading } from "@/components/loading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toAffiliateUrl, getUrlPlatform } from "@/lib/affiliate";
 
 interface PublicProfile {
   username: string;
@@ -15,13 +16,24 @@ interface PublicProfile {
   best_score?: number | null;
   home_course?: string | null;
   sns_links?: { instagram?: string; x?: string; custom_links?: { label: string; url: string }[] };
+  cover_images?: Array<{ id: string; image_url: string }>;
   clubs?: Array<{
     id: string;
     category: string;
     club_number: string;
     maker: string | null;
     model: string | null;
+    bag_number: number;
+    status: string;
     club_images: Array<{ image_url: string; is_primary: boolean }>;
+  }>;
+  items?: Array<{
+    id: string;
+    category: string;
+    brand: string | null;
+    model: string | null;
+    purchase_url: string | null;
+    accessory_images: Array<{ image_url: string; is_primary: boolean }>;
   }>;
   courses?: Array<{
     id: string;
@@ -58,6 +70,233 @@ const clubNoImage: Record<string, string> = {
   wedge: "/no-images/wedge.png",
   putter: "/no-images/putter.png",
 };
+
+const categoryLabels: Record<string, string> = {
+  ball: "ボール",
+  glove: "グローブ",
+  tee: "ティー",
+  apparel: "アパレル",
+  bag: "バッグ",
+  rangefinder: "距離計",
+  grip: "グリップ",
+  shaft: "シャフト",
+  other: "その他",
+};
+
+const categoryIcons: Record<string, string> = {
+  ball: "/no-images/ball.png",
+  glove: "/no-images/globe.png",
+  tee: "/no-images/tee.png",
+  apparel: "/no-images/ware.png",
+  bag: "/no-images/bag.png",
+  rangefinder: "/no-images/distance.png",
+  grip: "/no-images/grip.png",
+  shaft: "/no-images/shaft.png",
+  other: "/no-images/etc.png",
+};
+
+const bagLabels: Record<string, string> = {
+  main: "マイバッグ",
+  sub: "予備バッグ",
+  reserve: "保管庫",
+};
+
+function ClubsAccordion({ clubs }: { clubs: NonNullable<PublicProfile["clubs"]> }) {
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<string | null>(null);
+
+  const mainBag = clubs.filter((c) => c.status === "bag" && c.bag_number === 1);
+  const subBag = clubs.filter((c) => c.status === "bag" && c.bag_number === 2);
+  const reserve = clubs.filter((c) => c.status === "reserve");
+
+  const tabs: { key: string; clubs: typeof clubs }[] = [
+    ...(mainBag.length > 0 ? [{ key: "main", clubs: mainBag }] : []),
+    ...(subBag.length > 0 ? [{ key: "sub", clubs: subBag }] : []),
+    ...(reserve.length > 0 ? [{ key: "reserve", clubs: reserve }] : []),
+  ];
+
+  const filtered = filter ? (tabs.find((t) => t.key === filter)?.clubs ?? []) : clubs;
+
+  return (
+    <div className="rounded-lg bg-white overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="flex items-center w-full px-3 py-4">
+        <h2 className="flex-1 text-sm font-bold text-[#006728] text-left">クラブ</h2>
+        {open ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
+      </button>
+      {open && (
+        <div className="px-3 pb-3">
+          {tabs.length > 1 && (
+            <div className="flex flex-wrap gap-1.5 pb-3">
+              <button
+                onClick={() => setFilter(null)}
+                className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
+                  filter === null ? "bg-[#006728] text-white" : "bg-[#f0f0f0] text-[#8b8b8b]"
+                }`}
+              >
+                すべて
+              </button>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setFilter(tab.key)}
+                  className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
+                    filter === tab.key ? "bg-[#006728] text-white" : "bg-[#f0f0f0] text-[#8b8b8b]"
+                  }`}
+                >
+                  {bagLabels[tab.key]}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex flex-col">
+            {filtered.map((club, i) => {
+              const img = club.club_images?.find((c) => c.is_primary) ?? club.club_images?.[0];
+              return (
+                <div key={club.id} className={`flex items-center gap-2.5 py-2 ${i < filtered.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                  <div className="size-[50px] shrink-0 overflow-hidden rounded bg-[#f0f0f0] flex items-center justify-center">
+                    {img ? (
+                      <img src={img.image_url} alt="" className="size-full object-cover" />
+                    ) : (
+                      <img src={clubNoImage[club.category] ?? "/no-images/etc.png"} alt="" className="size-full object-cover" />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="shrink-0 bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">{club.club_number}</span>
+                      <span className="text-base font-bold text-black truncate">{club.model ?? "—"}</span>
+                    </div>
+                    <span className="text-sm text-[#8b8b8b] truncate pl-0.5">{club.maker ?? "—"}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ItemsAccordion({ items, categories }: { items: PublicProfile["items"] & {}; categories: string[] }) {
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<string | null>(null);
+
+  const filtered = filter ? items.filter((item) => item.category === filter) : items;
+
+  return (
+    <div className="rounded-lg bg-white overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="flex items-center w-full px-3 py-4">
+        <h2 className="flex-1 text-sm font-bold text-[#006728] text-left">アイテム</h2>
+        {open ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
+      </button>
+      {open && (
+        <div className="px-3 pb-3">
+          {/* Category filter tabs */}
+          {categories.length > 1 && (
+            <div className="flex flex-wrap gap-1.5 pb-3">
+              <button
+                onClick={() => setFilter(null)}
+                className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
+                  filter === null ? "bg-[#006728] text-white" : "bg-[#f0f0f0] text-[#8b8b8b]"
+                }`}
+              >
+                すべて
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setFilter(cat)}
+                  className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
+                    filter === cat ? "bg-[#006728] text-white" : "bg-[#f0f0f0] text-[#8b8b8b]"
+                  }`}
+                >
+                  {categoryLabels[cat] ?? cat}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Item list */}
+          <div className="flex flex-col">
+            {filtered.map((item, i) => {
+              const img = item.accessory_images?.find((a) => a.is_primary) ?? item.accessory_images?.[0];
+              const href = item.purchase_url ? toAffiliateUrl(item.purchase_url) : null;
+              const Row = href ? "a" : "div";
+              const linkProps = href ? { href, target: "_blank" as const, rel: "noopener noreferrer" } : {};
+              return (
+                <Row key={item.id} {...linkProps} className={`flex items-center gap-2.5 py-2 ${i < filtered.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
+                  <div className="size-[50px] shrink-0 overflow-hidden rounded bg-[#f0f0f0] flex items-center justify-center">
+                    {img ? (
+                      <img src={img.image_url} alt="" className="size-full object-cover" />
+                    ) : (
+                      <img src={categoryIcons[item.category] ?? "/no-images/etc.png"} alt="" className="size-full object-cover" />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                    <span className="text-xs font-medium text-[#8b8b8b]">
+                      {categoryLabels[item.category] ?? item.category}
+                    </span>
+                    <span className="text-base font-bold text-black truncate">
+                      {[item.brand, item.model].filter(Boolean).join(" ") || "—"}
+                    </span>
+                  </div>
+                  {href && <ExternalLink className="h-4 w-4 shrink-0 text-[#8b8b8b]" />}
+                </Row>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CoverCarousel({ images }: { images: Array<{ id: string; image_url: string }> }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      const index = Math.round(el.scrollLeft / el.clientWidth);
+      setActiveIndex(index);
+    };
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <div className="relative">
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {images.map((img) => (
+          <div key={img.id} className="w-full shrink-0 snap-start">
+            <div className="aspect-[2/1] w-full">
+              <img src={img.image_url} alt="" className="h-full w-full object-cover" />
+            </div>
+          </div>
+        ))}
+      </div>
+      {images.length > 1 && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {images.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                i === activeIndex ? "bg-white" : "bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = use(params);
@@ -117,32 +356,62 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
     <div className="relative flex flex-col" style={{ minHeight: "100dvh" }}>
       <div className="relative z-10 flex flex-col">
         {/* Header */}
-        <div className="flex flex-col items-center gap-2 pt-10 pb-4 px-4">
-          <Avatar className="h-20 w-20 ring-2 ring-white">
-            <AvatarImage src={profile.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-white text-[#006728] text-2xl font-bold">
-              {(displayName ?? "?")[0]}
-            </AvatarFallback>
-          </Avatar>
-          <h1 className="text-xl font-bold text-white">{displayName}</h1>
-          {profile.bio && <p className="text-sm text-white/80 text-center max-w-xs">{profile.bio}</p>}
+        {profile.cover_images && profile.cover_images.length > 0 ? (
+          <>
+            <CoverCarousel images={profile.cover_images} />
+            <div className="flex flex-col items-center gap-2 -mt-10 pb-4 px-4">
+              <Avatar className="h-20 w-20 ring-2 ring-white">
+                <AvatarImage src={profile.avatar_url ?? undefined} />
+                <AvatarFallback className="bg-white text-[#006728] text-2xl font-bold">
+                  {(displayName ?? "?")[0]}
+                </AvatarFallback>
+              </Avatar>
+              <h1 className="text-xl font-bold text-white">{displayName}</h1>
+              {profile.bio && <p className="text-sm text-white/80 text-center max-w-xs">{profile.bio}</p>}
 
-          {/* SNS icons under bio */}
-          {profile.sns_links && (profile.sns_links.instagram || profile.sns_links.x) && (
-            <div className="flex gap-3 mt-1">
-              {profile.sns_links.instagram && (
-                <a href={profile.sns_links.instagram} target="_blank" rel="noopener" className="flex items-center justify-center size-9 rounded-full bg-white/20">
-                  <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                </a>
-              )}
-              {profile.sns_links.x && (
-                <a href={profile.sns_links.x} target="_blank" rel="noopener" className="flex items-center justify-center size-9 rounded-full bg-white/20">
-                  <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                </a>
+              {profile.sns_links && (profile.sns_links.instagram || profile.sns_links.x) && (
+                <div className="flex gap-3 mt-1">
+                  {profile.sns_links.instagram && (
+                    <a href={profile.sns_links.instagram} target="_blank" rel="noopener" className="flex items-center justify-center size-9 rounded-full bg-white/20">
+                      <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                  )}
+                  {profile.sns_links.x && (
+                    <a href={profile.sns_links.x} target="_blank" rel="noopener" className="flex items-center justify-center size-9 rounded-full bg-white/20">
+                      <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-2 pt-10 pb-4 px-4">
+            <Avatar className="h-20 w-20 ring-2 ring-white">
+              <AvatarImage src={profile.avatar_url ?? undefined} />
+              <AvatarFallback className="bg-white text-[#006728] text-2xl font-bold">
+                {(displayName ?? "?")[0]}
+              </AvatarFallback>
+            </Avatar>
+            <h1 className="text-xl font-bold text-white">{displayName}</h1>
+            {profile.bio && <p className="text-sm text-white/80 text-center max-w-xs">{profile.bio}</p>}
+
+            {profile.sns_links && (profile.sns_links.instagram || profile.sns_links.x) && (
+              <div className="flex gap-3 mt-1">
+                {profile.sns_links.instagram && (
+                  <a href={profile.sns_links.instagram} target="_blank" rel="noopener" className="flex items-center justify-center size-9 rounded-full bg-white/20">
+                    <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                  </a>
+                )}
+                {profile.sns_links.x && (
+                  <a href={profile.sns_links.x} target="_blank" rel="noopener" className="flex items-center justify-center size-9 rounded-full bg-white/20">
+                    <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-col gap-2 px-2 pb-8">
           {/* Golf info */}
@@ -207,34 +476,19 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
             </AccordionSection>
           )}
 
-          {/* マイバッグ (accordion) */}
+          {/* クラブ (accordion with tabs) */}
           {profile.clubs && profile.clubs.length > 0 && (
-            <AccordionSection title="マイバッグ">
-              <div className="flex flex-col">
-                {profile.clubs.map((club, i) => {
-                  const img = club.club_images?.find((c) => c.is_primary) ?? club.club_images?.[0];
-                  return (
-                    <div key={club.id} className={`flex items-center gap-2.5 py-2 ${i < profile.clubs!.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                      <div className="size-[50px] shrink-0 overflow-hidden rounded bg-[#f0f0f0] flex items-center justify-center">
-                        {img ? (
-                          <img src={img.image_url} alt="" className="size-full object-cover" />
-                        ) : (
-                          <img src={clubNoImage[club.category] ?? "/no-images/etc.png"} alt="" className="size-full object-cover" />
-                        )}
-                      </div>
-                      <div className="flex flex-1 flex-col gap-0.5 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="shrink-0 bg-[#006728] text-white text-xs font-bold rounded-md px-2 py-0.5 min-w-[32px] text-center">{club.club_number}</span>
-                          <span className="text-base font-bold text-black truncate">{club.model ?? "—"}</span>
-                        </div>
-                        <span className="text-sm text-[#8b8b8b] truncate pl-0.5">{club.maker ?? "—"}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </AccordionSection>
+            <ClubsAccordion clubs={profile.clubs} />
           )}
+
+          {/* アイテム (accordion) */}
+          {profile.items && profile.items.length > 0 && (() => {
+            const allCategories = [...new Set(profile.items!.map((item) => item.category))];
+
+            return (
+              <ItemsAccordion items={profile.items!} categories={allCategories} />
+            );
+          })()}
 
           {/* お気に入りコース (accordion) */}
           {profile.courses && profile.courses.length > 0 && (
@@ -242,7 +496,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
               <div className="flex flex-col gap-2">
                 {profile.courses.map((c) => {
                   const goraUrl = c.gora_course_id
-                    ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/gora/detail/id=${c.gora_course_id}/`
+                    ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/?pc=${encodeURIComponent(`https://search.gora.golf.rakuten.co.jp/cal/disp/c_id/${c.gora_course_id}/`)}`
                     : null;
                   const inner = (
                     <div className="flex items-center gap-2">
