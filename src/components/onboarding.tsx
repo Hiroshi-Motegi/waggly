@@ -57,13 +57,13 @@ function Slide2() {
         仲間にかんたんシェア
       </h2>
       {/* Club screenshot */}
-      <div className="w-[57%] border-3 border-white rounded-sm overflow-hidden">
+      <div className="h-[200px] border-3 border-white rounded-sm overflow-hidden">
         <Image
           src="/onboarding/2-1.png"
           alt="クラブ詳細画面"
-          width={430}
-          height={532}
-          className="w-full h-auto"
+          width={454}
+          height={556}
+          className="h-full w-auto"
         />
       </div>
       {/* Callout 1 */}
@@ -75,13 +75,13 @@ function Slide2() {
         </p>
       </div>
       {/* Share screenshot */}
-      <div className="w-[57%] border-3 border-white rounded-sm overflow-hidden">
+      <div className="h-[200px] border-3 border-white rounded-sm overflow-hidden">
         <Image
           src="/onboarding/2-2.png"
           alt="シェア画面"
-          width={430}
-          height={532}
-          className="w-full h-auto"
+          width={456}
+          height={556}
+          className="h-full w-auto"
         />
       </div>
       {/* Callout 2 */}
@@ -171,8 +171,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       {currentSlide === 2 && <Slide3 />}
       {currentSlide === 3 && <Slide4 />}
 
-      <div className="shrink-0 py-3 flex flex-col items-center gap-3 relative z-10">
-        <div className="flex gap-1.5">
+      <div className="shrink-0 py-3 flex flex-col items-center gap-3 relative z-10"
+        style={{ background: "#7cb668 url(/images/home-bg.jpg) center / cover fixed", backgroundBlendMode: "soft-light" }}
+      >
+        <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+        <div className="relative flex gap-1.5">
           {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
             <div
               key={i}
@@ -184,7 +187,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         </div>
         <button
           onClick={handleNext}
-          className="px-8 py-2.5 rounded-full bg-white text-[#006728] font-bold text-sm"
+          className="relative px-8 py-2.5 rounded-full bg-white text-[#006728] font-bold text-sm"
         >
           {isLastSlide ? "はじめる" : "次へ"}
         </button>
