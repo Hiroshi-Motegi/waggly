@@ -22,6 +22,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja">
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3196641615749613"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={`${inter.className} overscroll-none`}>
         <SWRProvider>
           <AuthProvider>
