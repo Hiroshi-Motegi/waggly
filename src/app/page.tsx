@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Loading } from "@/components/loading";
 import Image from "next/image";
 import Link from "next/link";
@@ -179,6 +179,32 @@ function FeatureSection({ icon, title, photo, photoSide, screenshots, descriptio
 
 /* ─── Landing Page ─── */
 function LandingPage() {
+  const topLoginRef = useRef<HTMLDivElement>(null);
+  const bottomLoginRef = useRef<HTMLDivElement>(null);
+  const [showFloatingCta, setShowFloatingCta] = useState(false);
+
+  useEffect(() => {
+    const topEl = topLoginRef.current;
+    const bottomEl = bottomLoginRef.current;
+    if (!topEl || !bottomEl) return;
+    let topVisible = true;
+    let bottomVisible = false;
+    const update = () => setShowFloatingCta(!topVisible && !bottomVisible);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.target === topEl) topVisible = entry.isIntersecting;
+          if (entry.target === bottomEl) bottomVisible = entry.isIntersecting;
+        }
+        update();
+      },
+      { threshold: 0 }
+    );
+    observer.observe(topEl);
+    observer.observe(bottomEl);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="relative flex flex-col" style={{ minHeight: "100dvh" }}>
       <div className="relative z-10 flex flex-col items-center w-full">
@@ -201,7 +227,7 @@ function LandingPage() {
         </div>
 
         {/* Login */}
-        <div className="w-full">
+        <div ref={topLoginRef} className="w-full">
           <div className="bg-black/30 px-8 py-6">
             <p className="text-center text-base font-bold text-white mb-4">ログイン・新規登録<span className="inline-flex items-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full mx-1.5 -translate-y-px">無料</span>はこちらから</p>
             <LoginButtons />
@@ -322,7 +348,7 @@ function LandingPage() {
         </div>
 
         {/* Login (bottom) */}
-        <div className="w-full">
+        <div ref={bottomLoginRef} className="w-full">
           <div className="bg-black/30 px-8 py-6">
             <p className="text-center text-base font-bold text-white mb-4">ログイン・新規登録<span className="inline-flex items-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full mx-1.5 -translate-y-px">無料</span>はこちらから</p>
             <LoginButtons />
@@ -331,6 +357,14 @@ function LandingPage() {
 
         <PublicFooter />
       </div>
+
+      {/* Floating CTA */}
+      <button
+        onClick={() => bottomLoginRef.current?.scrollIntoView({ behavior: "smooth" })}
+        className={`fixed bottom-6 right-0 z-30 rounded-l-full bg-[#00441b] border-2 border-r-0 border-white pl-6 pr-3 py-3.5 text-white font-bold text-sm shadow-lg transition-all duration-300 ${showFloatingCta ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"}`}
+      >
+        無料でアカウント作成
+      </button>
     </div>
   );
 }
