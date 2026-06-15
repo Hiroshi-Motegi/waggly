@@ -181,7 +181,7 @@ export default function CheckoutPage() {
       <div className="relative z-10 flex flex-col space-y-4">
         <PageHeader
           title={changeCard ? "カード変更" : "お支払い"}
-          backHref="/settings/plan"
+          backHref={changeCard ? "/settings" : "/settings/plan"}
           variant="dark"
         />
 
