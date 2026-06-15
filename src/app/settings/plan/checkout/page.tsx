@@ -117,7 +117,9 @@ export default function CheckoutPage() {
     setLoading(true);
     setError(null);
 
-    const { error: tokenError, id } = await payjpSingleton.createToken(cardState.element);
+    const { error: tokenError, id } = await payjpSingleton.createToken(cardState.element, {
+      three_d_secure: true,
+    });
     if (tokenError) {
       setCardError(tokenError.message);
       setLoading(false);
