@@ -267,6 +267,18 @@ function CoverCarousel({ images }: { images: Array<{ id: string; image_url: stri
     return () => el.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Auto-play: 4秒ごとに次のスライドへ
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const nextIndex = (Math.round(el.scrollLeft / el.clientWidth) + 1) % images.length;
+      el.scrollTo({ left: nextIndex * el.clientWidth, behavior: "smooth" });
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
   return (
     <div className="relative">
       <div
@@ -283,7 +295,7 @@ function CoverCarousel({ images }: { images: Array<{ id: string; image_url: stri
         ))}
       </div>
       {images.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+        <div className="absolute bottom-2 right-3 z-10 flex gap-1.5">
           {images.map((_, i) => (
             <div
               key={i}
@@ -359,7 +371,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
         {profile.cover_images && profile.cover_images.length > 0 ? (
           <>
             <CoverCarousel images={profile.cover_images} />
-            <div className="flex flex-col items-center gap-2 -mt-10 pb-4 px-4">
+            <div className="flex flex-col items-center gap-2 -mt-14 pb-4 px-4">
               <Avatar className="h-20 w-20 ring-2 ring-white">
                 <AvatarImage src={profile.avatar_url ?? undefined} />
                 <AvatarFallback className="bg-white text-[#006728] text-2xl font-bold">
@@ -524,8 +536,16 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
 
           {/* Footer */}
           <div className="flex flex-col items-center gap-2 pt-4 pb-6">
-            <p className="text-xs text-white/60">Wagglyで作成</p>
-            <a href="https://waggly.jp" className="text-sm font-bold text-white underline">waggly.jp</a>
+            <p className="text-sm text-white/80">Wagglyで作成</p>
+            <a href="https://waggly.jp" className="text-base font-bold text-white underline">waggly.jp</a>
+            <div className="pt-2">
+              <a
+                href={`/report?username=${username}`}
+                className="text-sm text-white/70 underline"
+              >
+                不適切なコンテンツを通報
+              </a>
+            </div>
           </div>
         </div>
       </div>
