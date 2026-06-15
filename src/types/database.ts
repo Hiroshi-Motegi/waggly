@@ -225,3 +225,24 @@ export interface FavoriteCourse {
   sort_order: number;
   created_at: string;
 }
+
+export interface Inquiry {
+  id: string;
+  user_id: string | null;
+  name: string | null;
+  email: string;
+  category: 'bug' | 'feature' | 'question' | 'other';
+  message: string;
+  status: 'open' | 'in_progress' | 'closed';
+  created_at: string;
+}
+
+export interface Report {
+  id: string;
+  reported_username: string;
+  reason: 'inappropriate' | 'spam' | 'harassment' | 'other';
+  detail: string | null;
+  reporter_email: string | null;
+  status: 'open' | 'in_progress' | 'closed';
+  created_at: string;
+}
