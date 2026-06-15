@@ -9,6 +9,9 @@ export default function HelpIndexPage() {
     { href: "/help/account-linking", label: "アカウント連携について" },
     { href: "/help/plans", label: "プランについて" },
     { href: "/help/ads", label: "広告表示について" },
+    { href: "/help/golfer-card", label: "ゴルファー名刺について" },
+    { href: "/help/delete-account", label: "データの削除・退会について" },
+    { href: "/help/contact", label: "お問い合わせ" },
   ];
 
   return (

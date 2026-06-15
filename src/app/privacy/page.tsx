@@ -85,7 +85,7 @@ export default function PrivacyPage() {
         <section className="space-y-1">
           <h3 className="text-base font-bold text-[#006728]">9. お問い合わせ</h3>
           <p className="text-base">個人情報の取り扱いに関するお問い合わせは、下記メールアドレスまでご連絡ください。</p>
-          <p className="text-base font-bold">apps@cocoroe.me</p>
+          <img src="/images/email.svg" alt="メールアドレス" width={210} height={24} className="inline-block" />
         </section>
       </div>
       </div>
