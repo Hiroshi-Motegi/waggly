@@ -44,7 +44,29 @@ export type PlanId = typeof PLAN_ID[keyof typeof PLAN_ID];
 
 ## データベース設計
 
+### マイグレーション前提
+
+- `ai_usage` テーブルは**既存**（INSERT が稼働中）。model カラム追加は `ALTER TABLE` で行う
+- 他のテーブル（plans, subscriptions, etc.）は新規作成
+- `update_updated_at()` 関数は最初に定義し、全トリガーで再利用する
+
+### 共通: updated_at 自動更新関数
+
+全テーブルのトリガーで使用する。マイグレーションの最初に定義する:
+
+```sql
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+```
+
 ### `plans` テーブル
+
+plans は公開データのため **RLS は設定しない**（全ユーザーが SELECT 可能）。Supabase のデフォルト（RLS 無効 = 全公開）をそのまま利用する。
 
 ```sql
 CREATE TABLE public.plans (
@@ -82,7 +104,7 @@ CREATE TABLE public.subscriptions (
   payjp_customer_id text,
   current_period_start timestamptz,
   current_period_end timestamptz,
-  trial_end timestamptz,
+  trial_end timestamptz,                       -- free_months クーポン適用時にPay.jp側のtrial_endをミラー保存。API側でトライアル中かの判定に使用
   grace_period_end timestamptz,               -- 支払い失敗時のグレースピリオド終了日
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
@@ -91,15 +113,6 @@ CREATE TABLE public.subscriptions (
 -- active なサブスクはユーザーあたり1つだけ
 CREATE UNIQUE INDEX idx_subscriptions_active_user
   ON public.subscriptions (user_id) WHERE status = 'active';
-
--- updated_at 自動更新トリガー
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER subscriptions_updated_at
   BEFORE UPDATE ON public.subscriptions
@@ -160,10 +173,10 @@ CREATE TABLE public.coupons (
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now(),
   -- discount_percent と free_months は排他: 片方のみ設定可
+  -- discount_percent と free_months は排他: どちらか片方を必ず設定
   CONSTRAINT coupon_type_exclusive CHECK (
     (discount_percent > 0 AND free_months = 0) OR
-    (discount_percent = 0 AND free_months > 0) OR
-    (discount_percent = 0 AND free_months = 0)
+    (discount_percent = 0 AND free_months > 0)
   )
 );
 
@@ -219,9 +232,18 @@ CREATE POLICY "Users can read own counters"
 -- INSERT/UPDATE はポリシーなし = クライアントからは拒否
 ```
 
-### `ai_usage` テーブル（トークン追跡用、既存拡張）
+### `ai_usage` テーブル（トークン追跡用、既存テーブルを拡張）
 
 トークンコスト追跡用。回数制限には使わない（`ai_usage_counters` が担当）。`source` に `'autofill'` を含むのはコスト追跡のため — `ai_usage_counters` は `'chat'` / `'plan'` のみで、autofill はカウント対象外。
+
+**既存テーブルのため `ALTER TABLE` で差分マイグレーションする:**
+
+```sql
+-- model カラム追加（原価事後分析用）
+ALTER TABLE public.ai_usage ADD COLUMN IF NOT EXISTS model text;
+```
+
+参考: 完全なスキーマ定義（新規作成する場合）:
 
 ```sql
 CREATE TABLE public.ai_usage (
@@ -251,11 +273,10 @@ CREATE POLICY "Users can read own usage"
 回数カウントは **JST（Asia/Tokyo）** 基準。`ai_usage_counters.month` は JST の `YYYY-MM` 文字列で管理する。
 
 - DB側: `to_char(now() AT TIME ZONE 'Asia/Tokyo', 'YYYY-MM')`
-- TypeScript側:
+- TypeScript側（ICUバージョン非依存の手動計算）:
   ```typescript
-  const monthJST = new Date().toLocaleDateString('ja-JP', {
-    timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit'
-  }).replace(/\//g, '-').slice(0, 7); // "2026-06"
+  const d = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+  const monthJST = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; // "2026-06"
   ```
 
 ### 無料ユーザーの初期状態
@@ -303,6 +324,18 @@ CREATE POLICY "Users can read own usage"
 ```
 
 used は `ai_usage_counters` から取得。limit はユーザーのアクティブプランから取得。
+
+### 認証要件
+
+決済系エンドポイントはすべて**認証済みユーザーのみ**アクセス可能:
+- `POST /api/payment/create` — 認証必須。自分自身のサブスクのみ作成可能
+- `PATCH /api/payment/card` — 認証必須。自分の payjp_customer_id のカードのみ更新可能
+- `POST /api/subscription/cancel` — 認証必須。自分の active サブスクのみ解約可能
+- `POST /api/webhook/payjp` — 認証不要（Pay.jp からの呼び出し）。署名検証で保護
+
+### 未ログイン・ローカル（オフライン）モードの扱い
+
+未ログインユーザー（ネイティブアプリのローカルモード含む）は **AI 機能を利用できない**（認証必須）。既存の `api-client.ts` のスタブ（`limitReached: false, remaining: 100000`）は削除し、未ログイン時は AI 関連 UI を非表示にするか「ログインしてください」を表示する。ギア管理・練習記録のローカル機能は引き続き利用可能。
 
 ### フロントエンドのサブスク情報取得戦略
 
@@ -359,8 +392,9 @@ AI APIのストリーミング開始前のエラー（ネットワーク障害�
 ### サブスク管理
 
 - `GET /api/subscription` — 現在のアクティブなプラン取得（行なし = free プランを返す）
-- `POST /api/subscription` — サブスク作成（後述の決済フロー内で呼ばれる）
+- `POST /api/payment/create` — **決済の唯一のエントリポイント**。Pay.jpカスタマー作成 + 定期課金開始 + subscriptions INSERT + クーポン適用を一括処理（後述の3フェーズ）
   - 既に active な行がある場合: partial unique index により INSERT 失敗 → `409 Conflict` を返す（二重契約防止）
+- `PATCH /api/payment/card` — カード情報更新（後述）
 - `POST /api/subscription/cancel` — 解約:
   1. **Pay.jp: 定期課金をキャンセル**（`payjp.subscriptions.cancel(payjp_subscription_id)`）
   2. Pay.jp 成功後に DB: status を `canceled` に更新
@@ -388,9 +422,9 @@ Pay.jp で一度キャンセルした定期課金は再開できない（Pay.jp 
    ```sql
    UPDATE subscriptions
    SET status = 'active',
-       payjp_subscription_id = $new_id,
-       current_period_start = now(),
-       current_period_end = now() + interval '1 month'
+       payjp_subscription_id = $new_payjp_sub_id,
+       current_period_start = $period_start,    -- Pay.jp レスポンスから取得
+       current_period_end = $period_end          -- Pay.jp レスポンスから取得
    WHERE id = (
      SELECT id FROM subscriptions
      WHERE user_id = $user_id AND status = 'canceled'
@@ -501,10 +535,17 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 **Phase 1 — DBクーポン予約（トランザクション）:**
 ```
 BEGIN;
+  -- クーポンの有効性を再検証（validate は表示用、ここが最終判定）
+  SELECT id FROM coupons
+    WHERE id = $2 AND is_active = true
+    AND (expires_at IS NULL OR expires_at > now())
+    AND (max_uses IS NULL OR used_count < max_uses);
+  -- 行なし → ROLLBACK（無効 or 期限切れ or 上限到達）
+
   INSERT INTO coupon_redemptions (user_id, coupon_id) VALUES ($1, $2);
   UPDATE coupons SET used_count = used_count + 1
     WHERE id = $2 AND (max_uses IS NULL OR used_count < max_uses);
-  -- 更新行数が 0 → ROLLBACK（上限到達 or 無効クーポン）
+  -- 更新行数が 0 → ROLLBACK
 COMMIT;
 ```
 
@@ -609,8 +650,10 @@ Proユーザーが登録済みカードを変更したい場合:
 1. 「アップグレード」タップ
 2. クーポンあれば入力
 3. Pay.jpのカード入力（トークン化）
-4. `/api/payment/create` でサブスク開始（クーポン適用含む）
-5. 完了画面 → プラン画面に戻る（Pro表示に変わる）
+4. **ボタンを disabled + ローディング表示**（二重クリック防止）
+5. `/api/payment/create` でサブスク開始（クーポン適用含む）
+6. 成功 → 完了画面 → プラン画面に戻る（Pro表示に変わる）
+7. 失敗 → エラー表示 + ボタンを再有効化
 
 ### ネイティブアプリからの決済リターン
 
@@ -646,6 +689,7 @@ Proユーザーが登録済みカードを変更したい場合:
 
 ## セキュリティ
 
+- plans: 公開データのため **RLS 未設定**（全ユーザー SELECT 可能、書き込みは Supabase ダッシュボード or マイグレーションのみ）
 - 全新テーブル（subscriptions, webhook_events, coupons, coupon_redemptions, ai_usage, ai_usage_counters）に RLS を有効化
 - subscriptions / coupon_redemptions / ai_usage / ai_usage_counters: 自分のレコードのみ SELECT 可。INSERT/UPDATE/DELETE ポリシーなし（= RLS有効下でクライアントから拒否、サーバーサイド service_role のみ操作可）
 - coupons / webhook_events: ポリシーなし（= 全操作クライアントから拒否、service_role のみ）
