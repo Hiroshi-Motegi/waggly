@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, X } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/hooks/use-auth";
 import type { Club, ClubCategory } from "@/types/database";
-import { ClubDetailSpecs } from "@/components/club/club-detail-specs";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { clubValidationSchema } from "@/lib/form-validation";
 import { FieldError } from "@/components/ui/field-error";
@@ -35,6 +34,21 @@ interface ClubFormProps {
   isSubmitting?: boolean;
   showImagePicker?: boolean;
   onCancel?: () => void;
+}
+
+function SectionAccordion({ id, title, isOpen, onToggle, sectionRef, children }: {
+  id: string; title: string; isOpen: boolean; onToggle: (id: string) => void;
+  sectionRef: (el: HTMLDivElement | null) => void; children: React.ReactNode;
+}) {
+  return (
+    <div ref={sectionRef} className="rounded-lg bg-white overflow-hidden scroll-mt-[60px]">
+      <button type="button" onClick={() => onToggle(id)} className="flex w-full items-center px-3 py-3">
+        <span className="flex-1 text-left text-base font-bold">{title}</span>
+        {isOpen ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
+      </button>
+      {isOpen && <div className="px-3 pb-3">{children}</div>}
+    </div>
+  );
 }
 
 const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
@@ -148,10 +162,54 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
 
   const presetNumbers = form.category ? (clubNumbersByCategory[form.category] ?? []) : [];
 
+  const isPutter = form.category === "putter";
+  const specInputClass = "w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
+  const requiredBadge = <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span>;
+
+  const hasPurchaseData = !!(form.release_year || form.purchase_date || form.purchase_shop || form.purchase_price);
+  const hasShaftData = !!(form.shaft_name || form.shaft_flex || form.shaft_weight || form.frequency || form.kick_point);
+  const hasGripData = !!(form.grip_name || form.grip_size);
+  const hasHeadData = !!(form.loft || form.lie || form.length || form.bounce || form.sole_shape || form.face_angle || form.head_volume || form.head_weight);
+  const hasOverallData = !!(form.weight || form.swing_weight);
+
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    purchase: hasPurchaseData,
+    shaft: hasShaftData,
+    grip: hasGripData,
+    head: hasHeadData,
+    overall: hasOverallData,
+  });
+
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const toggleSection = useCallback((key: string) => {
+    setOpenSections((prev) => {
+      const willOpen = !prev[key];
+      if (willOpen) {
+        setTimeout(() => {
+          sectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      }
+      return { ...prev, [key]: willOpen };
+    });
+  }, []);
+
+  function SpecRow({ label, unit, children, last }: { label: string; unit?: string; children: React.ReactNode; last?: boolean }) {
+    return (
+      <div className={last ? "" : "border-b border-[#ececec]"}>
+        <div className="flex items-center py-3">
+          <span className="flex-1 text-base">{label}</span>
+          {children}
+          <span className="w-[32px] text-sm text-left pl-1">{unit ?? ""}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
-      {/* Section 1: クラブ詳細 */}
-      <h3 className="px-1 text-lg font-bold text-white">クラブ詳細</h3>
+      {/* Section 1: 基本情報（常に開く） */}
+      <h3 className="px-1 text-lg font-bold text-white">基本情報</h3>
       <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* 写真 */}
         {showImagePicker && (
@@ -161,25 +219,14 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
               {previewUrl && (
                 <div className="relative h-20 w-20 shrink-0">
                   <img src={previewUrl} alt="Preview" className="h-20 w-20 rounded-lg object-cover" />
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
-                  >
+                  <button type="button" onClick={removeImage} className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white">
                     <X className="h-3 w-3" />
                   </button>
                 </div>
               )}
               {!previewUrl && (
-                <ImagePicker onPick={(file) => {
-                  setPendingFile(file);
-                  if (previewUrl) URL.revokeObjectURL(previewUrl);
-                  setPreviewUrl(URL.createObjectURL(file));
-                }}>
-                  <button
-                    type="button"
-                    className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]"
-                  >
+                <ImagePicker onPick={(file) => { setPendingFile(file); if (previewUrl) URL.revokeObjectURL(previewUrl); setPreviewUrl(URL.createObjectURL(file)); }}>
+                  <button type="button" className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-[#c4c4c4] text-[#8b8b8b]">
                     <Plus className="h-6 w-6" />
                   </button>
                 </ImagePicker>
@@ -190,7 +237,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
 
         {/* 種類 */}
         <div className="flex flex-col gap-0.5 py-1" data-field="category">
-          <span className={labelClass}>種類 <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
+          <span className={labelClass}>種類 {requiredBadge}</span>
           <select value={form.category ?? ""} onChange={(e) => {
             const cat = e.target.value || undefined;
             update("category", cat);
@@ -200,9 +247,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
             else { update("club_number", ""); }
           }} className={`${selectClass} ${fieldError("category") ? "!border-red-400" : ""}`}>
             <option value="">選択してください</option>
-            {categories.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
+            {categories.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
           </select>
           <FieldError message={fieldError("category")} />
         </div>
@@ -210,39 +255,18 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         {/* 番手 */}
         {form.category && form.category !== "driver" && form.category !== "putter" && (
           <div className="flex flex-col gap-1 py-1" data-field="club_number">
-            <span className={labelClass}>番手 <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
+            <span className={labelClass}>番手 {requiredBadge}</span>
             <div className="flex flex-wrap gap-2">
               {presetNumbers.map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => { setUseCustomNumber(false); update("club_number", num); }}
-                  className={`rounded-full border px-2.5 py-1.5 text-sm font-bold ${
-                    !useCustomNumber && form.club_number === num
-                      ? "border-[#006728] bg-[#006728] text-white"
-                      : "border-[#c6c6c6] bg-white text-black"
-                  }`}
-                >
-                  {num}
-                </button>
+                <button key={num} type="button" onClick={() => { setUseCustomNumber(false); update("club_number", num); }}
+                  className={`rounded-full border px-2.5 py-1.5 text-sm font-bold ${!useCustomNumber && form.club_number === num ? "border-[#006728] bg-[#006728] text-white" : "border-[#c6c6c6] bg-white text-black"}`}>{num}</button>
               ))}
             </div>
             <div className="flex items-stretch pt-1.5">
-              <button
-                type="button"
-                onClick={() => setUseCustomNumber(true)}
-                className={`rounded-l-lg border border-[#c6c6c6] px-2.5 py-1.5 text-sm font-bold shrink-0 ${
-                  useCustomNumber ? "bg-[#006728] text-white border-[#006728]" : "bg-white text-black"
-                }`}
-              >
-                その他
-              </button>
-              <input
-                value={useCustomNumber ? (form.club_number ?? "") : ""}
-                onChange={(e) => { setUseCustomNumber(true); update("club_number", e.target.value); }}
-                placeholder=""
-                className="flex-1 rounded-r-lg border border-l-0 border-[#c4c4c4] bg-white px-3 py-1.5 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]"
-              />
+              <button type="button" onClick={() => setUseCustomNumber(true)}
+                className={`rounded-l-lg border border-[#c6c6c6] px-2.5 py-1.5 text-sm font-bold shrink-0 ${useCustomNumber ? "bg-[#006728] text-white border-[#006728]" : "bg-white text-black"}`}>その他</button>
+              <input value={useCustomNumber ? (form.club_number ?? "") : ""} onChange={(e) => { setUseCustomNumber(true); update("club_number", e.target.value); }}
+                className="flex-1 rounded-r-lg border border-l-0 border-[#c4c4c4] bg-white px-3 py-1.5 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
             </div>
             <FieldError message={fieldError("club_number")} />
           </div>
@@ -250,34 +274,76 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
 
         {/* メーカー */}
         <div className="flex flex-col gap-0.5 py-1" data-field="maker">
-          <span className={labelClass}>メーカー <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
+          <span className={labelClass}>メーカー {requiredBadge}</span>
           <input value={form.maker ?? ""} onChange={(e) => update("maker", e.target.value)} placeholder="メーカー名" className={`${inputClass} ${fieldError("maker") ? "!border-red-400" : ""}`} />
           <FieldError message={fieldError("maker")} />
         </div>
 
-        {/* モデル */}
+        {/* モデル名 */}
         <div className="flex flex-col gap-0.5 py-1" data-field="model">
-          <span className={labelClass}>モデル <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span></span>
+          <span className={labelClass}>モデル名 {requiredBadge}</span>
           <input value={form.model ?? ""} onChange={(e) => update("model", e.target.value)} placeholder="モデル名" className={`${inputClass} ${fieldError("model") ? "!border-red-400" : ""}`} />
           <FieldError message={fieldError("model")} />
         </div>
 
-        {/* シャフト */}
-        {form.category !== "putter" && (
-          <>
+        {/* 評価 */}
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className={labelClass}>評価</span>
+          <div className="flex gap-1.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button key={star} type="button" onClick={() => update("rating", form.rating === star ? null : star)}
+                className={`text-xl transition-colors ${form.rating != null && star <= form.rating ? "text-amber-400" : "text-gray-300"}`}>★</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* スペック自動入力 */}
+      {user && (
+        <div className="flex flex-col items-center gap-1 rounded-lg bg-[#ebf1eb] p-3">
+          <p className="text-sm text-black w-full">公開情報からスペックを自動入力します。内容に誤りがある場合があります。</p>
+          <p className="text-xs text-[#8b8b8b] w-full">※ AIトークンを消費します</p>
+          <button type="button" disabled={isSearching || (!form.maker && !form.model)} onClick={handleAutofill}
+            className="rounded-full border border-[#006728] bg-white px-5 py-1 text-xs font-bold text-[#006728] disabled:opacity-50">
+            {isSearching ? "検索中..." : "スペック自動入力"}
+          </button>
+        </div>
+      )}
+
+      {/* Section 2: 購入情報 */}
+      <SectionAccordion id="purchase" title="購入情報" isOpen={openSections.purchase ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.purchase = el; }}>
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5 py-1" data-field="release_year">
+            <span className={labelClass}>発売年</span>
+            <input type="number" min={1950} max={2028} value={form.release_year ?? ""} onChange={(e) => update("release_year", e.target.value ? Number(e.target.value) : undefined)} placeholder="2024" className={`${inputClass} ${fieldError("release_year") ? "!border-red-400" : ""}`} />
+            <FieldError message={fieldError("release_year")} />
+          </div>
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className={labelClass}>購入日</span>
+            <input type="date" value={form.purchase_date ?? ""} onChange={(e) => update("purchase_date", e.target.value || undefined)} className={inputClass} />
+          </div>
+          <div className="flex flex-col gap-0.5 py-1" data-field="purchase_shop">
+            <span className={labelClass}>購入店</span>
+            <input value={form.purchase_shop ?? ""} onChange={(e) => update("purchase_shop", e.target.value)} className={`${inputClass} ${fieldError("purchase_shop") ? "!border-red-400" : ""}`} />
+            <FieldError message={fieldError("purchase_shop")} />
+          </div>
+          <div className="flex flex-col gap-0.5 py-1" data-field="purchase_price">
+            <span className={labelClass}>価格（円）</span>
+            <input type="number" min={0} value={form.purchase_price ?? ""} onChange={(e) => update("purchase_price", e.target.value ? Number(e.target.value) : undefined)} className={`${inputClass} ${fieldError("purchase_price") ? "!border-red-400" : ""}`} />
+            <FieldError message={fieldError("purchase_price")} />
+          </div>
+        </div>
+      </SectionAccordion>
+
+      {/* Section 3: シャフト（パター非表示） */}
+      {!isPutter && (
+        <SectionAccordion id="shaft" title="シャフト" isOpen={openSections.shaft ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.shaft = el; }}>
+          <div className="flex flex-col gap-1">
             <div className="flex flex-col gap-0.5 py-1" data-field="shaft_name">
-              <span className={labelClass}>シャフト</span>
+              <span className={labelClass}>シャフト名</span>
               <input value={form.shaft_name ?? ""} onChange={(e) => update("shaft_name", e.target.value)} placeholder="シャフト名" className={`${inputClass} ${fieldError("shaft_name") ? "!border-red-400" : ""}`} />
               <FieldError message={fieldError("shaft_name")} />
             </div>
-
-            {/* 発売年 */}
-            <div className="flex flex-col gap-0.5 py-1" data-field="release_year">
-              <span className={labelClass}>発売年</span>
-              <input type="number" min={1950} max={2028} value={form.release_year ?? ""} onChange={(e) => update("release_year", e.target.value ? Number(e.target.value) : undefined)} placeholder="2024" className={`${inputClass} ${fieldError("release_year") ? "!border-red-400" : ""}`} />
-              <FieldError message={fieldError("release_year")} />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-0.5 py-1">
                 <span className={labelClass}>素材</span>
@@ -292,141 +358,92 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
                   <option value="">選択</option>
                   {shaftType === "carbon"
                     ? ["X", "S", "SR", "R", "R2", "L"].map((f) => <option key={f} value={f}>{f}</option>)
-                    : steelFlexes.map((f) => <option key={f} value={f}>{f}</option>)
-                  }
+                    : steelFlexes.map((f) => <option key={f} value={f}>{f}</option>)}
                 </select>
               </div>
             </div>
-          </>
-        )}
+            <SpecRow label="シャフト重量" unit="g">
+              <input type="number" step="1" min={0} max={200} value={form.shaft_weight ?? ""} onChange={(e) => update("shaft_weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
+            </SpecRow>
+            <SpecRow label="振動数" unit="cpm">
+              <input type="number" min={0} max={500} value={form.frequency ?? ""} onChange={(e) => update("frequency", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
+            </SpecRow>
+            <SpecRow label="キックポイント" last>
+              <select value={form.kick_point ?? ""} onChange={(e) => update("kick_point", e.target.value || undefined)} className={specInputClass}>
+                <option value="">—</option>
+                {["先調子", "先中調子", "中調子", "中元調子", "元調子"].map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+              </select>
+            </SpecRow>
+          </div>
+        </SectionAccordion>
+      )}
 
-        {/* 評価 */}
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className={labelClass}>評価</span>
-          <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => update("rating", form.rating === star ? null : star)}
-                className={`text-xl transition-colors ${
-                  form.rating != null && star <= form.rating ? "text-amber-400" : "text-gray-300"
-                }`}
-              >
-                ★
-              </button>
-            ))}
+      {/* Section 4: グリップ */}
+      <SectionAccordion id="grip" title="グリップ" isOpen={openSections.grip ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.grip = el; }}>
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className={labelClass}>グリップ名</span>
+            <input value={form.grip_name ?? ""} onChange={(e) => update("grip_name", e.target.value)} placeholder="銘柄名" className={inputClass} />
+          </div>
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className={labelClass}>太さ</span>
+            <input value={form.grip_size ?? ""} onChange={(e) => update("grip_size", e.target.value)} placeholder="M60" className={inputClass} />
           </div>
         </div>
-      </div>
+      </SectionAccordion>
 
-      {/* Section 2: スペック */}
-      <h3 className="px-1 pt-2 text-lg font-bold text-white">スペック</h3>
-      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
-        {/* 自動入力（サインイン時のみ） */}
-        {user && (
-          <div className="flex flex-col items-center gap-1 rounded bg-[#ebf1eb] p-3">
-            <p className="text-sm text-black w-full">
-              公開情報からスペックを自動入力します。内容に誤りがある場合があります。
-            </p>
-            <p className="text-xs text-[#8b8b8b] w-full">※ AIトークンを消費します</p>
-            <button
-              type="button"
-              disabled={isSearching || (!form.maker && !form.model)}
-              onClick={handleAutofill}
-              className="rounded-full border border-[#006728] bg-white px-5 py-1 text-xs font-bold text-[#006728] disabled:opacity-50"
-            >
-              {isSearching ? "検索中..." : "スペック自動入力"}
-            </button>
-          </div>
-        )}
-
-        {/* Inline spec rows */}
-        <div data-field="loft" className="border-b border-[#ececec]">
-          <div className="flex items-center py-3">
-            <span className="flex-1 text-base">ロフト角</span>
-            <input type="number" step="0.5" min={0} max={90} value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("loft") ? "!border-red-400" : ""}`} />
-            <span className="w-[32px] text-sm text-left pl-1">°</span>
-          </div>
-          {fieldError("loft") && <FieldError message={fieldError("loft")} />}
-        </div>
-        <div data-field="lie" className="border-b border-[#ececec]">
-          <div className="flex items-center py-3">
-            <span className="flex-1 text-base">ライ角</span>
-            <input type="number" step="0.5" min={0} max={90} value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("lie") ? "!border-red-400" : ""}`} />
-            <span className="w-[32px] text-sm text-left pl-1">°</span>
-          </div>
-          {fieldError("lie") && <FieldError message={fieldError("lie")} />}
-        </div>
-        <div data-field="length" className={form.category === "wedge" || form.category === "driver" ? "border-b border-[#ececec]" : ""}>
-          <div className="flex items-center py-3">
-            <span className="flex-1 text-base">長さ</span>
-            <input type="number" step="0.25" min={0} max={60} value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728] ${fieldError("length") ? "!border-red-400" : ""}`} />
-            <span className="w-[32px] text-sm text-left pl-1">inch</span>
-          </div>
-          {fieldError("length") && <FieldError message={fieldError("length")} />}
-        </div>
-
-        {/* ウェッジ専用 */}
-        {form.category === "wedge" && (
-          <>
-            <div data-field="bounce" className="border-b border-[#ececec]">
-              <div className="flex items-center py-3">
-                <span className="flex-1 text-base">バウンス角</span>
-                <input type="number" step="1" min={0} max={30} value={form.bounce ?? ""} onChange={(e) => update("bounce", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]`} />
-                <span className="w-[32px] text-sm text-left pl-1">°</span>
-              </div>
-            </div>
-            <div data-field="sole_shape">
-              <div className="flex items-center py-3">
-                <span className="flex-1 text-base">ソール形状</span>
-                <select value={form.sole_shape ?? ""} onChange={(e) => update("sole_shape", e.target.value || undefined)} className="w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]">
+      {/* Section 5: ヘッドスペック */}
+      <SectionAccordion id="head" title="ヘッドスペック" isOpen={openSections.head ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.head = el; }}>
+        <div className="flex flex-col">
+          <SpecRow label="ロフト角" unit="°">
+            <input type="number" step="0.5" min={0} max={90} value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${specInputClass} ${fieldError("loft") ? "!border-red-400" : ""}`} />
+          </SpecRow>
+          <SpecRow label="ライ角" unit="°">
+            <input type="number" step="0.5" min={0} max={90} value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${specInputClass} ${fieldError("lie") ? "!border-red-400" : ""}`} />
+          </SpecRow>
+          <SpecRow label="長さ" unit="inch">
+            <input type="number" step="0.25" min={0} max={60} value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${specInputClass} ${fieldError("length") ? "!border-red-400" : ""}`} />
+          </SpecRow>
+          {form.category === "wedge" && (
+            <>
+              <SpecRow label="バウンス角" unit="°">
+                <input type="number" step="1" min={0} max={30} value={form.bounce ?? ""} onChange={(e) => update("bounce", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
+              </SpecRow>
+              <SpecRow label="ソール形状">
+                <select value={form.sole_shape ?? ""} onChange={(e) => update("sole_shape", e.target.value || undefined)} className={specInputClass}>
                   <option value="">—</option>
-                  <option value="ワイド">ワイド</option>
-                  <option value="セミワイド">セミワイド</option>
-                  <option value="ナロー">ナロー</option>
-                  <option value="Cグラインド">Cグラインド</option>
-                  <option value="Sグラインド">Sグラインド</option>
-                  <option value="Wグラインド">Wグラインド</option>
+                  {["ワイド", "セミワイド", "ナロー", "Cグラインド", "Sグラインド", "Wグラインド"].map((v) => <option key={v} value={v}>{v}</option>)}
                 </select>
-                <span className="w-[32px] text-sm text-left pl-1"></span>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* ドライバー専用 */}
-        {form.category === "driver" && (
-          <div data-field="face_angle">
-            <div className="flex items-center py-3">
-              <span className="flex-1 text-base">フェース角</span>
-              <input type="number" step="0.5" min={-5} max={5} value={form.face_angle ?? ""} onChange={(e) => update("face_angle", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className="w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]" />
-              <span className="w-[32px] text-sm text-left pl-1">°</span>
-            </div>
-          </div>
-        )}
-
-        <ClubDetailSpecs form={form} onChange={update} fieldError={fieldError} category={form.category} />
-      </div>
-
-      {/* Section 3: 購入情報 */}
-      <h3 className="px-1 pt-2 text-lg font-bold text-white">購入情報</h3>
-      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className={labelClass}>購入日</span>
-          <input type="date" value={form.purchase_date ?? ""} onChange={(e) => update("purchase_date", e.target.value || undefined)} className={inputClass} />
+              </SpecRow>
+            </>
+          )}
+          {form.category === "driver" && (
+            <SpecRow label="フェース角" unit="°">
+              <input type="number" step="0.5" min={-5} max={5} value={form.face_angle ?? ""} onChange={(e) => update("face_angle", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
+            </SpecRow>
+          )}
+          {(form.category === "driver" || form.category === "fairway_wood") && (
+            <SpecRow label="ヘッド体積" unit="cc">
+              <input type="number" min={0} max={600} value={form.head_volume ?? ""} onChange={(e) => update("head_volume", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
+            </SpecRow>
+          )}
+          <SpecRow label="ヘッド重量" unit="g" last>
+            <input type="number" step="0.1" min={0} max={400} value={form.head_weight ?? ""} onChange={(e) => update("head_weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
+          </SpecRow>
         </div>
-        <div className="flex flex-col gap-0.5 py-1" data-field="purchase_shop">
-          <span className={labelClass}>購入店</span>
-          <input value={form.purchase_shop ?? ""} onChange={(e) => update("purchase_shop", e.target.value)} placeholder="" className={`${inputClass} ${fieldError("purchase_shop") ? "!border-red-400" : ""}`} />
-          <FieldError message={fieldError("purchase_shop")} />
+      </SectionAccordion>
+
+      {/* Section 6: 全体スペック */}
+      <SectionAccordion id="overall" title="全体スペック" isOpen={openSections.overall ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.overall = el; }}>
+        <div className="flex flex-col">
+          <SpecRow label="総重量" unit="g">
+            <input type="number" step="0.1" min={0} max={1000} value={form.weight ?? ""} onChange={(e) => update("weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
+          </SpecRow>
+          <SpecRow label="バランス" last>
+            <input type="text" value={form.swing_weight ?? ""} onChange={(e) => update("swing_weight", e.target.value || undefined)} placeholder="D2" className={specInputClass} />
+          </SpecRow>
         </div>
-        <div className="flex flex-col gap-0.5 py-1" data-field="purchase_price">
-          <span className={labelClass}>価格（円）</span>
-          <input type="number" min={0} value={form.purchase_price ?? ""} onChange={(e) => update("purchase_price", e.target.value ? Number(e.target.value) : undefined)} placeholder="" className={`${inputClass} ${fieldError("purchase_price") ? "!border-red-400" : ""}`} />
-          <FieldError message={fieldError("purchase_price")} />
-        </div>
-      </div>
+      </SectionAccordion>
 
       {/* Buttons */}
       <div className="flex flex-col items-center gap-4 px-4 pt-6 pb-8">
