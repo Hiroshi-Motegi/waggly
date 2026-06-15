@@ -10,6 +10,9 @@ import { Loading } from "@/components/loading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import { ImagePicker } from "@/components/ui/image-picker";
+import { CoverImageGallery } from "@/components/profile/cover-image-gallery";
+import type { ProfileCoverImage } from "@/types/database";
+import { apiFetch } from "@/lib/api-client";
 
 const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 const labelClass = "text-sm";
@@ -47,6 +50,18 @@ export default function ProfileSettingsPage() {
       });
     }
   }, [profile]);
+
+  const [coverImages, setCoverImages] = useState<ProfileCoverImage[]>([]);
+
+  useEffect(() => {
+    async function loadCoverImages() {
+      try {
+        const res = await apiFetch("/api/profile/cover-images");
+        if (res.ok) setCoverImages(await res.json());
+      } catch {}
+    }
+    loadCoverImages();
+  }, []);
 
   if (!user) return null;
   if (isLoading) return <Loading variant="light" />;
@@ -124,6 +139,18 @@ export default function ProfileSettingsPage() {
               </button>
             </ImagePicker>
           </div>
+        </div>
+
+        {/* Cover images */}
+        <h3 className="px-1 pt-2 text-lg font-bold text-white">カバー画像</h3>
+        <div className="rounded-lg bg-white p-3">
+          <p className="text-sm text-[#8b8b8b] pb-2">名刺ページの背景に表示されます（最大5枚、2:1比率）</p>
+          <CoverImageGallery
+            images={coverImages}
+            onUpload={(img) => setCoverImages((prev) => [...prev, img])}
+            onDelete={(id) => setCoverImages((prev) => prev.filter((img) => img.id !== id))}
+            onReorder={setCoverImages}
+          />
         </div>
 
         {/* Basic info */}
