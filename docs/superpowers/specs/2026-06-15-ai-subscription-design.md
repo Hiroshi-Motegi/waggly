@@ -23,6 +23,7 @@ AI機能（チャット・練習メニュー提案）に回数制限を導入し
 - 練習メニュー1回: 約¥2.0（input ~3000 + output ~2000トークン）
 - Proユーザー上限MAX利用時: ¥100 + ¥60 = ¥160/月（原価率33%）
 - 注意: モデル変更時に原価が変動するリスクあり。モデル切り替え時はプラン上限の見直しを行う
+- 単価最終確認: 2026-06-15時点（Claude Haiku 4.5: input $1/1M, output $5/1M）
 
 ### plans テーブルの price について
 
@@ -86,6 +87,19 @@ CREATE TABLE public.subscriptions (
 CREATE UNIQUE INDEX idx_subscriptions_active_user
   ON public.subscriptions (user_id) WHERE status = 'active';
 
+-- updated_at 自動更新トリガー
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER subscriptions_updated_at
+  BEFORE UPDATE ON public.subscriptions
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 -- RLS: 自分のレコードのみ読み取り可能、書き込みはサーバーサイドのみ
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read own subscriptions"
@@ -98,6 +112,15 @@ CREATE POLICY "Users can read own subscriptions"
 ```
 
 注: `coupon_id` は subscriptions に持たない。クーポン適用履歴は `coupon_redemptions` テーブルに一元管理する。
+
+### 前提条件: user_providers インデックス
+
+RLSポリシーの `user_providers` サブクエリが高頻度で実行される。以下のインデックスが必要（既存で存在しなければ作成）:
+
+```sql
+CREATE INDEX IF NOT EXISTS idx_user_providers_auth_user_id
+  ON public.user_providers (auth_user_id);
+```
 
 ### `webhook_events` テーブル（Webhook冪等性）
 
@@ -203,7 +226,7 @@ CREATE POLICY "Users can read own counters"
 
 ### `ai_usage` テーブル（トークン追跡用、既存拡張）
 
-トークンコスト追跡用。回数制限には使わない（ai_usage_counters が担当）。
+トークンコスト追跡用。回数制限には使わない（`ai_usage_counters` が担当）。`source` に `'autofill'` を含むのはコスト追跡のため — `ai_usage_counters` は `'chat'` / `'plan'` のみで、autofill はカウント対象外。
 
 ```sql
 CREATE TABLE public.ai_usage (
@@ -234,6 +257,17 @@ CREATE POLICY "Users can read own usage"
 ### 無料ユーザーの初期状態
 
 ユーザー登録時に subscriptions 行は **作成しない**。行なし = 無料プランとみなす。`GET /api/subscription` は行なし時に plans.free のデフォルト値を返す。有料プラン契約時に初めて subscriptions 行を INSERT する。
+
+### 既存コードからの移行
+
+現在の `usage-limit.ts` はトークン数ベース（`ai_monthly_tokens`）で制限している。本設計で回数ベース（`ai_chat_monthly_limit` / `ai_plan_monthly_limit`）に変更する。移行手順:
+
+1. `ai_usage_counters` テーブルを作成
+2. `plans` テーブルを作成（`ai_monthly_tokens` は廃止、`ai_chat_monthly_limit` / `ai_plan_monthly_limit` に置換）
+3. `usage-limit.ts` を回数ベースに書き換え（`ai_usage_counters` の `UPDATE ... RETURNING` パターン）
+4. `GET /api/usage` のレスポンスをトークン→回数に変更
+5. 既存の `billing.ts` の型定義を新スキーマに合わせて更新
+6. フロント側の使用量表示を回数ベースに変更
 
 ## API設計
 
@@ -284,24 +318,34 @@ RETURNING count;
 ### サブスク管理
 
 - `GET /api/subscription` — 現在のアクティブなプラン取得（行なし = free プランを返す）
-- `POST /api/subscription` — サブスク作成（新規行INSERT、旧行があれば expired に更新）
+- `POST /api/subscription` — サブスク作成（後述の決済フロー内で呼ばれる）
+  - 既に active な行がある場合: partial unique index により INSERT 失敗 → `409 Conflict` を返す（二重契約防止）
 - `POST /api/subscription/cancel` — 解約:
-  1. DB: status を `canceled` に更新、updated_at 更新
-  2. **Pay.jp: 定期課金をキャンセル**（`payjp.subscriptions.cancel(payjp_subscription_id)`）
-  3. current_period_end まで Pro 機能継続
+  1. **Pay.jp: 定期課金をキャンセル**（`payjp.subscriptions.cancel(payjp_subscription_id)`）
+  2. Pay.jp 成功後に DB: status を `canceled` に更新
+  3. Pay.jp 失敗時は DB 更新せずエラー返却（整合性保持）
+  4. 万が一 Pay.jp 成功→DB 更新失敗の場合: `subscription.canceled` Webhook が保険として DB を更新
+  5. current_period_end まで Pro 機能継続
 
 ### ステータス遷移
 
 ```
 [なし] → active（Pro契約時に行INSERT）
 active → canceled（ユーザーが解約。current_period_end まで Pro 機能継続）
-canceled → active（期間内に再契約 → 同じ行の status を active に戻す）
+canceled → active（期間内に再契約 → 新しいPay.jp定期課金を作成し、同じ行を更新）
 canceled → expired（current_period_end を過ぎたら遷移）
 active → expired（grace_period_end を過ぎても支払い未回復の場合）
 expired → active（再契約時に新しい行をINSERT）
 ```
 
-canceled 状態（まだ期間内）での再契約は、**同じ行の status を active に戻す**。Pay.jp 側でも定期課金を再開する。expired からの再契約は**新しい行を INSERT** する（履歴保持のため）。
+#### canceled → active の再契約
+
+Pay.jp で一度キャンセルした定期課金は再開できない（Pay.jp の仕様）。そのため canceled からの再契約では:
+
+1. **Pay.jp: 新しい定期課金を作成**（既存の payjp_customer_id を再利用）
+2. **DB: 同じ行の status を active に戻す** + `payjp_subscription_id` を新しいIDに更新 + `current_period_start/end` を更新
+
+expired からの再契約は**新しい行を INSERT** する（履歴保持のため）。
 
 #### canceled → expired の遷移タイミング
 
@@ -322,7 +366,7 @@ SELECT cron.schedule(
   '0 18 * * *',
   $$
     UPDATE public.subscriptions
-    SET status = 'expired', updated_at = now()
+    SET status = 'expired'
     WHERE (
       (status = 'canceled' AND current_period_end < now())
       OR
@@ -336,6 +380,8 @@ SELECT cron.schedule(
 
 Pro が expired/canceled で期間終了した場合、**即座に free の上限（5回/3回）に戻る**。当月に Pro 上限まで使っていた場合は、その時点で上限到達扱いになる。
 
+例: 無料で4/5回使用済み → Proにアップグレード → 残り96/100回。逆に Pro で50/100回使用済み → expired → free 上限5回に対して使用済み50回 → 上限到達。
+
 ### Pay.jp連携
 
 - `POST /api/payment/create` — Pay.jpカスタマー作成 + 定期課金開始
@@ -345,10 +391,12 @@ Pro が expired/canceled で期間終了した場合、**即座に free の上�
 
 | イベント | 処理 |
 |---------|------|
-| `subscription.renewed` | current_period_start/end を更新、updated_at 更新 |
-| `subscription.canceled` | status を `canceled` に、updated_at 更新 |
+| `subscription.renewed` | current_period_start/end を更新、**grace_period_end を NULL にクリア** |
+| `subscription.canceled` | status を `canceled` に更新 |
 | `charge.succeeded` | grace_period_end を NULL にクリア（グレースピリオド中の回復） |
 | `charge.failed` | グレースピリオド処理（後述） |
+
+注: `subscription.renewed` は課金成功を前提としているため、grace_period_end もクリアする。
 
 #### Webhook の冪等性・署名検証
 
@@ -372,15 +420,20 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 
 `charge.failed` 発生時、即座に Pro を剥奪せず **7日間のグレースピリオド** を設ける:
 
-1. `charge.failed` → `subscriptions.grace_period_end = now() + 7 days` をセット、updated_at 更新
+1. `charge.failed` → **grace_period_end が NULL の場合のみ** `now() + 7 days` をセット（リトライによる際限ない延長を防止）:
+   ```sql
+   UPDATE subscriptions SET grace_period_end = now() + interval '7 days'
+   WHERE id = $id AND grace_period_end IS NULL;
+   ```
 2. グレースピリオド中は Pro 機能を継続
-3. 期間内に再課金成功（`charge.succeeded`） → `grace_period_end` を NULL にクリア
+3. 期間内に再課金成功（`charge.succeeded` or `subscription.renewed`） → `grace_period_end` を NULL にクリア
 4. 期間終了後も未払い → status を `expired` に変更（APIアクセス時 or pg_cron で判定）
 5. ユーザーにはアプリ内で「お支払いに問題があります」バナーを表示
 
 ### クーポン
 
 - `POST /api/coupon/validate` — コード検証、割引内容返却。service_role で coupons テーブルにアクセス
+- **レートリミット**: IPベースで1分間5回まで。超過時は `429 Too Many Requests` を返す（ブルートフォース対策）
 
 #### クーポンの適用フロー
 
@@ -395,9 +448,9 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 #### クーポンの適用ルール
 
 - `discount_percent` と `free_months` は**排他**（DB制約で担保）
-- `discount_percent`: 初回課金から適用。Pay.jp には割引後の金額で課金
+- `discount_percent`: **初月のみ適用**。Pay.jp には割引後の金額で初回課金を作成し、`subscription.renewed` 時（2ヶ月目以降）は通常額（¥480）で課金。Pay.jp の定期課金金額は初回作成時に通常額で設定し、初回のみ手動で割引額をチャージする方式
 - `free_months`: Pay.jp の `trial_days` に変換（free_months × 30日）して適用。期間終了後に自動で通常額課金開始（Pay.jp の定期課金が自動処理）
-- ユーザー向け表記: 「○日間無料」と日数で表示する（暦上の月数とのずれによる誤解を防ぐ）
+- ユーザー向け表記: 「○日間無料」と日数で表示する（暦上の月数とのずれによる誤解を防ぐ。90日 vs 3暦月のずれについてはFAQ等で補足するとCS対応が楽）
 
 ## フロントエンドUI
 
@@ -444,6 +497,7 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 ### 月途中のアップグレード
 
 - AI利用回数の上限は**即座に Pro の値に変更**される（当月の利用済み回数はリセットしない）
+- 例: 無料で4/5回使用済み → Proにアップグレード → 残り96/100回
 - 日割り計算は**しない**。Pay.jp にそのまま月額で課金開始し、current_period_start を課金開始日にする
 
 ### 設定画面
@@ -457,9 +511,9 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 - 定期課金APIで月額サブスク管理
 - トライアル: `trial_days` パラメータで無料期間設定
 - クーポン/キャンペーン: 自前DB管理（Pay.jpにクーポン機能なし）
-  - `discount_percent`: 割引後の金額で Pay.jp に課金
+  - `discount_percent`: 初月のみ割引適用。2ヶ月目以降は通常額
   - `free_months`: `trial_days` に変換して Pay.jp に渡す。期間終了後は Pay.jp が自動で通常額課金
-- 解約時: DB の status 更新に加え、**Pay.jp 側の定期課金もキャンセル**する
+- 解約時: **Pay.jp 側の定期課金キャンセルを先に実行**し、成功後に DB 更新（整合性保持）
 - アプリからの決済: 外部ブラウザでWeb決済ページを開く（ストア課金規約回避）
 - Webhook 署名検証 + 冪等性処理を必須とする
 
@@ -470,6 +524,7 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 - coupons / webhook_events: ポリシーなし（= 全操作クライアントから拒否、service_role のみ）
 - Webhook エンドポイントは Pay.jp の署名検証で保護
 - ネイティブアプリの決済リターンは Universal Links / App Links を使用（カスタムURLスキームの乗っ取りリスク回避）
+- クーポン検証エンドポイントに IP ベースレートリミット（1分5回）
 
 ## 将来の拡張
 
