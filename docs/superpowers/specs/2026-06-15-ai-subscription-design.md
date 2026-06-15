@@ -71,12 +71,12 @@ UNIQUE(user_id) は設けない。解約→再契約で履歴を残すため、s
 CREATE TABLE public.subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  plan_id text NOT NULL REFERENCES public.plans(id) DEFAULT 'free',
+  plan_id text NOT NULL REFERENCES public.plans(id),   -- DEFAULT なし（Pro契約時のみINSERT）
   status text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'canceled', 'expired')),
   payjp_subscription_id text,
   payjp_customer_id text,
-  current_period_start timestamptz,           -- 無料プランは NULL
-  current_period_end timestamptz,             -- 無料プランは NULL
+  current_period_start timestamptz,
+  current_period_end timestamptz,
   trial_end timestamptz,
   grace_period_end timestamptz,               -- 支払い失敗時のグレースピリオド終了日
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -186,21 +186,6 @@ CREATE POLICY "Users can read own redemptions"
 -- INSERT/UPDATE/DELETE はポリシーなし = クライアントからは拒否
 ```
 
-#### クーポン適用のトランザクション
-
-クーポン適用は1トランザクション内で実行する。used_count の更新が0行（上限到達）なら全体を ROLLBACK:
-
-```
-BEGIN;
-  -- 1. 重複チェック兼記録（UNIQUE制約で二重適用を防止）
-  INSERT INTO coupon_redemptions (user_id, coupon_id, subscription_id) VALUES ($1, $2, $3);
-  -- 2. 利用数インクリメント（max_uses 未満の場合のみ更新）
-  UPDATE coupons SET used_count = used_count + 1
-    WHERE id = $2 AND (max_uses IS NULL OR used_count < max_uses);
-  -- 更新行数が 0 なら上限到達 → ROLLBACK
-COMMIT;
-```
-
 ### `ai_usage_counters` テーブル（回数制限用カウンター）
 
 race condition を防ぐため、ai_usage の COUNT ではなく専用カウンターテーブルを使う。
@@ -252,7 +237,15 @@ CREATE POLICY "Users can read own usage"
 
 ### 月次カウントのタイムゾーン
 
-回数カウントは **JST（Asia/Tokyo）** 基準。`ai_usage_counters.month` は JST の `YYYY-MM` 文字列で管理する。アプリ側で `to_char(now() AT TIME ZONE 'Asia/Tokyo', 'YYYY-MM')` を使用。
+回数カウントは **JST（Asia/Tokyo）** 基準。`ai_usage_counters.month` は JST の `YYYY-MM` 文字列で管理する。
+
+- DB側: `to_char(now() AT TIME ZONE 'Asia/Tokyo', 'YYYY-MM')`
+- TypeScript側:
+  ```typescript
+  const monthJST = new Date().toLocaleDateString('ja-JP', {
+    timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit'
+  }).replace(/\//g, '-').slice(0, 7); // "2026-06"
+  ```
 
 ### 無料ユーザーの初期状態
 
@@ -260,14 +253,28 @@ CREATE POLICY "Users can read own usage"
 
 ### 既存コードからの移行
 
-現在の `usage-limit.ts` はトークン数ベース（`ai_monthly_tokens`）で制限している。本設計で回数ベース（`ai_chat_monthly_limit` / `ai_plan_monthly_limit`）に変更する。移行手順:
+現在の `usage-limit.ts` はトークン数ベース（`ai_monthly_tokens`）で制限している。本設計で回数ベース（`ai_chat_monthly_limit` / `ai_plan_monthly_limit`）に変更する。
+
+#### 具体的な差分
+
+| 現在 (billing.ts) | 新spec |
+|---|---|
+| `stripe_subscription_id` | `payjp_subscription_id` + `payjp_customer_id` |
+| `ai_monthly_tokens: number` | `ai_chat_monthly_limit` + `ai_plan_monthly_limit` |
+| `coupon_id` (subscriptions内) | `coupon_redemptions` テーブルに分離 |
+| `free_until` | `trial_end` |
+| デフォルト上限 100,000トークン | 無料: chat 5回/plan 3回 |
+
+#### 移行手順
 
 1. `ai_usage_counters` テーブルを作成
 2. `plans` テーブルを作成（`ai_monthly_tokens` は廃止、`ai_chat_monthly_limit` / `ai_plan_monthly_limit` に置換）
 3. `usage-limit.ts` を回数ベースに書き換え（`ai_usage_counters` の `UPDATE ... RETURNING` パターン）
 4. `GET /api/usage` のレスポンスをトークン→回数に変更
-5. 既存の `billing.ts` の型定義を新スキーマに合わせて更新
+5. 既存の `billing.ts` の型定義を新スキーマに合わせて更新（上記差分表参照）
 6. フロント側の使用量表示を回数ベースに変更
+
+既存ユーザーへの影響: 移行時点で ai_usage_counters は空なので、全ユーザーが当月0回から開始。トークンベースの使用量は ai_usage テーブルに残り、コスト追跡には引き続き利用可能。
 
 ## API設計
 
@@ -285,6 +292,17 @@ CREATE POLICY "Users can read own usage"
 ```
 
 used は `ai_usage_counters` から取得。limit はユーザーのアクティブプランから取得。
+
+### フロントエンドのサブスク情報取得戦略
+
+`GET /api/subscription` と `GET /api/usage` は useSWR でクライアントキャッシュし、`revalidateOnFocus: true` で画面復帰時に自動再検証する。AI呼び出しのたびにDB問い合わせが走らないようにする。
+
+```typescript
+const { data: usage } = useSWR('/api/usage', fetcher, { revalidateOnFocus: true });
+const { data: subscription } = useSWR('/api/subscription', fetcher, { revalidateOnFocus: true });
+```
+
+AI呼び出し成功後は `mutate('/api/usage')` で即座にキャッシュを更新。
 
 ### AI各エンドポイント（既存を修正）
 
@@ -343,7 +361,16 @@ expired → active（再契約時に新しい行をINSERT）
 Pay.jp で一度キャンセルした定期課金は再開できない（Pay.jp の仕様）。そのため canceled からの再契約では:
 
 1. **Pay.jp: 新しい定期課金を作成**（既存の payjp_customer_id を再利用）
-2. **DB: 同じ行の status を active に戻す** + `payjp_subscription_id` を新しいIDに更新 + `current_period_start/end` を更新
+2. **DB: 最新の canceled 行を特定して更新**:
+   ```sql
+   UPDATE subscriptions
+   SET status = 'active',
+       payjp_subscription_id = $new_id,
+       current_period_start = now(),
+       current_period_end = now() + interval '1 month'
+   WHERE user_id = $user_id AND status = 'canceled'
+   ORDER BY updated_at DESC LIMIT 1;
+   ```
 
 expired からの再契約は**新しい行を INSERT** する（履歴保持のため）。
 
@@ -356,6 +383,8 @@ expired からの再契約は**新しい行を INSERT** する（履歴保持の
 グレースピリオド終了後の expired 遷移も同じ仕組みで処理する。
 
 #### pg_cron セットアップ
+
+**前提: Supabase Pro プラン以上が必要。** Free プランでは pg_cron が使えない。利用不可の場合は APIアクセス時チェックのみで運用し、pg_cron は Pro プラン移行後に追加する。
 
 Supabase ダッシュボード > SQL Editor で pg_cron を有効化し、日次ジョブを登録する:
 
@@ -434,23 +463,83 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 
 - `POST /api/coupon/validate` — コード検証、割引内容返却。service_role で coupons テーブルにアクセス
 - **レートリミット**: IPベースで1分間5回まで。超過時は `429 Too Many Requests` を返す（ブルートフォース対策）
+- validate はあくまで**表示用の事前チェック**。最終的な有効性判定は `/api/payment/create` のトランザクション内で再検証する
 
 #### クーポンの適用フロー
 
-1. ユーザーがクーポンコードを入力
-2. `/api/coupon/validate` でコード検証（有効性・有効期限・max_uses チェック）
-3. 決済確定時に `/api/payment/create` 内で以下を1トランザクションで実行:
-   - subscriptions に行 INSERT
-   - coupon_redemptions に記録（UNIQUE制約で重複防止）
-   - coupons.used_count インクリメント
-   - Pay.jp に定期課金作成（クーポン内容を反映）
+`/api/payment/create` 内の処理を外部API呼び出しとDB操作で2段階に分離する:
+
+**Phase 1 — DBクーポン予約（トランザクション）:**
+```
+BEGIN;
+  INSERT INTO coupon_redemptions (user_id, coupon_id) VALUES ($1, $2);
+  UPDATE coupons SET used_count = used_count + 1
+    WHERE id = $2 AND (max_uses IS NULL OR used_count < max_uses);
+  -- 更新行数が 0 → ROLLBACK（上限到達 or 無効クーポン）
+COMMIT;
+```
+
+**Phase 2 — Pay.jp API呼び出し:**
+Pay.jp カスタマー作成（or 既存再利用）→ 定期課金作成（クーポン内容反映）
+
+**Phase 3 — DB確定 or ロールバック:**
+- Pay.jp 成功 → subscriptions に INSERT + coupon_redemptions に subscription_id を更新
+- Pay.jp 失敗 → coupon_redemptions 削除 + used_count デクリメント
+
+このように外部API呼び出しをDBトランザクション外に出すことで、DB接続プール枯渇リスクと Pay.jp 成功→DB commit 失敗の不整合を防ぐ。
+
+**UIのエラーハンドリング:** validate で「有効」と表示した後、payment/create 時にクーポンが使い切られていた場合、「このクーポンは既に使い切られました。クーポンなしで続けますか？」ダイアログを表示する。
+
+#### Pay.jp カスタマー作成失敗時のクリーンアップ
+
+`/api/payment/create` で Pay.jp カスタマー作成成功 → 定期課金作成失敗の場合: **カスタマーは削除しない**（次回の決済試行時に再利用可能）。クーポン予約は Phase 3 でロールバック。ユーザーにはエラーを返し、再試行を促す。
 
 #### クーポンの適用ルール
 
 - `discount_percent` と `free_months` は**排他**（DB制約で担保）
-- `discount_percent`: **初月のみ適用**。Pay.jp には割引後の金額で初回課金を作成し、`subscription.renewed` 時（2ヶ月目以降）は通常額（¥480）で課金。Pay.jp の定期課金金額は初回作成時に通常額で設定し、初回のみ手動で割引額をチャージする方式
-- `free_months`: Pay.jp の `trial_days` に変換（free_months × 30日）して適用。期間終了後に自動で通常額課金開始（Pay.jp の定期課金が自動処理）
-- ユーザー向け表記: 「○日間無料」と日数で表示する（暦上の月数とのずれによる誤解を防ぐ。90日 vs 3暦月のずれについてはFAQ等で補足するとCS対応が楽）
+
+**`discount_percent`（初月割引）:**
+
+Pay.jp公式の「初回のみ異なる金額で課金」パターンを使用:
+
+1. 手動で割引額をチャージ: `payjp.charges.create({ amount: 割引後金額, customer: customer_id })`
+2. 定期課金を翌月開始で作成: `payjp.subscriptions.create({ customer: customer_id, plan: 'pro', trial_end: 翌月タイムスタンプ })`
+3. 2ヶ月目以降は Pay.jp が通常額（¥480）で自動課金
+
+```typescript
+// 例: 50%割引クーポン
+const discountedAmount = Math.round(480 * (1 - coupon.discount_percent / 100));
+
+// 1. 初回割引チャージ
+await payjp.charges.create({
+  amount: discountedAmount,  // 240
+  currency: 'jpy',
+  customer: customer_id
+});
+
+// 2. 定期課金を翌月開始で作成
+const trialEnd = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+await payjp.subscriptions.create({
+  customer: customer_id,
+  plan: 'pro',
+  trial_end: trialEnd
+});
+```
+
+**`free_months`（日数無料）:**
+
+Pay.jp の `trial_days` に変換（free_months × 30日）して適用。期間終了後に自動で通常額課金開始（Pay.jp の定期課金が自動処理）。
+
+ユーザー向け表記: 「○日間無料」と日数で表示する（暦上の月数とのずれによる誤解を防ぐ。90日 vs 3暦月のずれについてはFAQ等で補足するとCS対応が楽）。
+
+### カード変更フロー
+
+Proユーザーが登録済みカードを変更したい場合:
+
+1. プラン画面に「お支払い方法を変更」リンク
+2. Pay.jpのカード入力UIでトークンを取得
+3. `payjp.customers.update(customer_id, { card: token })` で既存カスタマーのカードを更新
+4. 次回課金から新カードが使われる
 
 ## フロントエンドUI
 
@@ -474,7 +563,7 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 - 「Proにアップグレード」ボタン
   - Web → Pay.jp決済フロー（カード入力画面）
   - ネイティブアプリ → 外部ブラウザでWeb決済ページを開く
-- Proユーザー:「解約する」ボタン
+- Proユーザー:「解約する」ボタン、「お支払い方法を変更」リンク
 - クーポンコード入力欄
 
 ### 決済フロー
@@ -511,7 +600,7 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 - 定期課金APIで月額サブスク管理
 - トライアル: `trial_days` パラメータで無料期間設定
 - クーポン/キャンペーン: 自前DB管理（Pay.jpにクーポン機能なし）
-  - `discount_percent`: 初月のみ割引適用。2ヶ月目以降は通常額
+  - `discount_percent`: 初月のみ割引。手動チャージ + trial_end で翌月から通常額
   - `free_months`: `trial_days` に変換して Pay.jp に渡す。期間終了後は Pay.jp が自動で通常額課金
 - 解約時: **Pay.jp 側の定期課金キャンセルを先に実行**し、成功後に DB 更新（整合性保持）
 - アプリからの決済: 外部ブラウザでWeb決済ページを開く（ストア課金規約回避）
@@ -526,8 +615,25 @@ Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔�
 - ネイティブアプリの決済リターンは Universal Links / App Links を使用（カスタムURLスキームの乗っ取りリスク回避）
 - クーポン検証エンドポイントに IP ベースレートリミット（1分5回）
 
+## テスト戦略
+
+- Pay.jp の**テストモード**（テスト用APIキー）で決済フロー全体を検証
+- ローカル開発時の Webhook テスト: **ngrok** でローカルサーバーを公開し、Pay.jp の Webhook 送信先に設定
+- テスト用カード番号: Pay.jp 提供のテストカード（4242424242424242 等）を使用
+- E2Eテスト: Webhook の冪等性（同じイベント2回送信で二重処理されないこと）を確認
+
+## 管理機能
+
+初期フェーズでは**Supabase ダッシュボード + SQL 直打ち**で運用:
+- クーポン作成: `INSERT INTO coupons ...`
+- サブスク状況確認: `SELECT * FROM subscriptions WHERE status = 'active'`
+- 売上確認: Pay.jp ダッシュボード
+
+将来的にはアプリ内 admin 画面を構築（`/admin/subscriptions`, `/admin/coupons`）。
+
 ## 将来の拡張
 
 - アプリ内課金（RevenueCat）でiOS/Android対応
 - 年額プラン（¥3,800/年 = 2ヶ月分お得、plans に `billing_interval: 'year'` の行を追加）
 - プラン追加（Proの上位など）
+- メール通知（契約開始・支払い失敗・解約完了）— 現フェーズではアプリ内バナーのみ
