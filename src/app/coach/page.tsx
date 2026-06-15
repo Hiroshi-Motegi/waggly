@@ -12,6 +12,9 @@ import { ChatInput } from "@/components/coach/chat-input";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
+import { useUsage } from "@/hooks/use-usage";
+import { UsageBadge } from "@/components/usage-badge";
+import { LimitReachedCard } from "@/components/limit-reached-card";
 
 type ConversationItem = {
   id: string;
@@ -31,6 +34,8 @@ function ChatView({
   onShowHistory: () => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { usage, mutate: mutateUsage } = useUsage();
+  const chatLimitReached = usage ? usage.chat.remaining <= 0 : false;
 
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
@@ -53,6 +58,7 @@ function ChatView({
 
   function handleSend(content: string) {
     sendMessage({ text: content });
+    mutateUsage();
   }
 
   return (
@@ -84,7 +90,20 @@ function ChatView({
           <div ref={bottomRef} />
         </div>
         <div className="shrink-0">
-          <ChatInput onSend={handleSend} isLoading={isLoading} />
+          {chatLimitReached ? (
+            <div className="p-3">
+              <LimitReachedCard />
+            </div>
+          ) : (
+            <>
+              {usage && (
+                <div className="flex justify-end px-3 pt-1">
+                  <UsageBadge used={usage.chat.used} limit={usage.chat.limit} />
+                </div>
+              )}
+              <ChatInput onSend={handleSend} isLoading={isLoading} />
+            </>
+          )}
         </div>
       </div>
       </div>

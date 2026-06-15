@@ -2,18 +2,12 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { checkUsageLimit } from "@/lib/ai/usage-limit";
 
 
 export async function POST(request: NextRequest) {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
-
-  const withinLimit = await checkUsageLimit(supabase, userId);
-  if (!withinLimit) {
-    return NextResponse.json({ error: "今月のAI利用上限に達しました" }, { status: 429 });
-  }
 
   const { category, club_number, maker, model, shaft_name, shaft_flex, release_year } = await request.json();
 

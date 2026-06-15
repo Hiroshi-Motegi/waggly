@@ -6,16 +6,20 @@ import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 
 import { analyzeGaps } from "@/lib/gap-analysis";
 import { parsePlanResponse } from "@/lib/ai/plan-parser";
-import { checkUsageLimit } from "@/lib/ai/usage-limit";
+import { incrementUsageCounter, decrementUsageCounter } from "@/lib/ai/usage-counter";
 
 export async function POST(request: Request) {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  const withinLimit = await checkUsageLimit(supabase, userId);
-  if (!withinLimit) {
-    return NextResponse.json({ error: "今月のAI利用上限に達しました" }, { status: 429 });
+  // Check usage limit (atomic increment)
+  const usageCount = await incrementUsageCounter(userId, "plan");
+  if (usageCount === null) {
+    return NextResponse.json(
+      { error: "limit_reached", source: "plan" },
+      { status: 429 }
+    );
   }
 
   const { source, duration, selectedClubs, focus, location, notes, referPractice, referPracticeMonths } = await request.json();
@@ -93,7 +97,10 @@ export async function POST(request: Request) {
     })),
   });
 
-  const { text, usage } = await generateText({
+  let text: string;
+  let usage: any;
+  try {
+  ({ text, usage } = await generateText({
     model: anthropic("claude-haiku-4-5-20251001"),
     system: systemPrompt,
     prompt: `ユーザーの練習記録とクラブセットを分析して、次の練習メニューを提案してください。
@@ -118,7 +125,11 @@ detailは具体的な練習方法・体の使い方・意識するポイント�
 }
 \`\`\``,
     maxOutputTokens: 2000,
-  });
+  }));
+  } catch (e) {
+    await decrementUsageCounter(userId, "plan");
+    throw e;
+  }
 
   // Save token usage
   if (usage) {

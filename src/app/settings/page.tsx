@@ -17,20 +17,14 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useProfile } from "@/hooks/use-profile";
 
 interface UsageData {
-  month: string;
-  inputTokens: number;
-  outputTokens: number;
-  totalTokens: number;
-  limit: number;
-  remaining: number;
+  chat: { used: number; limit: number; remaining: number };
+  plan: { used: number; limit: number; remaining: number };
   limitReached: boolean;
 }
 
 interface SubscriptionData {
-  plan_id: string;
-  plan?: { name: string; price: number; ai_monthly_tokens: number };
-  status: string;
-  free_until: string | null;
+  subscription: { plan_id: string; current_period_end: string | null } | null;
+  plan: { id: string; name: string; price: number; ai_chat_monthly_limit: number; ai_plan_monthly_limit: number };
 }
 
 export default function SettingsPage() {
@@ -87,9 +81,14 @@ export default function SettingsPage() {
   }, [user]);
 
   const [processing, setProcessing] = useState<string | null>(null);
+  const [isLineApp, setIsLineApp] = useState(false);
   const [conflictInfo, setConflictInfo] = useState<any>(null);
   const [conflictSelected, setConflictSelected] = useState<"a" | "b" | null>(null);
   const [conflictConfirm, setConflictConfirm] = useState(false);
+
+  useEffect(() => {
+    import("@/lib/platform").then(({ isLineBrowser }) => setIsLineApp(isLineBrowser()));
+  }, []);
 
   if (conflictInfo) {
     // Show conflict resolution UI
@@ -228,6 +227,12 @@ export default function SettingsPage() {
             <p className="text-sm text-[#8b8b8b] mb-3">サインインするとプロフィール公開・共有、AIコーチ、データのバックアップ・Web版との同期が使えます。</p>
             <button
               onClick={async () => {
+                // LINE内ブラウザの場合は外部ブラウザで開く
+                const { isLineBrowser } = await import("@/lib/platform");
+                if (isLineBrowser()) {
+                  window.open(`${window.location.origin}/settings`, "_blank");
+                  return;
+                }
                 setProcessing("ログイン中...");
                 try {
                   const { signInWithGoogle } = await import("@/lib/native-auth");
@@ -282,6 +287,9 @@ export default function SettingsPage() {
               </svg>
               Googleでサインイン
             </button>
+            {isLineApp && (
+              <p className="text-xs text-[#8b8b8b] text-center mt-1">LINEアプリ内ではGoogleログインを利用できません。外部ブラウザを起動します。</p>
+            )}
             <button
               onClick={async () => {
                 setProcessing("ログイン中...");
@@ -362,9 +370,8 @@ export default function SettingsPage() {
 
   if (!user) return null;
 
-  const usagePercent = usage ? Math.min(100, Math.round((usage.totalTokens / usage.limit) * 100)) : 0;
-  const isFreePlan = subscription?.plan_id === "free" || !subscription?.plan_id;
-  const isFreeTrialActive = subscription?.free_until && new Date(subscription.free_until) > new Date();
+  const currentPlanId = subscription?.plan?.id ?? "free";
+  const isPro = currentPlanId === "pro";
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
@@ -417,17 +424,21 @@ export default function SettingsPage() {
 
       {/* プラン */}
       <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
-      <div className="rounded-lg bg-white p-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-base font-bold">ベータ版</span>
-          <span className="rounded-full bg-[#ebf1eb] px-2.5 py-0.5 text-sm font-bold text-[#006728]">
-            無料提供中
-          </span>
+      <Link href="/settings/plan">
+        <div className="rounded-lg bg-white p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-base font-bold">{isPro ? "Waggly Pro" : "無料プラン"}</span>
+            {!isPro && (
+              <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
+                Proへ
+              </span>
+            )}
+            {isPro && (
+              <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+            )}
+          </div>
         </div>
-        <p className="text-sm text-[#8b8b8b]">
-          現在ベータ版として全機能を無料で提供しています。正式リリース時にプラン体系が変更される場合があります。
-        </p>
-      </div>
+      </Link>
 
       {/* AIコーチ利用状況 */}
       <p className="text-base font-bold text-white px-1 pt-4">AI相談利用状況</p>
@@ -435,25 +446,31 @@ export default function SettingsPage() {
         {usage ? (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-[#8b8b8b]">{usage.month}月</span>
-              <span className="font-medium">
-                {usage.totalTokens.toLocaleString()} / {usage.limit.toLocaleString()} トークン
-              </span>
+              <span className="text-[#8b8b8b]">AIチャット</span>
+              <span className="font-medium">{usage.chat.used}/{usage.chat.limit}回</span>
             </div>
             <div className="h-2 rounded-full bg-[#ebf1eb] overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${
-                  usagePercent >= 90 ? "bg-red-500" : usagePercent >= 70 ? "bg-yellow-500" : "bg-[#006728]"
+                  usage.chat.limit > 0 && usage.chat.used / usage.chat.limit >= 0.9 ? "bg-red-500" : usage.chat.limit > 0 && usage.chat.used / usage.chat.limit >= 0.7 ? "bg-yellow-500" : "bg-[#006728]"
                 }`}
-                style={{ width: `${usagePercent}%` }}
+                style={{ width: `${usage.chat.limit > 0 ? Math.min(100, Math.round((usage.chat.used / usage.chat.limit) * 100)) : 0}%` }}
               />
             </div>
-            <div className="flex justify-between text-xs text-[#8b8b8b]">
-              <span>使用率 {usagePercent}%</span>
-              <span>残り {usage.remaining.toLocaleString()} トークン</span>
+            <div className="flex justify-between text-sm mt-2">
+              <span className="text-[#8b8b8b]">練習メニュー</span>
+              <span className="font-medium">{usage.plan.used}/{usage.plan.limit}回</span>
+            </div>
+            <div className="h-2 rounded-full bg-[#ebf1eb] overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  usage.plan.limit > 0 && usage.plan.used / usage.plan.limit >= 0.9 ? "bg-red-500" : usage.plan.limit > 0 && usage.plan.used / usage.plan.limit >= 0.7 ? "bg-yellow-500" : "bg-[#006728]"
+                }`}
+                style={{ width: `${usage.plan.limit > 0 ? Math.min(100, Math.round((usage.plan.used / usage.plan.limit) * 100)) : 0}%` }}
+              />
             </div>
             {usage.limitReached && (
-              <p className="text-sm text-red-500 font-medium">
+              <p className="text-sm text-red-500 font-medium mt-1">
                 今月の利用上限に達しました。来月リセットされます。
               </p>
             )}
@@ -580,8 +597,10 @@ function AccountLinking({
   const router = useRouter();
   const [providers, setProviders] = useState<{ provider: string; provider_email?: string; is_current?: boolean }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLineApp, setIsLineApp] = useState(false);
 
   useEffect(() => {
+    import("@/lib/platform").then(({ isLineBrowser }) => setIsLineApp(isLineBrowser()));
     apiFetch("/api/auth/providers")
       .then((r) => r.ok ? r.json() : [])
       .then(setProviders)
@@ -678,6 +697,12 @@ function AccountLinking({
   }
 
   async function linkGoogle() {
+    // LINE内ブラウザの場合は外部ブラウザで開く
+    const { isLineBrowser } = await import("@/lib/platform");
+    if (isLineBrowser()) {
+      window.open(`${window.location.origin}/settings`, "_blank");
+      return;
+    }
     setProcessing("連携中...");
     sessionStorage.setItem("link_original_user", user.id);
     const { createClient } = await import("@/lib/supabase/client");
@@ -757,6 +782,9 @@ function AccountLinking({
           <button onClick={linkGoogle} className="text-sm font-bold text-[#006728] border border-[#006728] rounded-full px-3 py-1">連携する</button>
         )}
       </div>
+      {isLineApp && !googleEmail && (
+        <p className="text-xs text-[#8b8b8b] px-1 -mt-1">LINEアプリ内ではGoogle連携を利用できません。外部ブラウザを起動します。</p>
+      )}
     </div>
   );
 }

@@ -3,6 +3,10 @@
     {
       "path": "/api/admin/knowledge/auto-collect",
       "schedule": "0 21 * * 0"
+    },
+    {
+      "path": "/api/cron/expire-subscriptions",
+      "schedule": "0 18 * * *"
     }
   ]
 }
