@@ -123,7 +123,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Wait for user data before judging (prevents flash of onboarding for logged-in users)
   if (!native && isLoading) {
     return (
-      <div className="mx-auto max-w-md min-h-dvh">
+      <div className="mx-auto max-w-screen-sm min-h-dvh">
         <Loading variant="light" />
       </div>
     );
@@ -131,7 +131,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (needsOnboarding) {
     return (
-      <div className={`min-h-dvh shadow-sm bg-black/20 ${native ? "w-full" : "mx-auto max-w-md"}`}>
+      <div className={`min-h-dvh shadow-sm bg-black/20 ${native ? "w-full" : "mx-auto max-w-screen-sm"}`}>
         <Onboarding
           onComplete={async () => {
             if (user) {
@@ -160,7 +160,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (needsTermsAgreement) {
     return (
-      <div className={`min-h-dvh border-x border-border shadow-sm bg-white ${native ? "w-full" : "mx-auto max-w-md"}`}>
+      <div className={`min-h-dvh border-x border-border shadow-sm bg-white ${native ? "w-full" : "mx-auto max-w-screen-sm"}`}>
         <TermsAgreement
           isReagreement={!!user.agreed_terms_at}
           onAgree={async () => {
@@ -175,7 +175,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Login page: no header/nav
   if (pathname === "/login") {
     return (
-      <div className="mx-auto max-w-md min-h-dvh shadow-sm relative animate-fade-in">
+      <div className="mx-auto max-w-screen-sm min-h-dvh shadow-sm relative animate-fade-in">
         {children}
       </div>
     );
@@ -185,7 +185,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isPublicPage = pathname.startsWith("/p/");
   const hideChrome = isPublicPage || (!user && !native);
   return (
-    <div className={`min-h-dvh flex flex-col relative animate-fade-in bg-black/20 ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-md shadow-sm"}`}>
+    <div className={`min-h-dvh flex flex-col relative animate-fade-in bg-black/20 ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-screen-sm shadow-sm"}`}>
       {!hideChrome && <Header />}
       <main className={hideChrome ? "flex-1 flex flex-col" : "flex-1"} style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
