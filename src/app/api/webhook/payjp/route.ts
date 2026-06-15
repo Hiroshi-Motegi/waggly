@@ -9,14 +9,27 @@ function getAdminClient() {
 }
 
 export async function POST(req: Request) {
+  // Pay.jp 発信元トークン検証
+  const webhookToken = req.headers.get("x-payjp-webhook-token");
+  if (!webhookToken || webhookToken !== process.env.PAYJP_WEBHOOK_TOKEN) {
+    return NextResponse.json({ error: "invalid signature" }, { status: 401 });
+  }
+
   const body = await req.text();
 
-  // TODO: Pay.jp署名検証（Payjp-Signatureヘッダ）
-  // Pay.jpのSDKにビルトインの検証メソッドがあればそちらを使う
+  let event: any;
+  try {
+    event = JSON.parse(body);
+  } catch {
+    return NextResponse.json({ error: "invalid body" }, { status: 400 });
+  }
 
-  const event = JSON.parse(body);
   const eventId = event.id;
   const eventType = event.type;
+
+  if (!eventId || !eventType) {
+    return NextResponse.json({ error: "invalid event" }, { status: 400 });
+  }
 
   const supabase = getAdminClient();
 
@@ -74,7 +87,6 @@ export async function POST(req: Request) {
       const graceEnd = new Date(
         Date.now() + 7 * 24 * 60 * 60 * 1000
       ).toISOString();
-      // grace_period_end IS NULL の場合のみセット
       await supabase.rpc("set_grace_period", {
         p_customer_id: customerId,
         p_grace_end: graceEnd,

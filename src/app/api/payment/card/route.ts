@@ -16,7 +16,7 @@ export async function PATCH(req: Request) {
   const { userId } = auth;
 
   const { token } = await req.json();
-  if (!token) {
+  if (!token || typeof token !== "string" || token.length > 100) {
     return NextResponse.json({ error: "token required" }, { status: 400 });
   }
 

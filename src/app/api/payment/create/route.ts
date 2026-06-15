@@ -3,6 +3,7 @@ import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { createClient } from "@supabase/supabase-js";
 import { getPayjpClient } from "@/lib/payjp";
 import { PLAN_ID } from "@/lib/plans";
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
 function getAdminClient() {
   return createClient(
@@ -12,13 +13,23 @@ function getAdminClient() {
 }
 
 export async function POST(req: Request) {
+  // レートリミット: IP あたり 1分5回
+  const ip = getClientIP(req);
+  const { allowed } = checkRateLimit(`payment:${ip}`, 5, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "リクエストが多すぎます。しばらくしてからお試しください。" }, { status: 429 });
+  }
+
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { userId } = auth;
 
   const { token, coupon_code } = await req.json();
-  if (!token) {
+  if (!token || typeof token !== "string" || token.length > 100) {
     return NextResponse.json({ error: "token required" }, { status: 400 });
+  }
+  if (coupon_code && (typeof coupon_code !== "string" || coupon_code.length > 50)) {
+    return NextResponse.json({ error: "invalid coupon code" }, { status: 400 });
   }
 
   const supabase = getAdminClient();
@@ -240,7 +251,8 @@ export async function POST(req: Request) {
         p_coupon_id: couponId,
       });
     }
-    console.error("Payment failed:", e);
-    return NextResponse.json({ error: "payment_failed" }, { status: 500 });
+    const errCode = (e as any)?.body?.error?.code ?? "unknown";
+    console.error(`Payment failed: code=${errCode}, userId=${userId}`);
+    return NextResponse.json({ error: "決済に失敗しました。再度お試しください。" }, { status: 500 });
   }
 }

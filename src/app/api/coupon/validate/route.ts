@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { createClient } from "@supabase/supabase-js";
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
 function getAdminClient() {
   return createClient(
@@ -10,12 +11,19 @@ function getAdminClient() {
 }
 
 export async function POST(req: Request) {
+  // レートリミット: IP あたり 1分5回（ブルートフォース対策）
+  const ip = getClientIP(req);
+  const { allowed } = checkRateLimit(`coupon:${ip}`, 5, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "リクエストが多すぎます。しばらくしてからお試しください。" }, { status: 429 });
+  }
+
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { userId } = auth;
 
   const { code } = await req.json();
-  if (!code) {
+  if (!code || typeof code !== "string") {
     return NextResponse.json({ error: "code required" }, { status: 400 });
   }
 
