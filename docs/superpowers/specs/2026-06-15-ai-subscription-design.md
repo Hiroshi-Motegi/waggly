@@ -54,8 +54,13 @@ CREATE TABLE public.plans (
   billing_interval text NOT NULL DEFAULT 'month',      -- 'month' or 'year'
   ai_chat_monthly_limit integer NOT NULL DEFAULT 5,
   ai_plan_monthly_limit integer NOT NULL DEFAULT 3,
-  created_at timestamptz NOT NULL DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE TRIGGER plans_updated_at
+  BEFORE UPDATE ON public.plans
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 INSERT INTO public.plans (id, name, price, billing_interval, ai_chat_monthly_limit, ai_plan_monthly_limit)
 VALUES
@@ -136,6 +141,11 @@ ALTER TABLE public.webhook_events ENABLE ROW LEVEL SECURITY;
 -- ポリシーなし = 全拒否
 ```
 
+**クリーンアップ:** 90日経過したイベントを定期削除する（pg_cron or APIアクセス時）:
+```sql
+DELETE FROM webhook_events WHERE processed_at < now() - interval '90 days';
+```
+
 ### `coupons` テーブル
 
 ```sql
@@ -173,7 +183,7 @@ CREATE TABLE public.coupon_redemptions (
   coupon_id uuid NOT NULL REFERENCES public.coupons(id) ON DELETE CASCADE,
   subscription_id uuid REFERENCES public.subscriptions(id),  -- どのサブスクに適用したか
   created_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE(user_id, coupon_id)
+  UNIQUE(user_id, coupon_id)  -- 同一ユーザーは同一クーポンを1回のみ使用可（解約→再契約でも再利用不可）
 );
 
 ALTER TABLE public.coupon_redemptions ENABLE ROW LEVEL SECURITY;
@@ -218,6 +228,7 @@ CREATE TABLE public.ai_usage (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   source text NOT NULL CHECK (source IN ('chat', 'plan', 'autofill')),
+  model text,                                 -- 使用モデル名（原価事後分析用）
   input_tokens integer NOT NULL DEFAULT 0,
   output_tokens integer NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL DEFAULT now()
@@ -333,6 +344,18 @@ RETURNING count;
 -- RETURNING に値あり = OK → AI呼び出しへ + ai_usage にもトークン記録
 ```
 
+#### AI API呼び出し失敗時のカウンター補正
+
+カウンターインクリメント後にAI API（Claude）呼び出しが失敗した場合:
+
+```sql
+UPDATE ai_usage_counters
+SET count = count - 1
+WHERE user_id = $user_id AND source = $source AND month = $month_jst AND count > 0;
+```
+
+AI APIのストリーミング開始前のエラー（ネットワーク障害、500エラー等）の場合のみデクリメントする。ストリーミング途中で切断された場合は「回答を受け取った」とみなしデクリメントしない。
+
 ### サブスク管理
 
 - `GET /api/subscription` — 現在のアクティブなプラン取得（行なし = free プランを返す）
@@ -368,8 +391,11 @@ Pay.jp で一度キャンセルした定期課金は再開できない（Pay.jp 
        payjp_subscription_id = $new_id,
        current_period_start = now(),
        current_period_end = now() + interval '1 month'
-   WHERE user_id = $user_id AND status = 'canceled'
-   ORDER BY updated_at DESC LIMIT 1;
+   WHERE id = (
+     SELECT id FROM subscriptions
+     WHERE user_id = $user_id AND status = 'canceled'
+     ORDER BY updated_at DESC LIMIT 1
+   );
    ```
 
 expired からの再契約は**新しい行を INSERT** する（履歴保持のため）。
@@ -384,7 +410,10 @@ expired からの再契約は**新しい行を INSERT** する（履歴保持の
 
 #### pg_cron セットアップ
 
-**前提: Supabase Pro プラン以上が必要。** Free プランでは pg_cron が使えない。利用不可の場合は APIアクセス時チェックのみで運用し、pg_cron は Pro プラン移行後に追加する。
+**前提: Supabase Pro プラン以上が必要。** Free プランでは pg_cron が使えない。利用不可の場合の代替案:
+- **Vercel Cron Jobs**: `vercel.json` で日次スケジュールを設定し、`/api/cron/expire-subscriptions` を呼び出す
+- **外部 cron サービス**: cron-job.org 等で日次HTTPリクエストを送信
+- **APIアクセス時チェックのみ**: 最小構成。長期間アプリを開かないユーザーの expired 遷移が遅延するリスクあり
 
 Supabase ダッシュボード > SQL Editor で pg_cron を有効化し、日次ジョブを登録する:
 
@@ -420,12 +449,12 @@ Pro が expired/canceled で期間終了した場合、**即座に free の上�
 
 | イベント | 処理 |
 |---------|------|
-| `subscription.renewed` | current_period_start/end を更新、**grace_period_end を NULL にクリア** |
+| `subscription.renewed` | **Pay.jp イベントペイロードから** current_period_start/end を取得して更新、grace_period_end を NULL にクリア |
 | `subscription.canceled` | status を `canceled` に更新 |
 | `charge.succeeded` | grace_period_end を NULL にクリア（グレースピリオド中の回復） |
 | `charge.failed` | グレースピリオド処理（後述） |
 
-注: `subscription.renewed` は課金成功を前提としているため、grace_period_end もクリアする。
+注: `subscription.renewed` は課金成功を前提としているため、grace_period_end もクリアする。current_period_start/end は自前計算（`now() + 1 month`）ではなく、**Pay.jp のイベントペイロードの値**を使用する（Pay.jp 側の課金タイミングとの整合性を保証）。
 
 #### Webhook の冪等性・署名検証
 
@@ -484,7 +513,13 @@ Pay.jp カスタマー作成（or 既存再利用）→ 定期課金作成（ク
 
 **Phase 3 — DB確定 or ロールバック:**
 - Pay.jp 成功 → subscriptions に INSERT + coupon_redemptions に subscription_id を更新
-- Pay.jp 失敗 → coupon_redemptions 削除 + used_count デクリメント
+- Pay.jp 失敗 → **1トランザクションで** coupon_redemptions 削除 + used_count デクリメント:
+  ```
+  BEGIN;
+    DELETE FROM coupon_redemptions WHERE user_id = $1 AND coupon_id = $2;
+    UPDATE coupons SET used_count = used_count - 1 WHERE id = $2 AND used_count > 0;
+  COMMIT;
+  ```
 
 このように外部API呼び出しをDBトランザクション外に出すことで、DB接続プール枯渇リスクと Pay.jp 成功→DB commit 失敗の不整合を防ぐ。
 
@@ -528,18 +563,21 @@ await payjp.subscriptions.create({
 
 **`free_months`（日数無料）:**
 
-Pay.jp の `trial_days` に変換（free_months × 30日）して適用。期間終了後に自動で通常額課金開始（Pay.jp の定期課金が自動処理）。
+Pay.jp の `trial_end` をタイムスタンプで指定する。**30日/月 固定**で統一し、暦上の月日数の差異（28〜31日）は考慮しない。`free_months = 1` → 30日、`free_months = 3` → 90日。期間終了後に自動で通常額課金開始（Pay.jp の定期課金が自動処理）。
 
-ユーザー向け表記: 「○日間無料」と日数で表示する（暦上の月数とのずれによる誤解を防ぐ。90日 vs 3暦月のずれについてはFAQ等で補足するとCS対応が楽）。
+ユーザー向け表記: 「○日間無料」と日数で表示する（例: 「90日間無料」、「約3ヶ月」とは表記しない）。FAQ等でも「無料期間は日数ベースです」と補足。
 
-### カード変更フロー
+### カード変更
+
+**`PATCH /api/payment/card`** — カード情報更新
 
 Proユーザーが登録済みカードを変更したい場合:
 
 1. プラン画面に「お支払い方法を変更」リンク
 2. Pay.jpのカード入力UIでトークンを取得
-3. `payjp.customers.update(customer_id, { card: token })` で既存カスタマーのカードを更新
-4. 次回課金から新カードが使われる
+3. `PATCH /api/payment/card` に token を送信
+4. サーバー側: `payjp.customers.update(customer_id, { card: token })` で既存カスタマーのカードを更新
+5. 次回課金から新カードが使われる
 
 ## フロントエンドUI
 
