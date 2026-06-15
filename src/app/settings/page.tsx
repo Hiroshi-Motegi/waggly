@@ -429,7 +429,7 @@ export default function SettingsPage() {
         <Link href="/settings/plan">
           <div className={`flex items-center justify-between ${isPro ? "pb-2.5 border-b border-[#ececec]" : ""}`}>
             <div>
-              <span className="text-base font-bold">{isPro ? "Waggly Pro" : "無料プラン"}</span>
+              <span className="text-base font-bold">{!subscription ? "" : isPro ? "Waggly Pro" : "無料プラン"}</span>
               {isPaused && subscription?.subscription?.current_period_end && (
                 <p className="text-xs text-amber-500 mt-0.5">
                   解約予定（{new Date(subscription.subscription.current_period_end).toLocaleDateString("ja-JP")}まで利用可能）
@@ -456,12 +456,13 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* 広告非表示 */}
+      {/* 広告設定 */}
+      <p className="text-base font-bold text-white px-1 pt-4">広告</p>
       <Link href="/settings/remove-ads">
-        <div className="rounded-lg bg-[#006728]/10 border border-[#006728]/30 p-3 flex items-center justify-between">
+        <div className="rounded-lg bg-white p-3 flex items-center justify-between">
           <div>
-            <p className="text-sm font-bold text-[#006728]">広告を非表示にする</p>
-            <p className="text-xs text-[#8b8b8b]">¥100 の買い切りで広告を完全に非表示</p>
+            <p className="text-base font-bold">広告を非表示にする</p>
+            <p className="text-xs text-[#8b8b8b]">¥100 の買い切り</p>
           </div>
           <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
         </div>
