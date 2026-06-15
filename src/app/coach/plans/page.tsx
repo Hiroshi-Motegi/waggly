@@ -11,6 +11,9 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { isNative } from "@/lib/platform";
 import { usePlans } from "@/hooks/use-plans";
+import { useUsage } from "@/hooks/use-usage";
+import { useSubscription } from "@/hooks/use-subscription";
+import { PLAN_ID } from "@/lib/plans";
 
 const statusLabels: Record<string, string> = {
   new: "未実行",
@@ -27,6 +30,10 @@ const statusColors: Record<string, string> = {
 export default function PlansPage() {
   const { user } = useAuth();
   const { plans, isLoading, refetch } = usePlans();
+  const { usage } = useUsage();
+  const { plan: currentPlan } = useSubscription();
+  const isPro = currentPlan?.id === PLAN_ID.PRO;
+  const planLimitReached = usage ? usage.plan.remaining <= 0 : false;
   const refetchRef = useRef(refetch);
   refetchRef.current = refetch;
   const searchParams = useSearchParams();
@@ -64,6 +71,23 @@ export default function PlansPage() {
           </Link>
         )}
       </PageHeader>
+
+      {usage && user && (
+        <div className="rounded-lg bg-white px-3 py-2.5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[#333]">今月の生成回数</span>
+            <span className={`text-sm font-bold ${planLimitReached ? "text-red-500" : "text-[#006728]"}`}>{usage.plan.used} / {usage.plan.limit}回</span>
+          </div>
+          {planLimitReached && !isPro && (
+            <>
+              <p className="text-xs text-[#8b8b8b]">今月の上限に達しました。来月リセットされます。</p>
+              <Link href="/settings/plan" className="flex items-center justify-center rounded-full bg-[#006728] py-2 text-sm font-bold text-white">
+                上限を増やす
+              </Link>
+            </>
+          )}
+        </div>
+      )}
 
       {!user && isNative() ? (
         <div className="rounded-lg bg-white p-6 text-center">

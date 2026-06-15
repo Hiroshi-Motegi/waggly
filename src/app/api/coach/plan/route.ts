@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   const usageCount = await incrementUsageCounter(userId, "plan");
   if (usageCount === null) {
     return NextResponse.json(
-      { error: "limit_reached", source: "plan" },
+      { error: "今月の練習メニュー生成の上限に達しました。来月リセットされます。", source: "plan" },
       { status: 429 }
     );
   }
@@ -65,6 +65,19 @@ export async function POST(request: Request) {
   const plans = plansRes.data ?? [];
   const accessories = accessoriesRes.data ?? [];
   const knowledge = knowledgeRes.data ?? [];
+
+  const hasSessions = sessions.length > 0;
+  const hasClubs = clubs.length > 0;
+  const hasInput = !!(focus || notes);
+
+  if (!hasClubs && !hasSessions && !hasInput) {
+    await decrementUsageCounter(userId, "plan");
+    return NextResponse.json(
+      { error: "練習メニューを生成するには、クラブの登録、練習したいことの入力、または過去の練習記録のいずれかが必要です。" },
+      { status: 400 }
+    );
+  }
+
   const gapAnalysis = analyzeGaps(clubs);
 
   const systemPrompt = buildSystemPrompt({
@@ -103,15 +116,16 @@ export async function POST(request: Request) {
   ({ text, usage } = await generateText({
     model: anthropic("claude-haiku-4-5-20251001"),
     system: systemPrompt,
-    prompt: `ユーザーの練習記録とクラブセットを分析して、次の練習メニューを提案してください。
+    prompt: `ユーザーの練習メニューを提案してください。
 合計球数は100〜200球程度にしてください。
 ${duration ? `練習時間: ${duration}` : ""}
 ${location ? `練習場所: ${location}` : ""}
 ${selectedClubs && selectedClubs.length > 0 ? `利用可能なクラブ: ${selectedClubs.join(", ")}（すべて使う必要はありません。練習目的に合ったクラブを選んでください）` : ""}
 ${focus ? `重点的に練習したいこと: ${focus}` : ""}
 ${notes ? `その他の要望: ${notes}` : ""}
+${clubs.length === 0 ? `\nクラブセットの登録がありません。一般的なクラブ構成（7I, PW, SW, ドライバーなど）を想定して提案してください。` : ""}
 
-以下のJSON形式で出力してください。
+必ず以下のJSON形式のみで出力してください。JSON以外のテキストは不要です。
 focusは短い練習テーマ（10文字程度）。
 detailは具体的な練習方法・体の使い方・意識するポイント・注意点を詳しく記述してください（100〜200文字）。内容の区切りごとに改行（\\n）を入れて読みやすくしてください。
 
@@ -144,7 +158,8 @@ detailは具体的な練習方法・体の使い方・意識するポイント�
 
   const parsed = parsePlanResponse(text);
   if (!parsed) {
-    return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
+    console.error("[coach/plan] Failed to parse AI response. Raw text:", text?.substring(0, 500));
+    return NextResponse.json({ error: "AIの応答を処理できませんでした。もう一度お試しください。" }, { status: 500 });
   }
 
   // Save plan
@@ -167,6 +182,7 @@ detailは具体的な練習方法・体の使い方・意識するポイント�
     return {
       plan_id: plan.id,
       club_id: matchedClub?.id ?? null,
+      club_number: item.club_number,
       balls: item.balls,
       focus: item.focus,
       detail: item.detail ?? null,

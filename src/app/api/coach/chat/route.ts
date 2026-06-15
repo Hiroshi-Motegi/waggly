@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const count = await incrementUsageCounter(userId, "chat");
   if (count === null) {
     return new Response(
-      JSON.stringify({ error: "limit_reached", source: "chat" }),
+      JSON.stringify({ error: "今月のAIチャットの上限に達しました。来月リセットされます。", source: "chat" }),
       { status: 429, headers: { "Content-Type": "application/json" } }
     );
   }

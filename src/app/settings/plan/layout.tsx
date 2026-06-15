@@ -7,11 +7,7 @@ export default function PlanLayout({
 }) {
   return (
     <>
-      <Script
-        src="https://checkout.pay.jp/"
-        strategy="lazyOnload"
-        data-key={process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY}
-      />
+      <Script src="https://js.pay.jp/v2/pay.js" strategy="beforeInteractive" />
       {children}
     </>
   );

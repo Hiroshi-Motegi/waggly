@@ -430,7 +430,7 @@ export default function SettingsPage() {
             <span className="text-base font-bold">{isPro ? "Waggly Pro" : "無料プラン"}</span>
             {!isPro && (
               <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
-                Proへ
+                プランを変更
               </span>
             )}
             {isPro && (

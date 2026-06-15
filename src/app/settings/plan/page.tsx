@@ -1,11 +1,85 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useUsage } from "@/hooks/use-usage";
 import { apiFetch } from "@/lib/api-client";
 import { PLAN_ID } from "@/lib/plans";
 import { PageHeader } from "@/components/layout/page-header";
+
+declare global {
+  interface Window {
+    Payjp?: (key: string) => any;
+  }
+}
+
+function CardForm({
+  onToken,
+  loading,
+}: {
+  onToken: (token: string) => void;
+  loading: boolean;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [payjpInstance, setPayjpInstance] = useState<any>(null);
+  const [cardElement, setCardElement] = useState<any>(null);
+  const [cardError, setCardError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!window.Payjp || !cardRef.current) return;
+    const pj = window.Payjp(process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY!);
+    const elements = pj.elements();
+    const card = elements.create("card", {
+      style: {
+        base: {
+          fontSize: "16px",
+          color: "#333",
+        },
+        invalid: {
+          color: "#e25950",
+        },
+      },
+    });
+    card.mount(cardRef.current);
+    card.on("change", (event: any) => {
+      setCardError(event.error ? event.error.message : null);
+      setReady(event.complete);
+    });
+    setPayjpInstance(pj);
+    setCardElement(card);
+    return () => card.unmount();
+  }, []);
+
+  async function handleSubmit() {
+    if (!payjpInstance || !cardElement) return;
+    const { error, id } = await payjpInstance.createToken(cardElement);
+    if (error) {
+      setCardError(error.message);
+      return;
+    }
+    onToken(id);
+  }
+
+  return (
+    <div className="space-y-3">
+      <div
+        ref={cardRef}
+        className="border border-[#c4c4c4] rounded-lg p-3 bg-white min-h-[44px]"
+      />
+      {cardError && (
+        <p className="text-sm text-red-500">{cardError}</p>
+      )}
+      <button
+        onClick={handleSubmit}
+        disabled={loading || !ready}
+        className="w-full py-3 rounded-full bg-[#006728] text-white font-bold disabled:opacity-40"
+      >
+        {loading ? "処理中..." : "アップグレード"}
+      </button>
+    </div>
+  );
+}
 
 export default function PlanPage() {
   const { subscription, plan, mutate } = useSubscription();
@@ -17,6 +91,8 @@ export default function PlanPage() {
     discount_percent: number;
     free_days: number;
   } | null>(null);
+  const [showCardForm, setShowCardForm] = useState(false);
+  const [showCardChange, setShowCardChange] = useState(false);
 
   const isPro = plan?.id === PLAN_ID.PRO;
 
@@ -59,6 +135,7 @@ export default function PlanPage() {
       });
       if (res.ok) {
         mutate();
+        setShowCardForm(false);
       } else {
         const err = await res.json().catch(() => ({}));
         if (err.error === "coupon_maxed_out") {
@@ -71,6 +148,27 @@ export default function PlanPage() {
       }
     } catch {
       alert("決済に失敗しました。再度お試しください。");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCardChange(token: string) {
+    setLoading(true);
+    try {
+      const res = await apiFetch("/api/payment/card", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (res.ok) {
+        alert("カード情報を更新しました。");
+        setShowCardChange(false);
+      } else {
+        alert("カード更新に失敗しました。");
+      }
+    } catch {
+      alert("カード更新に失敗しました。");
     } finally {
       setLoading(false);
     }
@@ -175,27 +273,17 @@ export default function PlanPage() {
               </p>
             )}
 
-            {/* Pay.jp カード入力は payjp.js の Checkout を使う */}
-            <button
-              onClick={() => {
-                // Pay.jp Checkout でトークン取得
-                const payjpCheckout = (window as any).PayjpCheckout;
-                if (payjpCheckout) {
-                  payjpCheckout.open({
-                    key: process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY,
-                    onCreated: (response: any) => {
-                      handleUpgrade(response.id);
-                    },
-                  });
-                } else {
-                  alert("決済システムの読み込みに失敗しました。ページを再読み込みしてください。");
-                }
-              }}
-              disabled={loading}
-              className="w-full py-3 rounded-full bg-[#006728] text-white font-bold disabled:opacity-40"
-            >
-              {loading ? "処理中..." : "アップグレード"}
-            </button>
+            {showCardForm ? (
+              <CardForm onToken={handleUpgrade} loading={loading} />
+            ) : (
+              <button
+                onClick={() => setShowCardForm(true)}
+                disabled={loading}
+                className="w-full py-3 rounded-full bg-[#006728] text-white font-bold disabled:opacity-40"
+              >
+                アップグレード
+              </button>
+            )}
           </div>
         )}
 
@@ -209,34 +297,16 @@ export default function PlanPage() {
             >
               {loading ? "処理中..." : "解約する"}
             </button>
-            <button
-              onClick={() => {
-                const payjpCheckout = (window as any).PayjpCheckout;
-                if (payjpCheckout) {
-                  payjpCheckout.open({
-                    key: process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY,
-                    onCreated: async (response: any) => {
-                      setLoading(true);
-                      try {
-                        await apiFetch("/api/payment/card", {
-                          method: "PATCH",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ token: response.id }),
-                        });
-                        alert("カード情報を更新しました。");
-                      } catch {
-                        alert("カード更新に失敗しました。");
-                      } finally {
-                        setLoading(false);
-                      }
-                    },
-                  });
-                }
-              }}
-              className="w-full py-2 border border-[#c4c4c4] rounded text-sm"
-            >
-              お支払い方法を変更
-            </button>
+            {showCardChange ? (
+              <CardForm onToken={handleCardChange} loading={loading} />
+            ) : (
+              <button
+                onClick={() => setShowCardChange(true)}
+                className="w-full py-2 border border-[#c4c4c4] rounded text-sm"
+              >
+                お支払い方法を変更
+              </button>
+            )}
           </div>
         )}
       </div>

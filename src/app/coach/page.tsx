@@ -13,7 +13,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
 import { useUsage } from "@/hooks/use-usage";
-import { UsageBadge } from "@/components/usage-badge";
+import { useSubscription } from "@/hooks/use-subscription";
+import { PLAN_ID } from "@/lib/plans";
 import { LimitReachedCard } from "@/components/limit-reached-card";
 
 type ConversationItem = {
@@ -35,6 +36,8 @@ function ChatView({
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { usage, mutate: mutateUsage } = useUsage();
+  const { plan: currentPlan } = useSubscription();
+  const isPro = currentPlan?.id === PLAN_ID.PRO;
   const chatLimitReached = usage ? usage.chat.remaining <= 0 : false;
 
   const { messages, sendMessage, status } = useChat({
@@ -58,7 +61,18 @@ function ChatView({
 
   function handleSend(content: string) {
     sendMessage({ text: content });
-    mutateUsage();
+    // 楽観的にカウントを即反映
+    if (usage) {
+      mutateUsage({
+        ...usage,
+        chat: {
+          ...usage.chat,
+          used: usage.chat.used + 1,
+          remaining: Math.max(0, usage.chat.remaining - 1),
+        },
+        limitReached: usage.chat.remaining - 1 <= 0 || usage.plan.remaining <= 0,
+      }, { revalidate: false });
+    }
   }
 
   return (
@@ -83,6 +97,24 @@ function ChatView({
         </div>
       </PageHeader>
 
+      {/* 利用状況 */}
+      {usage && (
+        <div className="rounded-lg bg-white px-3 py-2.5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[#333]">今月の相談回数</span>
+            <span className={`text-sm font-bold ${chatLimitReached ? "text-red-500" : "text-[#006728]"}`}>{usage.chat.used} / {usage.chat.limit}回</span>
+          </div>
+          {chatLimitReached && !isPro && (
+            <>
+              <p className="text-xs text-[#8b8b8b]">今月の上限に達しました。来月リセットされます。</p>
+              <Link href="/settings/plan" className="flex items-center justify-center rounded-full bg-[#006728] py-2 text-sm font-bold text-white">
+                上限を増やす
+              </Link>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Chat card */}
       <div className="flex flex-col flex-1 min-h-0 rounded-lg bg-white">
         <div className="flex-1 overflow-y-auto">
@@ -95,14 +127,7 @@ function ChatView({
               <LimitReachedCard />
             </div>
           ) : (
-            <>
-              {usage && (
-                <div className="flex justify-end px-3 pt-1">
-                  <UsageBadge used={usage.chat.used} limit={usage.chat.limit} />
-                </div>
-              )}
-              <ChatInput onSend={handleSend} isLoading={isLoading} />
-            </>
+            <ChatInput onSend={handleSend} isLoading={isLoading} />
           )}
         </div>
       </div>
