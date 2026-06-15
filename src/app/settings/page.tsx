@@ -407,11 +407,19 @@ export default function SettingsPage() {
           </div>
         </Link>
         <Link href="/settings/share">
-          <div className="flex items-center justify-between py-3">
+          <div className={`flex items-center justify-between py-3 ${isPro ? "border-b border-[#ececec]" : ""}`}>
             <span className="text-base">名刺・共有設定</span>
             <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
           </div>
         </Link>
+        {isPro && (
+          <Link href="/settings/plan/checkout?change_card=true">
+            <div className="flex items-center justify-between py-3">
+              <span className="text-base">お支払い方法を変更</span>
+              <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+            </div>
+          </Link>
+        )}
       </div>
 
       {/* アカウント連携 */}
@@ -427,7 +435,7 @@ export default function SettingsPage() {
       <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
       <div className="rounded-lg bg-white p-3">
         <Link href="/settings/plan">
-          <div className={`flex items-center justify-between ${isPro ? "pb-2.5 border-b border-[#ececec]" : ""}`}>
+          <div className="flex items-center justify-between">
             <div>
               <span className="text-base font-bold">{!subscription ? "" : isPro ? "Waggly Pro" : "無料プラン"}</span>
               {isPaused && subscription?.subscription?.current_period_end && (
@@ -446,14 +454,6 @@ export default function SettingsPage() {
             )}
           </div>
         </Link>
-        {isPro && (
-          <Link href="/settings/plan/checkout?change_card=true">
-            <div className="flex items-center justify-between pt-2.5">
-              <span className="text-base">お支払い方法を変更</span>
-              <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
-            </div>
-          </Link>
-        )}
       </div>
 
       {/* 広告設定 */}
