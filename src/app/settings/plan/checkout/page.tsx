@@ -237,7 +237,7 @@ export default function CheckoutPage() {
 
           {/* カード入力 */}
           <div className="space-y-2">
-            <p className="text-sm font-bold">カード情報</p>
+            <p className="text-sm font-bold">カードを変更</p>
             <div
               id="payjp-card-element"
               className="border border-[#c4c4c4] rounded-lg p-3 bg-white min-h-[44px]"

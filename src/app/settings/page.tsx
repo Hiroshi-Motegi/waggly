@@ -418,15 +418,13 @@ export default function SettingsPage() {
         {isPro && (
           <Link href="/settings/plan/checkout?change_card=true">
             <div className="flex items-center justify-between py-3">
-              <div>
-                <span className="text-base">お支払い方法</span>
+              <span className="text-base">お支払い方法</span>
+              <div className="flex items-center gap-2">
                 {cardInfo && (
-                  <p className="text-xs text-[#8b8b8b] mt-0.5">
-                    {cardInfo.brand} •••• {cardInfo.last4}（{cardInfo.exp_month}/{cardInfo.exp_year}）
-                  </p>
+                  <span className="text-sm text-[#8b8b8b]">下4桁 {cardInfo.last4}</span>
                 )}
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
               </div>
-              <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
             </div>
           </Link>
         )}
