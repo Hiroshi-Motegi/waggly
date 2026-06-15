@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { isNative } from "@/lib/platform";
 import { useClubs } from "@/hooks/use-clubs";
 import { apiFetch } from "@/lib/api-client";
+import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 
 type ClubTab = "bag" | "bag2" | "reserve";
 
@@ -53,15 +54,21 @@ export default function NewPlanPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsGenerating(true);
     setError("");
 
+    if (clubs.length === 0 && !focus.trim() && !notes.trim() && referPractice === "none") {
+      setError("練習メニューを生成するには、クラブの登録、練習したいことの入力、または過去の練習記録の参考設定のいずれかが必要です。");
+      return;
+    }
+
+    setIsGenerating(true);
+
     // Fire and navigate - generation continues in background
-    apiFetch("/api/coach/plan", {
+    const res = await apiFetch("/api/coach/plan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        source: "manual",
+        source: "auto",
         duration,
         selectedClubs: selectedClubs.map((id) => clubs.find((c) => c.id === id)?.club_number).filter(Boolean),
         focus,
@@ -70,18 +77,30 @@ export default function NewPlanPage() {
         referPractice,
         referPracticeMonths: referPractice === "none" ? 0 : referPractice === "last" ? 0 : parseInt(referPractice),
       }),
-    }).catch(() => {});
+    });
 
-    // Navigate immediately
-    router.push("/coach/plans?generating=true");
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      setError(err.error ?? "生成に失敗しました");
+      setIsGenerating(false);
+      return;
+    }
+
+    router.push("/coach/plans");
   }
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
+      {isGenerating && <ProcessingOverlay message="練習メニューを生成中..." />}
       <div className="relative z-10 flex flex-col space-y-2 pb-8">
       <PageHeader title="練習メニューを作成" variant="dark" />
 
       <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 p-3">
+            <p className="text-sm text-red-600 font-medium">{error}</p>
+          </div>
+        )}
         <h3 className="px-1 pt-2 text-lg font-bold text-white">練習条件</h3>
         <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
           <div className="flex flex-col gap-0.5 py-1">
@@ -238,12 +257,6 @@ export default function NewPlanPage() {
             </>
           );
         })()}
-
-        {error && (
-          <div className="rounded-lg bg-white p-4 text-center">
-            <p className="text-base text-[#8b8b8b]">{error}</p>
-          </div>
-        )}
 
         <div className="flex flex-col items-center gap-4 px-4 pt-6 pb-8">
           <button

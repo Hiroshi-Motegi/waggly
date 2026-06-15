@@ -522,12 +522,19 @@ async function routeLocal(
 
   // GET /api/usage
   if (path === "/api/usage" && method === "GET") {
-    return { month: new Date().toISOString().slice(0, 7), inputTokens: 0, outputTokens: 0, totalTokens: 0, limit: 100000, remaining: 100000, limitReached: false };
+    return {
+      chat: { used: 0, limit: 0, remaining: 0 },
+      plan: { used: 0, limit: 0, remaining: 0 },
+      limitReached: true,
+    };
   }
 
   // GET /api/subscription
   if (path === "/api/subscription" && method === "GET") {
-    return { plan_id: "free", status: "active", free_until: null };
+    return {
+      subscription: null,
+      plan: { id: "free", name: "無料", price: 0, billing_interval: "month", ai_chat_monthly_limit: 0, ai_plan_monthly_limit: 0 },
+    };
   }
 
   // GET /api/export

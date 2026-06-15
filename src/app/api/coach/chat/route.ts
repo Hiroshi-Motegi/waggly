@@ -4,7 +4,7 @@ import { getApiAuth } from "@/lib/supabase/api";
 import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 import { analyzeGaps } from "@/lib/gap-analysis";
 
-import { checkUsageLimit } from "@/lib/ai/usage-limit";
+import { incrementUsageCounter, decrementUsageCounter } from "@/lib/ai/usage-counter";
 
 export async function POST(request: Request) {
   try {
@@ -12,10 +12,13 @@ export async function POST(request: Request) {
   if (!auth) return new Response("Unauthorized", { status: 401 });
   const { supabase, userId } = auth;
 
-  // Check usage limit
-  const withinLimit = await checkUsageLimit(supabase, userId);
-  if (!withinLimit) {
-    return new Response(JSON.stringify({ error: "今月のAI利用上限に達しました" }), { status: 429 });
+  // Check usage limit (atomic increment)
+  const count = await incrementUsageCounter(userId, "chat");
+  if (count === null) {
+    return new Response(
+      JSON.stringify({ error: "今月のAIチャットの上限に達しました。来月リセットされます。", source: "chat" }),
+      { status: 429, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   const body = await request.json();
@@ -108,6 +111,7 @@ export async function POST(request: Request) {
 
   const modelMessages = await convertToModelMessages(messages);
 
+  try {
   const result = streamText({
     model: anthropic("claude-haiku-4-5-20251001"),
     system: systemPrompt,
@@ -136,6 +140,10 @@ export async function POST(request: Request) {
   });
 
   return result.toUIMessageStreamResponse();
+  } catch (streamError) {
+    await decrementUsageCounter(userId, "chat");
+    throw streamError;
+  }
   } catch (error: any) {
     console.error("[chat] Error:", error?.message ?? error);
     return new Response(JSON.stringify({ error: error?.message ?? "Unknown error" }), { status: 500 });

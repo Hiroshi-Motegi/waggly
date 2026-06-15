@@ -20,43 +20,43 @@ const statusLabels: Record<string, string> = {
 };
 
 function getSpecs(category: string): { key: string; label: string; suffix?: string }[] {
-  const base: { key: string; label: string; suffix?: string }[] = [
-    { key: "shaft_name", label: "シャフト" },
-    { key: "shaft_flex", label: "フレックス" },
-    { key: "loft", label: "ロフト角", suffix: "°" },
-    { key: "lie", label: "ライ角", suffix: "°" },
-    { key: "length", label: "長さ", suffix: "inch" },
-  ];
-  // ウェッジ専用
+  const isPutter = category === "putter";
+  const specs: { key: string; label: string; suffix?: string }[] = [];
+
+  // シャフト（パター非表示）
+  if (!isPutter) {
+    specs.push({ key: "shaft_name", label: "シャフト" });
+    specs.push({ key: "shaft_flex", label: "フレックス" });
+    specs.push({ key: "shaft_weight", label: "シャフト重量", suffix: "g" });
+    specs.push({ key: "frequency", label: "振動数", suffix: "cpm" });
+    specs.push({ key: "kick_point", label: "キックポイント" });
+  }
+
+  // グリップ
+  specs.push({ key: "grip_name", label: "グリップ" });
+  specs.push({ key: "grip_size", label: "グリップ太さ" });
+
+  // ヘッドスペック
+  specs.push({ key: "loft", label: "ロフト角", suffix: "°" });
+  specs.push({ key: "lie", label: "ライ角", suffix: "°" });
+  specs.push({ key: "length", label: "長さ", suffix: "inch" });
   if (category === "wedge") {
-    base.push({ key: "bounce", label: "バウンス角", suffix: "°" });
-    base.push({ key: "sole_shape", label: "ソール形状" });
+    specs.push({ key: "bounce", label: "バウンス角", suffix: "°" });
+    specs.push({ key: "sole_shape", label: "ソール形状" });
   }
-  // ドライバー専用
   if (category === "driver") {
-    base.push({ key: "face_angle", label: "フェース角", suffix: "°" });
-  }
-  // 詳細スペック
-  base.push({ key: "grip_name", label: "グリップ" });
-  base.push({ key: "grip_size", label: "グリップ太さ" });
-  if (category !== "putter") {
-    base.push({ key: "shaft_weight", label: "シャフト重量", suffix: "g" });
-  }
-  base.push({ key: "weight", label: "総重量", suffix: "g" });
-  base.push({ key: "swing_weight", label: "バランス" });
-  if (category !== "putter") {
-    base.push({ key: "frequency", label: "振動数", suffix: "cpm" });
-    base.push({ key: "kick_point", label: "キックポイント" });
+    specs.push({ key: "face_angle", label: "フェース角", suffix: "°" });
   }
   if (category === "driver" || category === "fairway_wood") {
-    base.push({ key: "head_volume", label: "ヘッド体積", suffix: "cc" });
+    specs.push({ key: "head_volume", label: "ヘッド体積", suffix: "cc" });
   }
-  base.push({ key: "head_weight", label: "ヘッド重量", suffix: "g" });
-  // パターはシャフト非表示
-  if (category === "putter") {
-    return base.filter((s) => s.key !== "shaft_name" && s.key !== "shaft_flex");
-  }
-  return base;
+  specs.push({ key: "head_weight", label: "ヘッド重量", suffix: "g" });
+
+  // 全体スペック
+  specs.push({ key: "weight", label: "総重量", suffix: "g" });
+  specs.push({ key: "swing_weight", label: "バランス" });
+
+  return specs;
 }
 
 interface ActivityItem {
