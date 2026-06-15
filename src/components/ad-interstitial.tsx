@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAdFree } from "@/hooks/use-ad-free";
 import { useAuth } from "@/hooks/use-auth";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
@@ -29,6 +29,7 @@ export function useInterstitialAd() {
 }
 
 export function AdInterstitial({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
   const [countdown, setCountdown] = useState(3);
   const adRef = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
@@ -65,12 +66,15 @@ export function AdInterstitial({ onClose }: { onClose: () => void }) {
 
         {/* 閉じるボタン + 広告非表示リンク */}
         <div className="flex items-center justify-between p-3 border-t border-[#ececec]">
-          <Link
-            href="/settings/remove-ads"
+          <button
+            onClick={() => {
+              onClose();
+              router.push("/settings/remove-ads");
+            }}
             className="text-xs text-[#006728] underline"
           >
             広告を非表示にする
-          </Link>
+          </button>
           <button
             onClick={onClose}
             disabled={countdown > 0}

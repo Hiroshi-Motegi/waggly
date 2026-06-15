@@ -74,10 +74,13 @@ export default function SettingsPage() {
   const [usageLoaded, setUsageLoaded] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
 
+  const [cardInfo, setCardInfo] = useState<{ brand: string; last4: string; exp_month: number; exp_year: number } | null>(null);
+
   useEffect(() => {
     if (!user) return;
     apiFetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch(() => {}).finally(() => setUsageLoaded(true));
     apiFetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch(() => {});
+    apiFetch("/api/payment/card-info").then((r) => r.ok ? r.json() : null).then((d) => setCardInfo(d?.card ?? null)).catch(() => {});
   }, [user]);
 
   const [processing, setProcessing] = useState<string | null>(null);
@@ -415,7 +418,14 @@ export default function SettingsPage() {
         {isPro && (
           <Link href="/settings/plan/checkout?change_card=true">
             <div className="flex items-center justify-between py-3">
-              <span className="text-base">お支払い方法を変更</span>
+              <div>
+                <span className="text-base">お支払い方法</span>
+                {cardInfo && (
+                  <p className="text-xs text-[#8b8b8b] mt-0.5">
+                    {cardInfo.brand} •••• {cardInfo.last4}（{cardInfo.exp_month}/{cardInfo.exp_year}）
+                  </p>
+                )}
+              </div>
               <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
             </div>
           </Link>
