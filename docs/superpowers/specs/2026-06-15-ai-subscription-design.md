@@ -28,6 +28,19 @@ AI機能（チャット・練習メニュー提案）に回数制限を導入し
 
 `price` は**単価（円）**を表す。`billing_interval` と組み合わせて月額/年額を判別する。
 
+### プランID定数
+
+アプリコード側でプランIDをリテラルで散在させない。定数ファイルで一元管理する:
+
+```typescript
+// src/lib/plans.ts
+export const PLAN_ID = {
+  FREE: 'free',
+  PRO: 'pro',
+} as const;
+export type PlanId = typeof PLAN_ID[keyof typeof PLAN_ID];
+```
+
 ## データベース設計
 
 ### `plans` テーブル
@@ -65,7 +78,6 @@ CREATE TABLE public.subscriptions (
   current_period_end timestamptz,             -- 無料プランは NULL
   trial_end timestamptz,
   grace_period_end timestamptz,               -- 支払い失敗時のグレースピリオド終了日
-  coupon_id uuid REFERENCES public.coupons(id),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -84,6 +96,8 @@ CREATE POLICY "Users can read own subscriptions"
   ));
 -- INSERT/UPDATE/DELETE はポリシーなし = RLS有効下でクライアントからは拒否
 ```
+
+注: `coupon_id` は subscriptions に持たない。クーポン適用履歴は `coupon_redemptions` テーブルに一元管理する。
 
 ### `webhook_events` テーブル（Webhook冪等性）
 
@@ -125,13 +139,16 @@ ALTER TABLE public.coupons ENABLE ROW LEVEL SECURITY;
 -- ポリシーなし = 全拒否
 ```
 
-### `coupon_redemptions` テーブル（同一ユーザーの重複利用防止）
+### `coupon_redemptions` テーブル（クーポン利用の一元管理）
+
+クーポン適用履歴の唯一の記録先。subscriptions にはクーポン情報を持たない。
 
 ```sql
 CREATE TABLE public.coupon_redemptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   coupon_id uuid NOT NULL REFERENCES public.coupons(id) ON DELETE CASCADE,
+  subscription_id uuid REFERENCES public.subscriptions(id),  -- どのサブスクに適用したか
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE(user_id, coupon_id)
 );
@@ -153,7 +170,7 @@ CREATE POLICY "Users can read own redemptions"
 ```
 BEGIN;
   -- 1. 重複チェック兼記録（UNIQUE制約で二重適用を防止）
-  INSERT INTO coupon_redemptions (user_id, coupon_id) VALUES ($1, $2);
+  INSERT INTO coupon_redemptions (user_id, coupon_id, subscription_id) VALUES ($1, $2, $3);
   -- 2. 利用数インクリメント（max_uses 未満の場合のみ更新）
   UPDATE coupons SET used_count = used_count + 1
     WHERE id = $2 AND (max_uses IS NULL OR used_count < max_uses);
@@ -161,9 +178,32 @@ BEGIN;
 COMMIT;
 ```
 
-### `ai_usage` テーブル（既存拡張）
+### `ai_usage_counters` テーブル（回数制限用カウンター）
 
-autofill はコスト追跡目的で記録するが、回数制限の対象外。回数カウントクエリでは `source IN ('chat', 'plan')` でフィルタする。
+race condition を防ぐため、ai_usage の COUNT ではなく専用カウンターテーブルを使う。
+
+```sql
+CREATE TABLE public.ai_usage_counters (
+  user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  source text NOT NULL CHECK (source IN ('chat', 'plan')),
+  month text NOT NULL,                        -- 'YYYY-MM' (JST)
+  count integer NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, source, month)
+);
+
+ALTER TABLE public.ai_usage_counters ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can read own counters"
+  ON public.ai_usage_counters FOR SELECT
+  USING (user_id IN (
+    SELECT up.user_id FROM public.user_providers up
+    WHERE up.auth_user_id = auth.uid()
+  ));
+-- INSERT/UPDATE はポリシーなし = クライアントからは拒否
+```
+
+### `ai_usage` テーブル（トークン追跡用、既存拡張）
+
+トークンコスト追跡用。回数制限には使わない（ai_usage_counters が担当）。
 
 ```sql
 CREATE TABLE public.ai_usage (
@@ -189,16 +229,7 @@ CREATE POLICY "Users can read own usage"
 
 ### 月次カウントのタイムゾーン
 
-回数カウントは **JST（Asia/Tokyo）** 基準で月初〜月末を集計する。DBは UTC で保存しているため、クエリ時に変換する:
-
-```sql
-SELECT COUNT(*) FROM ai_usage
-WHERE user_id = $1
-  AND source IN ('chat', 'plan')  -- autofill は除外
-  AND source = $2                  -- 個別機能のカウント時
-  AND created_at >= date_trunc('month', now() AT TIME ZONE 'Asia/Tokyo') AT TIME ZONE 'Asia/Tokyo'
-  AND created_at < date_trunc('month', now() AT TIME ZONE 'Asia/Tokyo') AT TIME ZONE 'Asia/Tokyo' + interval '1 month';
-```
+回数カウントは **JST（Asia/Tokyo）** 基準。`ai_usage_counters.month` は JST の `YYYY-MM` 文字列で管理する。アプリ側で `to_char(now() AT TIME ZONE 'Asia/Tokyo', 'YYYY-MM')` を使用。
 
 ### 無料ユーザーの初期状態
 
@@ -219,39 +250,58 @@ WHERE user_id = $1
 }
 ```
 
+used は `ai_usage_counters` から取得。limit はユーザーのアクティブプランから取得。
+
 ### AI各エンドポイント（既存を修正）
 
 - `POST /api/coach/chat` — 送信前に回数チェック追加
 - `POST /api/coach/plan` — 同上
 - 上限超え時: `429` + `{ "error": "limit_reached", "source": "chat" }`
 
-#### 回数チェックの race condition 対策
+#### 回数チェック（race condition 安全）
 
-ai_usage への INSERT を先に行い、その後 COUNT で上限超過を確認する。超過していれば ROLLBACK する。
+`ai_usage_counters` の `UPDATE ... WHERE count < limit` パターンで原子的にチェック+インクリメントする:
 
-```
-BEGIN;
-INSERT INTO ai_usage (user_id, source, ...) VALUES (...);
-SELECT COUNT(*) FROM ai_usage WHERE user_id = $1 AND source = $2 AND created_at >= [月初JST];
--- COUNT > limit なら ROLLBACK、以下なら COMMIT してAI呼び出しへ
-COMMIT;
+```sql
+-- 1. カウンター行がなければ作成（月初の初回アクセス時）
+INSERT INTO ai_usage_counters (user_id, source, month, count)
+VALUES ($user_id, $source, $month_jst, 0)
+ON CONFLICT (user_id, source, month) DO NOTHING;
+
+-- 2. 原子的にインクリメント（上限未満の場合のみ）
+UPDATE ai_usage_counters
+SET count = count + 1
+WHERE user_id = $user_id
+  AND source = $source
+  AND month = $month_jst
+  AND count < $limit
+RETURNING count;
+
+-- RETURNING が空 = 上限到達 → 429 を返す
+-- RETURNING に値あり = OK → AI呼び出しへ + ai_usage にもトークン記録
 ```
 
 ### サブスク管理
 
 - `GET /api/subscription` — 現在のアクティブなプラン取得（行なし = free プランを返す）
 - `POST /api/subscription` — サブスク作成（新規行INSERT、旧行があれば expired に更新）
-- `POST /api/subscription/cancel` — 解約（status を canceled に、current_period_end まで Pro 継続）
+- `POST /api/subscription/cancel` — 解約:
+  1. DB: status を `canceled` に更新、updated_at 更新
+  2. **Pay.jp: 定期課金をキャンセル**（`payjp.subscriptions.cancel(payjp_subscription_id)`）
+  3. current_period_end まで Pro 機能継続
 
 ### ステータス遷移
 
 ```
 [なし] → active（Pro契約時に行INSERT）
 active → canceled（ユーザーが解約。current_period_end まで Pro 機能継続）
+canceled → active（期間内に再契約 → 同じ行の status を active に戻す）
 canceled → expired（current_period_end を過ぎたら遷移）
 active → expired（grace_period_end を過ぎても支払い未回復の場合）
 expired → active（再契約時に新しい行をINSERT）
 ```
+
+canceled 状態（まだ期間内）での再契約は、**同じ行の status を active に戻す**。Pay.jp 側でも定期課金を再開する。expired からの再契約は**新しい行を INSERT** する（履歴保持のため）。
 
 #### canceled → expired の遷移タイミング
 
@@ -260,6 +310,27 @@ expired → active（再契約時に新しい行をINSERT）
 2. **Supabase cron（pg_cron）**: 日次で `canceled` かつ期間終了済みの行を expired に一括更新（APIアクセスがない場合の保険）
 
 グレースピリオド終了後の expired 遷移も同じ仕組みで処理する。
+
+#### pg_cron セットアップ
+
+Supabase ダッシュボード > SQL Editor で pg_cron を有効化し、日次ジョブを登録する:
+
+```sql
+-- 毎日 JST 3:00（UTC 18:00）に実行
+SELECT cron.schedule(
+  'expire-subscriptions',
+  '0 18 * * *',
+  $$
+    UPDATE public.subscriptions
+    SET status = 'expired', updated_at = now()
+    WHERE (
+      (status = 'canceled' AND current_period_end < now())
+      OR
+      (status = 'active' AND grace_period_end IS NOT NULL AND grace_period_end < now())
+    );
+  $$
+);
+```
 
 ### ダウングレード時の利用回数
 
@@ -276,6 +347,7 @@ Pro が expired/canceled で期間終了した場合、**即座に free の上�
 |---------|------|
 | `subscription.renewed` | current_period_start/end を更新、updated_at 更新 |
 | `subscription.canceled` | status を `canceled` に、updated_at 更新 |
+| `charge.succeeded` | grace_period_end を NULL にクリア（グレースピリオド中の回復） |
 | `charge.failed` | グレースピリオド処理（後述） |
 
 #### Webhook の冪等性・署名検証
@@ -292,6 +364,10 @@ BEGIN;
 COMMIT;
 ```
 
+#### Webhook のリトライ・タイムアウト
+
+Pay.jp は Webhook 配信失敗時に**最大3回リトライ**する（間隔は Pay.jp 側で制御）。Webhook エンドポイントは **5秒以内に 200 を返す** 必要がある。重い処理が必要な場合は、イベントを受信してキューに入れ、非同期で処理する。ただし Waggly の Webhook 処理はDB更新のみなので5秒以内に完了する想定。
+
 #### 支払い失敗時のグレースピリオド
 
 `charge.failed` 発生時、即座に Pro を剥奪せず **7日間のグレースピリオド** を設ける:
@@ -306,12 +382,22 @@ COMMIT;
 
 - `POST /api/coupon/validate` — コード検証、割引内容返却。service_role で coupons テーブルにアクセス
 
+#### クーポンの適用フロー
+
+1. ユーザーがクーポンコードを入力
+2. `/api/coupon/validate` でコード検証（有効性・有効期限・max_uses チェック）
+3. 決済確定時に `/api/payment/create` 内で以下を1トランザクションで実行:
+   - subscriptions に行 INSERT
+   - coupon_redemptions に記録（UNIQUE制約で重複防止）
+   - coupons.used_count インクリメント
+   - Pay.jp に定期課金作成（クーポン内容を反映）
+
 #### クーポンの適用ルール
 
 - `discount_percent` と `free_months` は**排他**（DB制約で担保）
 - `discount_percent`: 初回課金から適用。Pay.jp には割引後の金額で課金
 - `free_months`: Pay.jp の `trial_days` に変換（free_months × 30日）して適用。期間終了後に自動で通常額課金開始（Pay.jp の定期課金が自動処理）
-- 注意: free_months × 30日は暦上の月数とずれる場合がある（例: 3ヶ月無料 = 90日）。ユーザー向けには「約○ヶ月無料」と表記
+- ユーザー向け表記: 「○日間無料」と日数で表示する（暦上の月数とのずれによる誤解を防ぐ）
 
 ## フロントエンドUI
 
@@ -343,15 +429,17 @@ COMMIT;
 1. 「アップグレード」タップ
 2. クーポンあれば入力
 3. Pay.jpのカード入力（トークン化）
-4. `/api/payment/create` でサブスク開始
+4. `/api/payment/create` でサブスク開始（クーポン適用含む）
 5. 完了画面 → プラン画面に戻る（Pro表示に変わる）
 
 ### ネイティブアプリからの決済リターン
 
-1. アプリから外部ブラウザで `/settings/plan/checkout` を開く
-2. 決済完了後、カスタムURLスキーム `waggly://subscription/complete` でアプリに戻す
+1. アプリから外部ブラウザで `https://waggly.jp/settings/plan/checkout` を開く
+2. 決済完了後、Universal Links（iOS）/ App Links（Android）で `https://waggly.jp/app/subscription/complete` に遷移 → アプリが起動
 3. アプリ側で Capacitor の `appUrlOpen` イベントをリスン、プラン画面をリロード
-4. フォールバック: ブラウザ上に「アプリに戻ってください」表示
+4. フォールバック: アプリが未インストールの場合はWebで「アプリに戻ってください」表示
+
+注意: カスタムURLスキーム（`waggly://`）は他アプリに乗っ取られるリスクがあるため、Universal Links / App Links を使用する。
 
 ### 月途中のアップグレード
 
@@ -371,15 +459,17 @@ COMMIT;
 - クーポン/キャンペーン: 自前DB管理（Pay.jpにクーポン機能なし）
   - `discount_percent`: 割引後の金額で Pay.jp に課金
   - `free_months`: `trial_days` に変換して Pay.jp に渡す。期間終了後は Pay.jp が自動で通常額課金
+- 解約時: DB の status 更新に加え、**Pay.jp 側の定期課金もキャンセル**する
 - アプリからの決済: 外部ブラウザでWeb決済ページを開く（ストア課金規約回避）
 - Webhook 署名検証 + 冪等性処理を必須とする
 
 ## セキュリティ
 
-- 全新テーブル（subscriptions, webhook_events, coupons, coupon_redemptions, ai_usage）に RLS を有効化
-- subscriptions / coupon_redemptions / ai_usage: 自分のレコードのみ SELECT 可。INSERT/UPDATE/DELETE ポリシーなし（= RLS有効下でクライアントから拒否、サーバーサイド service_role のみ操作可）
+- 全新テーブル（subscriptions, webhook_events, coupons, coupon_redemptions, ai_usage, ai_usage_counters）に RLS を有効化
+- subscriptions / coupon_redemptions / ai_usage / ai_usage_counters: 自分のレコードのみ SELECT 可。INSERT/UPDATE/DELETE ポリシーなし（= RLS有効下でクライアントから拒否、サーバーサイド service_role のみ操作可）
 - coupons / webhook_events: ポリシーなし（= 全操作クライアントから拒否、service_role のみ）
 - Webhook エンドポイントは Pay.jp の署名検証で保護
+- ネイティブアプリの決済リターンは Universal Links / App Links を使用（カスタムURLスキームの乗っ取りリスク回避）
 
 ## 将来の拡張
 
