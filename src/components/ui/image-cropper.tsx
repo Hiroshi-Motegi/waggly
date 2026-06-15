@@ -12,6 +12,7 @@ interface ImageCropperProps {
   onRetake: () => void;
   onCancel: () => void;
   aspectRatio?: number;
+  maxOutputWidth?: number;
 }
 
 const MAX_OUTPUT_SIZE = 1200;
@@ -25,6 +26,7 @@ export function ImageCropper({
   onRetake,
   onCancel,
   aspectRatio = 1,
+  maxOutputWidth = MAX_OUTPUT_SIZE,
 }: ImageCropperProps) {
   const cropperRef = useRef<ReactCropperElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -86,8 +88,8 @@ export function ImageCropper({
 
     try {
       const croppedCanvas = cropper.getCroppedCanvas({
-        maxWidth: MAX_OUTPUT_SIZE,
-        maxHeight: MAX_OUTPUT_SIZE,
+        maxWidth: maxOutputWidth,
+        maxHeight: maxOutputWidth,
         imageSmoothingEnabled: true,
         imageSmoothingQuality: "high",
       });

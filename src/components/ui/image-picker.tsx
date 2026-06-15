@@ -19,6 +19,8 @@ const ImageCropper = lazy(() =>
 interface ImagePickerProps {
   onPick: (file: File) => void;
   children: React.ReactNode;
+  aspectRatio?: number;
+  maxOutputWidth?: number;
 }
 
 type PickerState =
@@ -26,7 +28,7 @@ type PickerState =
   | { step: "cropping"; imageUrl: string }
   | { step: "loading" };
 
-export function ImagePicker({ onPick, children }: ImagePickerProps) {
+export function ImagePicker({ onPick, children, aspectRatio, maxOutputWidth }: ImagePickerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isPickingRef = useRef(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -161,6 +163,8 @@ export function ImagePicker({ onPick, children }: ImagePickerProps) {
               onCrop={handleCrop}
               onRetake={handleRetake}
               onCancel={handleCancel}
+              aspectRatio={aspectRatio}
+              maxOutputWidth={maxOutputWidth}
             />
           </Suspense>,
           document.body
