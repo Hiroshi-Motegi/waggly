@@ -11,6 +11,7 @@ import { useProfile, useFavoriteCourses } from "@/hooks/use-profile";
 import { isNative } from "@/lib/platform";
 import { RecentPractice } from "@/components/home/recent-practice";
 import { AdBanner } from "@/components/ad-banner";
+import { PublicFooter } from "@/components/public-footer";
 
 const featureCards = [
   {
@@ -96,13 +97,14 @@ function LoginButtons() {
 }
 
 /* ─── Feature section with accordion ─── */
-function FeatureSection({ icon, title, photo, photoSide, screenshots, description, details }: {
+function FeatureSection({ icon, title, photo, photoSide, screenshots, description, note, details }: {
   icon: string;
   title: string;
   photo: string;
   photoSide: "left" | "right";
   screenshots: { src: string; alt: string }[];
   description: string;
+  note?: string;
   details: { heading: string; src: string; text: string }[];
 }) {
   const [open, setOpen] = useState(false);
@@ -143,6 +145,7 @@ function FeatureSection({ icon, title, photo, photoSide, screenshots, descriptio
 
       {/* Description */}
       <p className="text-base text-white leading-relaxed mt-4 mx-5">{description}</p>
+      {note && <p className="text-xs text-white/60 leading-relaxed mt-2 mx-5">{note}</p>}
 
       {/* Accordion */}
       {!open && (
@@ -294,18 +297,7 @@ function LandingPage() {
           </div>
         </div>
 
-        {/* Footer */}
-        <footer className="w-full border-t border-white/15 bg-black/10 backdrop-blur-sm">
-          <div className="max-w-sm mx-auto px-4 py-6 space-y-4">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-              <Link href="/terms" className="text-sm text-white/60 hover:text-white/90">利用規約</Link>
-              <Link href="/privacy" className="text-sm text-white/60 hover:text-white/90">プライバシーポリシー</Link>
-              <Link href="/legal" className="text-sm text-white/60 hover:text-white/90 whitespace-nowrap">特定商取引法に基づく表記</Link>
-              <Link href="/help" className="text-sm text-white/60 hover:text-white/90">ご利用ガイド</Link>
-            </div>
-            <p className="text-xs text-white/30 text-center">&copy; cocoroe</p>
-          </div>
-        </footer>
+        <PublicFooter />
       </div>
     </div>
   );

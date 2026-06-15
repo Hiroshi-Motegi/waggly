@@ -79,7 +79,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       {showInterstitial && (
         <AdInterstitial onClose={() => setShowInterstitial(false)} />
       )}
-      <div className={animClass}>
+      <div className={`flex-1 ${animClass}`}>
         {children}
       </div>
     </>

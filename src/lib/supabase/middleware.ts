@@ -40,7 +40,8 @@ export async function updateSession(request: NextRequest) {
       pathname.startsWith("/p/") ||
       pathname.startsWith("/help") ||
       pathname === "/terms" ||
-      pathname === "/privacy";
+      pathname === "/privacy" ||
+      pathname === "/legal";
 
     if (!isPublic) {
       return NextResponse.redirect(new URL("/", request.url));

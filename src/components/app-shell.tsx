@@ -13,6 +13,7 @@ import { Loading } from "@/components/loading";
 import { CookieConsent } from "@/components/cookie-consent";
 import { TERMS_UPDATED_AT, ONBOARDING_VERSION } from "@/lib/constants";
 import { isNative } from "@/lib/platform";
+import { PublicFooter } from "@/components/public-footer";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -184,10 +185,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isPublicPage = pathname.startsWith("/p/");
   const hideChrome = isPublicPage || (!user && !native);
   return (
-    <div className={`min-h-dvh relative animate-fade-in bg-black/20 ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-md shadow-sm"}`}>
+    <div className={`min-h-dvh flex flex-col relative animate-fade-in bg-black/20 ${native ? "w-full overflow-x-hidden" : "mx-auto max-w-md shadow-sm"}`}>
       {!hideChrome && <Header />}
-      <main style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
+      <main className={hideChrome ? "flex-1 flex flex-col" : "flex-1"} style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
+        {hideChrome && pathname !== "/" && <PublicFooter />}
         <CookieConsent hasBottomNav={!hideChrome} />
       </main>
       {!hideChrome && <BottomNav />}
