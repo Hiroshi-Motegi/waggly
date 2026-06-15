@@ -184,7 +184,7 @@ function LandingPage() {
       <div className="relative z-10 flex flex-col items-center w-full">
 
         {/* Hero */}
-        <div className="flex flex-col items-center px-8 pt-16 pb-8 w-full max-w-sm">
+        <div className="flex flex-col items-center px-8 pt-16 pb-4 w-full max-w-sm">
           <Image src="/images/witb-waggly-text.png" alt="Waggly" width={187} height={60} priority />
           <p className="mt-3 text-lg text-white font-bold tracking-wider text-center">ゴルフギアの管理をこれ一つで</p>
           <p className="mt-3 text-sm text-white/70 text-center leading-relaxed">
@@ -192,8 +192,16 @@ function LandingPage() {
           </p>
         </div>
 
+        {/* Home image */}
+        <div className="flex justify-center">
+          <div className="relative border-2 border-b-0 border-white">
+            <Image src="/images/lp/home-image.png" alt="" width={252} height={323} />
+            <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/20 to-transparent" />
+          </div>
+        </div>
+
         {/* Login */}
-        <div className="w-full pb-10">
+        <div className="w-full">
           <div className="bg-black/30 px-8 py-6">
             <p className="text-center text-base font-bold text-white mb-4">ログイン・新規登録<span className="inline-flex items-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full mx-1.5 -translate-y-px">無料</span>はこちらから</p>
             <LoginButtons />
@@ -201,7 +209,7 @@ function LandingPage() {
         </div>
 
         {/* Section title */}
-        <p className="text-2xl font-bold text-white tracking-wider text-center mb-2">ワグリーでできること</p>
+        <p className="text-2xl font-bold text-white tracking-wider text-center mb-2 mt-10">ワグリーでできること</p>
         <p className="text-sm text-white/70 text-center mb-8">基本的な機能は会員登録だけで利用できます。</p>
 
         {/* Feature 1: クラブ管理 — photo right-flush */}
