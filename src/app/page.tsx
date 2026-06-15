@@ -236,12 +236,36 @@ function LandingPage() {
           ]}
         />
 
-        {/* Feature 3: 練習管理 — photo right-flush */}
+        {/* Feature 3: ゴルファー名刺 — photo right-flush, link instead of accordion */}
+        <div className="w-full mb-10">
+          <div className="relative ml-5 rounded-l-2xl overflow-hidden h-[254px]">
+            <img src="/images/lp/card-photo.jpg" alt="ゴルファー名刺" className="w-full h-full object-cover" />
+            <div className="absolute top-[20px] right-[10px]">
+              <div className="w-[160px] shadow-xl rounded-md">
+                <img src="/images/lp/ss-card.png" alt="名刺サンプル" className="w-full rounded-md" />
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center -mt-5 relative z-20 justify-end mr-5">
+            <span className="inline-flex items-center gap-3 bg-[#00441b] px-5 py-2">
+              <Image src="/icons/business-card-w.svg" alt="" width={24} height={24} />
+              <span className="text-lg font-bold text-white">ゴルファー名刺</span>
+            </span>
+          </div>
+          <p className="text-base text-white leading-relaxed mt-4 mx-5">
+            あなたのゴルフプロフィールをWeb名刺として公開。クラブセッティングやスコア、SNSリンクをまとめて共有できます。
+          </p>
+          <a href="https://waggly.jp/p/waglin" target="_blank" rel="noopener" className="mx-5 mt-4 flex h-11 w-[calc(100%-40px)] items-center justify-center gap-2 rounded-full border border-white bg-black/30 text-white text-base font-medium">
+            名刺のサンプルを見てみる
+          </a>
+        </div>
+
+        {/* Feature 4: 練習管理 — photo left-flush */}
         <FeatureSection
           icon="/icons/nav-practice-w.svg"
           title="練習管理"
           photo="/images/lp/practice-photo.jpg"
-          photoSide="right"
+          photoSide="left"
           screenshots={[
             { src: "/images/lp/ss-practice1.png", alt: "練習カレンダー" },
             { src: "/images/lp/ss-practice2.png", alt: "練習詳細" },
@@ -253,12 +277,12 @@ function LandingPage() {
           ]}
         />
 
-        {/* Feature 4: AIに相談 — photo left-flush */}
+        {/* Feature 5: AIに相談 — photo right-flush */}
         <FeatureSection
           icon="/images/witb-ball-logo.png"
           title="AIに相談"
           photo="/images/lp/ai-photo.jpg"
-          photoSide="left"
+          photoSide="right"
           screenshots={[
             { src: "/images/lp/ss-ai-menu.png", alt: "AI練習メニュー" },
             { src: "/images/lp/ss-ai-chat.png", alt: "AIチャット" },
