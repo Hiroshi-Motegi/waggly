@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     // redemption INSERT
     const { error: redemptionError } = await supabase
       .from("coupon_redemptions")
-      .insert({ user_id: userId, coupon_id: c.id });
+      .insert({ user_id: userId, coupon_id: c.id, purpose: "subscription" });
 
     if (redemptionError) {
       return NextResponse.json(

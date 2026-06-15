@@ -10,6 +10,7 @@ import { PageTransition } from "@/components/layout/page-transition";
 import { Onboarding } from "@/components/onboarding";
 import { TermsAgreement } from "@/components/terms-agreement";
 import { Loading } from "@/components/loading";
+import { CookieConsent } from "@/components/cookie-consent";
 import { TERMS_UPDATED_AT, ONBOARDING_VERSION } from "@/lib/constants";
 import { isNative } from "@/lib/platform";
 
@@ -109,12 +110,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Gate 1: Onboarding — DB for logged-in, localStorage for unsigned only
+  // Gate 1: Onboarding — DB for logged-in, localStorage for native unsigned only
+  // Web未ログイン時はオンボーディングをスキップ（PR等の直接アクセス対応）
   const effectiveOnboardingVersion = user
     ? (user.onboarding_version ?? 0)
-    : (typeof window !== "undefined"
+    : native && typeof window !== "undefined"
         ? parseInt(localStorage.getItem("onboarding_version") || "0", 10)
-        : 0);
+        : ONBOARDING_VERSION;
   const needsOnboarding = effectiveOnboardingVersion < ONBOARDING_VERSION;
 
   // Wait for user data before judging (prevents flash of onboarding for logged-in users)
@@ -186,6 +188,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {!hideChrome && <Header />}
       <main style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
+        <CookieConsent hasBottomNav={!hideChrome} />
       </main>
       {!hideChrome && <BottomNav />}
     </div>

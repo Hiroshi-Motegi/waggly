@@ -6,6 +6,7 @@ import { apiFetch } from "@/lib/api-client";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import { useAdFree } from "@/hooks/use-ad-free";
+import useSWR from "swr";
 
 declare global {
   interface Window {
@@ -33,12 +34,27 @@ export default function RemoveAdsPage() {
   const [promoCode, setPromoCode] = useState("");
   const [promoResult, setPromoResult] = useState<{
     valid: boolean;
+    name: string | null;
     discount_percent: number;
   } | null>(null);
+  const [useNewCard, setUseNewCard] = useState(false);
+  const [saveCard, setSaveCard] = useState(false);
+
+  // 既存カード情報を取得
+  const { data: cardData } = useSWR<{ card: { brand: string; last4: string; exp_month: number; exp_year: number } | null }>(
+    "/api/payment/card-info",
+    (url: string) => apiFetch(url).then((r) => r.json())
+  );
+  const existingCard = cardData?.card ?? null;
+
+  // 新しいカード入力が必要かどうか
+  const needsCardInput = !existingCard || useNewCard;
 
   const cardState = useRef<{ element: any }>({ element: null });
 
   useEffect(() => {
+    if (!needsCardInput) return;
+
     function mountCard() {
       const container = document.getElementById("payjp-card-element-ads");
       if (!container || !window.Payjp) return;
@@ -78,8 +94,10 @@ export default function RemoveAdsPage() {
         try { cardState.current.element.unmount(); } catch {}
         cardState.current.element = null;
       }
+      setMounted(false);
+      setReady(false);
     };
-  }, []);
+  }, [needsCardInput]);
 
   const price = promoResult?.valid
     ? Math.round(100 * (1 - promoResult.discount_percent / 100))
@@ -96,7 +114,7 @@ export default function RemoveAdsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setPromoResult({ valid: true, discount_percent: data.discount_percent });
+        setPromoResult({ valid: true, name: data.name, discount_percent: data.discount_percent });
       } else {
         setPromoResult(null);
         const err = await res.json().catch(() => ({}));
@@ -112,18 +130,24 @@ export default function RemoveAdsPage() {
   }
 
   async function handlePurchase() {
-    const pj = getPayjp();
-    if (!pj || !cardState.current.element) return;
     setLoading(true);
     setError(null);
 
-    const { error: tokenError, id } = await pj.createToken(cardState.current.element, {
-      three_d_secure: true,
-    });
-    if (tokenError) {
-      setCardError(tokenError.message);
-      setLoading(false);
-      return;
+    let tokenId: string | undefined;
+
+    if (needsCardInput) {
+      const pj = getPayjp();
+      if (!pj || !cardState.current.element) { setLoading(false); return; }
+
+      const { error: tokenError, id } = await pj.createToken(cardState.current.element, {
+        three_d_secure: true,
+      });
+      if (tokenError) {
+        setCardError(tokenError.message);
+        setLoading(false);
+        return;
+      }
+      tokenId = id;
     }
 
     try {
@@ -131,8 +155,9 @@ export default function RemoveAdsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          token: id,
+          token: tokenId,
           promo_code: promoResult?.valid ? promoCode : undefined,
+          save_card: tokenId ? saveCard : undefined,
         }),
       });
       if (res.ok) {
@@ -198,23 +223,85 @@ export default function RemoveAdsPage() {
             </button>
           </div>
           {promoResult?.valid && (
-            <p className="text-sm text-[#006728]">
-              {promoResult.discount_percent === 100
-                ? "無料で広告を非表示にできます！"
-                : `${promoResult.discount_percent}%OFF!`}
-            </p>
+            <p className="text-sm text-[#006728]">クーポンが適用されました</p>
           )}
 
-          {/* カード入力（¥0 の場合は非表示） */}
+          {/* カード情報（¥0 の場合は非表示） */}
           {price > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <p className="text-sm font-bold">カード情報</p>
-              <div
-                id="payjp-card-element-ads"
-                className="border border-[#c4c4c4] rounded-lg p-3 bg-white min-h-[44px]"
-              />
-              {!mounted && <p className="text-sm text-[#8b8b8b]">読み込み中...</p>}
-              {cardError && <p className="text-sm text-red-500">{cardError}</p>}
+              {existingCard ? (
+                <div className="space-y-3">
+                  {/* ラジオ選択 */}
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="card-choice"
+                      checked={!useNewCard}
+                      onChange={() => setUseNewCard(false)}
+                      className="w-4 h-4 accent-[#006728]"
+                    />
+                    <span className="text-sm text-[#333]">登録したカードを利用する</span>
+                  </label>
+                  {!useNewCard && (
+                    <div className="ml-6 border border-[#c4c4c4] rounded-lg p-3 bg-[#f9f9f9] flex items-center justify-between">
+                      <p className="text-base font-bold">
+                        {existingCard.brand} •••• {existingCard.last4}
+                      </p>
+                      <span className="text-sm text-[#8b8b8b]">
+                        {String(existingCard.exp_month).padStart(2, "0")}/{existingCard.exp_year}
+                      </span>
+                    </div>
+                  )}
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="card-choice"
+                      checked={useNewCard}
+                      onChange={() => setUseNewCard(true)}
+                      className="w-4 h-4 accent-[#006728]"
+                    />
+                    <span className="text-sm text-[#333]">別のカードを利用する</span>
+                  </label>
+                  {useNewCard && (
+                    <div className="ml-6 space-y-2">
+                      <div
+                        id="payjp-card-element-ads"
+                        className="border border-[#c4c4c4] rounded-lg p-3 bg-white min-h-[44px]"
+                      />
+                      {!mounted && <p className="text-sm text-[#8b8b8b]">読み込み中...</p>}
+                      {cardError && <p className="text-sm text-red-500">{cardError}</p>}
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={saveCard}
+                          onChange={(e) => setSaveCard(e.target.checked)}
+                          className="w-4 h-4 accent-[#006728]"
+                        />
+                        <span className="text-sm text-[#333]">このカードを今後の支払いに利用する</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div
+                    id="payjp-card-element-ads"
+                    className="border border-[#c4c4c4] rounded-lg p-3 bg-white min-h-[44px]"
+                  />
+                  {!mounted && <p className="text-sm text-[#8b8b8b]">読み込み中...</p>}
+                  {cardError && <p className="text-sm text-red-500">{cardError}</p>}
+                </div>
+              )}
+            </div>
+          )}
+
+          {promoResult?.valid && (
+            <div className="rounded-lg border border-[#006728] bg-[#f0f9f4] p-3 text-center space-y-1">
+              <p className="text-sm font-bold text-[#006728]">クーポンが適用されました</p>
+              <p className="text-base font-bold text-[#006728]">
+                {promoResult.name ?? `${promoResult.discount_percent}%OFFクーポン`}
+              </p>
             </div>
           )}
 
@@ -226,10 +313,16 @@ export default function RemoveAdsPage() {
 
           <button
             onClick={handlePurchase}
-            disabled={loading || (price > 0 && !ready)}
+            disabled={loading || (price > 0 && needsCardInput && !ready)}
             className="w-full py-3 rounded-full bg-[#006728] text-white font-bold disabled:opacity-40"
           >
-            {loading ? "処理中..." : price === 0 ? "広告を非表示にする" : `¥${price}で購入する`}
+            {loading
+              ? "処理中..."
+              : price === 0
+                ? "広告を非表示にする"
+                : promoResult?.valid
+                  ? <><span className="line-through opacity-60">¥100</span> → ¥{price}で購入する</>
+                  : `¥${price}で購入する`}
           </button>
         </div>
       </div>

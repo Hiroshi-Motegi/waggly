@@ -26,9 +26,9 @@ export async function POST(req: Request) {
   if (!auth) return unauthorized();
   const { userId } = auth;
 
-  const { token, promo_code } = await req.json();
-  if (!token || typeof token !== "string" || token.length > 100) {
-    return NextResponse.json({ error: "token required" }, { status: 400 });
+  const { token, promo_code, save_card } = await req.json();
+  if (token !== undefined && (typeof token !== "string" || token.length > 100)) {
+    return NextResponse.json({ error: "invalid token" }, { status: 400 });
   }
 
   const supabase = getAdminClient();
@@ -78,6 +78,7 @@ export async function POST(req: Request) {
       await supabase.from("coupon_redemptions").insert({
         user_id: userId,
         coupon_id: coupon.id,
+        purpose: "ad_free",
       });
       await supabase.rpc("increment_coupon_usage", { p_coupon_id: coupon.id });
     }
@@ -97,22 +98,44 @@ export async function POST(req: Request) {
         .single();
 
       let customerId = existingSub?.payjp_customer_id;
-      if (customerId) {
-        try {
-          await getPayjpClient().customers.update(customerId, { card: token });
-        } catch (e: any) {
-          if (e?.body?.error?.code !== "already_have_card") throw e;
-        }
-      } else {
-        const customer = await getPayjpClient().customers.create({ card: token });
-        customerId = customer.id;
-      }
 
-      await getPayjpClient().charges.create({
-        amount,
-        currency: "jpy",
-        customer: customerId,
-      });
+      if (token && save_card !== false) {
+        // 新しいカードをカスタマーに保存して課金
+        if (customerId) {
+          try {
+            await getPayjpClient().customers.update(customerId, { card: token });
+          } catch (e: any) {
+            if (e?.body?.error?.code !== "already_have_card") throw e;
+          }
+        } else {
+          const customer = await getPayjpClient().customers.create({ card: token });
+          customerId = customer.id;
+        }
+        await getPayjpClient().charges.create({
+          amount,
+          currency: "jpy",
+          customer: customerId,
+        });
+      } else if (token) {
+        // カード保存なし：トークンで直接課金
+        await getPayjpClient().charges.create({
+          amount,
+          currency: "jpy",
+          card: token,
+        });
+      } else if (customerId) {
+        // 既存カードで課金
+        await getPayjpClient().charges.create({
+          amount,
+          currency: "jpy",
+          customer: customerId,
+        });
+      } else {
+        return NextResponse.json(
+          { error: "カード情報が必要です。" },
+          { status: 400 }
+        );
+      }
     } catch {
       return NextResponse.json(
         { error: "決済に失敗しました。再度お試しください。" },

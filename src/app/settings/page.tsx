@@ -15,6 +15,7 @@ import { liffLogout } from "@/lib/liff";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/layout/page-header";
 import { useProfile } from "@/hooks/use-profile";
+import { useAdFree } from "@/hooks/use-ad-free";
 
 interface UsageData {
   chat: { used: number; limit: number; remaining: number };
@@ -30,6 +31,7 @@ interface SubscriptionData {
 export default function SettingsPage() {
   const { user, setUser } = useAuth();
   const { profile, isLoading: profileLoading } = useProfile();
+  const { isAdFree } = useAdFree();
   const router = useRouter();
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [linkToast, setLinkToast] = useState<string | null>(null);
@@ -361,7 +363,7 @@ export default function SettingsPage() {
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
               </Link>
               <Link href="/help" className="flex items-center justify-between py-2">
-                <span className="text-base">ヘルプ</span>
+                <span className="text-base">ご利用ガイド</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
               </Link>
             </div>
@@ -466,15 +468,22 @@ export default function SettingsPage() {
 
       {/* 広告設定 */}
       <p className="text-base font-bold text-white px-1 pt-4">広告</p>
-      <Link href="/settings/remove-ads">
-        <div className="rounded-lg bg-white p-3 flex items-center justify-between">
-          <div>
-            <p className="text-base font-bold">広告を非表示にする</p>
-            <p className="text-xs text-[#8b8b8b]">¥100 の買い切り</p>
-          </div>
-          <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+      {isAdFree ? (
+        <div className="rounded-lg bg-white p-3">
+          <p className="text-base font-bold">広告非表示</p>
+          <p className="text-xs text-[#006728]">購入済み</p>
         </div>
-      </Link>
+      ) : (
+        <Link href="/settings/remove-ads">
+          <div className="rounded-lg bg-white p-3 flex items-center justify-between">
+            <div>
+              <p className="text-base font-bold">広告を非表示にする</p>
+              <p className="text-xs text-[#8b8b8b]">¥100 の買い切り</p>
+            </div>
+            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+          </div>
+        </Link>
+      )}
 
       {/* AIコーチ利用状況 */}
       <p className="text-base font-bold text-white px-1 pt-4">AI相談利用状況</p>
@@ -530,7 +539,7 @@ export default function SettingsPage() {
             { href: "/terms", label: "利用規約" },
             { href: "/privacy", label: "プライバシーポリシー" },
             { href: "/legal", label: "特定商取引法に基づく表記" },
-            { href: "/help", label: "ヘルプ" },
+            { href: "/help", label: "ご利用ガイド" },
           ].map((item, i, arr) => (
             <Link key={item.href} href={item.href}>
               <div className={`flex items-center gap-2.5 py-2.5 ${i < arr.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>

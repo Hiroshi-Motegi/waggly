@@ -65,6 +65,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     valid: true,
+    name: coupon.name,
     discount_percent: coupon.discount_percent,
     free_months: coupon.free_months,
     free_days: coupon.free_months > 0 ? coupon.free_months * 30 : 0,

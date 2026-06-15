@@ -59,7 +59,7 @@ export default function AccountLinkingHelpPage() {
               <tr>
                 <td className="py-2.5 font-bold">iOSアプリ</td>
                 <td className="py-2.5">
-                  <span className="rounded-full bg-[#f5f5f5] px-2 py-0.5 text-xs text-[#8b8b8b]">
+                  <span className="rounded-full bg-[#f5f5f5] px-2 py-0.5 text-sm text-[#8b8b8b]">
                     準備中
                   </span>
                 </td>
@@ -118,12 +118,12 @@ export default function AccountLinkingHelpPage() {
                 open
                 className={`group py-3 ${i < arr.length - 1 ? "border-b border-[#ececec]" : ""}`}
               >
-                <summary className="text-sm font-bold cursor-pointer list-none flex items-center gap-1">
+                <summary className="text-base font-bold cursor-pointer list-none flex items-center gap-1">
                   <span className="text-[#006728]">Q.</span>
                   <span className="flex-1">{item.q}</span>
                   <ChevronDown className="h-4 w-4 text-[#8b8b8b] shrink-0 transition-transform duration-200 group-open:rotate-180" />
                 </summary>
-                <p className="text-sm text-[#666] leading-relaxed mt-1.5 pl-0.5">
+                <p className="text-base text-[#666] leading-relaxed mt-1.5 pl-0.5">
                   {item.a}
                 </p>
               </details>

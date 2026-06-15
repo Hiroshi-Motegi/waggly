@@ -12,7 +12,8 @@
     "build:app": "mv src/app/api src/app/_api_backup && mv src/app/auth/callback src/app/auth/_callback_backup && NEXT_OUTPUT=export next build; mv src/app/_api_backup src/app/api && mv src/app/auth/_callback_backup src/app/auth/callback",
     "cap:sync": "npx cap sync",
     "cap:ios": "npx cap open ios",
-    "cap:android": "npx cap open android"
+    "cap:android": "npx cap open android",
+    "db:reset-data": "npx supabase db execute --file scripts/reset-all-data.sql"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.81",

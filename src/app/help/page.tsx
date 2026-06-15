@@ -7,6 +7,8 @@ import { PageHeader } from "@/components/layout/page-header";
 export default function HelpIndexPage() {
   const items = [
     { href: "/help/account-linking", label: "アカウント連携について" },
+    { href: "/help/plans", label: "プランについて" },
+    { href: "/help/ads", label: "広告表示について" },
   ];
 
   return (
@@ -19,7 +21,7 @@ export default function HelpIndexPage() {
       }}
     >
       <div className="relative flex flex-col space-y-2">
-        <PageHeader title="ヘルプ" variant="dark" />
+        <PageHeader title="ご利用ガイド" variant="dark" />
 
         <div className="rounded-lg bg-white p-3">
           <div className="flex flex-col">

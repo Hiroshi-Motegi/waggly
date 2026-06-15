@@ -9,13 +9,14 @@ export default function PrivacyPage() {
       <PageHeader title="プライバシーポリシー" variant="dark" />
 
       <div className="rounded-lg bg-white p-4 space-y-5 leading-relaxed">
-        <p className="text-sm text-[#8b8b8b]">最終更新日: 2026年6月8日</p>
+        <p className="text-sm text-[#8b8b8b]">最終更新日: 2026年6月15日</p>
 
         <section className="space-y-1">
           <h3 className="text-base font-bold text-[#006728]">1. 個人情報の取得</h3>
           <p className="text-base">本サービス「Waggly」（以下「当サービス」）は、以下の個人情報を取得します。</p>
           <ul className="list-disc pl-5 space-y-0.5 text-base">
             <li>LINEアカウント情報（ユーザーID、表示名、プロフィール画像URL）</li>
+            <li>Googleアカウント情報（ユーザーID、表示名、プロフィール画像URL、メールアドレス）</li>
             <li>ゴルフクラブ・アイテムの登録情報</li>
             <li>練習記録データ</li>
             <li>AIコーチとの会話履歴</li>
@@ -40,8 +41,12 @@ export default function PrivacyPage() {
           <p className="text-base">当サービスでは、機能提供のために以下の外部サービスにデータを送信します。</p>
           <ul className="list-disc pl-5 space-y-0.5 text-base">
             <li><strong>LINE SDK</strong> - ユーザー認証</li>
+            <li><strong>Google OAuth</strong> - ユーザー認証</li>
             <li><strong>Anthropic API（Claude）</strong> - AIコーチ機能の提供（会話内容を送信）</li>
             <li><strong>Supabase</strong> - データの保存・管理</li>
+            <li><strong>Pay.jp</strong> - 決済処理（クレジットカード情報はPay.jp社が管理し、当サービスのサーバーには保存されません）</li>
+            <li><strong>Google AdSense</strong> - 広告の配信（Cookieを使用してユーザーの興味に基づいた広告を表示する場合があります）</li>
+            <li><strong>Google アナリティクス</strong> - アクセス解析（Cookieを使用してサイトの利用状況を収集します。データは匿名化されます）</li>
             <li><strong>楽天GORA API</strong> - ゴルフ場検索機能の提供</li>
             <li><strong>Vercel</strong> - サービスのホスティング・アクセスログ</li>
           </ul>
@@ -63,8 +68,13 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-1">
-          <h3 className="text-base font-bold text-[#006728]">7. Cookie・アクセス解析</h3>
-          <p className="text-base">当サービスでは、サービス改善のためにアクセス解析を行う場合があります。収集されるデータは統計的に処理され、個人を特定するものではありません。</p>
+          <h3 className="text-base font-bold text-[#006728]">7. Cookie・アクセス解析・広告</h3>
+          <p className="text-base">当サービスでは以下の目的でCookieを使用します。</p>
+          <ul className="list-disc pl-5 space-y-0.5 text-base">
+            <li><strong>ログイン状態の維持</strong> - セッション管理に必要なCookie</li>
+            <li><strong>Google アナリティクス</strong> - サービス改善のためのアクセス解析。収集されるデータは統計的に処理され、個人を特定するものではありません</li>
+            <li><strong>Google AdSense</strong> - 広告配信のためのCookie。ユーザーの興味・関心に基づいた広告が表示される場合があります。広告のパーソナライズはGoogleの設定（<a href="https://adssettings.google.com" className="text-[#006728] underline" target="_blank" rel="noopener noreferrer">広告設定</a>）から管理できます</li>
+          </ul>
         </section>
 
         <section className="space-y-1">
@@ -74,7 +84,8 @@ export default function PrivacyPage() {
 
         <section className="space-y-1">
           <h3 className="text-base font-bold text-[#006728]">9. お問い合わせ</h3>
-          <p className="text-base">個人情報の取り扱いに関するお問い合わせは、LINEの公式アカウントよりご連絡ください。</p>
+          <p className="text-base">個人情報の取り扱いに関するお問い合わせは、下記メールアドレスまでご連絡ください。</p>
+          <p className="text-base font-bold">apps@cocoroe.me</p>
         </section>
       </div>
       </div>

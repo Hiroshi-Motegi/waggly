@@ -13,7 +13,7 @@ declare global {
 
 // ページ遷移カウンター（モジュールレベル）
 let navigationCount = 0;
-const SHOW_EVERY_N = 3;
+const SHOW_EVERY_N = 10;
 
 export function useInterstitialAd() {
   const { user } = useAuth();
