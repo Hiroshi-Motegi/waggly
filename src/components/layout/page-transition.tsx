@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useInterstitialAd, AdInterstitial } from "@/components/ad-interstitial";
 
 const ANIMATED_PREFIXES = ["/bag", "/items", "/practice", "/courses"];
 
@@ -22,6 +23,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
   const [animClass, setAnimClass] = useState("opacity-0");
+  const { shouldShow } = useInterstitialAd();
+  const [showInterstitial, setShowInterstitial] = useState(false);
 
   // Disable browser's automatic scroll restoration
   useEffect(() => {
@@ -46,6 +49,11 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       requestAnimationFrame(scrollToTop);
       timers.push(setTimeout(scrollToTop, 50));
       timers.push(setTimeout(scrollToTop, 150));
+
+      // インタースティシャル広告（3回に1回）
+      if (shouldShow()) {
+        setShowInterstitial(true);
+      }
     }
 
     if (shouldSlide(prev, pathname)) {
@@ -67,8 +75,13 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   return (
-    <div className={animClass}>
-      {children}
-    </div>
+    <>
+      {showInterstitial && (
+        <AdInterstitial onClose={() => setShowInterstitial(false)} />
+      )}
+      <div className={animClass}>
+        {children}
+      </div>
+    </>
   );
 }

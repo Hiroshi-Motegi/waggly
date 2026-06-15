@@ -8,6 +8,7 @@ import { usePracticeSessions } from "@/hooks/use-practice";
 import { useProfile, useFavoriteCourses } from "@/hooks/use-profile";
 import { isNative } from "@/lib/platform";
 import { RecentPractice } from "@/components/home/recent-practice";
+import { AdBanner } from "@/components/ad-banner";
 
 const featureCards = [
   {
@@ -189,6 +190,11 @@ export default function HomePage() {
         <p className="text-lg font-medium text-white text-center mt-2">
           {(() => { const h = new Date().getHours(); return h >= 18 || h < 4 ? "こんばんは" : "こんにちは"; })()}{user && !profileLoading ? `、${profile?.nickname || user.display_name}さん` : ""}
         </p>
+
+        {/* 広告バナー */}
+        <div className="mt-3">
+          <AdBanner slot="HOME_TOP" />
+        </div>
 
         {/* Feature cards */}
         <div className="grid grid-cols-2 gap-2 w-full mt-4">

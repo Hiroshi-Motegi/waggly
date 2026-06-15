@@ -448,6 +448,19 @@ export default function SettingsPage() {
         )}
       </div>
 
+      {/* 広告非表示（Pro 以外 & 未購入のみ） */}
+      {!isPro && (
+        <Link href="/settings/remove-ads">
+          <div className="rounded-lg bg-[#006728]/10 border border-[#006728]/30 p-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-[#006728]">広告を非表示にする</p>
+              <p className="text-xs text-[#8b8b8b]">¥100 の買い切りで広告を完全に非表示</p>
+            </div>
+            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+          </div>
+        </Link>
+      )}
+
       {/* AIコーチ利用状況 */}
       <p className="text-base font-bold text-white px-1 pt-4">AI相談利用状況</p>
       <div className="rounded-lg bg-white p-3">

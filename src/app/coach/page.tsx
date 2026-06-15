@@ -16,6 +16,7 @@ import { useUsage } from "@/hooks/use-usage";
 import { useSubscription } from "@/hooks/use-subscription";
 import { PLAN_ID } from "@/lib/plans";
 import { LimitReachedCard } from "@/components/limit-reached-card";
+import { AdBanner } from "@/components/ad-banner";
 
 type ConversationItem = {
   id: string;
@@ -96,6 +97,9 @@ function ChatView({
           </button>
         </div>
       </PageHeader>
+
+      {/* 広告バナー */}
+      <AdBanner slot="CHAT_TOP" />
 
       {/* 利用状況 */}
       {usage && (
