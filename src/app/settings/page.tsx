@@ -501,6 +501,7 @@ export default function SettingsPage() {
           {[
             { href: "/terms", label: "利用規約" },
             { href: "/privacy", label: "プライバシーポリシー" },
+            { href: "/legal", label: "特定商取引法に基づく表記" },
             { href: "/help", label: "ヘルプ" },
           ].map((item, i, arr) => (
             <Link key={item.href} href={item.href}>
