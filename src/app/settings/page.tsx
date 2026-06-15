@@ -23,7 +23,7 @@ interface UsageData {
 }
 
 interface SubscriptionData {
-  subscription: { plan_id: string; current_period_end: string | null } | null;
+  subscription: { plan_id: string; status: string; current_period_end: string | null } | null;
   plan: { id: string; name: string; price: number; ai_chat_monthly_limit: number; ai_plan_monthly_limit: number };
 }
 
@@ -372,6 +372,7 @@ export default function SettingsPage() {
 
   const currentPlanId = subscription?.plan?.id ?? "free";
   const isPro = currentPlanId === "pro";
+  const isPaused = subscription?.subscription?.status === "paused";
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
@@ -427,18 +428,25 @@ export default function SettingsPage() {
       <div className="rounded-lg bg-white p-3">
         <Link href="/settings/plan">
           <div className={`flex items-center justify-between ${isPro ? "pb-2.5 border-b border-[#ececec]" : ""}`}>
-            <span className="text-base font-bold">{isPro ? "Waggly Pro" : "無料プラン"}</span>
-            {!isPro && (
+            <div>
+              <span className="text-base font-bold">{isPro ? "Waggly Pro" : "無料プラン"}</span>
+              {isPaused && subscription?.subscription?.current_period_end && (
+                <p className="text-xs text-amber-500 mt-0.5">
+                  解約予定（{new Date(subscription.subscription.current_period_end).toLocaleDateString("ja-JP")}まで利用可能）
+                </p>
+              )}
+            </div>
+            {!isPro && !isPaused && (
               <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
                 プランを変更
               </span>
             )}
-            {isPro && (
+            {(isPro || isPaused) && (
               <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
             )}
           </div>
         </Link>
-        {isPro && (
+        {isPro && !isPaused && (
           <Link href="/settings/plan/checkout?change_card=true">
             <div className="flex items-center justify-between pt-2.5">
               <span className="text-base">お支払い方法を変更</span>
@@ -448,18 +456,16 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* 広告非表示（Pro 以外 & 未購入のみ） */}
-      {!isPro && (
-        <Link href="/settings/remove-ads">
-          <div className="rounded-lg bg-[#006728]/10 border border-[#006728]/30 p-3 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-bold text-[#006728]">広告を非表示にする</p>
-              <p className="text-xs text-[#8b8b8b]">¥100 の買い切りで広告を完全に非表示</p>
-            </div>
-            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+      {/* 広告非表示 */}
+      <Link href="/settings/remove-ads">
+        <div className="rounded-lg bg-[#006728]/10 border border-[#006728]/30 p-3 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-[#006728]">広告を非表示にする</p>
+            <p className="text-xs text-[#8b8b8b]">¥100 の買い切りで広告を完全に非表示</p>
           </div>
-        </Link>
-      )}
+          <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+        </div>
+      </Link>
 
       {/* AIコーチ利用状況 */}
       <p className="text-base font-bold text-white px-1 pt-4">AI相談利用状況</p>
