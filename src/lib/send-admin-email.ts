@@ -1,7 +1,5 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const ADMIN_EMAIL = "apps@cocoroe.me";
 const FROM_EMAIL = "Waggly <onboarding@resend.dev>";
 
@@ -15,6 +13,7 @@ export async function sendAdminEmail(
   html: string
 ): Promise<void> {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,

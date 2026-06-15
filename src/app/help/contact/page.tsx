@@ -116,7 +116,7 @@ export default function ContactPage() {
           {isLoggedIn ? (
             <div>
               <label className="text-sm font-bold text-[#8b8b8b]">ユーザー</label>
-              <p className="mt-1 text-base">{profile.nickname ?? profile.display_name ?? "ユーザー"}</p>
+              <p className="mt-1 text-base">{profile.nickname ?? "ユーザー"}</p>
             </div>
           ) : (
             <div>
