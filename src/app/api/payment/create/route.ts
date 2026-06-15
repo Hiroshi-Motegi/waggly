@@ -90,7 +90,12 @@ export async function POST(req: Request) {
 
     let customerId = existingSub?.payjp_customer_id;
     if (customerId) {
-      await getPayjpClient().customers.update(customerId, { card: token });
+      try {
+        await getPayjpClient().customers.update(customerId, { card: token });
+      } catch (e: any) {
+        // 同じカードの場合はスキップ（already_have_card）
+        if (e?.body?.error?.code !== "already_have_card") throw e;
+      }
     } else {
       const customer = await getPayjpClient().customers.create({ card: token });
       customerId = customer.id;

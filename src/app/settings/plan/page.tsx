@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useUsage } from "@/hooks/use-usage";
 import { apiFetch } from "@/lib/api-client";
-import { useRouter } from "next/navigation";
 import { PLAN_ID } from "@/lib/plans";
 import { PageHeader } from "@/components/layout/page-header";
 
@@ -19,20 +18,44 @@ export default function PlanPage() {
   const { usage } = useUsage();
   const [loading, setLoading] = useState(false);
   const isPro = plan?.id === PLAN_ID.PRO;
+  const isPaused = subscription?.status === "paused";
 
-  async function handleCancel() {
+  async function handlePause() {
+    const periodEnd = subscription?.current_period_end
+      ? new Date(subscription.current_period_end).toLocaleDateString("ja-JP")
+      : null;
     if (
       !confirm(
-        "Waggly Proを解約しますか？現在の期間終了まで引き続きご利用いただけます。"
+        `無料プランに変更しますか？${periodEnd ? `\n${periodEnd}まではPro機能を引き続きご利用いただけます。\nそれまでの間はいつでもProに戻せます。` : ""}`
       )
     )
       return;
     setLoading(true);
     try {
-      await apiFetch("/api/subscription/cancel", { method: "POST" });
-      mutate();
+      const res = await apiFetch("/api/subscription/pause", { method: "POST" });
+      if (res.ok) {
+        mutate();
+      } else {
+        alert("プラン変更に失敗しました。");
+      }
     } catch {
-      alert("解約に失敗しました。");
+      alert("プラン変更に失敗しました。");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResume() {
+    setLoading(true);
+    try {
+      const res = await apiFetch("/api/subscription/resume", { method: "POST" });
+      if (res.ok) {
+        mutate();
+      } else {
+        alert("再開に失敗しました。");
+      }
+    } catch {
+      alert("再開に失敗しました。");
     } finally {
       setLoading(false);
     }
@@ -78,30 +101,49 @@ export default function PlanPage() {
         {/* プラン一覧 */}
         <div className="space-y-3">
           {/* 無料プラン */}
-          <div className={`rounded-lg bg-white p-4 ${!isPro ? "ring-2 ring-[#006728]" : ""}`}>
+          <div className={`rounded-lg bg-white p-4 ${!isPro && !isPaused ? "ring-2 ring-[#006728]" : ""}`}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base font-bold">無料プラン</h3>
-              {!isPro && (
+              {!isPro && !isPaused && (
                 <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
                   現在のプラン
                 </span>
               )}
+              {isPaused && (
+                <span className="rounded-full bg-[#8b8b8b] px-2.5 py-0.5 text-xs font-bold text-white">
+                  変更予定
+                </span>
+              )}
             </div>
             <p className="text-xl font-bold mb-2">¥0</p>
-            <ul className="text-sm space-y-1 text-[#666]">
+            <ul className="text-sm space-y-1 text-[#666] mb-4">
               <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />AIチャット 月5回</li>
               <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />練習メニュー提案 月3回</li>
               <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />ギア管理・練習記録は無制限</li>
             </ul>
+            {isPro && !isPaused && (
+              <button
+                onClick={handlePause}
+                disabled={loading}
+                className="w-full py-2.5 rounded-full border border-[#c4c4c4] text-sm text-[#666]"
+              >
+                {loading ? "処理中..." : "無料プランに変更"}
+              </button>
+            )}
           </div>
 
           {/* Pro プラン */}
-          <div className={`rounded-lg bg-white p-4 ${isPro ? "ring-2 ring-[#006728]" : ""}`}>
+          <div className={`rounded-lg bg-white p-4 ${isPro || isPaused ? "ring-2 ring-[#006728]" : ""}`}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base font-bold">Waggly Pro</h3>
-              {isPro && (
+              {isPro && !isPaused && (
                 <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
                   現在のプラン
+                </span>
+              )}
+              {isPaused && (
+                <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-bold text-white">
+                  解約予定
                 </span>
               )}
             </div>
@@ -114,7 +156,7 @@ export default function PlanPage() {
               <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />ギア管理・練習記録は無制限</li>
             </ul>
 
-            {!isPro && (
+            {!isPro && !isPaused && (
               <Link
                 href="/settings/plan/checkout"
                 className="flex items-center justify-center w-full py-3 rounded-full bg-[#006728] text-white font-bold"
@@ -122,32 +164,39 @@ export default function PlanPage() {
                 アップグレード
               </Link>
             )}
-          </div>
-        </div>
-
-        {/* Pro ユーザー: 解約 + カード変更 */}
-        {isPro && (
-          <div className="space-y-3">
-            {subscription?.current_period_end && (
-              <p className="text-sm text-white/70 text-center">
+            {isPaused && (
+              <>
+                <button
+                  onClick={handleResume}
+                  disabled={loading}
+                  className="w-full py-3 rounded-full bg-[#006728] text-white font-bold disabled:opacity-40"
+                >
+                  {loading ? "処理中..." : "Pro に戻す"}
+                </button>
+                {subscription?.current_period_end && (
+                  <p className="text-xs text-[#8b8b8b] text-center mt-2">
+                    {new Date(subscription.current_period_end).toLocaleDateString("ja-JP")}まで Pro 機能をご利用いただけます
+                  </p>
+                )}
+              </>
+            )}
+            {isPro && !isPaused && subscription?.current_period_end && (
+              <p className="text-xs text-[#8b8b8b] text-center">
                 次回更新日: {new Date(subscription.current_period_end).toLocaleDateString("ja-JP")}
               </p>
             )}
-            <button
-              onClick={() => router.push("/settings/plan/checkout?change_card=true")}
-              className="w-full py-2 rounded-lg bg-white text-sm text-center"
-            >
-              お支払い方法を変更
-            </button>
-            <button
-              onClick={handleCancel}
-              disabled={loading}
-              className="w-full py-2 text-sm text-red-400 text-center"
-            >
-              {loading ? "処理中..." : "解約する"}
-            </button>
           </div>
-        )}
+        </div>
+
+        {/* Waggly を解約（アカウント削除） */}
+        <div className="pt-4">
+          <Link
+            href="/settings/delete-account"
+            className="block w-full py-2 text-sm text-white/70 text-center"
+          >
+            Waggly を解約（アカウント削除）
+          </Link>
+        </div>
       </div>
     </div>
   );

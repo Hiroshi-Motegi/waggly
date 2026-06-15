@@ -32,12 +32,12 @@ export async function getActiveSubscription(
     .not("grace_period_end", "is", null)
     .lt("grace_period_end", new Date().toISOString());
 
-  // active を取得
+  // active or paused を取得（paused は期間内 Pro 継続）
   const { data: sub } = await supabase
     .from("subscriptions")
     .select("*, plan:plans(*)")
     .eq("user_id", userId)
-    .eq("status", "active")
+    .in("status", ["active", "paused"])
     .single();
 
   if (!sub) return { subscription: null, plan: FREE_PLAN };

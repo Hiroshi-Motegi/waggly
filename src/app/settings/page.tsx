@@ -424,9 +424,9 @@ export default function SettingsPage() {
 
       {/* プラン */}
       <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
-      <Link href="/settings/plan">
-        <div className="rounded-lg bg-white p-3">
-          <div className="flex items-center justify-between">
+      <div className="rounded-lg bg-white p-3">
+        <Link href="/settings/plan">
+          <div className={`flex items-center justify-between ${isPro ? "pb-2.5 border-b border-[#ececec]" : ""}`}>
             <span className="text-base font-bold">{isPro ? "Waggly Pro" : "無料プラン"}</span>
             {!isPro && (
               <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
@@ -437,8 +437,16 @@ export default function SettingsPage() {
               <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
             )}
           </div>
-        </div>
-      </Link>
+        </Link>
+        {isPro && (
+          <Link href="/settings/plan/checkout?change_card=true">
+            <div className="flex items-center justify-between pt-2.5">
+              <span className="text-base">お支払い方法を変更</span>
+              <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+            </div>
+          </Link>
+        )}
+      </div>
 
       {/* AIコーチ利用状況 */}
       <p className="text-base font-bold text-white px-1 pt-4">AI相談利用状況</p>

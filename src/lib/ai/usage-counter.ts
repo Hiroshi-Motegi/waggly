@@ -13,12 +13,12 @@ function getAdminClient() {
 export async function getUserPlanLimits(userId: string): Promise<Plan> {
   const supabase = getAdminClient();
 
-  // active なサブスクを取得
+  // active or paused なサブスクを取得（paused は期間内 Pro 継続）
   const { data: sub } = await supabase
     .from("subscriptions")
     .select("plan_id, status, current_period_end, grace_period_end")
     .eq("user_id", userId)
-    .eq("status", "active")
+    .in("status", ["active", "paused"])
     .single();
 
   if (!sub) return FREE_PLAN;

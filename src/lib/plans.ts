@@ -18,7 +18,7 @@ export interface Subscription {
   user_id: string;
   plan_id: PlanId;
   plan?: Plan;
-  status: "active" | "canceled" | "expired";
+  status: "active" | "paused" | "canceled" | "expired";
   payjp_subscription_id: string | null;
   payjp_customer_id: string | null;
   current_period_start: string | null;
