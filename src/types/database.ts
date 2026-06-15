@@ -63,6 +63,7 @@ export interface Club {
   face_angle: number | null;      // フェース角 (°) — ドライバー用
   shaft_weight: number | null;    // シャフト重量 (g)
   rating: number | null;
+  hidden_from_profile: boolean;
   created_at: string;
 }
 
@@ -157,6 +158,7 @@ export interface Accessory {
   status: AccessoryStatus;
   purchase_url: string | null;
   image_url: string | null;
+  hidden_from_profile: boolean;
   created_at: string;
 }
 
@@ -165,6 +167,14 @@ export interface AccessoryImage {
   accessory_id: string;
   image_url: string;
   is_primary: boolean;
+  created_at: string;
+}
+
+export interface ProfileCoverImage {
+  id: string;
+  user_id: string;
+  image_url: string;
+  sort_order: number;
   created_at: string;
 }
 
