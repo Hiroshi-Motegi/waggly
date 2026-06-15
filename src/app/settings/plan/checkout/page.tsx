@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/api-client";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
+import useSWR from "swr";
 
 declare global {
   interface Window {
@@ -30,6 +31,12 @@ export default function CheckoutPage() {
     discount_percent: number;
     free_days: number;
   } | null>(null);
+
+  // 現在のカード情報（カード変更時）
+  const { data: currentCard } = useSWR<{ card: { brand: string; last4: string; exp_month: number; exp_year: number } | null }>(
+    changeCard ? "/api/payment/card-info" : null,
+    (url: string) => apiFetch(url).then((r) => r.json())
+  );
 
   // カードエレメントを保持
   const [cardState] = useState<{ element: any }>({ element: null });
@@ -183,6 +190,19 @@ export default function CheckoutPage() {
             <div className="flex items-center justify-between pb-3 border-b border-[#ececec]">
               <span className="text-base font-bold">Waggly Pro</span>
               <span className="text-base font-bold text-[#006728]">¥480/月</span>
+            </div>
+          )}
+
+          {/* 現在のカード情報（カード変更時） */}
+          {changeCard && currentCard?.card && (
+            <div className="pb-3 border-b border-[#ececec]">
+              <p className="text-sm text-[#8b8b8b] mb-1">現在のカード</p>
+              <p className="text-base font-bold">
+                {currentCard.card.brand} •••• {currentCard.card.last4}
+                <span className="text-sm font-normal text-[#8b8b8b] ml-2">
+                  {currentCard.card.exp_month}/{currentCard.card.exp_year}
+                </span>
+              </p>
             </div>
           )}
 
