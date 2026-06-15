@@ -12,7 +12,7 @@ export default function LegalPage() {
           <table className="w-full text-sm">
             <tbody>
               {[
-                ["販売業者", "茂木 洋"],
+                ["販売業者", "cocoroe"],
                 ["運営責任者", "茂木 洋"],
                 ["所在地", "お問い合わせいただいた方に個別にお知らせいたします"],
                 ["電話番号", "お問い合わせいただいた方に個別にお知らせいたします"],
