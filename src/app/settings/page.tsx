@@ -451,6 +451,9 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between">
           <div>
             <span className="text-base font-bold">{!subscription ? "" : isPro ? "Waggly Pro" : "無料プラン"}</span>
+            {!isPro && !isPaused && (
+              <p className="text-xs text-[#8b8b8b] mt-0.5">AI相談・自動入力に回数制限があります</p>
+            )}
             {isPaused && subscription?.subscription?.current_period_end && (
               <p className="text-xs text-amber-500 mt-0.5">
                 解約予定（{new Date(subscription.subscription.current_period_end).toLocaleDateString("ja-JP")}まで利用可能）
