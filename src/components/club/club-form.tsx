@@ -335,7 +335,27 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         </div>
       </SectionAccordion>
 
-      {/* スペック */}
+      {/* 購入情報 */}
+      <SectionAccordion id="purchase" title="購入情報" isOpen={openSections.purchase ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.purchase = el; }}>
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className={labelClass}>購入日</span>
+            <input type="date" value={form.purchase_date ?? ""} onChange={(e) => update("purchase_date", e.target.value || undefined)} className={inputClass} />
+          </div>
+          <div className="flex flex-col gap-0.5 py-1" data-field="purchase_shop">
+            <span className={labelClass}>購入店</span>
+            <input value={form.purchase_shop ?? ""} onChange={(e) => update("purchase_shop", e.target.value)} className={`${inputClass} ${fieldError("purchase_shop") ? "!border-red-400" : ""}`} />
+            <FieldError message={fieldError("purchase_shop")} />
+          </div>
+          <div className="flex flex-col gap-0.5 py-1" data-field="purchase_price">
+            <span className={labelClass}>価格（円）</span>
+            <input type="number" min={0} value={form.purchase_price ?? ""} onChange={(e) => update("purchase_price", e.target.value ? Number(e.target.value) : undefined)} className={`${inputClass} ${fieldError("purchase_price") ? "!border-red-400" : ""}`} />
+            <FieldError message={fieldError("purchase_price")} />
+          </div>
+        </div>
+      </SectionAccordion>
+
+      {/* クラブスペック */}
       <SectionAccordion id="spec" title="クラブスペック" isOpen={openSections.spec ?? true} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.spec = el; }}>
         <div className="grid grid-cols-2 gap-1.5 py-1">
           <SpecCell label="ロフト角" unit="°" value={form.loft} step="0.5" min={0} max={90}
@@ -390,40 +410,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         </SectionAccordion>
       )}
 
-      {/* TODO: AI自動入力 — UX再設計後に復活
-      {user && (
-        <div className="flex flex-col items-center gap-1 rounded-lg bg-[#ebf1eb] p-3">
-          <p className="text-sm text-black w-full">公開情報からスペックを自動入力します。内容に誤りがある場合があります。</p>
-          <p className="text-xs text-[#8b8b8b] w-full">※ AIトークンを消費します</p>
-          <button type="button" disabled={isSearching || (!form.maker && !form.model)} onClick={handleAutofill}
-            className="rounded-full border border-[#006728] bg-white px-5 py-1 text-xs font-bold text-[#006728] disabled:opacity-50">
-            {isSearching ? "検索中..." : "スペック自動入力"}
-          </button>
-        </div>
-      )}
-      */}
-
-      {/* Section 2: 購入情報 */}
-      <SectionAccordion id="purchase" title="購入情報" isOpen={openSections.purchase ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.purchase = el; }}>
-        <div className="flex flex-col gap-1">
-          <div className="flex flex-col gap-0.5 py-1">
-            <span className={labelClass}>購入日</span>
-            <input type="date" value={form.purchase_date ?? ""} onChange={(e) => update("purchase_date", e.target.value || undefined)} className={inputClass} />
-          </div>
-          <div className="flex flex-col gap-0.5 py-1" data-field="purchase_shop">
-            <span className={labelClass}>購入店</span>
-            <input value={form.purchase_shop ?? ""} onChange={(e) => update("purchase_shop", e.target.value)} className={`${inputClass} ${fieldError("purchase_shop") ? "!border-red-400" : ""}`} />
-            <FieldError message={fieldError("purchase_shop")} />
-          </div>
-          <div className="flex flex-col gap-0.5 py-1" data-field="purchase_price">
-            <span className={labelClass}>価格（円）</span>
-            <input type="number" min={0} value={form.purchase_price ?? ""} onChange={(e) => update("purchase_price", e.target.value ? Number(e.target.value) : undefined)} className={`${inputClass} ${fieldError("purchase_price") ? "!border-red-400" : ""}`} />
-            <FieldError message={fieldError("purchase_price")} />
-          </div>
-        </div>
-      </SectionAccordion>
-
-      {/* Section 4: グリップ */}
+      {/* グリップ */}
       <SectionAccordion id="grip" title="グリップ" isOpen={openSections.grip ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.grip = el; }}>
         <div className="flex flex-col gap-1">
           <div className="flex flex-col gap-0.5 py-1">
