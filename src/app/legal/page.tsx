@@ -13,7 +13,7 @@ export default function LegalPage() {
             <tbody>
               {[
                 { label: "販売業者", value: "cocoroe" },
-                { label: "運営責任者", value: "茂木 洋" },
+                { label: "運営責任者", value: "Hiroshi Motegi" },
                 { label: "所在地", value: "お問い合わせいただいた方に個別にお知らせいたします" },
                 { label: "電話番号", value: "お問い合わせいただいた方に個別にお知らせいたします" },
                 { label: "メールアドレス", value: <img src="/images/email.svg" alt="メールアドレス" width={210} height={24} className="inline-block" /> },
