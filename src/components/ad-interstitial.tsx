@@ -53,7 +53,7 @@ export function AdInterstitial({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/70">
       <div className="bg-white rounded-lg w-[92%] overflow-hidden">
         {/* 広告エリア（AdSense未承認時はA8フォールバック） */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center p-2">
           <a href="https://px.a8.net/svt/ejp?a8mat=4B5X8H+6G750Q+3OSK+644DT" rel="nofollow" className="block w-full">
             <img width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260616833390&wid=004&eno=01&mid=s00000017210001027000&mc=1" className="w-full h-auto" />
           </a>
