@@ -303,25 +303,25 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
               <p className="text-sm font-bold text-[#333] mb-1">購入情報</p>
               <div className="flex flex-col">
                 {club.release_year && (
-                  <div className="flex items-center gap-2.5 border-b border-[#ececec] py-2 text-base">
+                  <div className="flex items-center gap-2.5 border-b border-[#ececec] py-2 text-sm">
                     <span className="shrink-0 text-[#8b8b8b]">発売年</span>
                     <span className="flex-1 text-right">{club.release_year}年</span>
                   </div>
                 )}
                 {club.purchase_date && (
-                  <div className="flex items-center gap-2.5 border-b border-[#ececec] py-2 text-base">
+                  <div className="flex items-center gap-2.5 border-b border-[#ececec] py-2 text-sm">
                     <span className="shrink-0 text-[#8b8b8b]">購入日</span>
                     <span className="flex-1 text-right">{formatDate(club.purchase_date)}</span>
                   </div>
                 )}
                 {club.purchase_shop && (
-                  <div className="flex items-center gap-2.5 border-b border-[#ececec] py-2 text-base">
+                  <div className="flex items-center gap-2.5 border-b border-[#ececec] py-2 text-sm">
                     <span className="shrink-0 text-[#8b8b8b]">購入店</span>
                     <span className="flex-1 text-right">{club.purchase_shop}</span>
                   </div>
                 )}
                 {club.purchase_price != null && (
-                  <div className="flex items-center gap-2.5 py-2 text-base">
+                  <div className="flex items-center gap-2.5 py-2 text-sm">
                     <span className="shrink-0 text-[#8b8b8b]">価格</span>
                     <span className="flex-1 text-right font-medium">{club.purchase_price.toLocaleString()}円</span>
                   </div>
