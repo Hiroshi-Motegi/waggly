@@ -246,3 +246,27 @@ export interface Report {
   status: 'open' | 'in_progress' | 'closed';
   created_at: string;
 }
+
+export interface ClubSpec {
+  id: string;
+  maker: string;
+  model: string;
+  category: string;
+  club_number: string | null;
+  maker_normalized: string;
+  model_normalized: string;
+  loft: number | null;
+  lie: number | null;
+  length: number | null;
+  distance: number | null;
+  weight: number | null;
+  swing_weight: string | null;
+  head_volume: number | null;
+  head_weight: number | null;
+  image_url: string | null;
+  affiliate_url: string | null;
+  source: 'ai' | 'manual';
+  verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
