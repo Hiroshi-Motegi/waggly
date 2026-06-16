@@ -415,11 +415,6 @@ export default function HomePage() {
           {(() => { const h = new Date().getHours(); return h >= 18 || h < 4 ? "こんばんは" : "こんにちは"; })()}{user && !profileLoading ? `、${profile?.nickname || user.display_name}さん` : ""}
         </p>
 
-        {/* 広告バナー */}
-        <div className="mt-3">
-          <AdBanner slot="HOME_TOP" />
-        </div>
-
         {/* Feature cards */}
         <div className="grid grid-cols-2 gap-2 w-full mt-4">
           {featureCards.map((card) => (
@@ -435,6 +430,11 @@ export default function HomePage() {
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* 広告バナー */}
+        <div className="mt-4">
+          <AdBanner slot="HOME_TOP" />
         </div>
 
         {/* Recent practice */}
