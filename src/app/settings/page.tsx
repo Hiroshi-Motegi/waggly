@@ -489,6 +489,9 @@ export default function SettingsPage() {
           </span>
         </div>
       )}
+      {!isAdFree && (
+        <p className="text-xs text-white/70 px-1 mt-1">広告非表示機能は現在準備中です</p>
+      )}
 
       {/* AIコーチ利用状況 */}
       <p className="text-base font-bold text-white px-1 pt-4">AI相談利用状況</p>
