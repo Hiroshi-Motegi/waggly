@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
     provider_email: providerInfo.providerEmail,
   });
 
-  return NextResponse.json({ user: newUser, conflict: false, isNew: true });
+  return NextResponse.json({ user: newUser, conflict: false, isNew: true, provider: providerInfo.provider });
 }
 
 /**

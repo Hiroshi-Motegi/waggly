@@ -12,6 +12,8 @@ function makeClub(overrides: Partial<Club>): Club {
     release_year: null, memo: null, bag_number: 1,
     weight: null, swing_weight: null, frequency: null,
     kick_point: null, head_volume: null, head_weight: null, rating: null,
+    grip_name: null, grip_size: null, bounce: null, sole_shape: null,
+    face_angle: null, shaft_weight: null, hidden_from_profile: false,
     ...overrides,
   };
 }

@@ -79,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (res.ok) {
             const result = await res.json();
+            const method = result.provider ?? (isNative() ? "native" : "google");
             if (result.conflict) {
               if (isNative()) {
                 localStorage.setItem("conflict_info", JSON.stringify(result));
@@ -98,10 +99,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 console.error("Failed to upload local data:", e);
               }
               setUser(result.user);
-              if (result.isNew) trackEvent("sign_up", { method: "native" });
+              if (result.isNew) trackEvent("sign_up", { method });
+              else trackEvent("login", { method });
             } else if (result.user) {
               setUser(result.user);
-              if (result.isNew) trackEvent("sign_up", { method: "native" });
+              if (result.isNew) trackEvent("sign_up", { method });
+              else trackEvent("login", { method });
               // 衝突なし・アップロード不要 → 通常 sync
               if (isNative()) {
                 try {
@@ -145,6 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (result.user) {
               setUser(result.user);
               if (result.isNew) trackEvent("sign_up", { method: "liff" });
+              else trackEvent("login", { method: "liff" });
             }
           }
           if (deepLink) router.replace(deepLink);
@@ -186,6 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (result.user) {
             setUser(result.user);
             if (result.isNew) trackEvent("sign_up", { method: "line" });
+            else trackEvent("login", { method: "line" });
           }
         }
 

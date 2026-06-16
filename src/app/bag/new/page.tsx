@@ -6,7 +6,7 @@ import { nativeHref } from "@/lib/native-routes";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import { PageHeader } from "@/components/layout/page-header";
 import { ClubForm } from "@/components/club/club-form";
-import { createClub } from "@/hooks/use-clubs";
+import { createClub, useClubs } from "@/hooks/use-clubs";
 import { apiFetch } from "@/lib/api-client";
 import type { Club } from "@/types/database";
 
@@ -15,6 +15,7 @@ export default function NewClubPage() {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { clubs } = useClubs();
 
   const defaults: Partial<Club> = tab === "bag2"
     ? { status: "bag", bag_number: 2 }
@@ -38,6 +39,7 @@ export default function NewClubPage() {
       }
       const { trackEvent } = await import("@/lib/gtm");
       trackEvent("club_added", { category: club.category });
+      if (clubs.length === 0) trackEvent("first_club_added");
       router.replace(nativeHref(`/bag/${club.id}`));
     } catch (error) {
       console.error("Failed to create club:", error);

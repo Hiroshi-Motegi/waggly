@@ -34,6 +34,13 @@ function makeClub(overrides: Partial<Club>): Club {
     head_volume: null,
     head_weight: null,
     rating: null,
+    grip_name: null,
+    grip_size: null,
+    bounce: null,
+    sole_shape: null,
+    face_angle: null,
+    shaft_weight: null,
+    hidden_from_profile: false,
     created_at: "2026-01-01T00:00:00Z",
     ...overrides,
   };

@@ -5,7 +5,7 @@ describe("buildSystemPrompt", () => {
   it("includes club data in prompt", () => {
     const prompt = buildSystemPrompt({
       clubs: [
-        { club_number: "1W", maker: "Titleist", model: "TSR3", shaft_name: "Speeder NX", distance: 230 },
+        { club_number: "1W", maker: "Titleist", model: "TSR3", shaft_name: "Speeder NX", distance: 230, status: "bag" },
       ],
       recentSessions: [],
       recentPlans: [],
@@ -21,7 +21,7 @@ describe("buildSystemPrompt", () => {
     const prompt = buildSystemPrompt({
       clubs: [],
       recentSessions: [
-        { practiced_at: "2026-06-01", total_balls: 100, memo: "スライスが出た", clubs: [{ club_number: "1W", balls: 30 }] },
+        { practiced_at: "2026-06-01", total_balls: 100, memo: "スライスが出た", rating: null, clubs: [{ club_number: "1W", balls: 30 }] },
       ],
       recentPlans: [],
       gapAnalysis: { gaps: [], missingDistance: [] },

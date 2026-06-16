@@ -87,10 +87,12 @@ export default function ShareSettingsPage() {
     setCopied(true);
     if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
     copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    import("@/lib/gtm").then(({ trackEvent }) => trackEvent("profile_shared", { method: "copy" }));
   }
 
   async function handleShowQR() {
     if (!profileUrl) return;
+    import("@/lib/gtm").then(({ trackEvent }) => trackEvent("profile_shared", { method: "qr" }));
     const QRCode = (await import("qrcode")).default;
     const url = await QRCode.toDataURL(profileUrl, {
       width: 256,
