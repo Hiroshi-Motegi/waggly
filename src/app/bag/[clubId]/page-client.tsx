@@ -219,7 +219,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
       <div className="relative z-10 flex flex-col space-y-2">
       <PageHeader
         title={club.model || "—"}
-        subtitle={`${club.club_number}${club.maker ? ` / ${club.maker}` : ""} · ${statusLabels[club.status]}`}
+        subtitle={`${club.club_number}${club.maker ? ` / ${club.maker}` : ""}`}
         variant="dark"
       >
         <div className="flex gap-2.5 shrink-0">
