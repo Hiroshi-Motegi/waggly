@@ -233,9 +233,9 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
-      {/* Section 1: 基本情報（常に開く） */}
-      <h3 className="px-1 text-lg font-bold text-white">基本情報</h3>
-      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+      {/* Section 1: 基本情報 */}
+      <SectionAccordion id="basic" title="基本情報" isOpen={openSections.basic ?? true} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.basic = el; }}>
+        <div className="flex flex-col gap-1">
         {/* 写真 */}
         {showImagePicker && (
           <div className="flex flex-col gap-0.5 py-1">
@@ -311,6 +311,13 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           <FieldError message={fieldError("model")} />
         </div>
 
+        {/* 発売年 */}
+        <div className="flex flex-col gap-0.5 py-1" data-field="release_year">
+          <span className={labelClass}>発売年</span>
+          <input type="number" min={1950} max={2028} value={form.release_year ?? ""} onChange={(e) => update("release_year", e.target.value ? Number(e.target.value) : undefined)} placeholder="2024" className={`${inputClass} ${fieldError("release_year") ? "!border-red-400" : ""}`} />
+          <FieldError message={fieldError("release_year")} />
+        </div>
+
         {/* 評価 */}
         <div className="flex flex-col gap-0.5 py-1">
           <span className={labelClass}>評価</span>
@@ -323,11 +330,11 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         </div>
 
         {extraContent}
-      </div>
+        </div>
+      </SectionAccordion>
 
       {/* スペック */}
-      <h3 className="px-1 text-lg font-bold text-white">スペック</h3>
-      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
+      <SectionAccordion id="spec" title="スペック" isOpen={openSections.spec ?? true} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.spec = el; }}>
         {/* シャフト名・素材・フレックス（パター非表示） */}
         {!isPutter && (
           <>
@@ -380,7 +387,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
             </>
           )}
         </div>
-      </div>
+      </SectionAccordion>
 
       {/* TODO: AI自動入力 — UX再設計後に復活
       {user && (
@@ -398,11 +405,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
       {/* Section 2: 購入情報 */}
       <SectionAccordion id="purchase" title="購入情報" isOpen={openSections.purchase ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.purchase = el; }}>
         <div className="flex flex-col gap-1">
-          <div className="flex flex-col gap-0.5 py-1" data-field="release_year">
-            <span className={labelClass}>発売年</span>
-            <input type="number" min={1950} max={2028} value={form.release_year ?? ""} onChange={(e) => update("release_year", e.target.value ? Number(e.target.value) : undefined)} placeholder="2024" className={`${inputClass} ${fieldError("release_year") ? "!border-red-400" : ""}`} />
-            <FieldError message={fieldError("release_year")} />
-          </div>
           <div className="flex flex-col gap-0.5 py-1">
             <span className={labelClass}>購入日</span>
             <input type="date" value={form.purchase_date ?? ""} onChange={(e) => update("purchase_date", e.target.value || undefined)} className={inputClass} />
