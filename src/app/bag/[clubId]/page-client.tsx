@@ -366,21 +366,23 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 
       {/* Activity header */}
       <div className="flex items-center gap-2 px-1 pt-4">
-        <h3 className="flex-1 text-lg font-bold text-white">アクティビティ</h3>
-        <Link
-          href={nativeHref(`/bag/${clubId}/memos?add=1`)}
-          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 h-[40px] text-sm font-bold text-white"
-        >
-          <Plus className="h-4 w-4" />
-          メモ
-        </Link>
-        <Link
-          href={nativeHref(`/bag/${clubId}/maintenances?add=1`)}
-          className="flex items-center gap-1 rounded-full bg-[#006728] px-4 h-[40px] text-sm font-bold text-white"
-        >
-          <Plus className="h-4 w-4" />
-          メンテナンス
-        </Link>
+        <h3 className="shrink-0 text-lg font-bold text-white">アクティビティ</h3>
+        <div className="flex flex-1 justify-end gap-2">
+          <Link
+            href={nativeHref(`/bag/${clubId}/memos?add=1`)}
+            className="flex items-center gap-0.5 rounded-full bg-[#006728] px-3 h-[36px] text-xs font-bold text-white"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            メモ
+          </Link>
+          <Link
+            href={nativeHref(`/bag/${clubId}/maintenances?add=1`)}
+            className="flex items-center gap-0.5 rounded-full bg-[#006728] px-3 h-[36px] text-xs font-bold text-white"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            メンテナンス
+          </Link>
+        </div>
       </div>
 
       {/* Activity card */}
