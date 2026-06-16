@@ -287,6 +287,76 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           <FieldError message={fieldError("model")} />
         </div>
 
+        {/* シャフト名・素材・フレックス（パター非表示） */}
+        {!isPutter && (
+          <>
+            <div className="flex flex-col gap-0.5 py-1" data-field="shaft_name">
+              <span className={labelClass}>シャフト名</span>
+              <input value={form.shaft_name ?? ""} onChange={(e) => update("shaft_name", e.target.value)} placeholder="シャフト名" className={`${inputClass} ${fieldError("shaft_name") ? "!border-red-400" : ""}`} />
+              <FieldError message={fieldError("shaft_name")} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-0.5 py-1">
+                <span className={labelClass}>素材</span>
+                <select value={shaftType} onChange={(e) => { setShaftType(e.target.value as "carbon" | "steel"); update("shaft_flex", undefined); }} className={selectClass}>
+                  <option value="carbon">カーボン</option>
+                  <option value="steel">スチール</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-0.5 py-1">
+                <span className={labelClass}>フレックス</span>
+                <select value={form.shaft_flex ?? ""} onChange={(e) => update("shaft_flex", e.target.value || undefined)} className={selectClass}>
+                  <option value="">選択</option>
+                  {shaftType === "carbon"
+                    ? ["X", "S", "SR", "R", "R2", "L"].map((f) => <option key={f} value={f}>{f}</option>)
+                    : steelFlexes.map((f) => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* グリップ名 */}
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className={labelClass}>グリップ名</span>
+          <input value={form.grip_name ?? ""} onChange={(e) => update("grip_name", e.target.value)} placeholder="銘柄名" className={inputClass} />
+        </div>
+
+        {/* ロフト角 */}
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className={labelClass}>ロフト角</span>
+          <div className="flex items-center gap-1">
+            <input type="number" step="0.5" min={0} max={90} value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${inputClass} ${fieldError("loft") ? "!border-red-400" : ""}`} />
+            <span className="text-sm text-[#8b8b8b] shrink-0">°</span>
+          </div>
+          <FieldError message={fieldError("loft")} />
+        </div>
+
+        {/* 総重量 */}
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className={labelClass}>総重量</span>
+          <div className="flex items-center gap-1">
+            <input type="number" step="0.1" min={0} max={1000} value={form.weight ?? ""} onChange={(e) => update("weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={inputClass} />
+            <span className="text-sm text-[#8b8b8b] shrink-0">g</span>
+          </div>
+        </div>
+
+        {/* バランス */}
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className={labelClass}>バランス</span>
+          <input type="text" value={form.swing_weight ?? ""} onChange={(e) => update("swing_weight", e.target.value || undefined)} placeholder="D2" className={inputClass} />
+        </div>
+
+        {/* 長さ */}
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className={labelClass}>長さ</span>
+          <div className="flex items-center gap-1">
+            <input type="number" step="0.25" min={0} max={60} value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${inputClass} ${fieldError("length") ? "!border-red-400" : ""}`} />
+            <span className="text-sm text-[#8b8b8b] shrink-0">inch</span>
+          </div>
+          <FieldError message={fieldError("length")} />
+        </div>
+
         {/* 評価 */}
         <div className="flex flex-col gap-0.5 py-1">
           <span className={labelClass}>評価</span>
