@@ -323,7 +323,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         </div>
 
         {/* ロフト角 */}
-        <div className="flex flex-col gap-0.5 py-1">
+        <div className="flex flex-col gap-0.5 py-1" data-field="loft">
           <span className={labelClass}>ロフト角</span>
           <div className="flex items-center gap-1">
             <input type="number" step="0.5" min={0} max={90} value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${inputClass} ${fieldError("loft") ? "!border-red-400" : ""}`} />
@@ -348,7 +348,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         </div>
 
         {/* 長さ */}
-        <div className="flex flex-col gap-0.5 py-1">
+        <div className="flex flex-col gap-0.5 py-1" data-field="length">
           <span className={labelClass}>長さ</span>
           <div className="flex items-center gap-1">
             <input type="number" step="0.25" min={0} max={60} value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${inputClass} ${fieldError("length") ? "!border-red-400" : ""}`} />
