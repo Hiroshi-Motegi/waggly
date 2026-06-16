@@ -170,13 +170,11 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
   const requiredBadge = <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span>;
 
   const hasPurchaseData = !!(form.release_year || form.purchase_date || form.purchase_shop || form.purchase_price);
-  const hasShaftData = !!(form.shaft_weight || form.frequency || form.kick_point);
   const hasGripData = !!(form.grip_name || form.grip_size);
   const hasHeadData = !!(form.bounce || form.sole_shape || form.face_angle || form.head_volume || form.head_weight);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     purchase: hasPurchaseData,
-    shaft: hasShaftData,
     grip: hasGripData,
     head: hasHeadData,
   });
@@ -313,6 +311,23 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           <FieldError message={fieldError("model")} />
         </div>
 
+        {/* 評価 */}
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className={labelClass}>評価</span>
+          <div className="flex gap-1.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button key={star} type="button" onClick={() => update("rating", form.rating === star ? null : star)}
+                className={`text-xl transition-colors ${form.rating != null && star <= form.rating ? "text-amber-400" : "text-gray-300"}`}>★</button>
+            ))}
+          </div>
+        </div>
+
+        {extraContent}
+      </div>
+
+      {/* スペック */}
+      <h3 className="px-1 text-lg font-bold text-white">スペック</h3>
+      <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
         {/* シャフト名・素材・フレックス（パター非表示） */}
         {!isPutter && (
           <>
@@ -342,7 +357,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           </>
         )}
 
-        {/* スペック（グリッド・タップ編集） */}
+        {/* スペックグリッド（タップ編集） */}
         <div className="grid grid-cols-2 gap-1.5 py-1">
           <SpecCell label="ロフト角" unit="°" value={form.loft} step="0.5" min={0} max={90}
             onChange={(v) => update("loft", v ? Number(v) : undefined)} />
@@ -354,20 +369,17 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
             onChange={(v) => update("weight", v ? Number(v) : undefined)} />
           <SpecCell label="バランス" value={form.swing_weight} type="text" placeholder="D2"
             onChange={(v) => update("swing_weight", v || undefined)} />
+          {!isPutter && (
+            <>
+              <SpecCell label="シャフト重量" unit="g" value={form.shaft_weight} step="1" min={0} max={200}
+                onChange={(v) => update("shaft_weight", v ? Number(v) : undefined)} />
+              <SpecCell label="振動数" unit="cpm" value={form.frequency} min={0} max={500}
+                onChange={(v) => update("frequency", v ? Number(v) : undefined)} />
+              <SpecCell label="キックポイント" value={form.kick_point} type="text" placeholder="—"
+                onChange={(v) => update("kick_point", v || undefined)} />
+            </>
+          )}
         </div>
-
-        {/* 評価 */}
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className={labelClass}>評価</span>
-          <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button key={star} type="button" onClick={() => update("rating", form.rating === star ? null : star)}
-                className={`text-xl transition-colors ${form.rating != null && star <= form.rating ? "text-amber-400" : "text-gray-300"}`}>★</button>
-            ))}
-          </div>
-        </div>
-
-        {extraContent}
       </div>
 
       {/* TODO: AI自動入力 — UX再設計後に復活
@@ -407,36 +419,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           </div>
         </div>
       </SectionAccordion>
-
-      {/* Section 3: シャフト詳細（パター非表示） */}
-      {!isPutter && (
-        <SectionAccordion id="shaft" title="シャフト詳細" isOpen={openSections.shaft ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.shaft = el; }}>
-          <div className="flex flex-col gap-1">
-            {/* 基本情報の参照表示 */}
-            {(form.shaft_name || form.shaft_flex) && (
-              <div className="rounded bg-[#f5f5f5] px-3 py-2 mb-1 text-sm text-[#666]">
-                {form.shaft_name && <span>{form.shaft_name}</span>}
-                {form.shaft_name && form.shaft_flex && <span> / </span>}
-                {form.shaft_flex && <span>{form.shaft_flex}</span>}
-                {form.shaft_flex && shaftType === "steel" && <span> (スチール)</span>}
-                {form.shaft_flex && shaftType === "carbon" && <span> (カーボン)</span>}
-              </div>
-            )}
-            <SpecRow label="シャフト重量" unit="g">
-              <input type="number" step="1" min={0} max={200} value={form.shaft_weight ?? ""} onChange={(e) => update("shaft_weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
-            </SpecRow>
-            <SpecRow label="振動数" unit="cpm">
-              <input type="number" min={0} max={500} value={form.frequency ?? ""} onChange={(e) => update("frequency", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
-            </SpecRow>
-            <SpecRow label="キックポイント" last>
-              <select value={form.kick_point ?? ""} onChange={(e) => update("kick_point", e.target.value || undefined)} className={specInputClass}>
-                <option value="">—</option>
-                {["先調子", "先中調子", "中調子", "中元調子", "元調子"].map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-              </select>
-            </SpecRow>
-          </div>
-        </SectionAccordion>
-      )}
 
       {/* Section 4: グリップ */}
       <SectionAccordion id="grip" title="グリップ" isOpen={openSections.grip ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.grip = el; }}>
