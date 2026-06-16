@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Plus, X, ChevronDown, ChevronUp } from "lucide-react";
-import { apiFetch } from "@/lib/api-client";
-import { useAuth } from "@/hooks/use-auth";
+// import { apiFetch } from "@/lib/api-client"; // TODO: AI自動入力復活時に戻す
+// import { useAuth } from "@/hooks/use-auth"; // TODO: AI自動入力復活時に戻す
 import type { Club, ClubCategory } from "@/types/database";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { clubValidationSchema } from "@/lib/form-validation";
@@ -83,7 +83,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
     ...initialData,
   });
   const { validateOnChange, validateOnSubmit, fieldError } = useFormValidation(clubValidationSchema);
-  const { user } = useAuth();
+  // const { user } = useAuth(); // TODO: AI自動入力復活時に戻す
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -118,12 +118,13 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
   const [shaftType, setShaftType] = useState<"carbon" | "steel">(
     initialData?.shaft_flex && steelFlexes.includes(initialData.shaft_flex) ? "steel" : "carbon"
   );
-  const [isSearching, setIsSearching] = useState(false);
-
   function update(field: string, value: string | number | undefined | null) {
     setForm((prev) => ({ ...prev, [field]: value }));
     validateOnChange(field, value);
   }
+
+  /* TODO: AI自動入力復活時に戻す
+  const [isSearching, setIsSearching] = useState(false);
 
   async function handleAutofill() {
     setIsSearching(true);
@@ -160,6 +161,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
       setIsSearching(false);
     }
   }
+  */
 
   const presetNumbers = form.category ? (clubNumbersByCategory[form.category] ?? []) : [];
 
@@ -363,7 +365,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         {extraContent}
       </div>
 
-      {/* スペック自動入力（基本情報の直下） */}
+      {/* TODO: AI自動入力 — UX再設計後に復活
       {user && (
         <div className="flex flex-col items-center gap-1 rounded-lg bg-[#ebf1eb] p-3">
           <p className="text-sm text-black w-full">公開情報からスペックを自動入力します。内容に誤りがある場合があります。</p>
@@ -374,6 +376,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           </button>
         </div>
       )}
+      */}
 
       {/* Section 2: 購入情報 */}
       <SectionAccordion id="purchase" title="購入情報" isOpen={openSections.purchase ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.purchase = el; }}>
