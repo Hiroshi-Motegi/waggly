@@ -575,7 +575,7 @@ export default function SettingsPage() {
         >
           ログアウト
         </button>
-        <Link href="/help/delete-account" className="text-sm text-white/60">
+        <Link href="/settings/delete-account" className="text-sm font-bold text-white mt-4">
           アカウント削除（退会）
         </Link>
       </div>
