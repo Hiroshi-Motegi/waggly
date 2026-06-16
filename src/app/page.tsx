@@ -149,7 +149,7 @@ function FeatureSection({ icon, title, photo, photoSide, screenshots, descriptio
 
       {/* Accordion */}
       {!open && (
-        <button onClick={() => setOpen(true)} className="mx-5 mt-4 flex h-11 w-[calc(100%-40px)] items-center justify-center gap-2 rounded-full border border-white bg-black/30 text-white text-base font-medium">
+        <button onClick={() => setOpen(true)} className="mt-4 flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2 rounded-full border border-white bg-black/30 text-white text-base font-medium">
           詳しく見る <ChevronDown className="h-4 w-4" />
         </button>
       )}
