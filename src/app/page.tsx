@@ -81,14 +81,14 @@ async function loginGoogle() {
 function LoginButtons() {
   return (
     <>
-      <button onClick={loginLine} className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#06C755] text-white font-bold text-base shadow-lg">
+      <button onClick={loginLine} className="flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2.5 rounded-full bg-[#06C755] text-white font-bold text-base shadow-lg">
         {LINE_ICON} LINEでログイン
       </button>
-      <button onClick={loginGoogle} className="mt-3 flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-white text-gray-800 font-bold text-base shadow-lg">
+      <button onClick={loginGoogle} className="mt-3 flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2.5 rounded-full bg-white text-gray-800 font-bold text-base shadow-lg">
         {GOOGLE_ICON} Googleでログイン
       </button>
       {process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true" && (
-        <button onClick={() => { localStorage.removeItem("dev-logged-in"); window.location.reload(); }} className="mt-3 flex h-12 w-full items-center justify-center rounded-full border border-white/30 text-white/70 font-bold text-base">
+        <button onClick={() => { localStorage.removeItem("dev-logged-in"); window.location.reload(); }} className="mt-3 flex h-12 w-full max-w-64 mx-auto items-center justify-center rounded-full border border-white/30 text-white/70 font-bold text-base">
           開発ログイン
         </button>
       )}
