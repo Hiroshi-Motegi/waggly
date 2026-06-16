@@ -299,31 +299,31 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 
           {/* 購入情報 */}
           {(club.release_year || club.purchase_date || club.purchase_shop || club.purchase_price != null) && (
-            <div>
+            <div className="pt-2">
               <p className="text-sm font-bold text-[#333] mb-1">購入情報</p>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="flex flex-col">
                 {club.release_year && (
-                  <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
-                    <span className="text-[10px] text-[#8b8b8b]">発売年</span>
-                    <span className="text-base font-bold text-black">{club.release_year}年</span>
+                  <div className="flex items-center gap-2.5 border-b border-[#ececec] py-2 text-base">
+                    <span className="shrink-0 text-[#8b8b8b]">発売年</span>
+                    <span className="flex-1 text-right">{club.release_year}年</span>
                   </div>
                 )}
                 {club.purchase_date && (
-                  <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
-                    <span className="text-[10px] text-[#8b8b8b]">購入日</span>
-                    <span className="text-base font-bold text-black">{formatDate(club.purchase_date)}</span>
+                  <div className="flex items-center gap-2.5 border-b border-[#ececec] py-2 text-base">
+                    <span className="shrink-0 text-[#8b8b8b]">購入日</span>
+                    <span className="flex-1 text-right">{formatDate(club.purchase_date)}</span>
                   </div>
                 )}
                 {club.purchase_shop && (
-                  <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
-                    <span className="text-[10px] text-[#8b8b8b]">購入店</span>
-                    <span className="text-base font-bold text-black">{club.purchase_shop}</span>
+                  <div className="flex items-center gap-2.5 border-b border-[#ececec] py-2 text-base">
+                    <span className="shrink-0 text-[#8b8b8b]">購入店</span>
+                    <span className="flex-1 text-right">{club.purchase_shop}</span>
                   </div>
                 )}
                 {club.purchase_price != null && (
-                  <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
-                    <span className="text-[10px] text-[#8b8b8b]">価格</span>
-                    <span className="text-base font-bold text-black">{club.purchase_price.toLocaleString()}円</span>
+                  <div className="flex items-center gap-2.5 py-2 text-base">
+                    <span className="shrink-0 text-[#8b8b8b]">価格</span>
+                    <span className="flex-1 text-right font-medium">{club.purchase_price.toLocaleString()}円</span>
                   </div>
                 )}
               </div>
