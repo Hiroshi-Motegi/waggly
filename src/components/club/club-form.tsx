@@ -301,18 +301,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         {extraContent}
       </div>
 
-      {/* スペック自動入力 */}
-      {user && (
-        <div className="flex flex-col items-center gap-1 rounded-lg bg-[#ebf1eb] p-3">
-          <p className="text-sm text-black w-full">公開情報からスペックを自動入力します。内容に誤りがある場合があります。</p>
-          <p className="text-xs text-[#8b8b8b] w-full">※ AIトークンを消費します</p>
-          <button type="button" disabled={isSearching || (!form.maker && !form.model)} onClick={handleAutofill}
-            className="rounded-full border border-[#006728] bg-white px-5 py-1 text-xs font-bold text-[#006728] disabled:opacity-50">
-            {isSearching ? "検索中..." : "スペック自動入力"}
-          </button>
-        </div>
-      )}
-
       {/* Section 2: 購入情報 */}
       <SectionAccordion id="purchase" title="購入情報" isOpen={openSections.purchase ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.purchase = el; }}>
         <div className="flex flex-col gap-1">
@@ -337,6 +325,18 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           </div>
         </div>
       </SectionAccordion>
+
+      {/* スペック自動入力 */}
+      {user && (
+        <div className="flex flex-col items-center gap-1 rounded-lg bg-[#ebf1eb] p-3">
+          <p className="text-sm text-black w-full">公開情報からスペックを自動入力します。内容に誤りがある場合があります。</p>
+          <p className="text-xs text-[#8b8b8b] w-full">※ AIトークンを消費します</p>
+          <button type="button" disabled={isSearching || (!form.maker && !form.model)} onClick={handleAutofill}
+            className="rounded-full border border-[#006728] bg-white px-5 py-1 text-xs font-bold text-[#006728] disabled:opacity-50">
+            {isSearching ? "検索中..." : "スペック自動入力"}
+          </button>
+        </div>
+      )}
 
       {/* Section 3: シャフト（パター非表示） */}
       {!isPutter && (
