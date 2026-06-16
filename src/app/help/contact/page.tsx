@@ -111,18 +111,18 @@ export default function ContactPage() {
       <PageHeader title="お問い合わせ" variant="dark" />
 
       <form onSubmit={handleSubmit}>
-        <div className="rounded-lg bg-white p-4 space-y-4">
+        <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
           {/* 名前 (未ログイン時) or ニックネーム表示 (ログイン時) */}
           {isLoggedIn ? (
-            <div>
-              <label className="text-sm flex items-center">ユーザー</label>
-              <p className="mt-1 text-base">{profile.nickname ?? "ユーザー"}</p>
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className="text-sm flex items-center">ユーザー</span>
+              <p className="text-base">{profile.nickname ?? "ユーザー"}</p>
             </div>
           ) : (
-            <div>
-              <label className="text-sm flex items-center">
-                お名前 <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
-              </label>
+            <div className="flex flex-col gap-0.5 py-1">
+              <span className="text-sm flex items-center">
+                お名前 <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
+              </span>
               <input
                 type="text"
                 value={form.name}
@@ -135,10 +135,10 @@ export default function ContactPage() {
           )}
 
           {/* メールアドレス */}
-          <div>
-            <label className="text-sm flex items-center">
-              メールアドレス <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
-            </label>
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-sm flex items-center">
+              メールアドレス <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
+            </span>
             <input
               type="email"
               value={form.email}
@@ -147,14 +147,14 @@ export default function ContactPage() {
               placeholder="example@email.com"
             />
             {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
-            <p className="text-xs text-[#8b8b8b] mt-1">返信先として使用します</p>
+            <p className="text-xs text-[#8b8b8b]">返信先として使用します</p>
           </div>
 
           {/* カテゴリ */}
-          <div>
-            <label className="text-sm flex items-center">
-              カテゴリ <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
-            </label>
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-sm flex items-center">
+              カテゴリ <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
+            </span>
             <select
               value={form.category}
               onChange={(e) => updateField("category", e.target.value)}
@@ -169,10 +169,10 @@ export default function ContactPage() {
           </div>
 
           {/* お問い合わせ内容 */}
-          <div>
-            <label className="text-sm flex items-center">
-              お問い合わせ内容 <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
-            </label>
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-sm flex items-center">
+              お問い合わせ内容 <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
+            </span>
             <textarea
               value={form.message}
               onChange={(e) => updateField("message", e.target.value)}

@@ -104,18 +104,18 @@ export default function ReportPage() {
 
       <form onSubmit={handleSubmit} className="space-y-2">
         {/* 通報対象 */}
-        <div className="rounded-lg bg-white p-4">
-          <label className="text-sm flex items-center">通報対象ユーザー</label>
-          <p className="mt-1 text-base font-bold">{username}</p>
+        <div className="flex flex-col gap-0.5 rounded-lg bg-white p-3 py-1">
+          <span className="text-sm flex items-center">通報対象ユーザー</span>
+          <p className="text-base font-bold">{username}</p>
         </div>
 
         {/* フォーム本体 */}
-        <div className="rounded-lg bg-white p-4 space-y-4">
+        <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
           {/* 理由 */}
-          <div>
-            <label className="text-sm flex items-center">
-              理由 <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
-            </label>
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-sm flex items-center">
+              理由 <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
+            </span>
             <select
               value={form.reason}
               onChange={(e) => updateField("reason", e.target.value)}
@@ -130,8 +130,8 @@ export default function ReportPage() {
           </div>
 
           {/* 詳細 */}
-          <div>
-            <label className="text-sm flex items-center">詳細（任意）</label>
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-sm flex items-center">詳細（任意）</span>
             <textarea
               value={form.detail}
               onChange={(e) => updateField("detail", e.target.value)}
@@ -141,8 +141,8 @@ export default function ReportPage() {
           </div>
 
           {/* メールアドレス */}
-          <div>
-            <label className="text-sm flex items-center">メールアドレス（任意）</label>
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className="text-sm flex items-center">メールアドレス（任意）</span>
             <input
               type="email"
               value={form.reporter_email}
