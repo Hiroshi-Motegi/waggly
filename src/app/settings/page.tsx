@@ -448,26 +448,21 @@ export default function SettingsPage() {
       {/* プラン */}
       <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
       <div className="rounded-lg bg-white p-3">
-        <Link href="/settings/plan">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-base font-bold">{!subscription ? "" : isPro ? "Waggly Pro" : "無料プラン"}</span>
-              {isPaused && subscription?.subscription?.current_period_end && (
-                <p className="text-xs text-amber-500 mt-0.5">
-                  解約予定（{new Date(subscription.subscription.current_period_end).toLocaleDateString("ja-JP")}まで利用可能）
-                </p>
-              )}
-            </div>
-            {!isPro && !isPaused && (
-              <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
-                プランを変更
-              </span>
-            )}
-            {(isPro || isPaused) && (
-              <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-base font-bold">{!subscription ? "" : isPro ? "Waggly Pro" : "無料プラン"}</span>
+            {isPaused && subscription?.subscription?.current_period_end && (
+              <p className="text-xs text-amber-500 mt-0.5">
+                解約予定（{new Date(subscription.subscription.current_period_end).toLocaleDateString("ja-JP")}まで利用可能）
+              </p>
             )}
           </div>
-        </Link>
+          {!isPro && !isPaused && (
+            <span className="rounded-full bg-[#8b8b8b] px-2.5 py-0.5 text-xs font-bold text-white">
+              準備中
+            </span>
+          )}
+        </div>
       </div>
 
       {/* 広告設定 */}
@@ -478,15 +473,15 @@ export default function SettingsPage() {
           <p className="text-xs text-[#006728]">購入済み</p>
         </div>
       ) : (
-        <Link href="/settings/remove-ads">
-          <div className="rounded-lg bg-white p-3 flex items-center justify-between">
-            <div>
-              <p className="text-base font-bold">広告を非表示にする</p>
-              <p className="text-xs text-[#8b8b8b]">¥100 の買い切り</p>
-            </div>
-            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+        <div className="rounded-lg bg-white p-3 flex items-center justify-between">
+          <div>
+            <p className="text-base font-bold">広告を非表示にする</p>
+            <p className="text-xs text-[#8b8b8b]">¥100 の買い切り</p>
           </div>
-        </Link>
+          <span className="rounded-full bg-[#8b8b8b] px-2.5 py-0.5 text-xs font-bold text-white">
+            準備中
+          </span>
+        </div>
       )}
 
       {/* AIコーチ利用状況 */}

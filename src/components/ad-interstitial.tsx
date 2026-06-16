@@ -62,15 +62,9 @@ export function AdInterstitial({ onClose }: { onClose: () => void }) {
 
         {/* 閉じるボタン + 広告非表示リンク */}
         <div className="flex items-center justify-between p-3 border-t border-[#ececec]">
-          <button
-            onClick={() => {
-              onClose();
-              router.push("/settings/remove-ads");
-            }}
-            className="text-xs text-[#006728] underline"
-          >
-            広告を非表示にする
-          </button>
+          <span className="text-xs text-[#8b8b8b]">
+            広告を非表示にする（準備中）
+          </span>
           <button
             onClick={onClose}
             disabled={countdown > 0}
