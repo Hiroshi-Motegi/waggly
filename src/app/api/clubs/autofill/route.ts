@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
   const [searchResult, rakutenResult] = await Promise.all([
     searchGolfKnowledge(searchQuery).catch(() => ({ results: [], answer: null })),
-    searchRakutenClub(maker, model),
+    searchRakutenClub(maker, model, club_number, category),
   ]);
 
   // 3. Build prompt with search context
