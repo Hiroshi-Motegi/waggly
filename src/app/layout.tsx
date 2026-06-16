@@ -9,8 +9,27 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Waggly - ゴルフクラブ管理",
-  description: "自分のクラブセットを管理し、練習日記とAIで上達をサポート",
+  title: {
+    default: "Waggly - ゴルフクラブ管理・練習記録アプリ",
+    template: "%s | Waggly",
+  },
+  description:
+    "ゴルフクラブのセッティング管理、練習記録、AIコーチング。クラブスペック・メンテナンス履歴をまとめて管理し、ゴルファー名刺で仲間にシェア。",
+  metadataBase: new URL("https://waggly.jp"),
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    siteName: "Waggly",
+    title: "Waggly - ゴルフクラブ管理・練習記録アプリ",
+    description:
+      "ゴルフクラブのセッティング管理、練習記録、AIコーチング。クラブスペック・メンテナンス履歴をまとめて管理し、ゴルファー名刺で仲間にシェア。",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  alternates: {
+    canonical: "https://waggly.jp",
+  },
 };
 
 export const viewport: Viewport = {

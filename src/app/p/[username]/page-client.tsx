@@ -364,8 +364,23 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
 
   const displayName = profile.nickname || profile.username;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: displayName,
+    url: `https://waggly.jp/p/${profile.username}`,
+    ...(profile.avatar_url ? { image: profile.avatar_url } : {}),
+    ...(profile.bio ? { description: profile.bio } : {}),
+    ...(profile.home_course ? { homeLocation: { "@type": "Place", name: profile.home_course } } : {}),
+    ...(profile.sns_links?.instagram ? { sameAs: [profile.sns_links.instagram, ...(profile.sns_links.x ? [profile.sns_links.x] : [])] } : profile.sns_links?.x ? { sameAs: [profile.sns_links.x] } : {}),
+  };
+
   return (
     <div className="relative flex flex-col" style={{ minHeight: "100dvh" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="relative z-10 flex flex-col">
         {/* Header */}
         {profile.cover_images && profile.cover_images.length > 0 ? (
