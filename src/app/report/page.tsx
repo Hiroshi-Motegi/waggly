@@ -105,7 +105,7 @@ export default function ReportPage() {
       <form onSubmit={handleSubmit} className="space-y-2">
         {/* 通報対象 */}
         <div className="rounded-lg bg-white p-4">
-          <label className="text-sm font-bold text-[#8b8b8b]">通報対象ユーザー</label>
+          <label className="text-sm flex items-center">通報対象ユーザー</label>
           <p className="mt-1 text-base font-bold">{username}</p>
         </div>
 
@@ -113,8 +113,8 @@ export default function ReportPage() {
         <div className="rounded-lg bg-white p-4 space-y-4">
           {/* 理由 */}
           <div>
-            <label className="text-sm font-bold text-[#8b8b8b]">
-              理由 <span className="text-red-500">*</span>
+            <label className="text-sm flex items-center">
+              理由 <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
             </label>
             <select
               value={form.reason}
@@ -131,7 +131,7 @@ export default function ReportPage() {
 
           {/* 詳細 */}
           <div>
-            <label className="text-sm font-bold text-[#8b8b8b]">詳細（任意）</label>
+            <label className="text-sm flex items-center">詳細（任意）</label>
             <textarea
               value={form.detail}
               onChange={(e) => updateField("detail", e.target.value)}
@@ -142,7 +142,7 @@ export default function ReportPage() {
 
           {/* メールアドレス */}
           <div>
-            <label className="text-sm font-bold text-[#8b8b8b]">メールアドレス（任意）</label>
+            <label className="text-sm flex items-center">メールアドレス（任意）</label>
             <input
               type="email"
               value={form.reporter_email}

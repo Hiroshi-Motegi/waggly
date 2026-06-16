@@ -115,13 +115,13 @@ export default function ContactPage() {
           {/* 名前 (未ログイン時) or ニックネーム表示 (ログイン時) */}
           {isLoggedIn ? (
             <div>
-              <label className="text-sm font-bold text-[#8b8b8b]">ユーザー</label>
+              <label className="text-sm flex items-center">ユーザー</label>
               <p className="mt-1 text-base">{profile.nickname ?? "ユーザー"}</p>
             </div>
           ) : (
             <div>
-              <label className="text-sm font-bold text-[#8b8b8b]">
-                お名前 <span className="text-red-500">*</span>
+              <label className="text-sm flex items-center">
+                お名前 <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
               </label>
               <input
                 type="text"
@@ -136,8 +136,8 @@ export default function ContactPage() {
 
           {/* メールアドレス */}
           <div>
-            <label className="text-sm font-bold text-[#8b8b8b]">
-              メールアドレス <span className="text-red-500">*</span>
+            <label className="text-sm flex items-center">
+              メールアドレス <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
             </label>
             <input
               type="email"
@@ -152,8 +152,8 @@ export default function ContactPage() {
 
           {/* カテゴリ */}
           <div>
-            <label className="text-sm font-bold text-[#8b8b8b]">
-              カテゴリ <span className="text-red-500">*</span>
+            <label className="text-sm flex items-center">
+              カテゴリ <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
             </label>
             <select
               value={form.category}
@@ -170,8 +170,8 @@ export default function ContactPage() {
 
           {/* お問い合わせ内容 */}
           <div>
-            <label className="text-sm font-bold text-[#8b8b8b]">
-              お問い合わせ内容 <span className="text-red-500">*</span>
+            <label className="text-sm flex items-center">
+              お問い合わせ内容 <span className="ml-1 text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">必須</span>
             </label>
             <textarea
               value={form.message}
