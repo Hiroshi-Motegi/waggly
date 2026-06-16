@@ -168,17 +168,15 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
   const requiredBadge = <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span>;
 
   const hasPurchaseData = !!(form.release_year || form.purchase_date || form.purchase_shop || form.purchase_price);
-  const hasShaftData = !!(form.shaft_name || form.shaft_flex || form.shaft_weight || form.frequency || form.kick_point);
-  const hasGripData = !!(form.grip_name || form.grip_size);
-  const hasHeadData = !!(form.loft || form.lie || form.length || form.bounce || form.sole_shape || form.face_angle || form.head_volume || form.head_weight);
-  const hasOverallData = !!(form.weight || form.swing_weight);
+  const hasShaftData = !!(form.shaft_weight || form.frequency || form.kick_point);
+  const hasGripData = !!(form.grip_size);
+  const hasHeadData = !!(form.lie || form.bounce || form.sole_shape || form.face_angle || form.head_volume || form.head_weight);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     purchase: hasPurchaseData,
     shaft: hasShaftData,
     grip: hasGripData,
     head: hasHeadData,
-    overall: hasOverallData,
   });
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -371,6 +369,18 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         {extraContent}
       </div>
 
+      {/* スペック自動入力（基本情報の直下） */}
+      {user && (
+        <div className="flex flex-col items-center gap-1 rounded-lg bg-[#ebf1eb] p-3">
+          <p className="text-sm text-black w-full">公開情報からスペックを自動入力します。内容に誤りがある場合があります。</p>
+          <p className="text-xs text-[#8b8b8b] w-full">※ AIトークンを消費します</p>
+          <button type="button" disabled={isSearching || (!form.maker && !form.model)} onClick={handleAutofill}
+            className="rounded-full border border-[#006728] bg-white px-5 py-1 text-xs font-bold text-[#006728] disabled:opacity-50">
+            {isSearching ? "検索中..." : "スペック自動入力"}
+          </button>
+        </div>
+      )}
+
       {/* Section 2: 購入情報 */}
       <SectionAccordion id="purchase" title="購入情報" isOpen={openSections.purchase ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.purchase = el; }}>
         <div className="flex flex-col gap-1">
@@ -396,45 +406,20 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         </div>
       </SectionAccordion>
 
-      {/* スペック自動入力 */}
-      {user && (
-        <div className="flex flex-col items-center gap-1 rounded-lg bg-[#ebf1eb] p-3">
-          <p className="text-sm text-black w-full">公開情報からスペックを自動入力します。内容に誤りがある場合があります。</p>
-          <p className="text-xs text-[#8b8b8b] w-full">※ AIトークンを消費します</p>
-          <button type="button" disabled={isSearching || (!form.maker && !form.model)} onClick={handleAutofill}
-            className="rounded-full border border-[#006728] bg-white px-5 py-1 text-xs font-bold text-[#006728] disabled:opacity-50">
-            {isSearching ? "検索中..." : "スペック自動入力"}
-          </button>
-        </div>
-      )}
-
-      {/* Section 3: シャフト（パター非表示） */}
+      {/* Section 3: シャフト詳細（パター非表示） */}
       {!isPutter && (
-        <SectionAccordion id="shaft" title="シャフト" isOpen={openSections.shaft ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.shaft = el; }}>
+        <SectionAccordion id="shaft" title="シャフト詳細" isOpen={openSections.shaft ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.shaft = el; }}>
           <div className="flex flex-col gap-1">
-            <div className="flex flex-col gap-0.5 py-1" data-field="shaft_name">
-              <span className={labelClass}>シャフト名</span>
-              <input value={form.shaft_name ?? ""} onChange={(e) => update("shaft_name", e.target.value)} placeholder="シャフト名" className={`${inputClass} ${fieldError("shaft_name") ? "!border-red-400" : ""}`} />
-              <FieldError message={fieldError("shaft_name")} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-0.5 py-1">
-                <span className={labelClass}>素材</span>
-                <select value={shaftType} onChange={(e) => { setShaftType(e.target.value as "carbon" | "steel"); update("shaft_flex", undefined); }} className={selectClass}>
-                  <option value="carbon">カーボン</option>
-                  <option value="steel">スチール</option>
-                </select>
+            {/* 基本情報の参照表示 */}
+            {(form.shaft_name || form.shaft_flex) && (
+              <div className="rounded bg-[#f5f5f5] px-3 py-2 mb-1 text-sm text-[#666]">
+                {form.shaft_name && <span>{form.shaft_name}</span>}
+                {form.shaft_name && form.shaft_flex && <span> / </span>}
+                {form.shaft_flex && <span>{form.shaft_flex}</span>}
+                {shaftType === "steel" && <span> (スチール)</span>}
+                {shaftType === "carbon" && <span> (カーボン)</span>}
               </div>
-              <div className="flex flex-col gap-0.5 py-1">
-                <span className={labelClass}>フレックス</span>
-                <select value={form.shaft_flex ?? ""} onChange={(e) => update("shaft_flex", e.target.value || undefined)} className={selectClass}>
-                  <option value="">選択</option>
-                  {shaftType === "carbon"
-                    ? ["X", "S", "SR", "R", "R2", "L"].map((f) => <option key={f} value={f}>{f}</option>)
-                    : steelFlexes.map((f) => <option key={f} value={f}>{f}</option>)}
-                </select>
-              </div>
-            </div>
+            )}
             <SpecRow label="シャフト重量" unit="g">
               <input type="number" step="1" min={0} max={200} value={form.shaft_weight ?? ""} onChange={(e) => update("shaft_weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
             </SpecRow>
@@ -451,13 +436,15 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         </SectionAccordion>
       )}
 
-      {/* Section 4: グリップ */}
-      <SectionAccordion id="grip" title="グリップ" isOpen={openSections.grip ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.grip = el; }}>
+      {/* Section 4: グリップ詳細 */}
+      <SectionAccordion id="grip" title="グリップ詳細" isOpen={openSections.grip ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.grip = el; }}>
         <div className="flex flex-col gap-1">
-          <div className="flex flex-col gap-0.5 py-1">
-            <span className={labelClass}>グリップ名</span>
-            <input value={form.grip_name ?? ""} onChange={(e) => update("grip_name", e.target.value)} placeholder="銘柄名" className={inputClass} />
-          </div>
+          {/* 基本情報の参照表示 */}
+          {form.grip_name && (
+            <div className="rounded bg-[#f5f5f5] px-3 py-2 mb-1 text-sm text-[#666]">
+              {form.grip_name}
+            </div>
+          )}
           <div className="flex flex-col gap-0.5 py-1">
             <span className={labelClass}>太さ</span>
             <input value={form.grip_size ?? ""} onChange={(e) => update("grip_size", e.target.value)} placeholder="M60" className={inputClass} />
@@ -468,14 +455,8 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
       {/* Section 5: ヘッドスペック */}
       <SectionAccordion id="head" title="ヘッドスペック" isOpen={openSections.head ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.head = el; }}>
         <div className="flex flex-col">
-          <SpecRow label="ロフト角" unit="°">
-            <input type="number" step="0.5" min={0} max={90} value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${specInputClass} ${fieldError("loft") ? "!border-red-400" : ""}`} />
-          </SpecRow>
           <SpecRow label="ライ角" unit="°">
             <input type="number" step="0.5" min={0} max={90} value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${specInputClass} ${fieldError("lie") ? "!border-red-400" : ""}`} />
-          </SpecRow>
-          <SpecRow label="長さ" unit="inch">
-            <input type="number" step="0.25" min={0} max={60} value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${specInputClass} ${fieldError("length") ? "!border-red-400" : ""}`} />
           </SpecRow>
           {form.category === "wedge" && (
             <>
@@ -502,18 +483,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           )}
           <SpecRow label="ヘッド重量" unit="g" last>
             <input type="number" step="0.1" min={0} max={400} value={form.head_weight ?? ""} onChange={(e) => update("head_weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
-          </SpecRow>
-        </div>
-      </SectionAccordion>
-
-      {/* Section 6: 全体スペック */}
-      <SectionAccordion id="overall" title="全体スペック" isOpen={openSections.overall ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.overall = el; }}>
-        <div className="flex flex-col">
-          <SpecRow label="総重量" unit="g">
-            <input type="number" step="0.1" min={0} max={1000} value={form.weight ?? ""} onChange={(e) => update("weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
-          </SpecRow>
-          <SpecRow label="バランス" last>
-            <input type="text" value={form.swing_weight ?? ""} onChange={(e) => update("swing_weight", e.target.value || undefined)} placeholder="D2" className={specInputClass} />
           </SpecRow>
         </div>
       </SectionAccordion>
