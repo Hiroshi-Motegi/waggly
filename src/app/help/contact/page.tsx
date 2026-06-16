@@ -110,9 +110,9 @@ export default function ContactPage() {
     <div className="relative flex flex-col px-2 py-2 space-y-2">
       <PageHeader title="お問い合わせ" variant="dark" />
 
-      <form onSubmit={handleSubmit} className="space-y-2">
-        {/* 名前 (未ログイン時) or ニックネーム表示 (ログイン時) */}
-        <div className="rounded-lg bg-white p-4">
+      <form onSubmit={handleSubmit}>
+        <div className="rounded-lg bg-white p-4 space-y-4">
+          {/* 名前 (未ログイン時) or ニックネーム表示 (ログイン時) */}
           {isLoggedIn ? (
             <div>
               <label className="text-sm font-bold text-[#8b8b8b]">ユーザー</label>
@@ -133,83 +133,81 @@ export default function ContactPage() {
               {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
             </div>
           )}
-        </div>
 
-        {/* メールアドレス */}
-        <div className="rounded-lg bg-white p-4">
-          <label className="text-sm font-bold text-[#8b8b8b]">
-            メールアドレス <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="email"
-            value={form.email}
-            onChange={(e) => updateField("email", e.target.value)}
-            className={inputClass}
-            placeholder="example@email.com"
-          />
-          {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
-          <p className="text-xs text-[#8b8b8b] mt-1">返信先として使用します</p>
-        </div>
-
-        {/* カテゴリ */}
-        <div className="rounded-lg bg-white p-4">
-          <label className="text-sm font-bold text-[#8b8b8b]">
-            カテゴリ <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={form.category}
-            onChange={(e) => updateField("category", e.target.value)}
-            className={inputClass}
-          >
-            <option value="">選択してください</option>
-            {CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
-          </select>
-          {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
-        </div>
-
-        {/* お問い合わせ内容 */}
-        <div className="rounded-lg bg-white p-4">
-          <label className="text-sm font-bold text-[#8b8b8b]">
-            お問い合わせ内容 <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            value={form.message}
-            onChange={(e) => updateField("message", e.target.value)}
-            className={`${inputClass} min-h-[120px] resize-y`}
-            placeholder="お問い合わせ内容をご記入ください"
-          />
-          {errors.message && <p className="text-sm text-red-500 mt-1">{errors.message}</p>}
-        </div>
-
-        {/* Turnstile */}
-        <div className="flex justify-center">
-          <Turnstile
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-            onSuccess={setTurnstileToken}
-          />
-        </div>
-
-        {/* エラー表示 */}
-        {submitError && (
-          <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600">
-            {submitError}
+          {/* メールアドレス */}
+          <div>
+            <label className="text-sm font-bold text-[#8b8b8b]">
+              メールアドレス <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => updateField("email", e.target.value)}
+              className={inputClass}
+              placeholder="example@email.com"
+            />
+            {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+            <p className="text-xs text-[#8b8b8b] mt-1">返信先として使用します</p>
           </div>
-        )}
+
+          {/* カテゴリ */}
+          <div>
+            <label className="text-sm font-bold text-[#8b8b8b]">
+              カテゴリ <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={form.category}
+              onChange={(e) => updateField("category", e.target.value)}
+              className={inputClass}
+            >
+              <option value="">選択してください</option>
+              {CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+            {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
+          </div>
+
+          {/* お問い合わせ内容 */}
+          <div>
+            <label className="text-sm font-bold text-[#8b8b8b]">
+              お問い合わせ内容 <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={form.message}
+              onChange={(e) => updateField("message", e.target.value)}
+              className={`${inputClass} min-h-[120px] resize-y`}
+              placeholder="お問い合わせ内容をご記入ください"
+            />
+            {errors.message && <p className="text-sm text-red-500 mt-1">{errors.message}</p>}
+          </div>
+
+          {/* Turnstile */}
+          <div className="flex justify-center">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={setTurnstileToken}
+            />
+          </div>
+
+          {/* エラー表示 */}
+          {submitError && (
+            <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600">
+              {submitError}
+            </div>
+          )}
+        </div>
 
         {/* 送信ボタン */}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-[#006728] py-3 text-base font-bold text-white disabled:opacity-50"
-        >
-          {submitting ? (
-            <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-          ) : (
-            "送信する"
-          )}
-        </button>
+        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50"
+          >
+            {submitting ? "送信中..." : "送信する"}
+          </button>
+        </div>
       </form>
     </div>
   );

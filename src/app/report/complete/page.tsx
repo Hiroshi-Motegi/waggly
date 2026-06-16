@@ -25,9 +25,12 @@ export default function ReportCompletePage() {
         <p className="text-base text-[#8b8b8b]">
           内容を確認の上、対応いたします。
         </p>
+      </div>
+
+      <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
         <button
           onClick={() => router.push("/")}
-          className="mt-4 rounded-lg bg-[#006728] px-6 py-3 text-base font-bold text-white"
+          className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728]"
         >
           トップへ戻る
         </button>

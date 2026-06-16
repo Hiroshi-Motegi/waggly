@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { validateForm, type ValidationSchema } from "@/lib/form-validation";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { Loader2 } from "lucide-react";
 
 const REASONS = [
   { value: "inappropriate", label: "不適切なコンテンツ" },
@@ -110,74 +109,75 @@ export default function ReportPage() {
           <p className="mt-1 text-base font-bold">{username}</p>
         </div>
 
-        {/* 理由 */}
-        <div className="rounded-lg bg-white p-4">
-          <label className="text-sm font-bold text-[#8b8b8b]">
-            理由 <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={form.reason}
-            onChange={(e) => updateField("reason", e.target.value)}
-            className={inputClass}
-          >
-            <option value="">選択してください</option>
-            {REASONS.map((r) => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
-          {errors.reason && <p className="text-sm text-red-500 mt-1">{errors.reason}</p>}
-        </div>
-
-        {/* 詳細 */}
-        <div className="rounded-lg bg-white p-4">
-          <label className="text-sm font-bold text-[#8b8b8b]">詳細（任意）</label>
-          <textarea
-            value={form.detail}
-            onChange={(e) => updateField("detail", e.target.value)}
-            className={`${inputClass} min-h-[100px] resize-y`}
-            placeholder="具体的な内容があればご記入ください"
-          />
-        </div>
-
-        {/* メールアドレス */}
-        <div className="rounded-lg bg-white p-4">
-          <label className="text-sm font-bold text-[#8b8b8b]">メールアドレス（任意）</label>
-          <input
-            type="email"
-            value={form.reporter_email}
-            onChange={(e) => updateField("reporter_email", e.target.value)}
-            className={inputClass}
-            placeholder="対応結果の返信を希望する場合"
-          />
-        </div>
-
-        {/* Turnstile */}
-        <div className="flex justify-center">
-          <Turnstile
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-            onSuccess={setTurnstileToken}
-          />
-        </div>
-
-        {/* エラー表示 */}
-        {submitError && (
-          <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600">
-            {submitError}
+        {/* フォーム本体 */}
+        <div className="rounded-lg bg-white p-4 space-y-4">
+          {/* 理由 */}
+          <div>
+            <label className="text-sm font-bold text-[#8b8b8b]">
+              理由 <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={form.reason}
+              onChange={(e) => updateField("reason", e.target.value)}
+              className={inputClass}
+            >
+              <option value="">選択してください</option>
+              {REASONS.map((r) => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
+            </select>
+            {errors.reason && <p className="text-sm text-red-500 mt-1">{errors.reason}</p>}
           </div>
-        )}
+
+          {/* 詳細 */}
+          <div>
+            <label className="text-sm font-bold text-[#8b8b8b]">詳細（任意）</label>
+            <textarea
+              value={form.detail}
+              onChange={(e) => updateField("detail", e.target.value)}
+              className={`${inputClass} min-h-[100px] resize-y`}
+              placeholder="具体的な内容があればご記入ください"
+            />
+          </div>
+
+          {/* メールアドレス */}
+          <div>
+            <label className="text-sm font-bold text-[#8b8b8b]">メールアドレス（任意）</label>
+            <input
+              type="email"
+              value={form.reporter_email}
+              onChange={(e) => updateField("reporter_email", e.target.value)}
+              className={inputClass}
+              placeholder="対応結果の返信を希望する場合"
+            />
+          </div>
+
+          {/* Turnstile */}
+          <div className="flex justify-center">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={setTurnstileToken}
+            />
+          </div>
+
+          {/* エラー表示 */}
+          {submitError && (
+            <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600">
+              {submitError}
+            </div>
+          )}
+        </div>
 
         {/* 送信ボタン */}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-[#c53030] py-3 text-base font-bold text-white disabled:opacity-50"
-        >
-          {submitting ? (
-            <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-          ) : (
-            "通報する"
-          )}
-        </button>
+        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50"
+          >
+            {submitting ? "送信中..." : "通報する"}
+          </button>
+        </div>
       </form>
     </div>
   );
