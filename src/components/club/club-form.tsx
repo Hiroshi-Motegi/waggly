@@ -172,7 +172,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
   const hasPurchaseData = !!(form.release_year || form.purchase_date || form.purchase_shop || form.purchase_price);
   const hasShaftData = !!(form.shaft_weight || form.frequency || form.kick_point);
   const hasGripData = !!(form.grip_name || form.grip_size);
-  const hasHeadData = !!(form.lie || form.bounce || form.sole_shape || form.face_angle || form.head_volume || form.head_weight);
+  const hasHeadData = !!(form.bounce || form.sole_shape || form.face_angle || form.head_volume || form.head_weight);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     purchase: hasPurchaseData,
@@ -194,6 +194,32 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
       return { ...prev, [key]: willOpen };
     });
   }, []);
+
+  function SpecCell({ label, unit, value, onChange, type = "number", step, min, max, placeholder = "—" }: {
+    label: string; unit?: string; value: string | number | undefined | null;
+    onChange: (v: string) => void; type?: "number" | "text"; step?: string; min?: number; max?: number; placeholder?: string;
+  }) {
+    const [editing, setEditing] = useState(false);
+    const display = value != null && value !== "" ? `${value}${unit ? unit : ""}` : null;
+    return editing ? (
+      <div className="flex flex-col gap-0.5 rounded-lg border border-[#006728] bg-white p-2">
+        <span className="text-[10px] text-[#8b8b8b]">{label}</span>
+        <input
+          type={type} step={step} min={min} max={max} value={value ?? ""} placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={() => setEditing(false)}
+          autoFocus
+          className="w-full bg-transparent text-base font-bold outline-none"
+        />
+      </div>
+    ) : (
+      <button type="button" onClick={() => setEditing(true)}
+        className="flex flex-col items-start rounded-lg border border-[#ececec] bg-[#fafafa] p-2 text-left">
+        <span className="text-[10px] text-[#8b8b8b]">{label}</span>
+        <span className={`text-base font-bold ${display ? "text-black" : "text-[#c4c4c4]"}`}>{display ?? "—"}</span>
+      </button>
+    );
+  }
 
   function SpecRow({ label, unit, children, last }: { label: string; unit?: string; children: React.ReactNode; last?: boolean }) {
     return (
@@ -316,39 +342,18 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           </>
         )}
 
-        {/* ロフト角 */}
-        <div className="flex flex-col gap-0.5 py-1" data-field="loft">
-          <span className={labelClass}>ロフト角</span>
-          <div className="flex items-center gap-1">
-            <input type="number" step="0.5" min={0} max={90} value={form.loft ?? ""} onChange={(e) => update("loft", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${inputClass} ${fieldError("loft") ? "!border-red-400" : ""}`} />
-            <span className="text-sm text-[#8b8b8b] shrink-0">°</span>
-          </div>
-          <FieldError message={fieldError("loft")} />
-        </div>
-
-        {/* 総重量 */}
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className={labelClass}>総重量</span>
-          <div className="flex items-center gap-1">
-            <input type="number" step="0.1" min={0} max={1000} value={form.weight ?? ""} onChange={(e) => update("weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={inputClass} />
-            <span className="text-sm text-[#8b8b8b] shrink-0">g</span>
-          </div>
-        </div>
-
-        {/* バランス */}
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className={labelClass}>バランス</span>
-          <input type="text" value={form.swing_weight ?? ""} onChange={(e) => update("swing_weight", e.target.value || undefined)} placeholder="D2" className={inputClass} />
-        </div>
-
-        {/* 長さ */}
-        <div className="flex flex-col gap-0.5 py-1" data-field="length">
-          <span className={labelClass}>長さ</span>
-          <div className="flex items-center gap-1">
-            <input type="number" step="0.25" min={0} max={60} value={form.length ?? ""} onChange={(e) => update("length", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${inputClass} ${fieldError("length") ? "!border-red-400" : ""}`} />
-            <span className="text-sm text-[#8b8b8b] shrink-0">inch</span>
-          </div>
-          <FieldError message={fieldError("length")} />
+        {/* スペック（グリッド・タップ編集） */}
+        <div className="grid grid-cols-2 gap-1.5 py-1">
+          <SpecCell label="ロフト角" unit="°" value={form.loft} step="0.5" min={0} max={90}
+            onChange={(v) => update("loft", v ? Number(v) : undefined)} />
+          <SpecCell label="ライ角" unit="°" value={form.lie} step="0.5" min={0} max={90}
+            onChange={(v) => update("lie", v ? Number(v) : undefined)} />
+          <SpecCell label="長さ" unit="inch" value={form.length} step="0.25" min={0} max={60}
+            onChange={(v) => update("length", v ? Number(v) : undefined)} />
+          <SpecCell label="総重量" unit="g" value={form.weight} step="0.1" min={0} max={1000}
+            onChange={(v) => update("weight", v ? Number(v) : undefined)} />
+          <SpecCell label="バランス" value={form.swing_weight} type="text" placeholder="D2"
+            onChange={(v) => update("swing_weight", v || undefined)} />
         </div>
 
         {/* 評価 */}
@@ -450,9 +455,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
       {/* Section 5: ヘッドスペック */}
       <SectionAccordion id="head" title="ヘッドスペック" isOpen={openSections.head ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.head = el; }}>
         <div className="flex flex-col">
-          <SpecRow label="ライ角" unit="°">
-            <input type="number" step="0.5" min={0} max={90} value={form.lie ?? ""} onChange={(e) => update("lie", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={`${specInputClass} ${fieldError("lie") ? "!border-red-400" : ""}`} />
-          </SpecRow>
           {form.category === "wedge" && (
             <>
               <SpecRow label="バウンス角" unit="°">
