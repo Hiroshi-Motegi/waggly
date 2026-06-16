@@ -366,6 +366,10 @@ export default function SettingsPage() {
                 <span className="text-base">プライバシーポリシー</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
               </Link>
+              <Link href="/legal" className="flex items-center justify-between py-2 border-b border-[#dfdfdf]">
+                <span className="text-base">特定商取引法に基づく表記</span>
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
+              </Link>
               <Link href="/help" className="flex items-center justify-between py-2">
                 <span className="text-base">ご利用ガイド</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
