@@ -452,7 +452,7 @@ export default function SettingsPage() {
           <div>
             <span className="text-base font-bold">{!subscription ? "" : isPro ? "Waggly Pro" : "無料プラン"}</span>
             {!isPro && !isPaused && (
-              <p className="text-xs text-[#8b8b8b] mt-0.5">AI相談・自動入力に回数制限があります</p>
+              <p className="text-xs text-[#8b8b8b] mt-0.5">AI相談・練習生成に回数制限があります</p>
             )}
             {isPaused && subscription?.subscription?.current_period_end && (
               <p className="text-xs text-amber-500 mt-0.5">
@@ -461,11 +461,14 @@ export default function SettingsPage() {
             )}
           </div>
           {!isPro && !isPaused && (
-            <span className="rounded-full bg-[#8b8b8b] px-2.5 py-0.5 text-xs font-bold text-white">
+            <span className="rounded-full bg-[#8b8b8b] px-2.5 py-0.5 text-xs font-bold text-white shrink-0">
               準備中
             </span>
           )}
         </div>
+        {!isPro && !isPaused && (
+          <p className="text-xs text-[#8b8b8b] mt-2">有料プランは現在準備中です</p>
+        )}
       </div>
 
       {/* 広告設定 */}
