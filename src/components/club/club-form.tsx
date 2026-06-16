@@ -336,7 +336,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
       </SectionAccordion>
 
       {/* スペック */}
-      <SectionAccordion id="spec" title="スペック" isOpen={openSections.spec ?? true} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.spec = el; }}>
+      <SectionAccordion id="spec" title="クラブスペック" isOpen={openSections.spec ?? true} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.spec = el; }}>
         <div className="grid grid-cols-2 gap-1.5 py-1">
           <SpecCell label="ロフト角" unit="°" value={form.loft} step="0.5" min={0} max={90}
             onChange={(v) => update("loft", v ? Number(v) : undefined)} />
