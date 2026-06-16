@@ -19,44 +19,83 @@ const statusLabels: Record<string, string> = {
   sold: "アーカイブ",
 };
 
-function getSpecs(category: string): { key: string; label: string; suffix?: string }[] {
+type SpecItem = { key: string; label: string; suffix?: string };
+type SpecSection = { title: string; items: SpecItem[] };
+
+function getSpecSections(category: string): SpecSection[] {
   const isPutter = category === "putter";
-  const specs: { key: string; label: string; suffix?: string }[] = [];
+  const sections: SpecSection[] = [];
+
+  // クラブスペック
+  sections.push({
+    title: "クラブスペック",
+    items: [
+      { key: "loft", label: "ロフト角", suffix: "°" },
+      { key: "lie", label: "ライ角", suffix: "°" },
+      { key: "length", label: "長さ", suffix: "inch" },
+      { key: "weight", label: "総重量", suffix: "g" },
+      { key: "swing_weight", label: "バランス" },
+    ],
+  });
 
   // シャフト（パター非表示）
   if (!isPutter) {
-    specs.push({ key: "shaft_name", label: "シャフト" });
-    specs.push({ key: "shaft_flex", label: "フレックス" });
-    specs.push({ key: "shaft_weight", label: "シャフト重量", suffix: "g" });
-    specs.push({ key: "frequency", label: "振動数", suffix: "cpm" });
-    specs.push({ key: "kick_point", label: "キックポイント" });
+    const shaftItems: SpecItem[] = [
+      { key: "shaft_name", label: "シャフト名" },
+      { key: "shaft_flex", label: "フレックス" },
+      { key: "shaft_weight", label: "シャフト重量", suffix: "g" },
+      { key: "frequency", label: "振動数", suffix: "cpm" },
+      { key: "kick_point", label: "キックポイント" },
+    ];
+    sections.push({ title: "シャフト", items: shaftItems });
   }
-
-  // グリップ
-  specs.push({ key: "grip_name", label: "グリップ" });
-  specs.push({ key: "grip_size", label: "グリップ太さ" });
 
   // ヘッドスペック
-  specs.push({ key: "loft", label: "ロフト角", suffix: "°" });
-  specs.push({ key: "lie", label: "ライ角", suffix: "°" });
-  specs.push({ key: "length", label: "長さ", suffix: "inch" });
-  if (category === "wedge") {
-    specs.push({ key: "bounce", label: "バウンス角", suffix: "°" });
-    specs.push({ key: "sole_shape", label: "ソール形状" });
+  const headItems: SpecItem[] = [
+    { key: "head_weight", label: "ヘッド重量", suffix: "g" },
+  ];
+  if (category === "driver" || category === "fairway_wood") {
+    headItems.push({ key: "head_volume", label: "ヘッド体積", suffix: "cc" });
   }
   if (category === "driver") {
-    specs.push({ key: "face_angle", label: "フェース角", suffix: "°" });
+    headItems.push({ key: "face_angle", label: "フェース角", suffix: "°" });
   }
-  if (category === "driver" || category === "fairway_wood") {
-    specs.push({ key: "head_volume", label: "ヘッド体積", suffix: "cc" });
+  if (category === "wedge") {
+    headItems.push({ key: "bounce", label: "バウンス角", suffix: "°" });
+    headItems.push({ key: "sole_shape", label: "ソール形状" });
   }
-  specs.push({ key: "head_weight", label: "ヘッド重量", suffix: "g" });
+  sections.push({ title: "ヘッドスペック", items: headItems });
 
-  // 全体スペック
-  specs.push({ key: "weight", label: "総重量", suffix: "g" });
-  specs.push({ key: "swing_weight", label: "バランス" });
+  // グリップ
+  sections.push({
+    title: "グリップ",
+    items: [
+      { key: "grip_name", label: "グリップ名" },
+      { key: "grip_size", label: "太さ" },
+    ],
+  });
 
-  return specs;
+  return sections;
+}
+
+function SpecGrid({ items, club }: { items: SpecItem[]; club: any }) {
+  const filled = items.filter((s) => {
+    const v = club[s.key];
+    return v != null && v !== "";
+  });
+  if (filled.length === 0) return null;
+  return (
+    <div className="grid grid-cols-2 gap-1.5">
+      {filled.map((spec) => (
+        <div key={spec.key} className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
+          <span className="text-[10px] text-[#8b8b8b]">{spec.label}</span>
+          <span className="text-base font-bold text-black">
+            {String(club[spec.key])}{spec.suffix ?? ""}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 interface ActivityItem {
@@ -229,7 +268,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
           }
           return <ClubImageCarousel images={images} clubNumber={club.club_number} />;
         })()}
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-3">
           {latestDistance != null && (
             <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-3 text-base">
               <span className="shrink-0 font-bold">飛距離</span>
@@ -240,76 +279,49 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             <span className="shrink-0">ステータス</span>
             <span className="flex-1 text-right">{statusLabels[club.status]}</span>
           </div>
-          {getSpecs(club.category).map((spec) => {
-            const value = (club as any)[spec.key];
-            if (value == null || value === "") return null;
+
+          {/* スペックシート */}
+          {getSpecSections(club.category).map((section) => {
+            const filled = section.items.filter((s) => {
+              const v = (club as any)[s.key];
+              return v != null && v !== "";
+            });
+            if (filled.length === 0) return null;
             return (
-              <div key={spec.key} className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
-                <span className="shrink-0">{spec.label}</span>
-                <span className="flex-1 text-right">
-                  {String(value)}{spec.suffix ? ` ${spec.suffix}` : ""}
-                </span>
+              <div key={section.title}>
+                <p className="text-sm font-bold text-[#333] mb-1">{section.title}</p>
+                <SpecGrid items={section.items} club={club} />
               </div>
             );
           })}
-          {club.purchase_date && (
-            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
-              <span className="shrink-0">購入日</span>
-              <span className="flex-1 text-right">{formatDate(club.purchase_date)}</span>
-            </div>
-          )}
-          {club.purchase_shop && (
-            <div className="flex items-center gap-2.5 border-b border-[#dfdfdf] py-2 text-base">
-              <span className="shrink-0">購入店</span>
-              <span className="flex-1 text-right">{club.purchase_shop}</span>
-            </div>
-          )}
-          {club.purchase_price != null && (
-            <div className="flex items-center gap-2.5 py-2 text-base">
-              <span className="shrink-0">価格</span>
-              <span className="flex-1 text-right font-medium">{club.purchase_price.toLocaleString()}円</span>
-            </div>
-          )}
 
-          {/* 詳細スペック（入力済みの場合のみ表示） */}
-          {(club.weight != null || club.swing_weight || club.frequency != null || club.kick_point || club.head_volume != null || club.head_weight != null) && (
-            <div className="border-t border-[#e8e8e8] pt-3 mt-3">
-              <p className="text-sm text-[#8b8b8b] mb-2">詳細スペック</p>
-              <div className="grid grid-cols-3 gap-2 text-base">
-                {club.weight != null && (
-                  <div>
-                    <span className="text-sm text-[#8b8b8b]">重量</span>
-                    <p className="font-medium">{club.weight}g</p>
+          {/* 購入情報 */}
+          {(club.release_year || club.purchase_date || club.purchase_shop || club.purchase_price != null) && (
+            <div>
+              <p className="text-sm font-bold text-[#333] mb-1">購入情報</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {club.release_year && (
+                  <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
+                    <span className="text-[10px] text-[#8b8b8b]">発売年</span>
+                    <span className="text-base font-bold text-black">{club.release_year}年</span>
                   </div>
                 )}
-                {club.swing_weight && (
-                  <div>
-                    <span className="text-sm text-[#8b8b8b]">バランス</span>
-                    <p className="font-medium">{club.swing_weight}</p>
+                {club.purchase_date && (
+                  <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
+                    <span className="text-[10px] text-[#8b8b8b]">購入日</span>
+                    <span className="text-base font-bold text-black">{formatDate(club.purchase_date)}</span>
                   </div>
                 )}
-                {club.frequency != null && (
-                  <div>
-                    <span className="text-sm text-[#8b8b8b]">振動数</span>
-                    <p className="font-medium">{club.frequency}cpm</p>
+                {club.purchase_shop && (
+                  <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
+                    <span className="text-[10px] text-[#8b8b8b]">購入店</span>
+                    <span className="text-base font-bold text-black">{club.purchase_shop}</span>
                   </div>
                 )}
-                {club.kick_point && (
-                  <div>
-                    <span className="text-sm text-[#8b8b8b]">キックポイント</span>
-                    <p className="font-medium">{club.kick_point}</p>
-                  </div>
-                )}
-                {club.head_volume != null && (
-                  <div>
-                    <span className="text-sm text-[#8b8b8b]">ヘッド体積</span>
-                    <p className="font-medium">{club.head_volume}cc</p>
-                  </div>
-                )}
-                {club.head_weight != null && (
-                  <div>
-                    <span className="text-sm text-[#8b8b8b]">ヘッド重量</span>
-                    <p className="font-medium">{club.head_weight}g</p>
+                {club.purchase_price != null && (
+                  <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
+                    <span className="text-[10px] text-[#8b8b8b]">価格</span>
+                    <span className="text-base font-bold text-black">{club.purchase_price.toLocaleString()}円</span>
                   </div>
                 )}
               </div>
