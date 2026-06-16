@@ -36,9 +36,14 @@ export async function PATCH(
 
   const body = await request.json();
 
+  const ALLOWED = ["category", "brand", "model", "memo", "rating", "status", "purchase_url", "hidden_from_profile"];
+  const updates = Object.fromEntries(
+    Object.entries(body).filter(([k]) => ALLOWED.includes(k))
+  );
+
   const { data, error } = await supabase
     .from("accessories")
-    .update(body)
+    .update(updates)
     .eq("id", id)
     .eq("user_id", userId)
     .select()

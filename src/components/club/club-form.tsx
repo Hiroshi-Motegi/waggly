@@ -34,6 +34,7 @@ interface ClubFormProps {
   isSubmitting?: boolean;
   showImagePicker?: boolean;
   onCancel?: () => void;
+  extraContent?: React.ReactNode;
 }
 
 function SectionAccordion({ id, title, isOpen, onToggle, sectionRef, children }: {
@@ -55,7 +56,7 @@ const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2
 const selectClass = inputClass;
 const labelClass = "text-sm flex items-center";
 
-export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker, onCancel }: ClubFormProps) {
+export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker, onCancel, extraContent }: ClubFormProps) {
   const [form, setForm] = useState<Partial<Club>>({
     category: undefined,
     club_number: "",
@@ -296,6 +297,8 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
             ))}
           </div>
         </div>
+
+        {extraContent}
       </div>
 
       {/* スペック自動入力 */}

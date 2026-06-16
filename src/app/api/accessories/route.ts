@@ -11,8 +11,9 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from("accessories")
-    .select("*")
+    .select("*, accessory_images(image_url)")
     .eq("user_id", userId)
+    .eq("accessory_images.is_primary", true)
     .order("created_at", { ascending: false });
 
   if (status) {
@@ -22,7 +23,14 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query;
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+
+  // Merge primary image into image_url for backward compatibility
+  const result = (data ?? []).map(({ accessory_images, ...rest }: any) => ({
+    ...rest,
+    image_url: rest.image_url ?? accessory_images?.[0]?.image_url ?? null,
+  }));
+
+  return NextResponse.json(result);
 }
 
 export async function POST(request: NextRequest) {

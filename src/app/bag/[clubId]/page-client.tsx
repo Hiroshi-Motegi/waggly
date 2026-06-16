@@ -104,7 +104,7 @@ function ClubImageCarousel({ images, clubNumber }: { images: { id: string; image
   const [index, setIndex] = useState(0);
   return (
     <div>
-      <div className="relative w-full aspect-square overflow-hidden rounded-lg">
+      <div className="relative mx-auto w-full max-w-[280px] aspect-square overflow-hidden rounded-lg">
         <img
           src={images[index].image_url}
           alt={clubNumber}
@@ -218,7 +218,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
           }
           if (images.length === 1) {
             return (
-              <div className="relative w-full aspect-square overflow-hidden rounded-lg">
+              <div className="relative mx-auto w-full max-w-[280px] aspect-square overflow-hidden rounded-lg">
                 <img
                   src={images[0].image_url}
                   alt={club.club_number}

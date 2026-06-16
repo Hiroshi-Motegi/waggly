@@ -189,7 +189,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {!hideChrome && <Header />}
       <main className={hideChrome ? "flex-1 flex flex-col" : "flex-1"} style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
-        {hideChrome && pathname !== "/" && !isLoading && <PublicFooter />}
+        {hideChrome && pathname !== "/" && !isPublicPage && !isLoading && <PublicFooter />}
         <CookieConsent hasBottomNav={!hideChrome} />
       </main>
       {!hideChrome && <BottomNav />}

@@ -76,7 +76,7 @@ function ItemImageCarousel({ images, alt }: { images: AccessoryImage[]; alt: str
   const [index, setIndex] = useState(0);
   return (
     <div>
-      <div className="relative w-full aspect-square overflow-hidden rounded-lg">
+      <div className="relative mx-auto w-full max-w-[280px] aspect-square overflow-hidden rounded-lg">
         <img src={images[index].image_url} alt={alt} className="w-full h-full object-cover" />
       </div>
       <div className="flex justify-center gap-2 mt-3">
@@ -122,7 +122,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     load();
   }, [id]);
 
-  function updateEdit(field: string, value: string | number | null | undefined) {
+  function updateEdit(field: string, value: string | number | boolean | null | undefined) {
     setEditForm((prev) => ({ ...prev, [field]: value }));
     validateOnChange(field, value);
   }
@@ -140,6 +140,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         rating: editForm.rating ?? null,
         status: editForm.status,
         purchase_url: editForm.purchase_url || null,
+        hidden_from_profile: editForm.hidden_from_profile ?? false,
       };
       const res = await apiFetch(`/api/accessories/${id}`, {
         method: "PATCH",
@@ -258,6 +259,22 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
 
+          {/* 名刺に表示しない */}
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-base">名刺に表示しない</span>
+            <button
+              type="button"
+              onClick={() => updateEdit("hidden_from_profile", editForm.hidden_from_profile ? false : true)}
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                editForm.hidden_from_profile ? "bg-[#006728]" : "bg-gray-300"
+              }`}
+            >
+              <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                editForm.hidden_from_profile ? "translate-x-6" : "translate-x-1"
+              }`} />
+            </button>
+          </div>
+
           {/* 購入URL */}
           <div data-field="purchase_url" className="flex flex-col gap-0.5 py-1">
             <span className="text-sm">購入URL</span>
@@ -278,6 +295,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
               ))}
             </select>
           </div>
+
         </form>
 
         {/* Buttons outside card */}
@@ -334,7 +352,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           }
           if (images.length === 1) {
             return (
-              <div className="relative w-full aspect-square overflow-hidden rounded-lg">
+              <div className="relative mx-auto w-full max-w-[280px] aspect-square overflow-hidden rounded-lg">
                 <img src={images[0].image_url} alt={item.model ?? ""} className="w-full h-full object-cover" />
               </div>
             );

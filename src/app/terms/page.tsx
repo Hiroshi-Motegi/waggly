@@ -56,33 +56,53 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-1">
-          <h3 className="text-base font-bold text-[#006728]">第7条（禁止事項）</h3>
+          <h3 className="text-base font-bold text-[#006728]">第7条（投稿コンテンツ）</h3>
+          <p className="text-base">ユーザーは、本サービスにおいて画像やテキスト等のコンテンツ（以下「投稿コンテンツ」）を投稿・公開することができます。投稿コンテンツに関して以下の事項に同意するものとします。</p>
+          <ul className="list-disc pl-5 space-y-0.5 text-base">
+            <li>投稿コンテンツの内容について、ユーザー自身が一切の責任を負います。</li>
+            <li>投稿コンテンツに関する著作権その他の権利は、投稿したユーザーに帰属します。ただし、運営者はサービス提供に必要な範囲で投稿コンテンツを利用できるものとします。</li>
+            <li>第三者の著作権、肖像権、プライバシーその他の権利を侵害するコンテンツを投稿してはなりません。</li>
+            <li>運営者は、本規約に違反する投稿コンテンツを事前の通知なく削除する権利を有します。</li>
+          </ul>
+        </section>
+
+        <section className="space-y-1">
+          <h3 className="text-base font-bold text-[#006728]">第8条（禁止事項）</h3>
           <p className="text-base">以下の行為を禁止します。</p>
           <ul className="list-disc pl-5 space-y-0.5 text-base">
             <li>本サービスへの不正アクセスや過度な負荷をかける行為</li>
             <li>AI機能を本来の目的以外で利用する行為</li>
             <li>他のユーザーに迷惑をかける行為</li>
             <li>不正な手段による有料プランの利用回避</li>
+            <li>公序良俗に反する画像・テキストの投稿</li>
+            <li>わいせつ、暴力的、差別的なコンテンツの投稿</li>
+            <li>他者の権利（著作権、肖像権、プライバシー等）を侵害するコンテンツの投稿</li>
           </ul>
+          <p className="text-base">運営者は、上記の禁止事項に違反した場合、事前の通知なく投稿コンテンツの削除、アカウントの一時停止または永久停止等の措置を講じることができます。これにより生じた損害について、運営者は一切の責任を負いません。</p>
         </section>
 
         <section className="space-y-1">
-          <h3 className="text-base font-bold text-[#006728]">第8条（アカウントの削除）</h3>
+          <h3 className="text-base font-bold text-[#006728]">第9条（コンテンツの通報）</h3>
+          <p className="text-base">ユーザーは、本規約に違反すると思われる投稿コンテンツを発見した場合、公開プロフィールページの通報機能またはお問い合わせ先より運営者に報告することができます。運営者は通報を受けた場合、合理的な期間内に内容を確認し、必要に応じて削除等の措置を講じます。</p>
+        </section>
+
+        <section className="space-y-1">
+          <h3 className="text-base font-bold text-[#006728]">第10条（アカウントの削除）</h3>
           <p className="text-base">ユーザーは、アプリ内の設定画面からいつでもアカウントを削除できます。アカウント削除により、登録された全てのデータ（クラブ、練習記録、AI相談履歴等）が完全に削除され、復元はできません。有料プランを契約中の場合、アカウント削除と同時にサブスクリプションも解約されます。残りの課金期間の返金は行いません。</p>
         </section>
 
         <section className="space-y-1">
-          <h3 className="text-base font-bold text-[#006728]">第9条（免責事項）</h3>
+          <h3 className="text-base font-bold text-[#006728]">第11条（免責事項）</h3>
           <p className="text-base">本サービスは現状有姿で提供され、特定の目的への適合性を保証しません。本サービスの利用により生じた損害について、運営者は一切の責任を負いません。決済に関するトラブルについては、決済代行会社（Pay.jp）の規約に従います。</p>
         </section>
 
         <section className="space-y-1">
-          <h3 className="text-base font-bold text-[#006728]">第10条（サービスの変更・停止）</h3>
+          <h3 className="text-base font-bold text-[#006728]">第12条（サービスの変更・停止）</h3>
           <p className="text-base">運営者は、事前の通知なくサービス内容の変更、または提供の停止を行うことがあります。サービス停止の場合、有料プランの未消化期間については返金を行います。</p>
         </section>
 
         <section className="space-y-1">
-          <h3 className="text-base font-bold text-[#006728]">第11条（規約の変更）</h3>
+          <h3 className="text-base font-bold text-[#006728]">第13条（規約の変更）</h3>
           <p className="text-base">本規約は予告なく変更することがあります。変更後の規約は本ページに掲載した時点で効力を生じます。有料プランの料金に関わる重要な変更については、変更の30日前までにアプリ内で通知します。</p>
         </section>
       </div>

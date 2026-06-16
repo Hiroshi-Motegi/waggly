@@ -11,18 +11,18 @@ import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 const inputClass = "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 
 const VISIBLE_FIELD_LABELS: Record<string, string> = {
+  cover_images: "カバー画像",
   nickname: "ニックネーム",
+  bio: "ひとこと",
+  sns_links: "SNS",
+  custom_links: "その他のリンク",
   golf_start_date: "ゴルフ歴",
   average_score: "平均スコア",
   best_score: "ベストスコア",
   home_course: "ホームコース",
-  bio: "ひとこと",
-  cover_images: "カバー画像",
   bag: "クラブ",
   items: "アイテム",
   favorite_courses: "お気に入りコース",
-  sns_links: "SNS",
-  custom_links: "その他のリンク",
 };
 
 export default function ShareSettingsPage() {

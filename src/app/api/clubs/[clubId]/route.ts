@@ -36,9 +36,21 @@ export async function PATCH(
 
   const body = await request.json();
 
+  const ALLOWED = [
+    "category", "club_number", "maker", "model", "shaft_name", "shaft_flex",
+    "loft", "lie", "length", "distance", "release_year", "memo",
+    "purchase_date", "purchase_shop", "purchase_price", "status", "bag_number", "sort_order",
+    "weight", "swing_weight", "frequency", "kick_point", "head_volume", "head_weight",
+    "grip_name", "grip_size", "bounce", "sole_shape", "face_angle", "shaft_weight",
+    "rating", "hidden_from_profile",
+  ];
+  const updates = Object.fromEntries(
+    Object.entries(body).filter(([k]) => ALLOWED.includes(k))
+  );
+
   const { data, error } = await supabase
     .from("clubs")
-    .update(body)
+    .update(updates)
     .eq("id", clubId)
     .eq("user_id", userId)
     .select()

@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const ADMIN_EMAIL = "apps@cocoroe.me";
+const ADMIN_EMAIL = "hiro@cocoroe.me";
 const FROM_EMAIL = "Waggly <onboarding@resend.dev>";
 
 /**

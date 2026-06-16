@@ -1,5 +1,10 @@
 /** Schema version — increment when adding migrations. */
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
+
+export const SCHEMA_V6 = `
+ALTER TABLE clubs ADD COLUMN hidden_from_profile INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accessories ADD COLUMN hidden_from_profile INTEGER NOT NULL DEFAULT 0;
+`;
 
 export const SCHEMA_V5 = `
 ALTER TABLE users ADD COLUMN onboarding_version INTEGER DEFAULT 0;

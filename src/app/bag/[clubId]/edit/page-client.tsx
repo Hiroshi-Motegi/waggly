@@ -16,11 +16,18 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
   const { club, isLoading } = useClub(clubId);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hiddenFromProfile, setHiddenFromProfile] = useState(false);
+  const [hiddenInitialized, setHiddenInitialized] = useState(false);
+
+  if (club && !hiddenInitialized) {
+    setHiddenFromProfile(club.hidden_from_profile ?? false);
+    setHiddenInitialized(true);
+  }
 
   async function handleSubmit(data: Partial<Club>) {
     setIsSubmitting(true);
     try {
-      await updateClub(clubId, data);
+      await updateClub(clubId, { ...data, hidden_from_profile: hiddenFromProfile });
       router.replace(nativeHref(`/bag/${clubId}`));
     } catch (error) {
       console.error("Failed to update club:", error);
@@ -32,7 +39,6 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
   const [clubImages, setClubImages] = useState<ClubImage[]>([]);
   const [imagesInitialized, setImagesInitialized] = useState(false);
 
-  // Sync images from club data on first load
   if (club && !imagesInitialized) {
     setClubImages(club.club_images ?? []);
     setImagesInitialized(true);
@@ -63,7 +69,28 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
             />
           </div>
         </div>
-        <ClubForm initialData={editableData} onSubmit={handleSubmit} isSubmitting={isSubmitting} onCancel={() => router.back()} />
+        <ClubForm
+          initialData={editableData}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          onCancel={() => router.back()}
+          extraContent={
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-base">名刺に表示しない</span>
+              <button
+                type="button"
+                onClick={() => setHiddenFromProfile(!hiddenFromProfile)}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                  hiddenFromProfile ? "bg-[#006728]" : "bg-gray-300"
+                }`}
+              >
+                <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                  hiddenFromProfile ? "translate-x-6" : "translate-x-1"
+                }`} />
+              </button>
+            </div>
+          }
+        />
       </div>
     </div>
   );

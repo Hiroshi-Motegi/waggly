@@ -104,7 +104,7 @@ export default function FavoriteCoursesPage() {
           ) : (
             courses.map((c) => {
               const goraUrl = c.gora_course_id
-                ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/gora/detail/id=${c.gora_course_id}/`
+                ? `https://hb.afl.rakuten.co.jp/hgc/${process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID ?? ""}/?pc=${encodeURIComponent(`https://search.gora.golf.rakuten.co.jp/cal/disp/c_id/${c.gora_course_id}/`)}`
                 : null;
               return (
                 <div key={c.id} className="flex items-center gap-2.5 py-2 border-b border-[#dfdfdf] last:border-0">

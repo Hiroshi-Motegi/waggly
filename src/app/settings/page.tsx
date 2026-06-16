@@ -354,6 +354,10 @@ export default function SettingsPage() {
           </div>
           <div className="rounded-lg bg-white p-3">
             <div className="flex flex-col gap-2">
+              <Link href="/help/contact" className="flex items-center justify-between py-2 border-b border-[#dfdfdf]">
+                <span className="text-base">お問い合わせ</span>
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
+              </Link>
               <Link href="/terms" className="flex items-center justify-between py-2 border-b border-[#dfdfdf]">
                 <span className="text-base">利用規約</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
@@ -536,6 +540,7 @@ export default function SettingsPage() {
       <div className="rounded-lg bg-white p-3">
         <div className="flex flex-col">
           {[
+            { href: "/help/contact", label: "お問い合わせ" },
             { href: "/terms", label: "利用規約" },
             { href: "/privacy", label: "プライバシーポリシー" },
             { href: "/legal", label: "特定商取引法に基づく表記" },

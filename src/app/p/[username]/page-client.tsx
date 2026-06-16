@@ -445,22 +445,22 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                     if (months < 0) { years--; months += 12; }
                     const label = years > 0 ? `${years}年${months > 0 ? `${months}ヶ月` : ""}` : `${months}ヶ月`;
                     return (
-                      <div className="flex items-center p-3 border-b border-[#dfdfdf]">
-                        <span className="flex-1 text-sm text-[#9c9c9c]">ゴルフ歴</span>
-                        <span className="text-[#006728] font-bold text-base">{label}</span>
+                      <div className="flex flex-col items-center p-3 border-b border-[#dfdfdf]">
+                        <span className="text-xs text-[#9c9c9c]">ゴルフ歴</span>
+                        <span className="text-[#006728] font-bold text-base mt-1">{label}</span>
                       </div>
                     );
                   })()}
                   {profile.average_score != null && (
-                    <div className="flex items-center p-3 border-b border-l border-[#dfdfdf]">
-                      <span className="flex-1 text-sm text-[#9c9c9c]">平均スコア</span>
-                      <span className="text-[#006728] font-bold text-base">{profile.average_score}</span>
+                    <div className="flex flex-col items-center p-3 border-b border-l border-[#dfdfdf]">
+                      <span className="text-xs text-[#9c9c9c]">平均スコア</span>
+                      <span className="text-[#006728] font-bold text-base mt-1">{profile.average_score}</span>
                     </div>
                   )}
                   {profile.best_score != null && (
-                    <div className="flex items-center p-3 border-b border-l border-[#dfdfdf]">
-                      <span className="flex-1 text-sm text-[#9c9c9c]">ベストスコア</span>
-                      <span className="text-[#006728] font-bold text-base">{profile.best_score}</span>
+                    <div className="flex flex-col items-center p-3 border-b border-l border-[#dfdfdf]">
+                      <span className="text-xs text-[#9c9c9c]">ベストスコア</span>
+                      <span className="text-[#006728] font-bold text-base mt-1">{profile.best_score}</span>
                     </div>
                   )}
                 </div>
@@ -538,7 +538,14 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
           <div className="flex flex-col items-center gap-2 pt-4 pb-6">
             <p className="text-sm text-white/80">Wagglyで作成</p>
             <a href="https://waggly.jp" className="text-base font-bold text-white underline">waggly.jp</a>
-            <div className="pt-2">
+            <div className="flex items-center gap-3 pt-2">
+              <a
+                href="/help/contact"
+                className="text-sm text-white/70 underline"
+              >
+                お問い合わせ
+              </a>
+              <span className="text-white/40">|</span>
               <a
                 href={`/report?username=${username}`}
                 className="text-sm text-white/70 underline"

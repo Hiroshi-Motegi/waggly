@@ -155,7 +155,7 @@ export default function ItemsPage() {
               {accessories.map((item) => (
                 <Link key={item.id} href={nativeHref(`/items/${item.id}`)}>
                   <div className="flex flex-col gap-1.5">
-                    <div className="h-[132px] w-full overflow-hidden rounded-md bg-[#f0f0f0]">
+                    <div className="aspect-square w-full overflow-hidden rounded-md bg-[#f0f0f0]">
                       {item.image_url ? (
                         <img src={item.image_url} alt={item.model ?? ""} className="size-full object-cover" />
                       ) : (
