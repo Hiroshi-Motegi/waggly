@@ -45,15 +45,26 @@ export function AdBanner({ slot, format = "auto" }: { slot: string; format?: str
   if (!user || isAdFree) return null;
 
   return (
-    <div ref={adRef} className="w-full overflow-hidden" style={{ display: filled ? "block" : "none" }}>
-      <ins
-        className="adsbygoogle"
-        style={{ display: "block" }}
-        data-ad-client="ca-pub-3196641615749613"
-        data-ad-slot={slot}
-        data-ad-format={format}
-        data-full-width-responsive="true"
-      />
-    </div>
+    <>
+      <div ref={adRef} className="w-full overflow-hidden" style={{ display: filled ? "block" : "none" }}>
+        <ins
+          className="adsbygoogle"
+          style={{ display: "block" }}
+          data-ad-client="ca-pub-3196641615749613"
+          data-ad-slot={slot}
+          data-ad-format={format}
+          data-full-width-responsive="true"
+        />
+      </div>
+      {/* AdSense未承認時のフォールバック（A8 アルペン） */}
+      {!filled && (
+        <div className="flex justify-center py-2">
+          <a href="https://px.a8.net/svt/ejp?a8mat=4B5X8H+6G750Q+3OSK+644DT" rel="nofollow">
+            <img width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260616833390&wid=004&eno=01&mid=s00000017210001027000&mc=1" />
+          </a>
+          <img width="1" height="1" src="https://www15.a8.net/0.gif?a8mat=4B5X8H+6G750Q+3OSK+644DT" alt="" />
+        </div>
+      )}
+    </>
   );
 }
