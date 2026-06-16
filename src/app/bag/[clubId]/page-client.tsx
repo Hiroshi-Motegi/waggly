@@ -64,7 +64,7 @@ function getSpecSections(category: string): SpecSection[] {
     headItems.push({ key: "bounce", label: "バウンス角", suffix: "°" });
     headItems.push({ key: "sole_shape", label: "ソール形状" });
   }
-  sections.push({ title: "ヘッドスペック", items: headItems });
+  sections.push({ title: "ヘッドスペック", items: headItems, cols: 3 });
 
   // グリップ
   sections.push({
