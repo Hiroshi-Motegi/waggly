@@ -564,8 +564,8 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* ログアウト */}
-      <div className="flex flex-col items-center pt-4 pb-8">
+      {/* ログアウト・退会 */}
+      <div className="flex flex-col items-center gap-3 pt-4 pb-8">
         <button
           onClick={async () => {
             setProcessing("ログアウト中...");
@@ -575,6 +575,9 @@ export default function SettingsPage() {
         >
           ログアウト
         </button>
+        <Link href="/help/delete-account" className="text-sm text-white/60">
+          アカウント削除（退会）
+        </Link>
       </div>
       </div>
 
