@@ -166,6 +166,8 @@ export default function CheckoutPage() {
           }),
         });
         if (res.ok) {
+          const { trackEvent } = await import("@/lib/gtm");
+          trackEvent("plan_upgraded");
           router.push("/settings/plan?upgraded=true");
         } else {
           const err = await res.json().catch(() => ({}));

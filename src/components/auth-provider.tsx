@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AuthContext } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 import { isNative } from "@/lib/platform";
+import { trackEvent } from "@/lib/gtm";
 import type { User } from "@/types/database";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -97,8 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 console.error("Failed to upload local data:", e);
               }
               setUser(result.user);
+              if (result.isNew) trackEvent("sign_up", { method: "native" });
             } else if (result.user) {
               setUser(result.user);
+              if (result.isNew) trackEvent("sign_up", { method: "native" });
               // 衝突なし・アップロード不要 → 通常 sync
               if (isNative()) {
                 try {
@@ -139,7 +142,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const res = await apiFetch("/api/auth/resolve-session", { method: "POST" });
           if (res.ok) {
             const result = await res.json();
-            if (result.user) setUser(result.user);
+            if (result.user) {
+              setUser(result.user);
+              if (result.isNew) trackEvent("sign_up", { method: "liff" });
+            }
           }
           if (deepLink) router.replace(deepLink);
           setIsLoading(false);
@@ -177,7 +183,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (resolveRes.ok) {
           const result = await resolveRes.json();
-          if (result.user) setUser(result.user);
+          if (result.user) {
+            setUser(result.user);
+            if (result.isNew) trackEvent("sign_up", { method: "line" });
+          }
         }
 
         if (deepLink) router.replace(deepLink);

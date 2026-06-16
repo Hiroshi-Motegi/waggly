@@ -36,6 +36,8 @@ export default function NewClubPage() {
           body: formData,
         });
       }
+      const { trackEvent } = await import("@/lib/gtm");
+      trackEvent("club_added", { category: club.category });
       router.replace(nativeHref(`/bag/${club.id}`));
     } catch (error) {
       console.error("Failed to create club:", error);

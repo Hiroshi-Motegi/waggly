@@ -57,6 +57,8 @@ export default function NewPracticePage() {
           body: JSON.stringify({ status: "done" }),
         });
       }
+      const { trackEvent } = await import("@/lib/gtm");
+      trackEvent("practice_logged");
       setSaved(true);
     } catch (error) {
       console.error("Failed to create practice session:", error);

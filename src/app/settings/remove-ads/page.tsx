@@ -172,6 +172,8 @@ export default function RemoveAdsPage() {
         }),
       });
       if (res.ok) {
+        const { trackEvent } = await import("@/lib/gtm");
+        trackEvent("ad_removed", { price });
         router.push("/settings?ad_free=true");
       } else {
         const err = await res.json().catch(() => ({}));
