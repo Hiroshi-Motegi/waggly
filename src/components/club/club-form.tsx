@@ -170,11 +170,13 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
   const requiredBadge = <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span>;
 
   const hasPurchaseData = !!(form.release_year || form.purchase_date || form.purchase_shop || form.purchase_price);
+  const hasShaftData = !!(form.shaft_name || form.shaft_flex || form.shaft_weight || form.frequency || form.kick_point);
   const hasGripData = !!(form.grip_name || form.grip_size);
   const hasHeadData = !!(form.bounce || form.sole_shape || form.face_angle || form.head_volume || form.head_weight);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     purchase: hasPurchaseData,
+    shaft: hasShaftData,
     grip: hasGripData,
     head: hasHeadData,
   });
@@ -335,10 +337,24 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
 
       {/* スペック */}
       <SectionAccordion id="spec" title="スペック" isOpen={openSections.spec ?? true} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.spec = el; }}>
-        {/* シャフト（パター非表示） */}
-        {!isPutter && (
-          <>
-            <span className="text-sm font-bold text-[#333]">シャフト</span>
+        <div className="grid grid-cols-2 gap-1.5 py-1">
+          <SpecCell label="ロフト角" unit="°" value={form.loft} step="0.5" min={0} max={90}
+            onChange={(v) => update("loft", v ? Number(v) : undefined)} />
+          <SpecCell label="ライ角" unit="°" value={form.lie} step="0.5" min={0} max={90}
+            onChange={(v) => update("lie", v ? Number(v) : undefined)} />
+          <SpecCell label="長さ" unit="inch" value={form.length} step="0.25" min={0} max={60}
+            onChange={(v) => update("length", v ? Number(v) : undefined)} />
+          <SpecCell label="総重量" unit="g" value={form.weight} step="0.1" min={0} max={1000}
+            onChange={(v) => update("weight", v ? Number(v) : undefined)} />
+          <SpecCell label="バランス" value={form.swing_weight} type="text" placeholder="D2"
+            onChange={(v) => update("swing_weight", v || undefined)} />
+        </div>
+      </SectionAccordion>
+
+      {/* シャフト（パター非表示） */}
+      {!isPutter && (
+        <SectionAccordion id="shaft" title="シャフト" isOpen={openSections.shaft ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.shaft = el; }}>
+          <div className="flex flex-col gap-1">
             <div className="flex flex-col gap-0.5 py-1" data-field="shaft_name">
               <span className={labelClass}>シャフト名</span>
               <input value={form.shaft_name ?? ""} onChange={(e) => update("shaft_name", e.target.value)} placeholder="シャフト名" className={`${inputClass} ${fieldError("shaft_name") ? "!border-red-400" : ""}`} />
@@ -370,23 +386,9 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
               <SpecCell label="キックポイント" value={form.kick_point} type="text" placeholder="—"
                 onChange={(v) => update("kick_point", v || undefined)} />
             </div>
-          </>
-        )}
-
-        {/* スペックグリッド（タップ編集） */}
-        <div className="grid grid-cols-2 gap-1.5 py-1">
-          <SpecCell label="ロフト角" unit="°" value={form.loft} step="0.5" min={0} max={90}
-            onChange={(v) => update("loft", v ? Number(v) : undefined)} />
-          <SpecCell label="ライ角" unit="°" value={form.lie} step="0.5" min={0} max={90}
-            onChange={(v) => update("lie", v ? Number(v) : undefined)} />
-          <SpecCell label="長さ" unit="inch" value={form.length} step="0.25" min={0} max={60}
-            onChange={(v) => update("length", v ? Number(v) : undefined)} />
-          <SpecCell label="総重量" unit="g" value={form.weight} step="0.1" min={0} max={1000}
-            onChange={(v) => update("weight", v ? Number(v) : undefined)} />
-          <SpecCell label="バランス" value={form.swing_weight} type="text" placeholder="D2"
-            onChange={(v) => update("swing_weight", v || undefined)} />
-        </div>
-      </SectionAccordion>
+          </div>
+        </SectionAccordion>
+      )}
 
       {/* TODO: AI自動入力 — UX再設計後に復活
       {user && (
