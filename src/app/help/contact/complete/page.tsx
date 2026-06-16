@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { CheckCircle } from "lucide-react";
@@ -8,14 +7,7 @@ import { CheckCircle } from "lucide-react";
 export default function ContactCompletePage() {
   const router = useRouter();
 
-  useEffect(() => {
-    const referrer = document.referrer;
-    if (!referrer || !referrer.includes("/help/contact")) {
-      router.replace("/help/contact");
-    }
-  }, [router]);
-
-  return (
+return (
     <div className="relative flex flex-col px-2 py-2 space-y-2">
       <PageHeader title="お問い合わせ" variant="dark" />
 

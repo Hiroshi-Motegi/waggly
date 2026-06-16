@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { CheckCircle } from "lucide-react";
@@ -8,14 +7,7 @@ import { CheckCircle } from "lucide-react";
 export default function ReportCompletePage() {
   const router = useRouter();
 
-  useEffect(() => {
-    const referrer = document.referrer;
-    if (!referrer || !referrer.includes("/report")) {
-      router.replace("/report");
-    }
-  }, [router]);
-
-  return (
+return (
     <div className="relative flex flex-col px-2 py-2 space-y-2">
       <PageHeader title="通報" variant="dark" />
 
