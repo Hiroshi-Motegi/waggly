@@ -166,7 +166,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
   const presetNumbers = form.category ? (clubNumbersByCategory[form.category] ?? []) : [];
 
   const isPutter = form.category === "putter";
-  const specInputClass = "w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
   const requiredBadge = <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span>;
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -213,18 +212,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         <span className="text-[10px] text-[#8b8b8b]">{label}</span>
         <span className={`text-base font-bold ${display ? "text-black" : "text-[#c4c4c4]"}`}>{display ?? "—"}</span>
       </button>
-    );
-  }
-
-  function SpecRow({ label, unit, children, last }: { label: string; unit?: string; children: React.ReactNode; last?: boolean }) {
-    return (
-      <div className={last ? "" : "border-b border-[#ececec]"}>
-        <div className="flex items-center py-3">
-          <span className="flex-1 text-base">{label}</span>
-          {children}
-          <span className="w-[32px] text-sm text-left pl-1">{unit ?? ""}</span>
-        </div>
-      </div>
     );
   }
 
@@ -419,35 +406,27 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         </div>
       </SectionAccordion>
 
-      {/* Section 5: ヘッドスペック */}
-      <SectionAccordion id="head" title="ヘッドスペック" isOpen={openSections.head ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.head = el; }}>
-        <div className="flex flex-col">
-          {form.category === "wedge" && (
-            <>
-              <SpecRow label="バウンス角" unit="°">
-                <input type="number" step="1" min={0} max={30} value={form.bounce ?? ""} onChange={(e) => update("bounce", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
-              </SpecRow>
-              <SpecRow label="ソール形状">
-                <select value={form.sole_shape ?? ""} onChange={(e) => update("sole_shape", e.target.value || undefined)} className={specInputClass}>
-                  <option value="">—</option>
-                  {["ワイド", "セミワイド", "ナロー", "Cグラインド", "Sグラインド", "Wグラインド"].map((v) => <option key={v} value={v}>{v}</option>)}
-                </select>
-              </SpecRow>
-            </>
+      {/* ヘッドスペック */}
+      <SectionAccordion id="head" title="ヘッドスペック" isOpen={openSections.head ?? true} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.head = el; }}>
+        <div className="grid grid-cols-2 gap-1.5 py-1">
+          <SpecCell label="ヘッド重量" unit="g" value={form.head_weight} step="0.1" min={0} max={400}
+            onChange={(v) => update("head_weight", v ? Number(v) : undefined)} />
+          {(form.category === "driver" || form.category === "fairway_wood") && (
+            <SpecCell label="ヘッド体積" unit="cc" value={form.head_volume} min={0} max={600}
+              onChange={(v) => update("head_volume", v ? Number(v) : undefined)} />
           )}
           {form.category === "driver" && (
-            <SpecRow label="フェース角" unit="°">
-              <input type="number" step="0.5" min={-5} max={5} value={form.face_angle ?? ""} onChange={(e) => update("face_angle", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
-            </SpecRow>
+            <SpecCell label="フェース角" unit="°" value={form.face_angle} step="0.5" min={-5} max={5}
+              onChange={(v) => update("face_angle", v ? Number(v) : undefined)} />
           )}
-          {(form.category === "driver" || form.category === "fairway_wood") && (
-            <SpecRow label="ヘッド体積" unit="cc">
-              <input type="number" min={0} max={600} value={form.head_volume ?? ""} onChange={(e) => update("head_volume", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
-            </SpecRow>
+          {form.category === "wedge" && (
+            <>
+              <SpecCell label="バウンス角" unit="°" value={form.bounce} step="1" min={0} max={30}
+                onChange={(v) => update("bounce", v ? Number(v) : undefined)} />
+              <SpecCell label="ソール形状" value={form.sole_shape} type="text" placeholder="—"
+                onChange={(v) => update("sole_shape", v || undefined)} />
+            </>
           )}
-          <SpecRow label="ヘッド重量" unit="g" last>
-            <input type="number" step="0.1" min={0} max={400} value={form.head_weight ?? ""} onChange={(e) => update("head_weight", e.target.value ? Number(e.target.value) : undefined)} placeholder="—" className={specInputClass} />
-          </SpecRow>
         </div>
       </SectionAccordion>
 
