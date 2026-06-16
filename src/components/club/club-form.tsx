@@ -169,16 +169,11 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
   const specInputClass = "w-[100px] rounded-lg border border-[#c4c4c4] bg-white px-2 py-1.5 text-center text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
   const requiredBadge = <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px mb-0.5">必須</span>;
 
-  const hasPurchaseData = !!(form.release_year || form.purchase_date || form.purchase_shop || form.purchase_price);
-  const hasShaftData = !!(form.shaft_name || form.shaft_flex || form.shaft_weight || form.frequency || form.kick_point);
-  const hasGripData = !!(form.grip_name || form.grip_size);
-  const hasHeadData = !!(form.bounce || form.sole_shape || form.face_angle || form.head_volume || form.head_weight);
-
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    purchase: hasPurchaseData,
-    shaft: hasShaftData,
-    grip: hasGripData,
-    head: hasHeadData,
+    purchase: true,
+    shaft: true,
+    grip: true,
+    head: true,
   });
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
