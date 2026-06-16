@@ -9,6 +9,7 @@ export function PublicFooter() {
           <Link href="/privacy" className="text-sm text-white/60 hover:text-white/90">プライバシーポリシー</Link>
           <Link href="/legal" className="text-sm text-white/60 hover:text-white/90 whitespace-nowrap">特定商取引法に基づく表記</Link>
           <Link href="/help" className="text-sm text-white/60 hover:text-white/90">ご利用ガイド</Link>
+          <Link href="/help/contact" className="text-sm text-white/60 hover:text-white/90">お問い合わせ</Link>
         </div>
         <p className="text-xs text-white/30 text-center">&copy; cocoroe</p>
       </div>
