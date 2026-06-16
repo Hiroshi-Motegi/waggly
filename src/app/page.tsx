@@ -100,7 +100,7 @@ export default async function HomePage() {
           <p className="text-base text-white leading-relaxed mt-4 mx-5">
             あなたのゴルフプロフィールをWeb名刺として公開。クラブセッティングやスコア、SNSリンクをまとめて共有できます。
           </p>
-          <a href="https://waggly.jp/p/waglin" target="_blank" rel="noopener" className="mx-5 mt-4 flex h-11 w-[calc(100%-40px)] items-center justify-center gap-2 rounded-full border border-white bg-black/30 text-white text-base font-medium">
+          <a href="https://waggly.jp/p/waglin" target="_blank" rel="noopener" className="mt-4 flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2 rounded-full border border-white bg-black/30 text-white text-base font-medium">
             名刺のサンプルを見てみる
           </a>
         </div>
