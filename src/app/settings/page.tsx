@@ -466,10 +466,10 @@ export default function SettingsPage() {
             </span>
           )}
         </div>
-        {!isPro && !isPaused && (
-          <p className="text-xs text-[#8b8b8b] mt-2">有料プランは現在準備中です</p>
-        )}
       </div>
+      {!isPro && !isPaused && (
+        <p className="text-xs text-white/70 px-1 mt-1">有料プランは現在準備中です</p>
+      )}
 
       {/* 広告設定 */}
       <p className="text-base font-bold text-white px-1 pt-4">広告</p>
