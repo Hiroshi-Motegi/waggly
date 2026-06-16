@@ -42,7 +42,7 @@ function SectionAccordion({ id, title, isOpen, onToggle, sectionRef, children }:
   sectionRef: (el: HTMLDivElement | null) => void; children: React.ReactNode;
 }) {
   return (
-    <div ref={sectionRef} className="rounded-lg bg-white overflow-hidden scroll-mt-[60px]">
+    <div ref={sectionRef} className="rounded-lg bg-white overflow-hidden scroll-mt-[80px]">
       <button type="button" onClick={() => onToggle(id)} className="flex w-full items-center px-3 py-3">
         <span className="flex-1 text-left text-base font-bold">{title}</span>
         {isOpen ? <ChevronUp className="h-4 w-4 text-[#8b8b8b]" /> : <ChevronDown className="h-4 w-4 text-[#8b8b8b]" />}
