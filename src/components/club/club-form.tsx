@@ -416,8 +416,8 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
                 {form.shaft_name && <span>{form.shaft_name}</span>}
                 {form.shaft_name && form.shaft_flex && <span> / </span>}
                 {form.shaft_flex && <span>{form.shaft_flex}</span>}
-                {shaftType === "steel" && <span> (スチール)</span>}
-                {shaftType === "carbon" && <span> (カーボン)</span>}
+                {form.shaft_flex && shaftType === "steel" && <span> (スチール)</span>}
+                {form.shaft_flex && shaftType === "carbon" && <span> (カーボン)</span>}
               </div>
             )}
             <SpecRow label="シャフト重量" unit="g">
