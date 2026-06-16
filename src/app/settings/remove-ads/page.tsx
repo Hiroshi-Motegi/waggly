@@ -8,13 +8,24 @@ import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import { useAdFree } from "@/hooks/use-ad-free";
 import useSWR from "swr";
 
+interface PayjpCardElement {
+  mount(selector: string): void;
+  unmount(): void;
+  on(event: string, handler: (e: { error?: { message: string }; complete: boolean }) => void): void;
+}
+
+interface PayjpInstance {
+  elements(): { create(type: string, options: Record<string, unknown>): PayjpCardElement };
+  createToken(element: PayjpCardElement, options?: Record<string, unknown>): Promise<{ error?: { message: string }; id: string }>;
+}
+
 declare global {
   interface Window {
-    Payjp?: (key: string) => any;
+    Payjp?: (key: string) => PayjpInstance;
   }
 }
 
-let payjpSingleton: any = null;
+let payjpSingleton: PayjpInstance | null = null;
 
 function getPayjp() {
   if (!payjpSingleton && window.Payjp) {
@@ -50,7 +61,7 @@ export default function RemoveAdsPage() {
   // 新しいカード入力が必要かどうか
   const needsCardInput = !existingCard || useNewCard;
 
-  const cardState = useRef<{ element: any }>({ element: null });
+  const cardState = useRef<{ element: PayjpCardElement | null }>({ element: null });
 
   useEffect(() => {
     if (!needsCardInput) return;
@@ -68,7 +79,7 @@ export default function RemoveAdsPage() {
         },
       });
       card.mount("#payjp-card-element-ads");
-      card.on("change", (e: any) => {
+      card.on("change", (e) => {
         setCardError(e.error ? e.error.message : null);
         setReady(e.complete);
       });
@@ -91,7 +102,7 @@ export default function RemoveAdsPage() {
 
     return () => {
       if (cardState.current.element) {
-        try { cardState.current.element.unmount(); } catch {}
+        try { cardState.current.element.unmount(); } catch (e) { console.warn("Payjp unmount:", e); }
         cardState.current.element = null;
       }
       setMounted(false);

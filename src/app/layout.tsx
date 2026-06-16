@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth-provider";
 import { AppShell } from "@/components/app-shell";
 import { SWRProvider } from "@/components/swr-provider";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -52,6 +53,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <AppShell>{children}</AppShell>
           </AuthProvider>
         </SWRProvider>
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

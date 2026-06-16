@@ -27,7 +27,7 @@ describe("apiUrl", () => {
   it("prepends production URL on native", async () => {
     vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
     const { apiUrl } = await import("@/lib/api-client");
-    expect(apiUrl("/api/clubs")).toBe("https://www.waggly.jp/api/clubs");
+    expect(apiUrl("/api/clubs")).toBe("https://waggly.jp/api/clubs");
   });
 });
 
@@ -71,7 +71,7 @@ describe("apiFetch", () => {
     await apiFetch("/api/clubs");
 
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://www.waggly.jp/api/clubs",
+      "https://waggly.jp/api/clubs",
       expect.objectContaining({
         headers: expect.any(Headers),
       })

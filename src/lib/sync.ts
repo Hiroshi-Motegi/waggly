@@ -151,7 +151,7 @@ export async function getLocalDataSummary(): Promise<DataSummary> {
         UNION ALL SELECT MAX(created_at) FROM accessories
       )`
     );
-    lastUpdated = dates[0]?.latest ?? null;
+    lastUpdated = (dates && dates.length > 0 ? dates[0]?.latest : null) ?? null;
   }
 
   return {

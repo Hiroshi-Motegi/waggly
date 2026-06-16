@@ -103,7 +103,9 @@ export default function CoursesPage() {
         setCurrentPage(state.page ?? 1);
         setResults(state.results ?? null);
       }
-    } catch {}
+    } catch (e) {
+      console.warn("Failed to restore search state:", e);
+    }
   }, []);
 
   function saveState(kw: string, area: string, page: number, data: SearchResult | null) {

@@ -7,13 +7,24 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import useSWR from "swr";
 
+interface PayjpCardElement {
+  mount(selector: string): void;
+  unmount(): void;
+  on(event: string, handler: (e: { error?: { message: string }; complete: boolean }) => void): void;
+}
+
+interface PayjpInstance {
+  elements(): { create(type: string, options: Record<string, unknown>): PayjpCardElement };
+  createToken(element: PayjpCardElement, options?: Record<string, unknown>): Promise<{ error?: { message: string }; id: string }>;
+}
+
 declare global {
   interface Window {
-    Payjp?: (key: string) => any;
+    Payjp?: (key: string) => PayjpInstance;
   }
 }
 
-let payjpSingleton: any = null;
+let payjpSingleton: PayjpInstance | null = null;
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -39,7 +50,7 @@ export default function CheckoutPage() {
   );
 
   // カードエレメントを保持
-  const [cardState] = useState<{ element: any }>({ element: null });
+  const [cardState] = useState<{ element: PayjpCardElement | null }>({ element: null });
 
   useEffect(() => {
     function mountCard() {
@@ -57,7 +68,7 @@ export default function CheckoutPage() {
         },
       });
       card.mount("#payjp-card-element");
-      card.on("change", (e: any) => {
+      card.on("change", (e) => {
         setCardError(e.error ? e.error.message : null);
         setReady(e.complete);
       });
@@ -85,7 +96,7 @@ export default function CheckoutPage() {
 
     return () => {
       if (cardState.element) {
-        try { cardState.element.unmount(); } catch {}
+        try { cardState.element.unmount(); } catch (e) { console.warn("Payjp unmount:", e); }
         cardState.element = null;
         setMounted(false);
       }

@@ -63,7 +63,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 localSummary.counts.practices > 0 ||
                 localSummary.counts.accessories > 0;
               localLastUpdated = localSummary.lastUpdated;
-            } catch {}
+            } catch (e) {
+              console.warn("Failed to get local data summary:", e);
+            }
           }
 
           const res = await apiFetch("/api/auth/resolve-session", {
@@ -91,7 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   body: JSON.stringify({ localData }),
                 });
                 await fullSync();
-              } catch {}
+              } catch (e) {
+                console.error("Failed to upload local data:", e);
+              }
               setUser(result.user);
             } else if (result.user) {
               setUser(result.user);
@@ -100,7 +104,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 try {
                   const { fullSync } = await import("@/lib/sync");
                   await fullSync();
-                } catch {}
+                } catch (e) {
+                  console.warn("Sync failed:", e);
+                }
               }
             }
           }

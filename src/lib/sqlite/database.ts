@@ -20,7 +20,7 @@ export async function getDb(): Promise<SQLiteDBConnection> {
     db = await connection.retrieveConnection(DB_NAME, false);
   } else {
     // JS wrapper and native layer are out of sync — reset and recreate
-    try { await connection.closeAllConnections(); } catch {}
+    try { await connection.closeAllConnections(); } catch (e) { console.warn("SQLite close:", e); }
     db = await connection.createConnection(
       DB_NAME,
       false,

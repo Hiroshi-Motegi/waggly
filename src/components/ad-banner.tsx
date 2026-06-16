@@ -26,7 +26,9 @@ export function AdBanner({ slot, format = "auto" }: { slot: string; format?: str
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
-    } catch {}
+    } catch (e) {
+      console.warn("AdSense push failed:", e);
+    }
 
     // AdSense が広告を埋めたか監視（未承認時は空 iframe になるため）
     const el = adRef.current;

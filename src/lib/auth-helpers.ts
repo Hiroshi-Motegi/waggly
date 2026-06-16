@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 export function getSupabaseAdmin() {
   return createClient(
@@ -12,26 +12,26 @@ export function getSupabaseAdmin() {
  * resolve-session と link-provider で使用。
  */
 export function extractProviderInfo(authUser: {
-  app_metadata: any;
-  user_metadata: any;
+  app_metadata: Record<string, unknown>;
+  user_metadata: Record<string, unknown>;
 }): { provider: string; providerSub: string; providerEmail: string | null } | null {
   const appMeta = authUser.app_metadata ?? {};
   const userMeta = authUser.user_metadata ?? {};
 
   // Google
   if (appMeta.provider === "google") {
-    const sub = userMeta.sub;
+    const sub = userMeta.sub as string | undefined;
     if (!sub) return null;
     return {
       provider: "google",
       providerSub: sub,
-      providerEmail: userMeta.email ?? null,
+      providerEmail: (userMeta.email as string) ?? null,
     };
   }
 
   // Apple
   if (appMeta.provider === "apple") {
-    const sub = userMeta.sub;
+    const sub = userMeta.sub as string | undefined;
     if (!sub) return null;
     return {
       provider: "apple",
@@ -44,7 +44,7 @@ export function extractProviderInfo(authUser: {
   if (userMeta.line_user_id) {
     return {
       provider: "line",
-      providerSub: userMeta.line_user_id,
+      providerSub: userMeta.line_user_id as string,
       providerEmail: null,
     };
   }
@@ -170,7 +170,7 @@ export async function verifyGoogleIdToken(
  * 失敗した場合は元の URL をそのまま返す。
  */
 export async function uploadAvatarFromUrl(
-  supabase: any,
+  supabase: SupabaseClient,
   userId: string,
   avatarUrl: string
 ): Promise<string> {
@@ -206,7 +206,7 @@ export async function uploadAvatarFromUrl(
 /**
  * ユーザーのデータを全削除する（user_providers と auth.users は含まない）。
  */
-export async function deleteUserData(supabase: any, userId: string) {
+export async function deleteUserData(supabase: SupabaseClient, userId: string) {
   await supabase.from("favorite_courses").delete().eq("user_id", userId);
   await supabase.from("profiles").delete().eq("id", userId);
   await supabase.from("practice_sessions").delete().eq("user_id", userId);
@@ -217,7 +217,7 @@ export async function deleteUserData(supabase: any, userId: string) {
 /**
  * ユーザーに紐づく全auth.usersを削除する。
  */
-export async function deleteUserAuthAccounts(supabase: any, userId: string) {
+export async function deleteUserAuthAccounts(supabase: SupabaseClient, userId: string) {
   const { data: providers } = await supabase
     .from("user_providers")
     .select("auth_user_id")
@@ -233,7 +233,7 @@ export async function deleteUserAuthAccounts(supabase: any, userId: string) {
 /**
  * ユーザーを完全削除する（データ + user_providers + auth.users + usersレコード）。
  */
-export async function deleteUserCompletely(supabase: any, userId: string) {
+export async function deleteUserCompletely(supabase: SupabaseClient, userId: string) {
   await deleteUserData(supabase, userId);
   await deleteUserAuthAccounts(supabase, userId);
   await supabase.from("user_providers").delete().eq("user_id", userId);

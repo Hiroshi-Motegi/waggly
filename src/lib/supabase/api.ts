@@ -3,9 +3,6 @@ import { createClient as createRawClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-const DEV_EMAIL = "dev@waggly.local";
-const DEV_PASSWORD = "devpassword123";
-
 let cachedDevUserId: string | null = null;
 
 function isDevMode() {
@@ -41,8 +38,11 @@ async function resolveUserId(authUserId: string): Promise<string | null> {
  * Returns null if not authenticated (caller should return 401).
  * userId is users.id (independent UUID), NOT auth.users.id.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AppSupabaseClient = ReturnType<typeof createRawClient<any>>;
+
 export async function getApiAuth(): Promise<{
-  supabase: any;
+  supabase: AppSupabaseClient;
   userId: string;
 } | null> {
   if (isDevMode()) {
@@ -122,7 +122,7 @@ export async function getApiAuth(): Promise<{
  * Used by auth APIs (resolve-session, etc.) that need both IDs.
  */
 export async function getApiAuthWithAuthUserId(): Promise<{
-  supabase: any;
+  supabase: AppSupabaseClient;
   authUserId: string;
   userId: string | null;
 } | null> {

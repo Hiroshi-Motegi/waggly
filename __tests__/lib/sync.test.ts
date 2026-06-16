@@ -100,7 +100,8 @@ describe("SyncEngine", () => {
         .mockResolvedValueOnce([{ count: 0 }])
         .mockResolvedValueOnce([{ count: 0 }])
         .mockResolvedValueOnce([{ count: 0 }])
-        .mockResolvedValueOnce([]); // no sync_meta row
+        .mockResolvedValueOnce([])              // no sync_meta row
+        .mockResolvedValueOnce([{ latest: null }]); // fallback MAX query
 
       const { getLocalDataSummary } = await import("@/lib/sync");
       const summary = await getLocalDataSummary();

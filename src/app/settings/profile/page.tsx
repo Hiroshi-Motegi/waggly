@@ -32,7 +32,7 @@ export default function ProfileSettingsPage() {
     bio: "",
     sns_instagram: "",
     sns_x: "",
-    custom_links: [] as { label: string; url: string }[],
+    custom_links: [] as { id: string; label: string; url: string }[],
   });
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function ProfileSettingsPage() {
         bio: profile.bio ?? "",
         sns_instagram: profile.sns_links?.instagram ?? "",
         sns_x: profile.sns_links?.x ?? "",
-        custom_links: (profile.sns_links as any)?.custom_links ?? [],
+        custom_links: ((profile.sns_links as Record<string, unknown>)?.custom_links as { label: string; url: string }[] ?? []).map((l) => ({ ...l, id: crypto.randomUUID() })),
       });
     }
   }, [profile]);
@@ -58,7 +58,9 @@ export default function ProfileSettingsPage() {
       try {
         const res = await apiFetch("/api/profile/cover-images");
         if (res.ok) setCoverImages(await res.json());
-      } catch {}
+      } catch (e) {
+        console.warn("Failed to load cover images:", e);
+      }
     }
     loadCoverImages();
   }, []);
@@ -84,10 +86,12 @@ export default function ProfileSettingsPage() {
   async function handleSave() {
     setIsSaving(true);
     try {
-      const snsLinks: Record<string, any> = {};
+      const snsLinks: Record<string, unknown> = {};
       if (form.sns_instagram) snsLinks.instagram = form.sns_instagram;
       if (form.sns_x) snsLinks.x = form.sns_x;
-      const validLinks = form.custom_links.filter((l) => l.label && l.url);
+      const validLinks = form.custom_links
+        .filter((l) => l.label && l.url)
+        .map(({ label, url }) => ({ label, url }));
       if (validLinks.length > 0) snsLinks.custom_links = validLinks;
 
       await updateProfile({
@@ -97,7 +101,7 @@ export default function ProfileSettingsPage() {
         best_score: form.best_score,
         home_course: form.home_course || null,
         bio: form.bio || null,
-        sns_links: snsLinks as any,
+        sns_links: snsLinks as Record<string, unknown>,
       });
       router.back();
     } catch (err) {
@@ -205,7 +209,7 @@ export default function ProfileSettingsPage() {
         <h3 className="px-1 pt-2 text-lg font-bold text-white">その他のリンク</h3>
         <div className="flex flex-col gap-2 rounded-lg bg-white p-3">
           {form.custom_links.map((link, i) => (
-            <div key={i} className={`flex gap-2 items-start pb-2 ${i < form.custom_links.length - 1 ? "border-b border-[#ececec] mb-2" : ""}`}>
+            <div key={link.id} className={`flex gap-2 items-start pb-2 ${i < form.custom_links.length - 1 ? "border-b border-[#ececec] mb-2" : ""}`}>
               <div className="flex flex-col gap-1 shrink-0 mt-1">
                 <button
                   type="button"
@@ -265,7 +269,7 @@ export default function ProfileSettingsPage() {
           ))}
           <button
             type="button"
-            onClick={() => setForm((p) => ({ ...p, custom_links: [...p.custom_links, { label: "", url: "" }] }))}
+            onClick={() => setForm((p) => ({ ...p, custom_links: [...p.custom_links, { id: crypto.randomUUID(), label: "", url: "" }] }))}
             className="flex items-center gap-1 text-sm font-bold text-[#006728] pt-1"
           >
             <Plus className="h-4 w-4" />
