@@ -335,9 +335,10 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
 
       {/* スペック */}
       <SectionAccordion id="spec" title="スペック" isOpen={openSections.spec ?? true} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.spec = el; }}>
-        {/* シャフト名・素材・フレックス（パター非表示） */}
+        {/* シャフト（パター非表示） */}
         {!isPutter && (
           <>
+            <span className="text-sm font-bold text-[#333]">シャフト</span>
             <div className="flex flex-col gap-0.5 py-1" data-field="shaft_name">
               <span className={labelClass}>シャフト名</span>
               <input value={form.shaft_name ?? ""} onChange={(e) => update("shaft_name", e.target.value)} placeholder="シャフト名" className={`${inputClass} ${fieldError("shaft_name") ? "!border-red-400" : ""}`} />
