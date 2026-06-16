@@ -98,9 +98,6 @@ function ChatView({
         </div>
       </PageHeader>
 
-      {/* 広告バナー */}
-      <AdBanner slot="CHAT_TOP" />
-
       {/* 利用状況 */}
       {usage && (
         <div className="rounded-lg bg-white px-3 py-2.5 space-y-2">
