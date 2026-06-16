@@ -20,7 +20,7 @@ const statusLabels: Record<string, string> = {
 };
 
 type SpecItem = { key: string; label: string; suffix?: string };
-type SpecSection = { title: string; items: SpecItem[]; titleKey?: string };
+type SpecSection = { title: string; items: SpecItem[]; titleKey?: string; cols?: number };
 
 function getSpecSections(category: string): SpecSection[] {
   const isPutter = category === "putter";
@@ -47,7 +47,7 @@ function getSpecSections(category: string): SpecSection[] {
       { key: "frequency", label: "振動数", suffix: "cpm" },
       { key: "kick_point", label: "キックポイント" },
     ];
-    sections.push({ title: "シャフト", items: shaftItems, titleKey: "shaft_name" });
+    sections.push({ title: "シャフト", items: shaftItems, titleKey: "shaft_name", cols: 3 });
   }
 
   // ヘッドスペック
@@ -79,14 +79,15 @@ function getSpecSections(category: string): SpecSection[] {
   return sections;
 }
 
-function SpecGrid({ items, club }: { items: SpecItem[]; club: any }) {
+function SpecGrid({ items, club, cols = 2 }: { items: SpecItem[]; club: any; cols?: number }) {
   const filled = items.filter((s) => {
     const v = club[s.key];
     return v != null && v !== "";
   });
   if (filled.length === 0) return null;
+  const gridClass = cols === 3 ? "grid grid-cols-3 gap-1.5" : "grid grid-cols-2 gap-1.5";
   return (
-    <div className="grid grid-cols-2 gap-1.5">
+    <div className={gridClass}>
       {filled.map((spec) => (
         <div key={spec.key} className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
           <span className="text-[10px] text-[#8b8b8b]">{spec.label}</span>
@@ -271,14 +272,14 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         })()}
         <div className="flex flex-col gap-3">
           {latestDistance != null && (
-            <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2 mt-2">
+            <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2 mt-4">
               <span className="text-[10px] text-[#8b8b8b]">飛距離</span>
               <span className="text-lg font-bold text-black">{latestDistance} yd</span>
             </div>
           )}
 
           {/* スペックシート */}
-          {getSpecSections(club.category).map((section) => {
+          {getSpecSections(club.category).map((section, i) => {
             const filled = section.items.filter((s) => {
               const v = (club as any)[s.key];
               return v != null && v !== "";
@@ -286,12 +287,12 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
             if (filled.length === 0) return null;
             const titleKey = section.titleKey ? (club as any)[section.titleKey] : null;
             return (
-              <div key={section.title}>
+              <div key={section.title} className={i > 0 ? "pt-2" : ""}>
                 <div className="flex items-baseline gap-2 mb-1">
                   <p className="text-sm font-bold text-[#333]">{section.title}</p>
                   {titleKey && <span className="text-sm text-[#666]">{titleKey}</span>}
                 </div>
-                <SpecGrid items={section.items.filter((s) => s.key !== section.titleKey)} club={club} />
+                <SpecGrid items={section.items.filter((s) => s.key !== section.titleKey)} club={club} cols={section.cols} />
               </div>
             );
           })}
