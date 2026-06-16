@@ -169,7 +169,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
 
   const hasPurchaseData = !!(form.release_year || form.purchase_date || form.purchase_shop || form.purchase_price);
   const hasShaftData = !!(form.shaft_weight || form.frequency || form.kick_point);
-  const hasGripData = !!(form.grip_size);
+  const hasGripData = !!(form.grip_name || form.grip_size);
   const hasHeadData = !!(form.lie || form.bounce || form.sole_shape || form.face_angle || form.head_volume || form.head_weight);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -314,12 +314,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           </>
         )}
 
-        {/* グリップ名 */}
-        <div className="flex flex-col gap-0.5 py-1">
-          <span className={labelClass}>グリップ名</span>
-          <input value={form.grip_name ?? ""} onChange={(e) => update("grip_name", e.target.value)} placeholder="銘柄名" className={inputClass} />
-        </div>
-
         {/* ロフト角 */}
         <div className="flex flex-col gap-0.5 py-1" data-field="loft">
           <span className={labelClass}>ロフト角</span>
@@ -436,15 +430,13 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
         </SectionAccordion>
       )}
 
-      {/* Section 4: グリップ詳細 */}
-      <SectionAccordion id="grip" title="グリップ詳細" isOpen={openSections.grip ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.grip = el; }}>
+      {/* Section 4: グリップ */}
+      <SectionAccordion id="grip" title="グリップ" isOpen={openSections.grip ?? false} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.grip = el; }}>
         <div className="flex flex-col gap-1">
-          {/* 基本情報の参照表示 */}
-          {form.grip_name && (
-            <div className="rounded bg-[#f5f5f5] px-3 py-2 mb-1 text-sm text-[#666]">
-              {form.grip_name}
-            </div>
-          )}
+          <div className="flex flex-col gap-0.5 py-1">
+            <span className={labelClass}>グリップ名</span>
+            <input value={form.grip_name ?? ""} onChange={(e) => update("grip_name", e.target.value)} placeholder="銘柄名" className={inputClass} />
+          </div>
           <div className="flex flex-col gap-0.5 py-1">
             <span className={labelClass}>太さ</span>
             <input value={form.grip_size ?? ""} onChange={(e) => update("grip_size", e.target.value)} placeholder="M60" className={inputClass} />
