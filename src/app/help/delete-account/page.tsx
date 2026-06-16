@@ -1,9 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function DeleteAccountHelpPage() {
+  const { user } = useAuth();
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2">
       <div className="relative flex flex-col space-y-2">
@@ -88,6 +91,15 @@ export default function DeleteAccountHelpPage() {
             ))}
           </div>
         </div>
+
+        {/* 退会ボタン */}
+        {user && (
+          <div className="flex justify-center pt-2 pb-4">
+            <Link href="/settings/delete-account" className="rounded-full border border-red-400 px-6 py-2.5 text-base font-bold text-red-400">
+              アカウントを削除する
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
