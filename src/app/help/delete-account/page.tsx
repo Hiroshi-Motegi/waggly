@@ -94,8 +94,8 @@ export default function DeleteAccountHelpPage() {
 
         {/* 退会ボタン */}
         {user && (
-          <div className="flex justify-center pt-2 pb-4">
-            <Link href="/settings/delete-account" className="rounded-full border border-red-400 px-6 py-2.5 text-base font-bold text-red-400">
+          <div className="flex justify-center pt-6 pb-4">
+            <Link href="/settings/delete-account" className="rounded-full bg-white px-6 py-2.5 text-base font-bold text-red-500">
               アカウントを削除する
             </Link>
           </div>
