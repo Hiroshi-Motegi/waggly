@@ -362,6 +362,14 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
                 </select>
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-1.5 py-1">
+              <SpecCell label="シャフト重量" unit="g" value={form.shaft_weight} step="1" min={0} max={200}
+                onChange={(v) => update("shaft_weight", v ? Number(v) : undefined)} />
+              <SpecCell label="振動数" unit="cpm" value={form.frequency} min={0} max={500}
+                onChange={(v) => update("frequency", v ? Number(v) : undefined)} />
+              <SpecCell label="キックポイント" value={form.kick_point} type="text" placeholder="—"
+                onChange={(v) => update("kick_point", v || undefined)} />
+            </div>
           </>
         )}
 
@@ -377,16 +385,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
             onChange={(v) => update("weight", v ? Number(v) : undefined)} />
           <SpecCell label="バランス" value={form.swing_weight} type="text" placeholder="D2"
             onChange={(v) => update("swing_weight", v || undefined)} />
-          {!isPutter && (
-            <>
-              <SpecCell label="シャフト重量" unit="g" value={form.shaft_weight} step="1" min={0} max={200}
-                onChange={(v) => update("shaft_weight", v ? Number(v) : undefined)} />
-              <SpecCell label="振動数" unit="cpm" value={form.frequency} min={0} max={500}
-                onChange={(v) => update("frequency", v ? Number(v) : undefined)} />
-              <SpecCell label="キックポイント" value={form.kick_point} type="text" placeholder="—"
-                onChange={(v) => update("kick_point", v || undefined)} />
-            </>
-          )}
         </div>
       </SectionAccordion>
 
