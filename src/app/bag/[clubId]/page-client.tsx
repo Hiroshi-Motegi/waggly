@@ -271,7 +271,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
         })()}
         <div className="flex flex-col gap-3">
           {latestDistance != null && (
-            <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2">
+            <div className="flex flex-col rounded-lg border border-[#ececec] bg-[#fafafa] p-2 mt-2">
               <span className="text-[10px] text-[#8b8b8b]">飛距離</span>
               <span className="text-lg font-bold text-black">{latestDistance} yd</span>
             </div>
