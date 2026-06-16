@@ -71,7 +71,8 @@ export async function POST(request: NextRequest) {
 
   // 2. Cache miss — fetch in parallel
   const categoryLabel = CATEGORY_LABELS[category] ?? category ?? "";
-  const searchQuery = `${maker} ${model} ${club_number ?? ""} ${categoryLabel} ゴルフ スペック ロフト角 ライ角 長さ 重量`.trim();
+  const clubNumberLabel = club_number ? `${club_number}番` : "";
+  const searchQuery = `${maker} ${model} ${clubNumberLabel} ${categoryLabel} スペック ロフト角 ライ角 長さ`.trim();
 
   const [searchResult, rakutenResult] = await Promise.all([
     searchGolfKnowledge(searchQuery).catch(() => ({ results: [], answer: null })),
@@ -86,7 +87,9 @@ export async function POST(request: NextRequest) {
 
   const prompt = hasSearchResults
     ? `以下のWeb検索結果を参考に、ゴルフクラブのスペック情報をJSON形式で回答してください。
-検索結果に記載されている情報のみを使用し、推測はしないでください。
+注意: 検索結果にはスペック表の一部（別の番手の情報）しか含まれていない場合があります。
+指定された番手（${club_number ?? "不明"}）のスペックが検索結果に見つからない場合は、あなたの知識から正確な公開スペック情報を回答してください。
+別の番手のスペックを指定された番手のものとして回答しないでください。
 該当する情報がない項目はnullにしてください。
 
 ## Web検索結果

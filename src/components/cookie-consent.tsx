@@ -20,7 +20,7 @@ export function CookieConsent({ hasBottomNav = false }: { hasBottomNav?: boolean
   }
 
   return (
-    <div className={`fixed left-1/2 -translate-x-1/2 z-[200] w-full max-w-md px-2 animate-fade-in ${hasBottomNav ? "" : "bottom-4"}`} style={hasBottomNav ? { bottom: "calc(var(--bottom-nav-height) + 16px)" } : undefined}>
+    <div className={`fixed left-1/2 -translate-x-1/2 z-[200] w-full max-w-screen-sm px-2 animate-fade-in ${hasBottomNav ? "" : "bottom-4"}`} style={hasBottomNav ? { bottom: "calc(var(--bottom-nav-height) + 16px)" } : undefined}>
       <div className="bg-white shadow-lg px-4 py-3 flex items-center gap-3 rounded-xl">
         <p className="flex-1 text-xs text-[#666] leading-relaxed">
           当サイトではCookieを使用しています。詳しくは
