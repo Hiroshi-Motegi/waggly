@@ -14,20 +14,30 @@ import { apiFetch } from "@/lib/api-client";
 
 interface Configuration {
   id: string;
-  shaft_id: string | null;
+  shaft_variant_id: string | null;
   length: number | null;
   total_weight: number | null;
   swing_weight: string | null;
 }
 
-interface SeriesShaft {
-  link_id: string;
+interface ShaftModelWithVariants {
   id: string;
   maker: string;
   name: string;
-  flex: string | null;
-  weight: number | null;
+  type: string | null;
+  variants: {
+    id: string;
+    flex: string | null;
+    weight: number | null;
+    torque: number | null;
+    kick_point: string | null;
+  }[];
+}
+
+interface SeriesShaft {
+  link_id: string;
   is_default: boolean;
+  shaft_model: ShaftModelWithVariants;
 }
 
 interface Series {
@@ -312,12 +322,12 @@ function AddHeadForm({
 
 /* ── Shaft Linker ── */
 
-interface ShaftSearchResult {
+interface ShaftModelSearchResult {
   id: string;
   maker: string;
   name: string;
-  flex: string | null;
-  weight: number | null;
+  type: string | null;
+  variants: { id: string; flex: string | null; weight: number | null }[];
 }
 
 function ShaftLinker({
@@ -330,7 +340,7 @@ function ShaftLinker({
   onUpdated: () => void;
 }) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ShaftSearchResult[]>([]);
+  const [results, setResults] = useState<ShaftModelSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
 
@@ -341,31 +351,31 @@ function ShaftLinker({
     try {
       const res = await apiFetch(`/api/admin/shafts?search=${encodeURIComponent(q)}&pageSize=10`);
       if (res.ok) {
-        const data = await res.json();
-        setResults(data.items ?? data);
+        const json = await res.json();
+        setResults(json.data ?? json);
       }
     } finally {
       setSearching(false);
     }
   }
 
-  async function handleAdd(shaftId: string) {
+  async function handleAdd(shaftModelId: string) {
     await apiFetch(`/api/admin/series/${seriesId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "add_shaft", shaft_id: shaftId }),
+      body: JSON.stringify({ action: "add_shaft", shaft_model_id: shaftModelId }),
     });
-    setResults((prev) => prev.filter((r) => r.id !== shaftId));
+    setResults((prev) => prev.filter((r) => r.id !== shaftModelId));
     onUpdated();
   }
 
-  async function handleRemove(linkId: string, shaftId: string) {
+  async function handleRemove(linkId: string, shaftModelId: string) {
     setRemoving(linkId);
     try {
       await apiFetch(`/api/admin/series/${seriesId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "remove_shaft", link_id: linkId, shaft_id: shaftId }),
+        body: JSON.stringify({ action: "remove_shaft", link_id: linkId, shaft_model_id: shaftModelId }),
       });
       onUpdated();
     } finally {
@@ -373,48 +383,39 @@ function ShaftLinker({
     }
   }
 
-  // Group shafts by maker+name for display
-  const grouped = shafts.reduce<
-    Record<string, { maker: string; name: string; variants: SeriesShaft[] }>
-  >((acc, s) => {
-    const key = `${s.maker}|||${s.name}`;
-    if (!acc[key]) acc[key] = { maker: s.maker, name: s.name, variants: [] };
-    acc[key].variants.push(s);
-    return acc;
-  }, {});
-
-  // Filter out already-linked shaft IDs from search results
-  const linkedIds = new Set(shafts.map((s) => s.id));
-  const filteredResults = results.filter((r) => !linkedIds.has(r.id));
+  // Filter out already-linked shaft model IDs from search results
+  const linkedModelIds = new Set(shafts.map((s) => s.shaft_model.id));
+  const filteredResults = results.filter((r) => !linkedModelIds.has(r.id));
 
   return (
-    <AdminFormSection title={`シャフト (${shafts.length}本)`}>
+    <AdminFormSection title={`シャフト (${shafts.length}モデル)`}>
       {/* Linked shafts */}
-      {Object.entries(grouped).length > 0 && (
+      {shafts.length > 0 && (
         <div className="space-y-1">
-          {Object.entries(grouped).map(([key, g]) => (
-            <div key={key} className="flex items-center gap-2 rounded border border-[#e5e5e5] bg-white px-3 py-1.5 text-sm">
+          {shafts.map((s) => (
+            <div key={s.link_id} className="flex items-center gap-2 rounded border border-[#e5e5e5] bg-white px-3 py-1.5 text-sm">
               <div className="flex-1">
-                <span className="font-medium">{g.maker} {g.name}</span>
+                <span className="font-medium">{s.shaft_model.maker} {s.shaft_model.name}</span>
                 <span className="ml-2 text-[#888]">
-                  {g.variants
-                    .map((v) => `${v.flex ?? "?"}${v.weight != null ? ` (${v.weight}g)` : ""}`)
-                    .join(", ")}
+                  {s.shaft_model.variants.length}バリアント
+                  {s.shaft_model.variants.length > 0 && (
+                    <> ({s.shaft_model.variants.map((v) => v.flex ?? "?").join(", ")})</>
+                  )}
                 </span>
+                {s.is_default && (
+                  <span className="ml-2 rounded-full bg-[#006728] px-1.5 py-0.5 text-[9px] font-bold text-white">
+                    デフォルト
+                  </span>
+                )}
               </div>
-              <div className="flex gap-1">
-                {g.variants.map((v) => (
-                  <button
-                    key={v.link_id}
-                    onClick={() => handleRemove(v.link_id, v.id)}
-                    disabled={removing === v.link_id}
-                    className="text-[10px] text-red-400 hover:text-red-600 disabled:opacity-40"
-                    title={`${v.flex ?? "?"} を削除`}
-                  >
-                    ✕{v.flex ?? ""}
-                  </button>
-                ))}
-              </div>
+              <button
+                onClick={() => handleRemove(s.link_id, s.shaft_model.id)}
+                disabled={removing === s.link_id}
+                className="text-[10px] text-red-400 hover:text-red-600 disabled:opacity-40"
+                title="シャフトモデルを削除"
+              >
+                ✕ 削除
+              </button>
             </div>
           ))}
         </div>
@@ -423,7 +424,7 @@ function ShaftLinker({
       {/* Search input */}
       <div className="flex items-end gap-2 pt-2">
         <div className="flex flex-1 flex-col gap-0.5">
-          <label className="text-[10px] text-[#8b8b8b]">シャフトを検索して追加</label>
+          <label className="text-[10px] text-[#8b8b8b]">シャフトモデルを検索して追加</label>
           <input
             type="text"
             value={query}
@@ -449,8 +450,9 @@ function ShaftLinker({
             <div key={r.id} className="flex items-center gap-2 rounded border border-dashed border-[#ccc] bg-[#fafafa] px-3 py-1 text-sm">
               <div className="flex-1">
                 {r.maker} {r.name}
-                {r.flex && <span className="ml-1 text-[#888]">{r.flex}</span>}
-                {r.weight != null && <span className="ml-1 text-[#888]">({r.weight}g)</span>}
+                <span className="ml-2 text-[#888]">
+                  {r.variants.length}バリアント
+                </span>
               </div>
               <button
                 onClick={() => handleAdd(r.id)}
@@ -468,6 +470,14 @@ function ShaftLinker({
 
 /* ── Configurations Matrix ── */
 
+// Flatten shaft models into a list of columns: { modelName, variant }
+interface ShaftColumn {
+  modelName: string;
+  variantId: string;
+  flex: string | null;
+  weight: number | null;
+}
+
 type ConfigEdits = Record<string, Record<string, { length?: string; total_weight?: string; swing_weight?: string }>>;
 
 function ConfigurationsMatrix({
@@ -484,35 +494,56 @@ function ConfigurationsMatrix({
   const [edits, setEdits] = useState<ConfigEdits>({});
   const [saving, setSaving] = useState(false);
 
+  // Flatten shaft models' variants into columns
+  const shaftColumns: ShaftColumn[] = shafts.flatMap((s) =>
+    s.shaft_model.variants.map((v) => ({
+      modelName: s.shaft_model.name,
+      variantId: v.id,
+      flex: v.flex,
+      weight: v.weight,
+    })),
+  );
+
+  // Group columns by model name for header spanning
+  const modelGroups: { modelName: string; columns: ShaftColumn[] }[] = [];
+  for (const col of shaftColumns) {
+    const last = modelGroups[modelGroups.length - 1];
+    if (last && last.modelName === col.modelName) {
+      last.columns.push(col);
+    } else {
+      modelGroups.push({ modelName: col.modelName, columns: [col] });
+    }
+  }
+
   function getConfigVal(
     spec: Series["specs"][number],
-    shaftId: string,
+    variantId: string,
     field: "length" | "total_weight" | "swing_weight",
   ): string {
-    const edited = edits[spec.id]?.[shaftId]?.[field];
+    const edited = edits[spec.id]?.[variantId]?.[field];
     if (edited !== undefined) return edited;
-    const cfg = spec.configurations.find((c) => c.shaft_id === shaftId);
+    const cfg = spec.configurations.find((c) => c.shaft_variant_id === variantId);
     if (!cfg) return "";
     const v = cfg[field];
     return v != null ? String(v) : "";
   }
 
-  function setConfigField(specId: string, shaftId: string, field: string, value: string) {
+  function setConfigField(specId: string, variantId: string, field: string, value: string) {
     setEdits((prev) => ({
       ...prev,
       [specId]: {
         ...prev[specId],
-        [shaftId]: { ...prev[specId]?.[shaftId], [field]: value },
+        [variantId]: { ...prev[specId]?.[variantId], [field]: value },
       },
     }));
   }
 
   // Collect all changed cells
-  const changedCells: { head_id: string; shaft_id: string }[] = [];
-  for (const [specId, shaftMap] of Object.entries(edits)) {
-    for (const [shaftId, fields] of Object.entries(shaftMap)) {
+  const changedCells: { head_id: string; shaft_variant_id: string }[] = [];
+  for (const [specId, variantMap] of Object.entries(edits)) {
+    for (const [variantId, fields] of Object.entries(variantMap)) {
       if (Object.keys(fields).length > 0) {
-        changedCells.push({ head_id: specId, shaft_id: shaftId });
+        changedCells.push({ head_id: specId, shaft_variant_id: variantId });
       }
     }
   }
@@ -522,11 +553,11 @@ function ConfigurationsMatrix({
     setSaving(true);
     try {
       await Promise.all(
-        changedCells.map(({ head_id, shaft_id }) => {
+        changedCells.map(({ head_id, shaft_variant_id }) => {
           const spec = specs.find((s) => s.id === head_id);
-          const fields = edits[head_id]?.[shaft_id] ?? {};
+          const fields = edits[head_id]?.[shaft_variant_id] ?? {};
           // Merge existing values with edits
-          const existing = spec?.configurations.find((c) => c.shaft_id === shaft_id);
+          const existing = spec?.configurations.find((c) => c.shaft_variant_id === shaft_variant_id);
           const length = "length" in fields ? parseNum(fields.length!) : (existing?.length ?? null);
           const total_weight = "total_weight" in fields ? parseNum(fields.total_weight!) : (existing?.total_weight ?? null);
           const swing_weight = "swing_weight" in fields
@@ -539,7 +570,7 @@ function ConfigurationsMatrix({
             body: JSON.stringify({
               action: "upsert_config",
               head_id,
-              shaft_id,
+              shaft_variant_id,
               length,
               total_weight,
               swing_weight,
@@ -554,16 +585,6 @@ function ConfigurationsMatrix({
     }
   }
 
-  // Group shafts by maker+name for column headers
-  const shaftGroups = shafts.reduce<
-    Record<string, { maker: string; name: string; variants: SeriesShaft[] }>
-  >((acc, s) => {
-    const key = `${s.maker}|||${s.name}`;
-    if (!acc[key]) acc[key] = { maker: s.maker, name: s.name, variants: [] };
-    acc[key].variants.push(s);
-    return acc;
-  }, {});
-
   const sortedSpecs = [...specs].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   return (
@@ -571,38 +592,36 @@ function ConfigurationsMatrix({
       <div className="overflow-x-auto rounded-lg border border-[#e5e5e5]">
         <table className="w-full text-sm">
           <thead>
-            {/* Group header row */}
+            {/* Model group header row */}
             <tr className="border-b border-[#e5e5e5] bg-[#fafafa]">
               <th className="sticky left-0 z-10 bg-[#fafafa] px-2 py-1 text-left text-[11px] text-[#888] font-medium" rowSpan={2}>
                 番手
               </th>
-              {Object.entries(shaftGroups).map(([key, g]) => (
+              {modelGroups.map((g, i) => (
                 <th
-                  key={key}
-                  colSpan={g.variants.length * 3}
+                  key={`${g.modelName}-${i}`}
+                  colSpan={g.columns.length * 3}
                   className="border-l border-[#e5e5e5] px-2 py-1 text-center text-[11px] text-[#888] font-medium"
                 >
-                  {g.name}
+                  {g.modelName}
                 </th>
               ))}
             </tr>
-            {/* Flex sub-header row */}
+            {/* Variant (flex) sub-header row */}
             <tr className="border-b border-[#e5e5e5] bg-[#fafafa]">
-              {Object.entries(shaftGroups).flatMap(([, g]) =>
-                g.variants.map((v) => (
-                  <th
-                    key={v.id}
-                    colSpan={3}
-                    className="border-l border-[#e5e5e5] px-1 py-1 text-center text-[10px] text-[#888] font-normal"
-                  >
-                    {v.flex ?? "?"}
-                    {v.weight != null && <span className="ml-0.5 text-[#aaa]">({v.weight}g)</span>}
-                    <div className="flex justify-center gap-1 text-[9px] text-[#bbb]">
-                      <span>長さ</span><span>重量</span><span>SW</span>
-                    </div>
-                  </th>
-                )),
-              )}
+              {shaftColumns.map((col) => (
+                <th
+                  key={col.variantId}
+                  colSpan={3}
+                  className="border-l border-[#e5e5e5] px-1 py-1 text-center text-[10px] text-[#888] font-normal"
+                >
+                  {col.flex ?? "?"}
+                  {col.weight != null && <span className="ml-0.5 text-[#aaa]">({col.weight}g)</span>}
+                  <div className="flex justify-center gap-1 text-[9px] text-[#bbb]">
+                    <span>長さ</span><span>重量</span><span>SW</span>
+                  </div>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -611,40 +630,38 @@ function ConfigurationsMatrix({
                 <td className="sticky left-0 z-10 bg-white px-2 py-1 font-medium whitespace-nowrap">
                   {sp.club_number ?? (CATEGORY_LABELS[sp.category] ?? sp.category)}
                 </td>
-                {Object.entries(shaftGroups).flatMap(([, g]) =>
-                  g.variants.map((v) => (
-                    <td key={`${sp.id}-${v.id}`} className="border-l border-[#f0f0f0] px-0.5 py-0.5">
-                      <div className="flex gap-0.5">
-                        <input
-                          type="number"
-                          step="any"
-                          value={getConfigVal(sp, v.id, "length")}
-                          onChange={(e) => setConfigField(sp.id, v.id, "length", e.target.value)}
-                          className="w-12 rounded border border-[#e5e5e5] bg-white px-1 py-0.5 text-xs outline-none focus:border-[#006728]"
-                          placeholder='"'
-                          title="長さ (inch)"
-                        />
-                        <input
-                          type="number"
-                          step="any"
-                          value={getConfigVal(sp, v.id, "total_weight")}
-                          onChange={(e) => setConfigField(sp.id, v.id, "total_weight", e.target.value)}
-                          className="w-12 rounded border border-[#e5e5e5] bg-white px-1 py-0.5 text-xs outline-none focus:border-[#006728]"
-                          placeholder="g"
-                          title="総重量 (g)"
-                        />
-                        <input
-                          type="text"
-                          value={getConfigVal(sp, v.id, "swing_weight")}
-                          onChange={(e) => setConfigField(sp.id, v.id, "swing_weight", e.target.value)}
-                          className="w-10 rounded border border-[#e5e5e5] bg-white px-1 py-0.5 text-xs outline-none focus:border-[#006728]"
-                          placeholder="SW"
-                          title="スイングウェイト"
-                        />
-                      </div>
-                    </td>
-                  )),
-                )}
+                {shaftColumns.map((col) => (
+                  <td key={`${sp.id}-${col.variantId}`} className="border-l border-[#f0f0f0] px-0.5 py-0.5">
+                    <div className="flex gap-0.5">
+                      <input
+                        type="number"
+                        step="any"
+                        value={getConfigVal(sp, col.variantId, "length")}
+                        onChange={(e) => setConfigField(sp.id, col.variantId, "length", e.target.value)}
+                        className="w-12 rounded border border-[#e5e5e5] bg-white px-1 py-0.5 text-xs outline-none focus:border-[#006728]"
+                        placeholder='"'
+                        title="長さ (inch)"
+                      />
+                      <input
+                        type="number"
+                        step="any"
+                        value={getConfigVal(sp, col.variantId, "total_weight")}
+                        onChange={(e) => setConfigField(sp.id, col.variantId, "total_weight", e.target.value)}
+                        className="w-12 rounded border border-[#e5e5e5] bg-white px-1 py-0.5 text-xs outline-none focus:border-[#006728]"
+                        placeholder="g"
+                        title="総重量 (g)"
+                      />
+                      <input
+                        type="text"
+                        value={getConfigVal(sp, col.variantId, "swing_weight")}
+                        onChange={(e) => setConfigField(sp.id, col.variantId, "swing_weight", e.target.value)}
+                        className="w-10 rounded border border-[#e5e5e5] bg-white px-1 py-0.5 text-xs outline-none focus:border-[#006728]"
+                        placeholder="SW"
+                        title="スイングウェイト"
+                      />
+                    </div>
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
