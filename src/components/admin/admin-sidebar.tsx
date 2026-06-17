@@ -30,11 +30,23 @@ export function AdminSidebar() {
   }));
 
   const sections = [
-    { title: "クラブスペック", items: specItems },
     {
       title: "シリーズ",
       items: [
         { href: "/admin/series", label: "シリーズ一覧", match: (p: string) => p.startsWith("/admin/series") },
+      ],
+    },
+    { title: "ヘッドスペック", items: specItems },
+    {
+      title: "シャフト",
+      items: [
+        { href: "/admin/shafts", label: "シャフト一覧", match: (p: string) => p.startsWith("/admin/shafts") },
+      ],
+    },
+    {
+      title: "グリップ",
+      items: [
+        { href: "/admin/grips", label: "グリップ一覧", match: (p: string) => p.startsWith("/admin/grips") },
       ],
     },
     {
