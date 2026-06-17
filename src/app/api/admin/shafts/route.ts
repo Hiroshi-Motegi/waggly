@@ -9,7 +9,9 @@ function getAdmin() {
   );
 }
 
-/** GET /api/admin/shafts — シャフト一覧（ページネーション＋検索） */
+const VARIANT_SELECT = "id, flex, weight, torque, kick_point, source, verified";
+
+/** GET /api/admin/shafts — シャフトモデル一覧（バリアント付き、ページネーション＋検索） */
 export async function GET(request: NextRequest) {
   const admin = getAdmin();
   const url = new URL(request.url);
@@ -20,8 +22,8 @@ export async function GET(request: NextRequest) {
   const search = url.searchParams.get("search") ?? "";
 
   let query = admin
-    .from("shafts")
-    .select("*", { count: "exact" });
+    .from("shaft_models")
+    .select(`*, variants:shaft_variants(${VARIANT_SELECT})`, { count: "exact" });
 
   if (search) {
     const norm = normalizeClubName(search);
@@ -40,41 +42,31 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ data: data ?? [], total: count ?? 0, page, pageSize });
 }
 
-/** POST /api/admin/shafts — シャフト作成 */
+/** POST /api/admin/shafts — シャフトモデル作成（親のみ） */
 export async function POST(request: NextRequest) {
   const admin = getAdmin();
   const body = await request.json();
-  const { maker, name, flex } = body;
+  const { maker, name } = body;
 
   if (!maker || !name) {
     return NextResponse.json({ error: "maker and name required" }, { status: 400 });
   }
 
-  const row = {
-    maker,
-    maker_normalized: normalizeClubName(maker),
-    name,
-    name_normalized: normalizeClubName(name),
-    flex: flex || null,
-    type: body.type || null,
-    weight: body.weight ?? null,
-    torque: body.torque ?? null,
-    kick_point: body.kick_point || null,
-    image_url: body.image_url || null,
-    affiliate_url: body.affiliate_url || null,
-    source: body.source || "manual",
-    verified: body.verified ?? false,
-  };
-
   const { data, error } = await admin
-    .from("shafts")
-    .insert(row)
-    .select()
+    .from("shaft_models")
+    .insert({
+      maker,
+      maker_normalized: normalizeClubName(maker),
+      name,
+      name_normalized: normalizeClubName(name),
+      type: body.type || null,
+    })
+    .select(`*, variants:shaft_variants(${VARIANT_SELECT})`)
     .single();
 
   if (error) {
     if (error.code === "23505") {
-      return NextResponse.json({ error: "既に存在するシャフトです" }, { status: 409 });
+      return NextResponse.json({ error: "既に存在するシャフトモデルです" }, { status: 409 });
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -82,51 +74,127 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(data, { status: 201 });
 }
 
-/** PATCH /api/admin/shafts — body: { id, data: {...} } */
+/**
+ * PATCH /api/admin/shafts — 複数アクション対応
+ *
+ * action: "update"          — モデル更新 { id, action, data }
+ * action: "add_variant"     — バリアント追加 { action, model_id, flex, weight, torque, kick_point }
+ * action: "update_variant"  — バリアント更新 { action, variant_id, data }
+ * action: "delete_variant"  — バリアント削除 { action, variant_id }
+ */
 export async function PATCH(request: NextRequest) {
   const admin = getAdmin();
-  const { id, data: updateData } = await request.json();
+  const body = await request.json();
+  const { action } = body;
 
-  if (!id || !updateData) {
-    return NextResponse.json({ error: "id and data required" }, { status: 400 });
-  }
-
-  const { data: existing } = await admin.from("shafts").select("*").eq("id", id).single();
-  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-  const ALLOWED = [
-    "maker", "name", "type", "flex", "weight", "torque", "kick_point",
-    "image_url", "affiliate_url", "own_image_url", "source", "verified",
-  ];
-  const fields: Record<string, any> = {};
-  for (const key of ALLOWED) {
-    if (key in updateData) fields[key] = updateData[key];
-  }
-
-  if (Object.keys(fields).length === 0) {
-    return NextResponse.json({ error: "No valid fields" }, { status: 400 });
-  }
-
-  // Re-normalize if identity fields changed
-  if ("maker" in fields) fields.maker_normalized = normalizeClubName(fields.maker);
-  if ("name" in fields) fields.name_normalized = normalizeClubName(fields.name);
-
-  const { error } = await admin.from("shafts").update(fields).eq("id", id);
-  if (error) {
-    if (error.code === "23505") {
-      return NextResponse.json({ error: "既に存在するシャフトです" }, { status: 409 });
+  // --- update model ---
+  if (action === "update") {
+    const { id, data: updateData } = body;
+    if (!id || !updateData) {
+      return NextResponse.json({ error: "id and data required" }, { status: 400 });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+    const ALLOWED = ["maker", "name", "type", "image_url", "affiliate_url", "verified"];
+    const fields: Record<string, any> = {};
+    for (const key of ALLOWED) {
+      if (key in updateData) fields[key] = updateData[key];
+    }
+    if (Object.keys(fields).length === 0) {
+      return NextResponse.json({ error: "No valid fields" }, { status: 400 });
+    }
+
+    if ("maker" in fields) fields.maker_normalized = normalizeClubName(fields.maker);
+    if ("name" in fields) fields.name_normalized = normalizeClubName(fields.name);
+
+    const { error } = await admin.from("shaft_models").update(fields).eq("id", id);
+    if (error) {
+      if (error.code === "23505") {
+        return NextResponse.json({ error: "既に存在するシャフトモデルです" }, { status: 409 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const { data: updated } = await admin
+      .from("shaft_models")
+      .select(`*, variants:shaft_variants(${VARIANT_SELECT})`)
+      .eq("id", id)
+      .single();
+    return NextResponse.json(updated);
   }
 
-  const { data: updated } = await admin.from("shafts").select("*").eq("id", id).single();
-  return NextResponse.json(updated);
+  // --- add variant ---
+  if (action === "add_variant") {
+    const { model_id, flex, weight, torque, kick_point } = body;
+    if (!model_id) {
+      return NextResponse.json({ error: "model_id required" }, { status: 400 });
+    }
+
+    const { data, error } = await admin
+      .from("shaft_variants")
+      .insert({
+        model_id,
+        flex: flex || null,
+        weight: weight ?? null,
+        torque: torque ?? null,
+        kick_point: kick_point || null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === "23505") {
+        return NextResponse.json({ error: "既に存在するバリアントです" }, { status: 409 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data, { status: 201 });
+  }
+
+  // --- update variant ---
+  if (action === "update_variant") {
+    const { variant_id, data: updateData } = body;
+    if (!variant_id || !updateData) {
+      return NextResponse.json({ error: "variant_id and data required" }, { status: 400 });
+    }
+
+    const ALLOWED = ["flex", "weight", "torque", "kick_point", "verified"];
+    const fields: Record<string, any> = {};
+    for (const key of ALLOWED) {
+      if (key in updateData) fields[key] = updateData[key];
+    }
+    if (Object.keys(fields).length === 0) {
+      return NextResponse.json({ error: "No valid fields" }, { status: 400 });
+    }
+
+    const { error } = await admin.from("shaft_variants").update(fields).eq("id", variant_id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    const { data: updated } = await admin.from("shaft_variants").select().eq("id", variant_id).single();
+    return NextResponse.json(updated);
+  }
+
+  // --- delete variant ---
+  if (action === "delete_variant") {
+    const { variant_id } = body;
+    if (!variant_id) {
+      return NextResponse.json({ error: "variant_id required" }, { status: 400 });
+    }
+
+    const { error } = await admin.from("shaft_variants").delete().eq("id", variant_id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ ok: true });
+  }
+
+  return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
 
-/** DELETE /api/admin/shafts — body: { id } */
+/** DELETE /api/admin/shafts — シャフトモデル削除（CASCADE でバリアントも削除） */
 export async function DELETE(request: NextRequest) {
   const admin = getAdmin();
   const { id } = await request.json();
-  await admin.from("shafts").delete().eq("id", id);
+  const { error } = await admin.from("shaft_models").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

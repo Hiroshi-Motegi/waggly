@@ -9,7 +9,9 @@ function getAdmin() {
   );
 }
 
-/** GET /api/admin/grips — グリップ一覧（ページネーション＋検索） */
+const VARIANT_SELECT = "id, size, weight, source, verified";
+
+/** GET /api/admin/grips — グリップモデル一覧（バリアント付き、ページネーション＋検索） */
 export async function GET(request: NextRequest) {
   const admin = getAdmin();
   const url = new URL(request.url);
@@ -20,8 +22,8 @@ export async function GET(request: NextRequest) {
   const search = url.searchParams.get("search") ?? "";
 
   let query = admin
-    .from("grips")
-    .select("*", { count: "exact" });
+    .from("grip_models")
+    .select(`*, variants:grip_variants(${VARIANT_SELECT})`, { count: "exact" });
 
   if (search) {
     const norm = normalizeClubName(search);
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ data: data ?? [], total: count ?? 0, page, pageSize });
 }
 
-/** POST /api/admin/grips — グリップ作成 */
+/** POST /api/admin/grips — グリップモデル作成（親のみ） */
 export async function POST(request: NextRequest) {
   const admin = getAdmin();
   const body = await request.json();
@@ -50,29 +52,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "maker and name required" }, { status: 400 });
   }
 
-  const row = {
-    maker,
-    maker_normalized: normalizeClubName(maker),
-    name,
-    name_normalized: normalizeClubName(name),
-    weight: body.weight ?? null,
-    size: body.size || null,
-    material: body.material || null,
-    image_url: body.image_url || null,
-    affiliate_url: body.affiliate_url || null,
-    source: body.source || "manual",
-    verified: body.verified ?? false,
-  };
-
   const { data, error } = await admin
-    .from("grips")
-    .insert(row)
-    .select()
+    .from("grip_models")
+    .insert({
+      maker,
+      maker_normalized: normalizeClubName(maker),
+      name,
+      name_normalized: normalizeClubName(name),
+      material: body.material || null,
+    })
+    .select(`*, variants:grip_variants(${VARIANT_SELECT})`)
     .single();
 
   if (error) {
     if (error.code === "23505") {
-      return NextResponse.json({ error: "既に存在するグリップです" }, { status: 409 });
+      return NextResponse.json({ error: "既に存在するグリップモデルです" }, { status: 409 });
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -80,51 +74,125 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(data, { status: 201 });
 }
 
-/** PATCH /api/admin/grips — body: { id, data: {...} } */
+/**
+ * PATCH /api/admin/grips — 複数アクション対応
+ *
+ * action: "update"          — モデル更新 { id, action, data }
+ * action: "add_variant"     — バリアント追加 { action, model_id, size, weight }
+ * action: "update_variant"  — バリアント更新 { action, variant_id, data }
+ * action: "delete_variant"  — バリアント削除 { action, variant_id }
+ */
 export async function PATCH(request: NextRequest) {
   const admin = getAdmin();
-  const { id, data: updateData } = await request.json();
+  const body = await request.json();
+  const { action } = body;
 
-  if (!id || !updateData) {
-    return NextResponse.json({ error: "id and data required" }, { status: 400 });
-  }
-
-  const { data: existing } = await admin.from("grips").select("*").eq("id", id).single();
-  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-  const ALLOWED = [
-    "maker", "name", "weight", "size", "material",
-    "image_url", "affiliate_url", "own_image_url", "source", "verified",
-  ];
-  const fields: Record<string, any> = {};
-  for (const key of ALLOWED) {
-    if (key in updateData) fields[key] = updateData[key];
-  }
-
-  if (Object.keys(fields).length === 0) {
-    return NextResponse.json({ error: "No valid fields" }, { status: 400 });
-  }
-
-  // Re-normalize if identity fields changed
-  if ("maker" in fields) fields.maker_normalized = normalizeClubName(fields.maker);
-  if ("name" in fields) fields.name_normalized = normalizeClubName(fields.name);
-
-  const { error } = await admin.from("grips").update(fields).eq("id", id);
-  if (error) {
-    if (error.code === "23505") {
-      return NextResponse.json({ error: "既に存在するグリップです" }, { status: 409 });
+  // --- update model ---
+  if (action === "update") {
+    const { id, data: updateData } = body;
+    if (!id || !updateData) {
+      return NextResponse.json({ error: "id and data required" }, { status: 400 });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+    const ALLOWED = ["maker", "name", "material", "image_url", "affiliate_url", "verified"];
+    const fields: Record<string, any> = {};
+    for (const key of ALLOWED) {
+      if (key in updateData) fields[key] = updateData[key];
+    }
+    if (Object.keys(fields).length === 0) {
+      return NextResponse.json({ error: "No valid fields" }, { status: 400 });
+    }
+
+    if ("maker" in fields) fields.maker_normalized = normalizeClubName(fields.maker);
+    if ("name" in fields) fields.name_normalized = normalizeClubName(fields.name);
+
+    const { error } = await admin.from("grip_models").update(fields).eq("id", id);
+    if (error) {
+      if (error.code === "23505") {
+        return NextResponse.json({ error: "既に存在するグリップモデルです" }, { status: 409 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const { data: updated } = await admin
+      .from("grip_models")
+      .select(`*, variants:grip_variants(${VARIANT_SELECT})`)
+      .eq("id", id)
+      .single();
+    return NextResponse.json(updated);
   }
 
-  const { data: updated } = await admin.from("grips").select("*").eq("id", id).single();
-  return NextResponse.json(updated);
+  // --- add variant ---
+  if (action === "add_variant") {
+    const { model_id, size, weight } = body;
+    if (!model_id) {
+      return NextResponse.json({ error: "model_id required" }, { status: 400 });
+    }
+
+    const { data, error } = await admin
+      .from("grip_variants")
+      .insert({
+        model_id,
+        size: size || null,
+        weight: weight ?? null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === "23505") {
+        return NextResponse.json({ error: "既に存在するバリアントです" }, { status: 409 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data, { status: 201 });
+  }
+
+  // --- update variant ---
+  if (action === "update_variant") {
+    const { variant_id, data: updateData } = body;
+    if (!variant_id || !updateData) {
+      return NextResponse.json({ error: "variant_id and data required" }, { status: 400 });
+    }
+
+    const ALLOWED = ["size", "weight", "verified"];
+    const fields: Record<string, any> = {};
+    for (const key of ALLOWED) {
+      if (key in updateData) fields[key] = updateData[key];
+    }
+    if (Object.keys(fields).length === 0) {
+      return NextResponse.json({ error: "No valid fields" }, { status: 400 });
+    }
+
+    const { error } = await admin.from("grip_variants").update(fields).eq("id", variant_id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    const { data: updated } = await admin.from("grip_variants").select().eq("id", variant_id).single();
+    return NextResponse.json(updated);
+  }
+
+  // --- delete variant ---
+  if (action === "delete_variant") {
+    const { variant_id } = body;
+    if (!variant_id) {
+      return NextResponse.json({ error: "variant_id required" }, { status: 400 });
+    }
+
+    const { error } = await admin.from("grip_variants").delete().eq("id", variant_id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ ok: true });
+  }
+
+  return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
 
-/** DELETE /api/admin/grips — body: { id } */
+/** DELETE /api/admin/grips — グリップモデル削除（CASCADE でバリアントも削除） */
 export async function DELETE(request: NextRequest) {
   const admin = getAdmin();
   const { id } = await request.json();
-  await admin.from("grips").delete().eq("id", id);
+  const { error } = await admin.from("grip_models").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
