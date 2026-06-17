@@ -40,10 +40,19 @@ interface SeriesShaft {
   shaft_model: ShaftModelWithVariants;
 }
 
+interface ProductLineRef {
+  id: string;
+  maker: string;
+  name: string;
+}
+
 interface Series {
   id: string;
   maker: string;
   model: string;
+  name: string | null;
+  product_line_id: string | null;
+  product_line: ProductLineRef | null;
   category: string | null;
   image_url: string | null;
   affiliate_url: string | null;
@@ -711,7 +720,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
   const { data: series, mutate, isLoading } = useAdminOne<Series>("series", id);
   const { updateSeries, lookupRakuten, toggleVerified } = useSeriesActions(id, () => mutate());
 
-  const [form, setForm] = useState({ maker: "", model: "", category: "", image_url: "", affiliate_url: "" });
+  const [form, setForm] = useState({ name: "", category: "", image_url: "", affiliate_url: "" });
   const [saving, setSaving] = useState(false);
   const [rakutenUrl, setRakutenUrl] = useState("");
   const [lookingUp, setLookingUp] = useState(false);
@@ -729,8 +738,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
   useEffect(() => {
     if (series) {
       setForm({
-        maker: series.maker ?? "",
-        model: series.model ?? "",
+        name: series.name ?? "",
         category: series.category ?? "",
         image_url: series.image_url ?? "",
         affiliate_url: series.affiliate_url ?? "",
@@ -742,8 +750,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
     setSaving(true);
     try {
       await updateSeries({
-        maker: form.maker,
-        model: form.model,
+        name: form.name || null,
         category: form.category || null,
         image_url: form.image_url || null,
         affiliate_url: form.affiliate_url || null,
@@ -774,7 +781,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
 
   async function handleDelete() {
     if (!series) return;
-    if (!confirm(`「${series.maker} ${series.model}」シリーズを削除しますか？`)) return;
+    if (!confirm(`「${titleText}」を削除しますか？`)) return;
     await apiFetch("/api/admin/series", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -789,15 +796,17 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
 
   /* ── Derived values ── */
 
-  const titleText = `${series.maker} ${series.model}`.trim();
-  const searchKeyword = `${form.maker} ${form.model} スペック`;
+  const plMaker = series.product_line?.maker ?? series.maker;
+  const plName = series.product_line?.name ?? series.model;
+  const titleText = `${plMaker} ${plName}${series.name ? ` ${series.name}` : ""}`.trim();
+  const searchKeyword = `${plMaker} ${plName} ${series.name ?? ""} スペック`.trim();
 
   return (
     <div className="space-y-4 p-4">
       {/* Breadcrumb */}
       <AdminBreadcrumb
         items={[
-          { label: "シリーズ", href: "/admin/series" },
+          { label: "クラブ", href: "/admin/series" },
           { label: titleText },
         ]}
       />
@@ -857,25 +866,25 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
         <div className="flex-1 space-y-4">
           {/* 基本情報 */}
           <AdminFormSection title="基本情報">
-            <div className="grid grid-cols-3 gap-3">
-              <div className="flex flex-col gap-0.5">
-                <label className="text-[10px] text-[#8b8b8b]">メーカー</label>
-                <input
-                  type="text"
-                  value={form.maker}
-                  onChange={(e) => setForm((p) => ({ ...p, maker: e.target.value }))}
-                  className="rounded border border-[#dfdfdf] bg-white px-2 py-1.5 text-sm text-black outline-none focus:border-[#006728]"
-                  placeholder="-"
-                />
+            {/* Product line info (read-only) */}
+            {series.product_line && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] text-[#8b8b8b]">モデルライン:</span>
+                <span className="rounded border border-[#006728] bg-[#f0f8f0] px-2 py-0.5 text-sm font-medium">
+                  {series.product_line.maker} {series.product_line.name}
+                </span>
               </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-0.5">
-                <label className="text-[10px] text-[#8b8b8b]">モデル</label>
+                <label className="text-[10px] text-[#8b8b8b]">クラブ名</label>
                 <input
                   type="text"
-                  value={form.model}
-                  onChange={(e) => setForm((p) => ({ ...p, model: e.target.value }))}
+                  value={form.name}
+                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                   className="rounded border border-[#dfdfdf] bg-white px-2 py-1.5 text-sm text-black outline-none focus:border-[#006728]"
-                  placeholder="-"
+                  placeholder="アイアン、ドライバー..."
                 />
               </div>
               <div className="flex flex-col gap-0.5">
@@ -904,7 +913,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
                 <Search size={12} />Google<ExternalLink size={10} />
               </a>
               <a
-                href={`https://search.rakuten.co.jp/search/mall/${encodeURIComponent(`${form.maker} ${form.model}`.trim())}/`}
+                href={`https://search.rakuten.co.jp/search/mall/${encodeURIComponent(`${plMaker} ${plName} ${series.name ?? ""}`.trim())}/`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs text-[#bf0000] hover:underline"
@@ -964,8 +973,8 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
           <HeadsInlineEditor
             specs={series.specs}
             seriesId={series.id}
-            maker={series.maker}
-            model={series.model}
+            maker={plMaker}
+            model={plName}
             category={series.category ?? "iron"}
             onUpdated={() => mutate()}
           />

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
   let query = admin
     .from("club_models")
-    .select("*, heads(id, category, club_number, loft, verified)", { count: "exact" });
+    .select("*, product_line:product_lines(id, maker, name), heads(id, category, club_number, loft, verified)", { count: "exact" });
 
   if (category) query = query.eq("category", category);
 
@@ -46,16 +46,28 @@ export async function GET(request: NextRequest) {
 /** POST /api/admin/series — シリーズ作成 */
 export async function POST(request: NextRequest) {
   const admin = getAdmin();
-  const { maker, model, category } = await request.json();
+  const { product_line_id, name, category } = await request.json();
 
-  if (!maker || !model) {
-    return NextResponse.json({ error: "maker and model required" }, { status: 400 });
+  if (!product_line_id || !name) {
+    return NextResponse.json({ error: "product_line_id and name required" }, { status: 400 });
+  }
+
+  // Fetch product_line to get maker/model for backward compatibility
+  const { data: pl } = await admin.from("product_lines").select("maker, name").eq("id", product_line_id).single();
+  if (!pl) {
+    return NextResponse.json({ error: "Product line not found" }, { status: 404 });
   }
 
   const { data, error } = await admin
     .from("club_models")
-    .insert({ maker, model, ...(category ? { category } : {}) })
-    .select()
+    .insert({
+      product_line_id,
+      name,
+      maker: pl.maker,
+      model: pl.name,
+      ...(category ? { category } : {}),
+    })
+    .select("*, product_line:product_lines(id, maker, name)")
     .single();
 
   if (error) {
@@ -93,7 +105,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (action === "update" && updateData) {
-    const ALLOWED = ["maker", "model", "category", "image_url", "affiliate_url", "verified"];
+    const ALLOWED = ["name", "category", "product_line_id", "image_url", "affiliate_url", "verified"];
     const fields: Record<string, any> = {};
     for (const key of ALLOWED) {
       if (key in updateData) fields[key] = updateData[key];
@@ -101,9 +113,19 @@ export async function PATCH(request: NextRequest) {
     if (Object.keys(fields).length === 0) {
       return NextResponse.json({ error: "No valid fields" }, { status: 400 });
     }
+
+    // When product_line changes, update maker/model from the new product_line
+    if ("product_line_id" in fields) {
+      const { data: pl } = await admin.from("product_lines").select("maker, name").eq("id", fields.product_line_id).single();
+      if (pl) {
+        fields.maker = pl.maker;
+        fields.model = pl.name;
+      }
+    }
+
     await admin.from("club_models").update(fields).eq("id", id);
 
-    // When maker or model changes, cascade to all linked heads
+    // Cascade maker/model changes to all linked heads
     if ("maker" in fields || "model" in fields) {
       const headUpdates: Record<string, any> = {};
       if ("maker" in fields) {
@@ -117,7 +139,7 @@ export async function PATCH(request: NextRequest) {
       await admin.from("heads").update(headUpdates).eq("model_id", id);
     }
 
-    const { data: updated } = await admin.from("club_models").select("*").eq("id", id).single();
+    const { data: updated } = await admin.from("club_models").select("*, product_line:product_lines(id, maker, name)").eq("id", id).single();
     return NextResponse.json(updated);
   }
 

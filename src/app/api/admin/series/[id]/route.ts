@@ -15,6 +15,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     .from("club_models")
     .select(`
       *,
+      product_line:product_lines(id, maker, name),
       heads(id, category, club_number, sort_order, loft, lie, bounce, head_volume, head_weight, distance, verified,
         configurations:clubs(id, shaft_variant_id, length, total_weight, swing_weight)
       ),
@@ -24,7 +25,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     .single();
 
   if (error || !data) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    console.error("[series/[id] GET]", error?.message, error?.details, error?.hint);
+    return NextResponse.json({ error: error?.message ?? "Not found" }, { status: 404 });
   }
 
   // Build specs with all configurations (not just default)

@@ -31,9 +31,15 @@ export function AdminSidebar() {
 
   const sections = [
     {
-      title: "シリーズ",
+      title: "モデル",
       items: [
-        { href: "/admin/series", label: "シリーズ一覧", match: (p: string) => p.startsWith("/admin/series") },
+        { href: "/admin/models", label: "モデル一覧", match: (p: string) => p.startsWith("/admin/models") },
+      ],
+    },
+    {
+      title: "クラブ",
+      items: [
+        { href: "/admin/series", label: "クラブ一覧", match: (p: string) => p.startsWith("/admin/series") },
       ],
     },
     { title: "ヘッド", items: specItems },
