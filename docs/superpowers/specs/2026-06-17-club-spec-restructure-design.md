@@ -49,7 +49,9 @@ club_spec_series（完成品モデル: PING G440 Iron）
 |--|--|--|
 | id | uuid PK | |
 | maker | text | シャフトメーカー（日本シャフト, Fujikura等） |
+| maker_normalized | text | 正規化メーカー名（検索・マッチング用） |
 | name | text | 製品名。重量帯を含む（例: "Diamana ZF 60", "ALTA J CB BLACK"） |
+| name_normalized | text | 正規化製品名（検索・マッチング用） |
 | type | text | `steel` / `carbon` |
 | flex | text | S, SR, R, X等 |
 | weight | numeric | シャフト単体重量 (g)。null許容 |
@@ -58,12 +60,14 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | image_url | text | |
 | affiliate_url | text | |
 | own_image_url | text | |
+| source | text | ai / manual |
+| verified | boolean | default false |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-ユニーク: `(maker, name, flex)` ※同名シャフトでもフレックス違いは別レコード
+ユニーク: `(maker_normalized, name_normalized, flex)`
 
-**nameの命名規則:** シャフトの重量帯バリエーション（Diamana ZF **50** vs ZF **60**）は `name` に含める。同じ製品ラインでも重量帯が異なれば別製品として登録する。これによりユニーク制約 `(maker, name, flex)` で重量バリエーションも一意に識別可能。
+**nameの命名規則:** シャフトの重量帯バリエーション（Diamana ZF **50** vs ZF **60**）は `name` に含める。同じ製品ラインでも重量帯が異なれば別製品として登録する。
 
 注: `length` カラムは持たない。シャフト単体の長さは番手ごとにカットされるため、シャフトマスタとしては意味がない。クラブ完成長は `configurations.length` で管理。
 
@@ -73,19 +77,23 @@ club_spec_series（完成品モデル: PING G440 Iron）
 |--|--|--|
 | id | uuid PK | |
 | maker | text | グリップメーカー（Golf Pride, IOMIC等） |
+| maker_normalized | text | 正規化メーカー名（検索・マッチング用） |
 | name | text | 製品名（Tour Velvet） |
+| name_normalized | text | 正規化製品名（検索・マッチング用） |
 | weight | numeric | 重量 (g)。null許容 |
 | size | text | サイズ（M58, M60等）。null許容 |
 | material | text | 素材（ラバー, コード, エラストマー等）。null許容 |
 | image_url | text | |
 | affiliate_url | text | |
 | own_image_url | text | |
+| source | text | ai / manual |
+| verified | boolean | default false |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-ユニーク制約はfunctionalインデックスで実装（PostgreSQLの通常UNIQUE制約ではCOALESCEが使えないため）:
+ユニーク制約はfunctionalインデックスで実装:
 ```sql
-CREATE UNIQUE INDEX idx_grips_unique ON grips(maker, name, COALESCE(size, ''));
+CREATE UNIQUE INDEX idx_grips_unique ON grips(maker_normalized, name_normalized, COALESCE(size, ''));
 ```
 同じTour Velvetでも M58/M60 は別レコード。sizeがnullの場合はデフォルトサイズとして1レコードのみ。
 
@@ -112,7 +120,7 @@ CREATE UNIQUE INDEX idx_grips_unique ON grips(maker, name, COALESCE(size, ''));
 | head_volume | numeric | ヘッド体積 (cc) |
 | head_weight | numeric | ヘッド重量 (g)。メーカー公表 or 逆算推定 |
 | head_weight_source | text | `published` / `calculated` / null |
-| distance | numeric | 飛距離目安 (yd)。ヘッドのロフト依存が大きいためhead側に配置 |
+| distance | numeric | 飛距離目安 (yd)。ヘッドのロフト依存が大きいためhead側に配置。ただしシャフト長でも変わるため参考値 |
 | image_url | text | |
 | own_image_url | text | |
 | affiliate_url | text | |
@@ -123,6 +131,10 @@ CREATE UNIQUE INDEX idx_grips_unique ON grips(maker, name, COALESCE(size, ''));
 
 ※ length, weight(総重量), swing_weight は configurations に移動
 ※ distance はヘッドのロフトに強く依存するためhead側に残す（将来シャフト別distanceが必要になればconfigurationsにも追加可能 — 「将来拡張」参照）
+
+**ユニーク制約:**
+- 既存: `(maker_normalized, model_normalized, category, COALESCE(club_number, ''))` — 単体ヘッド+autofill検索用に維持
+- 追加: `(series_id, category, COALESCE(club_number, '')) WHERE series_id IS NOT NULL` — シリーズ内の一意性保証
 
 **maker/modelの整合性ルール:**
 - series_id非nullの場合、series.maker/series.modelが正とする
@@ -172,12 +184,10 @@ CREATE UNIQUE INDEX idx_grips_unique ON grips(maker, name, COALESCE(size, ''));
 
 **ユニーク制約:** 部分ユニークインデックスで実装:
 ```sql
--- shaft_idありの通常ユニーク
 CREATE UNIQUE INDEX idx_configurations_head_shaft
   ON club_spec_configurations(head_id, shaft_id)
   WHERE shaft_id IS NOT NULL;
 
--- shaft_id=nullは1ヘッドにつき1レコードのみ
 CREATE UNIQUE INDEX idx_configurations_head_null_shaft
   ON club_spec_configurations(head_id)
   WHERE shaft_id IS NULL;
@@ -189,6 +199,20 @@ CREATE UNIQUE INDEX idx_configurations_head_null_shaft
 - **データ入力時の動作:** configuration作成/更新時に、series_gripsの `is_default=true` のグリップのweightを自動設定。手動での上書きも可能。グリップ未登録の場合はnull
 - nullの場合は不明（従来データ互換）
 
+## updated_at トリガー
+
+全新規テーブルに `updated_at` 自動更新トリガーを適用:
+
+```sql
+CREATE TRIGGER <table_name>_updated_at
+  BEFORE UPDATE ON <table_name>
+  FOR EACH ROW EXECUTE FUNCTION update_club_specs_updated_at();
+```
+
+対象: `shafts`, `grips`, `club_spec_series_shafts`, `club_spec_series_grips`, `club_spec_configurations`
+
+※ `club_spec_heads` は既存の `club_specs` リネームなのでトリガーは引き継がれる。
+
 ## RLSポリシー
 
 全新規テーブルに既存の `club_specs` / `club_spec_series` と同じRLSポリシーを適用:
@@ -199,7 +223,7 @@ CREATE POLICY "Deny all for non-service roles" ON <table_name>
   FOR ALL USING (false);
 ```
 
-対象: `shafts`, `grips`, `club_spec_heads`, `club_spec_series_shafts`, `club_spec_series_grips`, `club_spec_configurations`
+対象: `shafts`, `grips`, `club_spec_heads`（リネーム後にRLSは引き継がれるが念のため確認）, `club_spec_series_shafts`, `club_spec_series_grips`, `club_spec_configurations`
 
 service roleがRLSをバイパスしてアクセス。anon/authenticatedは全拒否。
 
@@ -276,6 +300,19 @@ head_weight（推定） = total_weight - shaft.weight - assumed_grip_weight
 
 1マイグレーション内でトランザクション管理。リネーム + データ移行 + カラム削除を一括実行。失敗時はトランザクション全体がロールバックされる。API変更は同時デプロイ。段階的移行（VIEW等）は不要（管理画面のみの影響で、エンドユーザー影響なし）。
 
+### 既存オブジェクトの対処
+
+テーブルリネーム時に以下の既存オブジェクトも対処が必要:
+
+| オブジェクト | 対処 |
+|--|--|
+| `upsert_club_spec()` 関数 (209_club_specs_cache.sql) | DROP + 新テーブル名で再作成 |
+| `idx_club_specs_unique` インデックス | ALTER INDEX ... RENAME TO `idx_club_spec_heads_unique` |
+| `idx_club_specs_lookup` インデックス | ALTER INDEX ... RENAME TO `idx_club_spec_heads_lookup` |
+| `idx_club_specs_series` インデックス | ALTER INDEX ... RENAME TO `idx_club_spec_heads_series` |
+| `club_specs_updated_at` トリガー | DROP + 新テーブル名で再作成 |
+| RLSポリシー | DROP + 新テーブル名で再作成 |
+
 ### 手順
 
 ```sql
@@ -284,20 +321,42 @@ BEGIN;
 -- 1. club_specs → club_spec_heads にリネーム
 ALTER TABLE club_specs RENAME TO club_spec_heads;
 
--- 2. head_weight_source カラム追加
-ALTER TABLE club_spec_heads ADD COLUMN head_weight_source text;
+-- 2. インデックスリネーム
+ALTER INDEX idx_club_specs_unique RENAME TO idx_club_spec_heads_unique;
+ALTER INDEX idx_club_specs_lookup RENAME TO idx_club_spec_heads_lookup;
+ALTER INDEX idx_club_specs_series RENAME TO idx_club_spec_heads_series;
 
--- 3. configurations テーブル作成 + データ移行
+-- 3. シリーズ内ユニーク制約追加
+CREATE UNIQUE INDEX idx_club_spec_heads_series_unique
+  ON club_spec_heads(series_id, category, COALESCE(club_number, ''))
+  WHERE series_id IS NOT NULL;
+
+-- 4. upsert_club_spec() 関数を新テーブル名で再作成
+DROP FUNCTION IF EXISTS upsert_club_spec;
+CREATE OR REPLACE FUNCTION upsert_club_spec(
+  -- ... 既存と同じ引数、テーブル名のみ club_spec_heads に変更
+) ...;
+
+-- 5. トリガー再作成
+DROP TRIGGER IF EXISTS club_specs_updated_at ON club_spec_heads;
+CREATE TRIGGER club_spec_heads_updated_at
+  BEFORE UPDATE ON club_spec_heads
+  FOR EACH ROW EXECUTE FUNCTION update_club_specs_updated_at();
+
+-- 6. head_weight_source, distance カラム追加
+ALTER TABLE club_spec_heads ADD COLUMN head_weight_source text;
+-- distance は既存カラムなので追加不要
+
+-- 7. configurations テーブル作成 + データ移行
 INSERT INTO club_spec_configurations (head_id, shaft_id, length, total_weight, swing_weight, source, verified)
   SELECT id, NULL, length, weight, swing_weight, source, verified
   FROM club_spec_heads
   WHERE length IS NOT NULL OR weight IS NOT NULL OR swing_weight IS NOT NULL;
 
--- 4. heads から移行済みカラムを削除
+-- 8. heads から移行済みカラムを削除
 ALTER TABLE club_spec_heads DROP COLUMN length;
 ALTER TABLE club_spec_heads DROP COLUMN weight;
 ALTER TABLE club_spec_heads DROP COLUMN swing_weight;
--- distance は heads に残す（ヘッドロフト依存のため）
 
 COMMIT;
 ```
@@ -307,9 +366,19 @@ shaft_id=null の configuration = 「シャフト未特定の公称スペック�
 ### API変更（同時デプロイ）
 
 - テーブル名 `club_specs` → `club_spec_heads` への変更を全API routeに反映
+- `upsert_club_spec()` RPC呼び出し箇所の更新
 - series更新時にheadsのmaker/modelも連動更新するロジック追加
 - 型定義の更新
 - 管理画面コンポーネントの更新
+- `collect-specs.mjs` の挿入先テーブル変更（club_specs → club_spec_heads + configurations）
+
+### autofill APIの互換性
+
+autofill APIのレスポンスは現在 `{ loft, lie, length, weight, swing_weight, ... }` のフラット構造。restructure後:
+- loft, lie, head_volume, head_weight → heads テーブルから取得
+- length, weight(→total_weight), swing_weight → configurations テーブルから取得（shaft_id=null）
+- **レスポンス構造は変更なし**（フラットなまま）。内部のクエリがJOINになるだけ
+- フロント側（club-form.tsx）の変更は不要
 
 ## 管理画面の変更
 
@@ -353,16 +422,22 @@ shaft_id=null の configuration = 「シャフト未特定の公称スペック�
 
 ## 実装順序
 
-1. `shafts`, `grips` テーブル作成 + RLSポリシー（マイグレーション）
-2. `club_spec_series_shafts`, `club_spec_series_grips` 作成 + RLSポリシー
-3. `club_spec_configurations` 作成 + ユニーク制約（部分インデックス）+ RLSポリシー
-4. `club_specs` → `club_spec_heads` リネーム + カラム整理 + distance残留 + head_weight_source追加 + 既存データ移行（トランザクション内）+ API全変更（同時デプロイ）
+1. `shafts`, `grips` テーブル作成（maker_normalized, name_normalized, source, verified 含む）+ updated_atトリガー + RLSポリシー（マイグレーション）
+2. `club_spec_series_shafts`, `club_spec_series_grips` 作成 + updated_atトリガー + RLSポリシー
+3. `club_spec_configurations` 作成 + ユニーク制約（部分インデックス）+ updated_atトリガー + RLSポリシー
+4. `club_specs` → `club_spec_heads` リネーム + 既存オブジェクト対処（インデックスリネーム、upsert関数再作成、トリガー再作成）+ シリーズ内ユニーク制約追加 + head_weight_source追加 + 既存データ移行（トランザクション内）+ API全変更 + collect-specs.mjs変更（同時デプロイ）
 5. series更新APIにheadsのmaker/model連動更新ロジック追加
 6. 管理画面: シャフト/グリップ一覧・編集
 7. 管理画面: シリーズ編集にヘッド管理・シャフト/グリップ選択・configurations表追加
 8. configuration作成時のassumed_grip_weight自動設定ロジック
-9. autofill API更新
-10. AI取得プロンプト更新（シャフト別スペック対応）
+9. autofill API更新（内部クエリ変更、レスポンス構造は維持）
+10. AI取得プロンプト更新 + collect-specs.mjs更新（シャフト別スペック対応）
+
+## 留意事項
+
+- `swing_weight` は text 型のまま（既存踏襲）。将来ソート/比較が必要になれば数値化（D0=0, D1=1...）を検討
+- `head.distance` はあくまで参考値。「このヘッド＝この飛距離」ではなくシャフト長でも変わる点を、カタログ表示時に注記すべき
+- `grips` の COALESCE インデックスは現時点では `(maker, name, size)` で十分。将来 material 等で区別が必要になればインデックス再構築が必要
 
 ## 将来拡張（今回スコープ外）
 
@@ -373,3 +448,4 @@ shaft_id=null の configuration = 「シャフト未特定の公称スペック�
 - configurationsへのdistance追加（シャフト別飛距離目安が必要になった場合）
 - シャフト単体販売時の原長（未カット長）管理
 - グリップの太さバリエーション（下巻き追加等、sizeでは表現しきれない場合）
+- swing_weightの数値型への変換
