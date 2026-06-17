@@ -70,6 +70,39 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ data: flattened, total: count ?? 0, page, pageSize });
 }
 
+/** POST /api/admin/specs — ヘッド新規作成 */
+export async function POST(request: NextRequest) {
+  const admin = getAdmin();
+  const { maker, model, category, club_number, series_id } = await request.json();
+
+  if (!maker || !model || !category) {
+    return NextResponse.json({ error: "maker, model, category required" }, { status: 400 });
+  }
+
+  const { data, error } = await admin
+    .from("club_spec_heads")
+    .insert({
+      maker,
+      model,
+      category,
+      club_number: club_number || null,
+      maker_normalized: normalizeClubName(maker),
+      model_normalized: normalizeClubName(model),
+      series_id: series_id || null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      return NextResponse.json({ error: "既に存在するヘッドスペックです" }, { status: 409 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data, { status: 201 });
+}
+
 /**
  * PATCH /api/admin/specs
  * body: { id, action: "refresh_image" | "refresh_spec" | "update", data?: Record<string,any> }

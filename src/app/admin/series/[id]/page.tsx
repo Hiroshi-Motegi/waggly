@@ -49,6 +49,78 @@ const CATEGORY_LABELS: Record<string, string> = {
   putter: "パター",
 };
 
+/* ── Add Head Form ── */
+
+function AddHeadForm({
+  seriesId,
+  maker,
+  model,
+  category,
+  onCreated,
+}: {
+  seriesId: string;
+  maker: string;
+  model: string;
+  category: string;
+  onCreated: () => void;
+}) {
+  const [clubNumber, setClubNumber] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleAdd() {
+    if (!clubNumber.trim()) return;
+    setCreating(true);
+    setError("");
+    try {
+      const res = await apiFetch("/api/admin/specs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          maker,
+          model,
+          category,
+          club_number: clubNumber.trim(),
+          series_id: seriesId,
+        }),
+      });
+      if (res.ok) {
+        setClubNumber("");
+        onCreated();
+      } else {
+        const data = await res.json();
+        setError(data.error ?? "作成に失敗しました");
+      }
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  return (
+    <div className="flex items-end gap-2 pt-2">
+      <div className="flex flex-col gap-0.5">
+        <label className="text-[10px] text-[#8b8b8b]">番手を追加</label>
+        <input
+          type="text"
+          value={clubNumber}
+          onChange={(e) => setClubNumber(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
+          className="w-24 rounded border border-[#dfdfdf] bg-white px-2 py-1.5 text-sm outline-none focus:border-[#006728]"
+          placeholder="7i, 52°..."
+        />
+      </div>
+      <button
+        onClick={handleAdd}
+        disabled={creating || !clubNumber.trim()}
+        className="rounded-full bg-[#006728] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-40"
+      >
+        {creating ? "追加中..." : "＋ 追加"}
+      </button>
+      {error && <span className="text-xs text-red-500">{error}</span>}
+    </div>
+  );
+}
+
 /* ── Component ── */
 
 export default function SeriesEditPage({ params }: { params: Promise<{ id: string }> }) {
@@ -307,9 +379,9 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
             </div>
           </AdminFormSection>
 
-          {/* 紐づきスペック */}
-          <AdminFormSection title={`紐づきスペック (${series.spec_count}件)`}>
-            {series.specs.length > 0 ? (
+          {/* ヘッド（番手）一覧 */}
+          <AdminFormSection title={`ヘッド一覧 (${series.spec_count}件)`}>
+            {series.specs.length > 0 && (
               <div className="overflow-hidden rounded-lg border border-[#e5e5e5]">
                 <table className="w-full text-sm">
                   <thead>
@@ -330,8 +402,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
                     {series.specs.map((sp) => (
                       <tr key={sp.id} className="border-b border-[#f0f0f0] hover:bg-[#fafafa]">
                         <td className="px-3 py-2 font-medium">
-                          {CATEGORY_LABELS[sp.category] ?? sp.category}
-                          {sp.club_number ? ` ${sp.club_number}` : ""}
+                          {sp.club_number ?? (CATEGORY_LABELS[sp.category] ?? sp.category)}
                         </td>
                         <td className="px-3 py-2">{sp.loft != null ? `${sp.loft}°` : "-"}</td>
                         <td className="px-3 py-2">{sp.lie != null ? `${sp.lie}°` : "-"}</td>
@@ -357,9 +428,16 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
                   </tbody>
                 </table>
               </div>
-            ) : (
-              <p className="text-[11px] text-[#8b8b8b]">紐づいたスペックがありません</p>
             )}
+
+            {/* 番手追加フォーム */}
+            <AddHeadForm
+              seriesId={series.id}
+              maker={series.maker}
+              model={series.model}
+              category={series.category ?? "iron"}
+              onCreated={() => mutate()}
+            />
           </AdminFormSection>
 
           {/* Bottom action bar */}
