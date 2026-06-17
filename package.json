@@ -37,6 +37,7 @@
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.107.0",
     "@tailwindcss/typography": "^0.5.19",
+    "@tanstack/react-table": "^8.21.3",
     "@tavily/core": "^0.7.5",
     "@types/qrcode": "^1.5.6",
     "@vercel/og": "^0.11.1",
