@@ -49,7 +49,7 @@ club_spec_series（完成品モデル: PING G440 Iron）
 |--|--|--|
 | id | uuid PK | |
 | maker | text | シャフトメーカー（日本シャフト, Fujikura等） |
-| name | text | 製品名（N.S. Pro 950GH neo） |
+| name | text | 製品名。重量帯を含む（例: "Diamana ZF 60", "ALTA J CB BLACK"） |
 | type | text | `steel` / `carbon` |
 | flex | text | S, SR, R, X等 |
 | weight | numeric | シャフト単体重量 (g)。null許容 |
@@ -62,6 +62,8 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | updated_at | timestamptz | |
 
 ユニーク: `(maker, name, flex)` ※同名シャフトでもフレックス違いは別レコード
+
+**nameの命名規則:** シャフトの重量帯バリエーション（Diamana ZF **50** vs ZF **60**）は `name` に含める。同じ製品ラインでも重量帯が異なれば別製品として登録する。これによりユニーク制約 `(maker, name, flex)` で重量バリエーションも一意に識別可能。
 
 注: `length` カラムは持たない。シャフト単体の長さは番手ごとにカットされるため、シャフトマスタとしては意味がない。クラブ完成長は `configurations.length` で管理。
 
@@ -81,7 +83,11 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-ユニーク: `(maker, name, COALESCE(size, ''))` — 同じTour Velvetでも M58/M60 は別レコード。sizeがnullの場合はデフォルトサイズとして1レコードのみ。
+ユニーク制約はfunctionalインデックスで実装（PostgreSQLの通常UNIQUE制約ではCOALESCEが使えないため）:
+```sql
+CREATE UNIQUE INDEX idx_grips_unique ON grips(maker, name, COALESCE(size, ''));
+```
+同じTour Velvetでも M58/M60 は別レコード。sizeがnullの場合はデフォルトサイズとして1レコードのみ。
 
 #### `club_spec_series` — モデル（既存テーブル拡張）
 
@@ -95,7 +101,7 @@ club_spec_series（完成品モデル: PING G440 Iron）
 |--|--|--|
 | id | uuid PK | |
 | series_id | uuid FK → series | null許容（単体管理も可） |
-| maker | text | series_id非nullの場合はseriesのmaker/modelが正。単体ヘッド用に必要 |
+| maker | text | series登録時にseriesの値をコピー。単体ヘッド用にも必要 |
 | model | text | 同上 |
 | category | text | driver/iron/wedge等 |
 | club_number | text | 7i, 3W, 52°等 |
@@ -116,9 +122,13 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | updated_at | timestamptz | |
 
 ※ length, weight(総重量), swing_weight は configurations に移動
-※ distance はヘッドのロフトに強く依存するためhead側に残す
+※ distance はヘッドのロフトに強く依存するためhead側に残す（将来シャフト別distanceが必要になればconfigurationsにも追加可能 — 「将来拡張」参照）
 
-**maker/modelの整合性ルール:** series_id非nullの場合、series.maker/series.modelが正とする。headsのmaker/modelはseries登録時にseriesの値をコピー。単体ヘッド（series_id=null）の場合のみheadsのmaker/modelを直接使用。
+**maker/modelの整合性ルール:**
+- series_id非nullの場合、series.maker/series.modelが正とする
+- headsのmaker/modelはseries登録時にseriesの値をコピー
+- **series更新時にheadsも連動更新するAPI実装が必要**（実装順序に記載）
+- 単体ヘッド（series_id=null）の場合のみheadsのmaker/modelを直接使用
 
 #### `club_spec_series_shafts` — モデルで選べるシャフト
 
@@ -160,7 +170,7 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-**ユニーク制約:** `(head_id, shaft_id)` — shaft_id=nullの場合は部分ユニークインデックスで1レコードのみ許容:
+**ユニーク制約:** 部分ユニークインデックスで実装:
 ```sql
 -- shaft_idありの通常ユニーク
 CREATE UNIQUE INDEX idx_configurations_head_shaft
@@ -173,7 +183,11 @@ CREATE UNIQUE INDEX idx_configurations_head_null_shaft
   WHERE shaft_id IS NULL;
 ```
 
-**`assumed_grip_weight`について:** configurationsの `total_weight` は `is_default=true` のグリップ重量を含む前提。`assumed_grip_weight` を記録しておくことで、将来グリップマスタの重量が更新されても、このconfigurationが作られた時点の前提を追跡可能。nullの場合は不明（従来データ互換）。
+**`assumed_grip_weight`について:**
+- configurationsの `total_weight` は `is_default=true` のグリップ重量を含む前提
+- `assumed_grip_weight` を記録しておくことで、将来グリップマスタの重量が更新されても、このconfigurationが作られた時点の前提を追跡可能
+- **データ入力時の動作:** configuration作成/更新時に、series_gripsの `is_default=true` のグリップのweightを自動設定。手動での上書きも可能。グリップ未登録の場合はnull
+- nullの場合は不明（従来データ互換）
 
 ## RLSポリシー
 
@@ -260,23 +274,32 @@ head_weight（推定） = total_weight - shaft.weight - assumed_grip_weight
 
 ### 方針
 
-1マイグレーションでリネーム + API変更を同時デプロイ。段階的移行（VIEW等）は不要（管理画面のみの影響で、エンドユーザー影響なし）。
+1マイグレーション内でトランザクション管理。リネーム + データ移行 + カラム削除を一括実行。失敗時はトランザクション全体がロールバックされる。API変更は同時デプロイ。段階的移行（VIEW等）は不要（管理画面のみの影響で、エンドユーザー影響なし）。
 
 ### 手順
 
 ```sql
+BEGIN;
+
 -- 1. club_specs → club_spec_heads にリネーム
 ALTER TABLE club_specs RENAME TO club_spec_heads;
 
--- 2. configurations テーブル作成 + データ移行
+-- 2. head_weight_source カラム追加
+ALTER TABLE club_spec_heads ADD COLUMN head_weight_source text;
+
+-- 3. configurations テーブル作成 + データ移行
 INSERT INTO club_spec_configurations (head_id, shaft_id, length, total_weight, swing_weight, source, verified)
   SELECT id, NULL, length, weight, swing_weight, source, verified
   FROM club_spec_heads
   WHERE length IS NOT NULL OR weight IS NOT NULL OR swing_weight IS NOT NULL;
 
--- 3. heads から移行済みカラムを削除
-ALTER TABLE club_spec_heads DROP COLUMN length, DROP COLUMN weight, DROP COLUMN swing_weight;
+-- 4. heads から移行済みカラムを削除
+ALTER TABLE club_spec_heads DROP COLUMN length;
+ALTER TABLE club_spec_heads DROP COLUMN weight;
+ALTER TABLE club_spec_heads DROP COLUMN swing_weight;
 -- distance は heads に残す（ヘッドロフト依存のため）
+
+COMMIT;
 ```
 
 shaft_id=null の configuration = 「シャフト未特定の公称スペック」として互換性を維持。
@@ -284,6 +307,7 @@ shaft_id=null の configuration = 「シャフト未特定の公称スペック�
 ### API変更（同時デプロイ）
 
 - テーブル名 `club_specs` → `club_spec_heads` への変更を全API routeに反映
+- series更新時にheadsのmaker/modelも連動更新するロジック追加
 - 型定義の更新
 - 管理画面コンポーネントの更新
 
@@ -332,11 +356,13 @@ shaft_id=null の configuration = 「シャフト未特定の公称スペック�
 1. `shafts`, `grips` テーブル作成 + RLSポリシー（マイグレーション）
 2. `club_spec_series_shafts`, `club_spec_series_grips` 作成 + RLSポリシー
 3. `club_spec_configurations` 作成 + ユニーク制約（部分インデックス）+ RLSポリシー
-4. `club_specs` → `club_spec_heads` リネーム + カラム整理 + distance残留 + head_weight_source追加 + 既存データ移行 + API全変更（同時デプロイ）
-5. 管理画面: シャフト/グリップ一覧・編集
-6. 管理画面: シリーズ編集にヘッド管理・シャフト/グリップ選択・configurations表追加
-7. autofill API更新
-8. AI取得プロンプト更新（シャフト別スペック対応）
+4. `club_specs` → `club_spec_heads` リネーム + カラム整理 + distance残留 + head_weight_source追加 + 既存データ移行（トランザクション内）+ API全変更（同時デプロイ）
+5. series更新APIにheadsのmaker/model連動更新ロジック追加
+6. 管理画面: シャフト/グリップ一覧・編集
+7. 管理画面: シリーズ編集にヘッド管理・シャフト/グリップ選択・configurations表追加
+8. configuration作成時のassumed_grip_weight自動設定ロジック
+9. autofill API更新
+10. AI取得プロンプト更新（シャフト別スペック対応）
 
 ## 将来拡張（今回スコープ外）
 
@@ -344,3 +370,6 @@ shaft_id=null の configuration = 「シャフト未特定の公称スペック�
 - 組み合わせシミュレーション画面
 - ヘッド重量の逆算自動化
 - ユーザーのクラブ登録時にパーツマスタから選択
+- configurationsへのdistance追加（シャフト別飛距離目安が必要になった場合）
+- シャフト単体販売時の原長（未カット長）管理
+- グリップの太さバリエーション（下巻き追加等、sizeでは表現しきれない場合）
