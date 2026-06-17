@@ -1,7 +1,8 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSeriesByMaker } from "@/lib/catalog";
+import { PromoBanner } from "@/components/catalog/promo-banner";
 
 export const revalidate = 86400;
 
@@ -27,43 +28,60 @@ export default async function MakerPage({ params }: { params: Promise<{ maker: s
   const makerName = series[0].maker;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <nav className="text-xs text-[#888] mb-4 flex gap-1">
-          <Link href="/catalog" className="hover:text-[#006728]">カタログ</Link>
-          <span>/</span>
-          <span>{makerName}</span>
-        </nav>
+    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <div className="flex flex-col items-center w-full">
+        {/* Header */}
+        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+          <p className="text-sm font-bold text-white">ゴルフクラブカタログ</p>
+        </div>
 
-        <h1 className="text-2xl font-bold text-[#222] mb-6">{makerName} シリーズ一覧</h1>
+        {/* Breadcrumb */}
+        <div className="flex items-center px-3 py-1 w-full max-w-screen-sm bg-black/20 border-b border-white/30 overflow-hidden">
+          <p className="text-xs text-white truncate">
+            <Link href="/catalog" className="underline">カタログ</Link>
+            <span> / {makerName}</span>
+          </p>
+        </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {series.map((s) => (
-            <Link
-              key={s.id}
-              href={`/catalog/${s.maker_slug}/${s.name_slug}`}
-              className="group block rounded-xl border border-[#e0e0e0] bg-white overflow-hidden hover:shadow-md transition-shadow"
-            >
-              <div className="aspect-video relative bg-[#f5f5f5]">
-                {s.image_url ? (
-                  <Image
-                    src={s.image_url}
-                    alt={`${s.maker} ${s.name}`}
-                    fill
-                    className="object-contain p-2"
-                    sizes="(max-width: 640px) 50vw, 33vw"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-[#bbb] text-xs">
-                    No Image
-                  </div>
-                )}
-              </div>
-              <div className="p-3">
-                <p className="font-bold text-sm text-[#222] group-hover:text-[#006728]">{s.name}</p>
-              </div>
-            </Link>
-          ))}
+        {/* Title bar */}
+        <div className="px-5 py-3 w-full max-w-screen-sm bg-black/20">
+          <h1 className="text-[15px] font-extrabold text-white">{makerName} シリーズ一覧</h1>
+        </div>
+
+        {/* Banner */}
+        <PromoBanner />
+
+        {/* Content */}
+        <div className="w-full max-w-screen-sm px-3 py-4">
+          <div className="grid grid-cols-2 gap-2">
+            {series.map((s) => (
+              <Link
+                key={s.id}
+                href={`/catalog/${s.maker_slug}/${s.name_slug}`}
+                className="block rounded-md bg-white overflow-hidden"
+              >
+                <div className="aspect-video relative bg-[#f5f5f5]">
+                  {s.image_url ? (
+                    <Image
+                      src={s.image_url}
+                      alt={`${s.maker} ${s.name}`}
+                      fill
+                      className="object-contain p-2"
+                      sizes="(max-width: 640px) 50vw, 33vw"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[#bbb] text-xs">
+                      No Image
+                    </div>
+                  )}
+                </div>
+                <div className="p-2.5">
+                  <p className="font-bold text-sm text-[#006728]">{s.name}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -2,7 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCompareModels } from "@/lib/catalog";
+import { fetchRelatedNews } from "@/lib/catalog-news";
 import { CompareTable } from "@/components/catalog/compare-table";
+import { PromoBanner } from "@/components/catalog/promo-banner";
 
 export const revalidate = 86400;
 
@@ -85,6 +87,8 @@ export default async function CompareVsPage({
   const nameA = `${modelA.catalog_series.maker} ${modelA.catalog_series.name}${modelA.name ? ` ${modelA.name}` : ""}`;
   const nameB = `${modelB.catalog_series.maker} ${modelB.catalog_series.name}${modelB.name ? ` ${modelB.name}` : ""}`;
 
+  const news = await fetchRelatedNews(`${modelA.catalog_series.name} ${label}`);
+
   return (
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
       <div className="flex flex-col items-center w-full">
@@ -120,21 +124,18 @@ export default async function CompareVsPage({
           <ModelCard model={modelB} label={label} />
         </div>
 
-        {/* App promo banner (image) */}
-        <Link href="/" target="_blank" className="block w-full max-w-screen-sm border-y-2 border-white">
-          <Image
-            src="/banner/vs_banner.png"
-            alt="自分のクラブセットを管理 ゴルファー名刺にしませんか？"
-            width={480}
-            height={84}
-            className="w-full h-auto"
-          />
-        </Link>
+        {/* App promo banner (hidden for logged-in users) */}
+        <PromoBanner />
 
         {/* Compare table */}
         <div className="w-full max-w-screen-sm">
-          <CompareTable modelA={modelA} modelB={modelB} />
+          <CompareTable modelA={modelA} modelB={modelB} news={news} />
         </div>
+
+        {/* Disclaimer */}
+        <p className="w-full max-w-screen-sm px-4 py-6 text-left text-xs text-white leading-relaxed">
+          ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
+        </p>
       </div>
     </div>
   );

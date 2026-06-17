@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getMakers } from "@/lib/catalog";
+import { PromoBanner } from "@/components/catalog/promo-banner";
 
 export const revalidate = 86400;
 
@@ -12,26 +14,41 @@ export default async function CatalogPage() {
   const makers = await getMakers();
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-[#222] mb-2">ゴルフクラブカタログ</h1>
-        <p className="text-sm text-[#666] mb-8">メーカーを選択してスペックを確認できます</p>
+    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <div className="flex flex-col items-center w-full">
+        {/* Header */}
+        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+          <p className="text-sm font-bold text-white">ゴルフクラブカタログ</p>
+        </div>
 
-        {makers.length === 0 ? (
-          <p className="text-sm text-[#888]">カタログデータがありません</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {makers.map((maker) => (
-              <Link
-                key={maker.maker_slug}
-                href={`/catalog/${maker.maker_slug}`}
-                className="flex items-center justify-center rounded-xl border border-[#e0e0e0] bg-white px-4 py-5 text-center font-bold text-[#222] hover:border-[#006728] hover:text-[#006728] hover:shadow-sm transition-all"
-              >
-                {maker.maker}
-              </Link>
-            ))}
-          </div>
-        )}
+        {/* Title bar */}
+        <div className="px-5 py-3 w-full max-w-screen-sm bg-black/20">
+          <h1 className="text-[15px] font-extrabold text-white">メーカー一覧</h1>
+          <p className="text-xs text-white/70 mt-0.5">メーカーを選択してスペックを確認</p>
+        </div>
+
+        {/* Banner */}
+        <PromoBanner />
+
+        {/* Content */}
+        <div className="w-full max-w-screen-sm px-3 py-4">
+          {makers.length === 0 ? (
+            <p className="text-sm text-white/70">カタログデータがありません</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {makers.map((maker) => (
+                <Link
+                  key={maker.maker_slug}
+                  href={`/catalog/${maker.maker_slug}`}
+                  className="flex items-center justify-center rounded-md bg-white px-4 py-4 text-center font-bold text-[#222] hover:bg-[#f5f5f5] transition-colors"
+                >
+                  {maker.maker}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

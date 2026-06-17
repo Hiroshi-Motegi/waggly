@@ -103,6 +103,10 @@ export default async function CompareIndexPage({
             ))}
           </div>
         )}
+
+        <p className="mt-10 text-left text-xs text-[#888] leading-relaxed">
+          ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
+        </p>
       </div>
     </div>
   );

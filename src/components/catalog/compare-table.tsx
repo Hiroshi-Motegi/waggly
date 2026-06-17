@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import type { CatalogModelWithSpecs, CatalogSpec } from "@/lib/catalog";
+import type { NewsItem } from "@/lib/catalog-news";
 import { SPEC_LABELS, CATEGORY_SPECS, type SpecKey } from "./spec-table";
 
 interface CompareTableProps {
   modelA: CatalogModelWithSpecs;
   modelB: CatalogModelWithSpecs;
+  news?: NewsItem[];
 }
 
 type ViewMode = "by-club" | "by-spec" | "news";
 
-export function CompareTable({ modelA, modelB }: CompareTableProps) {
+export function CompareTable({ modelA, modelB, news = [] }: CompareTableProps) {
   const [view, setView] = useState<ViewMode>("by-club");
   const [activeSpecKey, setActiveSpecKey] = useState<SpecKey | null>(null);
   const category = modelA.category;
@@ -106,9 +108,38 @@ export function CompareTable({ modelA, modelB }: CompareTableProps) {
           />
         )}
         {view === "news" && (
-          <div className="rounded-md bg-white p-4 text-center">
-            <p className="text-sm text-[#888]">関連ニュースは準備中です</p>
-          </div>
+          <>
+            <p className="text-sm text-white/80 leading-relaxed mb-2">
+              ※ 関連情報の収集にはAIを利用しており、内容が正確でない場合があります。
+            </p>
+            <div className="flex flex-col gap-2">
+              {news.length === 0 ? (
+                <div className="rounded-md bg-white p-4 text-center">
+                  <p className="text-sm text-[#888]">関連ニュースが見つかりませんでした</p>
+                </div>
+              ) : (
+                news.map((item, i) => (
+                  <a
+                    key={i}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col gap-1 rounded-md bg-white p-3"
+                  >
+                    <p className="text-sm font-bold text-[#006728] leading-snug">{item.title}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[#888]">{item.source}</span>
+                      {item.date && (
+                        <span className="text-xs text-[#aaa]">
+                          {new Date(item.date).toLocaleDateString("ja-JP")}
+                        </span>
+                      )}
+                    </div>
+                  </a>
+                ))
+              )}
+            </div>
+          </>
         )}
       </div>
 

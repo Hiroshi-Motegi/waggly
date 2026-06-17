@@ -2,7 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getModelDetail, getModelsByCategory, compareModelSlug } from "@/lib/catalog";
+import { fetchRelatedNews } from "@/lib/catalog-news";
 import { SpecTable } from "@/components/catalog/spec-table";
+import { PromoBanner } from "@/components/catalog/promo-banner";
 
 export const revalidate = 86400;
 
@@ -67,132 +69,175 @@ export default async function ModelDetailPage({
 
   const imageUrl = model.image_url ?? catalogSeries.image_url;
 
+  // Fetch related news
+  const news = await fetchRelatedNews(`${catalogSeries.name} ${categoryLabel}`);
+
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-xs text-[#888] mb-4 flex flex-wrap gap-1">
-          <Link href="/catalog" className="hover:text-[#006728]">カタログ</Link>
-          <span>/</span>
-          <Link href={`/catalog/${maker}`} className="hover:text-[#006728]">{catalogSeries.maker}</Link>
-          <span>/</span>
-          <Link href={`/catalog/${maker}/${series}`} className="hover:text-[#006728]">{catalogSeries.name}</Link>
-          <span>/</span>
-          <span>{categoryLabel}</span>
-        </nav>
-
+    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="bg-white rounded-xl border border-[#e0e0e0] p-5 mb-6">
-          <div className="flex gap-4">
-            {imageUrl && (
-              <div className="relative w-24 h-24 shrink-0 bg-[#f5f5f5] rounded-lg overflow-hidden">
-                <Image
-                  src={imageUrl}
-                  alt={`${catalogSeries.maker} ${catalogSeries.name}`}
-                  fill
-                  className="object-contain p-1"
-                  sizes="96px"
-                />
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="text-xs text-[#888] mb-0.5">{catalogSeries.maker}</p>
-              <h1 className="text-xl font-bold text-[#222] leading-tight">
-                {catalogSeries.name}
-                {model.name ? ` ${model.name}` : ""}
-              </h1>
-              <span className="inline-block mt-1 rounded-full bg-[#e6f2eb] px-2 py-0.5 text-xs font-medium text-[#006728]">
-                {categoryLabel}
-              </span>
-            </div>
-          </div>
+        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+          <p className="text-sm font-bold text-white">ゴルフクラブカタログ</p>
+        </div>
 
-          {/* Basic info */}
-          <div className="mt-4 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-            {model.release_year && (
-              <div>
-                <span className="text-xs text-[#888]">発売年</span>
-                <p className="font-medium">{model.release_year}年</p>
-              </div>
-            )}
-            {model.price !== null && (
-              <div>
-                <span className="text-xs text-[#888]">価格</span>
-                <p className="font-medium">
-                  ¥{model.price.toLocaleString("ja-JP")}〜
-                  {model.price_note && <span className="text-xs text-[#888] ml-1">{model.price_note}</span>}
-                </p>
-              </div>
-            )}
-            {model.head_material && (
-              <div>
-                <span className="text-xs text-[#888]">ヘッド素材</span>
-                <p className="font-medium">{model.head_material}</p>
-              </div>
-            )}
-            {model.finish && (
-              <div>
-                <span className="text-xs text-[#888]">フィニッシュ</span>
-                <p className="font-medium">{model.finish}</p>
-              </div>
-            )}
-            {model.grip_name && (
-              <div>
-                <span className="text-xs text-[#888]">グリップ</span>
-                <p className="font-medium">{model.grip_name}</p>
-              </div>
-            )}
-          </div>
+        {/* Breadcrumb */}
+        <div className="flex items-center px-3 py-1 w-full max-w-screen-sm bg-black/20 border-b border-white/30 overflow-hidden">
+          <p className="text-xs text-white truncate">
+            <Link href="/catalog" className="underline">カタログ</Link>
+            <span> / </span>
+            <Link href={`/catalog/${maker}`} className="underline">{catalogSeries.maker}</Link>
+            <span> / </span>
+            <Link href={`/catalog/${maker}/${series}`} className="underline">{catalogSeries.name}</Link>
+            <span> / {categoryLabel}</span>
+          </p>
+        </div>
 
-          {/* Shaft list */}
-          {model.shaft_names && model.shaft_names.length > 0 && (
-            <div className="mt-4">
-              <span className="text-xs text-[#888] block mb-1">シャフト</span>
-              <div className="flex flex-wrap gap-1">
-                {model.shaft_names.map((shaft) => (
-                  <span
-                    key={shaft}
-                    className="inline-block rounded border border-[#ddd] px-2 py-0.5 text-xs text-[#555]"
-                  >
-                    {shaft}
-                  </span>
-                ))}
+        {/* Banner */}
+        <PromoBanner />
+
+        {/* Model header card */}
+        <div className="w-full max-w-screen-sm px-3 pt-4">
+          <div className="rounded-md bg-white p-4">
+            <div className="flex gap-4">
+              {imageUrl && (
+                <div className="relative w-20 h-20 shrink-0 bg-[#f5f5f5] rounded-lg overflow-hidden">
+                  <Image
+                    src={imageUrl}
+                    alt={`${catalogSeries.maker} ${catalogSeries.name}`}
+                    fill
+                    className="object-contain p-1"
+                    sizes="80px"
+                  />
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-xs text-[#888] mb-0.5">{catalogSeries.maker}</p>
+                <h1 className="text-lg font-bold text-[#222] leading-tight">
+                  {catalogSeries.name}
+                  {model.name ? ` ${model.name}` : ""}
+                </h1>
+                <span className="inline-block mt-1 rounded-full bg-[#e6f2eb] px-2 py-0.5 text-xs font-medium text-[#006728]">
+                  {categoryLabel}
+                </span>
               </div>
             </div>
-          )}
 
-          {model.url && (
-            <a
-              href={model.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-block text-xs text-[#006728] hover:underline"
-            >
-              公式ページ ↗
-            </a>
-          )}
+            {/* Basic info */}
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              {model.release_year && (
+                <div>
+                  <span className="text-xs text-[#888]">発売年</span>
+                  <p className="font-medium">{model.release_year}年</p>
+                </div>
+              )}
+              {model.price !== null && (
+                <div>
+                  <span className="text-xs text-[#888]">価格</span>
+                  <p className="font-medium">
+                    ¥{model.price.toLocaleString("ja-JP")}〜
+                    {model.price_note && <span className="text-xs text-[#888] ml-1">{model.price_note}</span>}
+                  </p>
+                </div>
+              )}
+              {model.head_material && (
+                <div>
+                  <span className="text-xs text-[#888]">ヘッド素材</span>
+                  <p className="font-medium">{model.head_material}</p>
+                </div>
+              )}
+              {model.finish && (
+                <div>
+                  <span className="text-xs text-[#888]">フィニッシュ</span>
+                  <p className="font-medium">{model.finish}</p>
+                </div>
+              )}
+              {model.grip_name && (
+                <div>
+                  <span className="text-xs text-[#888]">グリップ</span>
+                  <p className="font-medium">{model.grip_name}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Shaft list */}
+            {model.shaft_names && model.shaft_names.length > 0 && (
+              <div className="mt-3">
+                <span className="text-xs text-[#888] block mb-1">シャフト</span>
+                <div className="flex flex-wrap gap-1">
+                  {model.shaft_names.map((shaft) => (
+                    <span
+                      key={shaft}
+                      className="inline-block rounded border border-[#ddd] px-2 py-0.5 text-xs text-[#555]"
+                    >
+                      {shaft}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {model.url && (
+              <a
+                href={model.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-block text-xs text-[#006728] hover:underline"
+              >
+                公式ページ ↗
+              </a>
+            )}
+          </div>
         </div>
 
         {/* Spec table */}
         {model.catalog_specs.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-base font-bold text-[#222] mb-3">スペック詳細</h2>
-            <div className="rounded-xl border border-[#e0e0e0] overflow-hidden">
+          <div className="w-full max-w-screen-sm px-3 pt-4">
+            <h2 className="text-sm font-bold text-white mb-2">スペック詳細</h2>
+            <div className="rounded-md overflow-hidden">
               <SpecTable specs={model.catalog_specs} category={model.category} />
+            </div>
+          </div>
+        )}
+
+        {/* Related news */}
+        {news.length > 0 && (
+          <div className="w-full max-w-screen-sm px-3 pt-4">
+            <h2 className="text-sm font-bold text-white mb-2">関連ニュース</h2>
+            <div className="flex flex-col gap-2">
+              {news.map((item, i) => (
+                <a
+                  key={i}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col gap-1 rounded-md bg-white p-3"
+                >
+                  <p className="text-sm font-bold text-[#006728] leading-snug">{item.title}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#888]">{item.source}</span>
+                    {item.date && (
+                      <span className="text-xs text-[#aaa]">
+                        {new Date(item.date).toLocaleDateString("ja-JP")}
+                      </span>
+                    )}
+                  </div>
+                </a>
+              ))}
             </div>
           </div>
         )}
 
         {/* Compare links */}
         {compareLinks.length > 0 && (
-          <div>
-            <h2 className="text-base font-bold text-[#222] mb-3">他モデルと比較する</h2>
+          <div className="w-full max-w-screen-sm px-3 pt-4">
+            <h2 className="text-sm font-bold text-white mb-2">他モデルと比較する</h2>
             <div className="flex flex-wrap gap-2">
               {compareLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="inline-flex items-center rounded-full border border-[#006728] bg-white px-3 py-1.5 text-xs font-medium text-[#006728] hover:bg-[#e6f2eb] transition-colors"
+                  className="inline-flex items-center rounded-full border border-white bg-[#17552f] px-3 py-1.5 text-xs font-medium text-white"
                 >
                   {link.label} と比較
                 </Link>
@@ -200,6 +245,11 @@ export default async function ModelDetailPage({
             </div>
           </div>
         )}
+
+        {/* Disclaimer */}
+        <p className="w-full max-w-screen-sm px-4 py-6 text-left text-xs text-white leading-relaxed">
+          ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
+        </p>
       </div>
     </div>
   );
