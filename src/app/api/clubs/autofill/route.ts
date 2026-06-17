@@ -39,20 +39,20 @@ export async function POST(request: NextRequest) {
   const admin = getAdminClient();
 
   // 1. Check cache
-  const query = admin
-    .from("club_specs")
-    .select("*")
+  const headQuery = admin
+    .from("club_spec_heads")
+    .select("*, configurations:club_spec_configurations(length, total_weight, swing_weight, shaft_id)")
     .eq("maker_normalized", makerNorm)
     .eq("model_normalized", modelNorm)
     .eq("category", category ?? "");
 
   if (club_number) {
-    query.eq("club_number", club_number);
+    headQuery.eq("club_number", club_number);
   } else {
-    query.is("club_number", null);
+    headQuery.is("club_number", null);
   }
 
-  const { data: cached } = await query.maybeSingle();
+  const { data: cached } = await headQuery.maybeSingle();
 
   if (cached) {
     // series画像フォールバック: series → spec → null
@@ -69,13 +69,14 @@ export async function POST(request: NextRequest) {
         affiliateUrl = affiliateUrl ?? series.affiliate_url;
       }
     }
+    const defaultConfig = (cached.configurations ?? []).find((c: any) => c.shaft_id === null);
     return NextResponse.json({
       loft: cached.loft,
       lie: cached.lie,
-      length: cached.length,
+      length: defaultConfig?.length ?? null,
       distance: cached.distance,
-      weight: cached.weight,
-      swing_weight: cached.swing_weight,
+      weight: defaultConfig?.total_weight ?? null,
+      swing_weight: defaultConfig?.swing_weight ?? null,
       head_volume: cached.head_volume,
       head_weight: cached.head_weight,
       image_url: imageUrl,
@@ -183,8 +184,8 @@ ${searchContext}
     const jsonStr = jsonMatch[1] ?? jsonMatch[0];
     const specs = JSON.parse(jsonStr);
 
-    // 4. Save to cache (UPSERT, skip if verified=true)
-    const { error: cacheError } = await admin.rpc("upsert_club_spec", {
+    // 4. Save to cache — head + default configuration (skip if verified=true)
+    const { data: headId, error: headError } = await admin.rpc("upsert_club_spec_head", {
       p_maker: maker,
       p_model: model,
       p_category: category ?? "",
@@ -193,16 +194,38 @@ ${searchContext}
       p_model_normalized: modelNorm,
       p_loft: specs.loft ?? null,
       p_lie: specs.lie ?? null,
-      p_length: specs.length ?? null,
-      p_distance: specs.distance ?? null,
-      p_weight: specs.weight ?? null,
-      p_swing_weight: specs.swing_weight ?? null,
       p_head_volume: specs.head_volume ?? null,
       p_head_weight: specs.head_weight ?? null,
+      p_distance: specs.distance ?? null,
       p_image_url: rakutenResult.imageUrl,
       p_affiliate_url: rakutenResult.affiliateUrl,
     });
-    if (cacheError) console.error("[autofill] Cache save error:", cacheError.message);
+    if (headError) console.error("[autofill] Head save error:", headError.message);
+
+    // Save configuration (length, weight→total_weight, swing_weight) for shaft_id=null
+    if (headId && (specs.length != null || specs.weight != null || specs.swing_weight != null)) {
+      const { data: existingConfig } = await admin
+        .from("club_spec_configurations")
+        .select("id, verified")
+        .eq("head_id", headId)
+        .is("shaft_id", null)
+        .maybeSingle();
+
+      const configFields = {
+        head_id: headId,
+        length: specs.length ?? null,
+        total_weight: specs.weight ?? null,
+        swing_weight: specs.swing_weight ?? null,
+        source: "ai" as const,
+      };
+
+      if (existingConfig && !existingConfig.verified) {
+        await admin.from("club_spec_configurations").update(configFields).eq("id", existingConfig.id);
+      } else if (!existingConfig) {
+        await admin.from("club_spec_configurations").insert(configFields);
+      }
+      // Skip if existingConfig.verified === true (preserve verified data)
+    }
 
     return NextResponse.json({
       ...specs,

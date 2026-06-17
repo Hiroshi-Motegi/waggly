@@ -193,7 +193,7 @@ async function collectOne(maker, model, category, clubNumber) {
 
   // Skip if already cached
   const query = supabase
-    .from("club_specs")
+    .from("club_spec_heads")
     .select("id")
     .eq("maker_normalized", makerNorm)
     .eq("model_normalized", modelNorm)
@@ -214,8 +214,8 @@ async function collectOne(maker, model, category, clubNumber) {
 
   const rakuten = await searchRakuten(maker, model, clubNumber, category);
 
-  // Upsert
-  const { error } = await supabase.rpc("upsert_club_spec", {
+  // Upsert head
+  const { data: headId, error: headError } = await supabase.rpc("upsert_club_spec_head", {
     p_maker: maker,
     p_model: model,
     p_category: category,
@@ -224,16 +224,39 @@ async function collectOne(maker, model, category, clubNumber) {
     p_model_normalized: modelNorm,
     p_loft: specs.loft ?? null,
     p_lie: specs.lie ?? null,
-    p_length: specs.length ?? null,
-    p_distance: specs.distance ?? null,
-    p_weight: specs.weight ?? null,
-    p_swing_weight: specs.swing_weight ?? null,
     p_head_volume: specs.head_volume ?? null,
     p_head_weight: specs.head_weight ?? null,
+    p_distance: specs.distance ?? null,
     p_image_url: rakuten.imageUrl,
     p_affiliate_url: rakuten.affiliateUrl,
   });
-  if (error) throw new Error(`Upsert error: ${error.message}`);
+  if (headError) throw new Error(`Head upsert error: ${headError.message}`);
+
+  // Save default configuration (shaft_id=null)
+  if (headId && (specs.length != null || specs.weight != null || specs.swing_weight != null)) {
+    const { data: existingConfig } = await supabase
+      .from("club_spec_configurations")
+      .select("id, verified")
+      .eq("head_id", headId)
+      .is("shaft_id", null)
+      .maybeSingle();
+
+    const configFields = {
+      head_id: headId,
+      length: specs.length ?? null,
+      total_weight: specs.weight ?? null,
+      swing_weight: specs.swing_weight ?? null,
+      source: "ai",
+    };
+
+    if (existingConfig && !existingConfig.verified) {
+      const { error } = await supabase.from("club_spec_configurations").update(configFields).eq("id", existingConfig.id);
+      if (error) console.error(`  WARN  config update: ${error.message}`);
+    } else if (!existingConfig) {
+      const { error } = await supabase.from("club_spec_configurations").insert(configFields);
+      if (error) console.error(`  WARN  config insert: ${error.message}`);
+    }
+  }
   return specs;
 }
 
