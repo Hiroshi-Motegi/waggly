@@ -7,7 +7,7 @@ interface CompareTableProps {
 }
 
 export function CompareTable({ modelA, modelB }: CompareTableProps) {
-  const category = modelA.category_slug;
+  const category = modelA.category;
   const specKeys = CATEGORY_SPECS[category] ?? (Object.keys(SPEC_LABELS) as SpecKey[]);
 
   // Collect all unique club numbers across both models, sorted by sort_order

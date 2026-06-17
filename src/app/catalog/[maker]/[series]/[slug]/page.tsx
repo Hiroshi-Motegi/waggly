@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getModelDetail, getModelsByCategory, modelSlug } from "@/lib/catalog";
+import { getModelDetail, getModelsByCategory, compareModelSlug } from "@/lib/catalog";
 import { SpecTable } from "@/components/catalog/spec-table";
 
 export const revalidate = 86400;
@@ -18,10 +18,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ maker: string; series: string; category: string }>;
+  params: Promise<{ maker: string; series: string; slug: string }>;
 }) {
-  const { maker, series, category } = await params;
-  const model = await getModelDetail(maker, series, category);
+  const { maker, series, slug } = await params;
+  const model = await getModelDetail(maker, series, slug);
   if (!model) return {};
   const { catalog_series: s } = model;
   const categoryLabel = CATEGORY_LABELS[model.category] ?? model.category;
@@ -38,10 +38,10 @@ export async function generateMetadata({
 export default async function ModelDetailPage({
   params,
 }: {
-  params: Promise<{ maker: string; series: string; category: string }>;
+  params: Promise<{ maker: string; series: string; slug: string }>;
 }) {
-  const { maker, series, category } = await params;
-  const model = await getModelDetail(maker, series, category);
+  const { maker, series, slug } = await params;
+  const model = await getModelDetail(maker, series, slug);
 
   if (!model) {
     notFound();
@@ -51,16 +51,16 @@ export default async function ModelDetailPage({
   const categoryLabel = CATEGORY_LABELS[model.category] ?? model.category;
 
   // Fetch other models in the same category for compare links
-  const categoryModels = await getModelsByCategory(category);
+  const categoryModels = await getModelsByCategory(model.category);
   const otherModels = categoryModels.filter((m) => m.id !== model.id);
 
   // Generate compare links (sort slugs alphabetically)
-  const mySlug = modelSlug(catalogSeries);
+  const mySlug = compareModelSlug(catalogSeries, model);
   const compareLinks = otherModels.slice(0, 8).map((other) => {
-    const otherSlug = modelSlug(other.catalog_series);
+    const otherSlug = compareModelSlug(other.catalog_series, other);
     const [slugA, slugB] = [mySlug, otherSlug].sort();
     return {
-      href: `/compare/${category}/${slugA}-vs-${slugB}`,
+      href: `/compare/${model.category}/${slugA}-vs-${slugB}`,
       label: `${other.catalog_series.maker} ${other.catalog_series.name}${other.name ? ` ${other.name}` : ""}`,
     };
   });

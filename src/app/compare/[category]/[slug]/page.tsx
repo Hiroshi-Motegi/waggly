@@ -101,7 +101,7 @@ export default async function CompareVsPage({
                 <p className="text-xs text-[#555] mt-1">¥{model.price.toLocaleString("ja-JP")}〜</p>
               )}
               <Link
-                href={`/catalog/${model.catalog_series.maker_slug}/${model.catalog_series.name_slug}/${model.category_slug}`}
+                href={`/catalog/${model.catalog_series.maker_slug}/${model.catalog_series.name_slug}/${model.slug}`}
                 className="mt-2 inline-block text-xs text-[#006728] hover:underline"
               >
                 詳細を見る →

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getModelsByCategory, modelSlug } from "@/lib/catalog";
+import { getModelsByCategory, compareModelSlug } from "@/lib/catalog";
 
 export const revalidate = 86400;
 
@@ -42,8 +42,8 @@ export default async function CompareIndexPage({
     for (let j = i + 1; j < models.length; j++) {
       const a = models[i];
       const b = models[j];
-      const slugA = modelSlug(a.catalog_series);
-      const slugB = modelSlug(b.catalog_series);
+      const slugA = compareModelSlug(a.catalog_series, a);
+      const slugB = compareModelSlug(b.catalog_series, b);
       const [sortedA, sortedB] = [slugA, slugB].sort();
       const nameA = `${a.catalog_series.maker} ${a.catalog_series.name}${a.name ? ` ${a.name}` : ""}`;
       const nameB = `${b.catalog_series.maker} ${b.catalog_series.name}${b.name ? ` ${b.name}` : ""}`;

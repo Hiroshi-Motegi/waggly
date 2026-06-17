@@ -18,7 +18,7 @@ interface SeriesWithModels {
     id: string;
     name: string;
     category: string;
-    category_slug: string;
+    slug: string;
   }>;
 }
 

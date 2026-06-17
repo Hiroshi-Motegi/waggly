@@ -21,7 +21,7 @@ export type CatalogModel = {
   series_id: string;
   name: string;
   category: string;
-  category_slug: string;
+  slug: string;
   head_material: string | null;
   finish: string | null;
   price: number | null;
@@ -93,45 +93,55 @@ export async function getModelsBySeries(makerSlug: string, nameSlug: string) {
 }
 
 /** モデル詳細 + スペック */
-export async function getModelDetail(makerSlug: string, nameSlug: string, categorySlug: string) {
+export async function getModelDetail(makerSlug: string, nameSlug: string, slug: string) {
   const { data } = await supabase
     .from("catalog_models")
     .select("*, catalog_series!inner(*), catalog_specs(*)")
     .eq("catalog_series.maker_slug", makerSlug)
     .eq("catalog_series.name_slug", nameSlug)
-    .eq("category_slug", categorySlug)
+    .eq("slug", slug)
     .order("sort_order", { referencedTable: "catalog_specs" })
     .single();
   return data as CatalogModelWithSpecs | null;
 }
 
 /** カテゴリ内の全モデル一覧（比較インデックス用） */
-export async function getModelsByCategory(categorySlug: string) {
+export async function getModelsByCategory(category: string) {
   const { data } = await supabase
     .from("catalog_models")
     .select("*, catalog_series!inner(*)")
-    .eq("category_slug", categorySlug)
+    .eq("category", category)
     .order("name");
   return (data ?? []) as (CatalogModel & { catalog_series: CatalogSeries })[];
 }
 
-/** slugから2モデル取得（VS比較用） */
-export async function getCompareModels(categorySlug: string, slugA: string, slugB: string) {
-  const parseSlug = (slug: string) => {
-    const i = slug.indexOf("-");
-    return { makerSlug: slug.slice(0, i), nameSlug: slug.slice(i + 1) };
-  };
-  const a = parseSlug(slugA);
-  const b = parseSlug(slugB);
+/** 比較用slugからモデル取得 */
+async function getModelByCompareSlug(compareSlug: string, category: string) {
+  // compareSlug = "ping-g430-iron" → maker_slug=ping, name_slug=g430, slug=iron
+  // 先頭からmaker_slug, name_slugを順に試す
+  const { data: allModels } = await supabase
+    .from("catalog_models")
+    .select("*, catalog_series!inner(*), catalog_specs(*)")
+    .eq("category", category)
+    .order("sort_order", { referencedTable: "catalog_specs" });
 
+  if (!allModels) return null;
+  return (allModels as CatalogModelWithSpecs[]).find((m) => {
+    const s = m.catalog_series as CatalogSeries;
+    return compareModelSlug(s, m) === compareSlug;
+  }) ?? null;
+}
+
+/** slugから2モデル取得（VS比較用） */
+export async function getCompareModels(category: string, slugA: string, slugB: string) {
   const [modelA, modelB] = await Promise.all([
-    getModelDetail(a.makerSlug, a.nameSlug, categorySlug),
-    getModelDetail(b.makerSlug, b.nameSlug, categorySlug),
+    getModelByCompareSlug(slugA, category),
+    getModelByCompareSlug(slugB, category),
   ]);
   return { modelA, modelB };
 }
 
-/** モデルの比較用slug生成 */
-export function modelSlug(series: CatalogSeries): string {
-  return `${series.maker_slug}-${series.name_slug}`;
+/** モデルの比較用slug生成（{maker_slug}-{name_slug}-{model_slug}） */
+export function compareModelSlug(series: CatalogSeries, model: CatalogModel): string {
+  return `${series.maker_slug}-${series.name_slug}-${model.slug}`;
 }

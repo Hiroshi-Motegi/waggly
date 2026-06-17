@@ -17,7 +17,7 @@ interface ModelCardProps {
 }
 
 export function ModelCard({ model, series }: ModelCardProps) {
-  const href = `/catalog/${series.maker_slug}/${series.name_slug}/${model.category_slug}`;
+  const href = `/catalog/${series.maker_slug}/${series.name_slug}/${model.slug}`;
   const categoryLabel = CATEGORY_LABELS[model.category] ?? model.category;
   const imageUrl = model.image_url ?? series.image_url;
 

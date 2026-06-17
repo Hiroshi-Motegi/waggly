@@ -17,10 +17,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const category_slug = body.category ?? "";
   const { data, error } = await supabase
     .from("catalog_models")
-    .insert({ ...body, category_slug })
+    .insert(body)
     .select()
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

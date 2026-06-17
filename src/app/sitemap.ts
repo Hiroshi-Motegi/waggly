@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getMakers, getSeriesByMaker, getModelsByCategory } from "@/lib/catalog";
-import { modelSlug } from "@/lib/catalog";
+import { compareModelSlug } from "@/lib/catalog";
 
 const baseUrl = "https://waggly.jp";
 
@@ -58,12 +58,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         );
         const { data: models } = await supabase
           .from("catalog_models")
-          .select("category_slug")
+          .select("slug")
           .eq("series_id", series.id);
 
         for (const model of models ?? []) {
           catalogUrls.push({
-            url: `${baseUrl}/catalog/${series.maker_slug}/${series.name_slug}/${model.category_slug}`,
+            url: `${baseUrl}/catalog/${series.maker_slug}/${series.name_slug}/${model.slug}`,
             changeFrequency: "monthly",
             priority: 0.6,
           });
@@ -90,8 +90,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       for (let i = 0; i < models.length; i++) {
         for (let j = i + 1; j < models.length; j++) {
-          const slugA = modelSlug(models[i].catalog_series);
-          const slugB = modelSlug(models[j].catalog_series);
+          const slugA = compareModelSlug(models[i].catalog_series, models[i]);
+          const slugB = compareModelSlug(models[j].catalog_series, models[j]);
           const [sortedA, sortedB] = [slugA, slugB].sort();
           compareUrls.push({
             url: `${baseUrl}/compare/${category}/${sortedA}-vs-${sortedB}`,
