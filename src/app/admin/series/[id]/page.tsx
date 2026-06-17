@@ -270,7 +270,7 @@ function AddHeadForm({
           model,
           category,
           club_number: clubNumber.trim(),
-          series_id: seriesId,
+          model_id: seriesId,
         }),
       });
       if (res.ok) {

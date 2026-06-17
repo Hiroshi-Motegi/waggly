@@ -30,7 +30,7 @@ interface ClubSpec {
   affiliate_url: string | null;
   source: string;
   verified: boolean;
-  series_id: string | null;
+  model_id: string | null;
   series: { id: string; maker: string; model: string; image_url: string | null; own_image_url: string | null; affiliate_url: string | null } | null;
 }
 
@@ -173,7 +173,7 @@ interface FormState {
   distance: string;
   image_url: string;
   affiliate_url: string;
-  series_id: string;
+  model_id: string;
 }
 
 function parseNum(v: string): number | null {
@@ -198,7 +198,7 @@ function specToForm(spec: ClubSpec): FormState {
     distance: spec.distance != null ? String(spec.distance) : "",
     image_url: spec.image_url ?? "",
     affiliate_url: spec.affiliate_url ?? "",
-    series_id: spec.series_id ?? "",
+    model_id: spec.model_id ?? "",
   };
 }
 
@@ -215,7 +215,7 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
     maker: "", model: "", category: "driver", club_number: "",
     loft: "", lie: "", length: "", total_weight: "", swing_weight: "",
     head_volume: "", head_weight: "", distance: "",
-    image_url: "", affiliate_url: "", series_id: "",
+    image_url: "", affiliate_url: "", model_id: "",
   });
   const [saving, setSaving] = useState(false);
   const [rakutenUrl, setRakutenUrl] = useState("");
@@ -248,9 +248,9 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
         head_volume: parseNum(form.head_volume),
         head_weight: parseNum(form.head_weight),
         distance: parseNum(form.distance),
-        series_id: form.series_id || null,
+        model_id: form.model_id || null,
       };
-      if (!form.series_id) {
+      if (!form.model_id) {
         payload.image_url = form.image_url || null;
         payload.affiliate_url = form.affiliate_url || null;
       }
@@ -321,7 +321,7 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
   const categoryLabel = CATEGORY_LABELS[spec.category] ?? spec.category;
   const titleText = `${spec.maker} ${spec.model} ${spec.club_number ?? ""}`.trim();
   const seriesList: SeriesItem[] = seriesData?.data ?? [];
-  const hasSeriesSelected = form.series_id !== "";
+  const hasSeriesSelected = form.model_id !== "";
   const searchKeyword = `${form.maker} ${form.model} ${form.club_number} スペック`;
   const affiliateUrl = spec.series?.affiliate_url ?? spec.affiliate_url;
 
@@ -475,8 +475,8 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
             {/* Series selector with search */}
             <SeriesCombobox
               seriesList={seriesList}
-              value={form.series_id}
-              onChange={(v) => updateField("series_id", v)}
+              value={form.model_id}
+              onChange={(v) => updateField("model_id", v)}
               hasSelection={hasSeriesSelected}
             />
 
@@ -574,7 +574,7 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
               <p className="text-sm text-amber-800">
                 画像・リンクはシリーズ「{spec.series?.maker} {spec.series?.model}」で管理されています。
               </p>
-              <Link href={`/admin/series/${form.series_id}`}
+              <Link href={`/admin/series/${form.model_id}`}
                 className="mt-1 inline-block text-xs font-bold text-amber-700 hover:underline">
                 シリーズ編集ページへ →
               </Link>

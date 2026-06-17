@@ -114,7 +114,7 @@ export async function PATCH(request: NextRequest) {
         headUpdates.model = fields.model;
         headUpdates.model_normalized = normalizeClubName(fields.model);
       }
-      await admin.from("heads").update(headUpdates).eq("series_id", id);
+      await admin.from("heads").update(headUpdates).eq("model_id", id);
     }
 
     const { data: updated } = await admin.from("club_models").select("*").eq("id", id).single();
@@ -126,7 +126,7 @@ export async function PATCH(request: NextRequest) {
     // maker+model が一致する heads を全て紐づけ
     const { count } = await admin
       .from("heads")
-      .update({ series_id: id })
+      .update({ model_id: id })
       .eq("maker", series.maker)
       .eq("model", series.model);
 
@@ -137,7 +137,7 @@ export async function PATCH(request: NextRequest) {
   return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
 
-/** DELETE /api/admin/series — シリーズ削除（specsのseries_idはON DELETE SET NULLで解除） */
+/** DELETE /api/admin/series — シリーズ削除（headsのmodel_idはON DELETE SET NULLで解除） */
 export async function DELETE(request: NextRequest) {
   const admin = getAdmin();
   const { id } = await request.json();

@@ -28,7 +28,7 @@ interface ClubSpec {
   affiliate_url: string | null;
   source: string;
   verified: boolean;
-  series_id: string | null;
+  model_id: string | null;
   series: { id: string; image_url: string | null; affiliate_url: string | null } | null;
 }
 

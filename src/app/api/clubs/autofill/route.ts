@@ -58,11 +58,11 @@ export async function POST(request: NextRequest) {
     // series画像フォールバック: series → spec → null
     let imageUrl = cached.image_url;
     let affiliateUrl = cached.affiliate_url;
-    if (cached.series_id && (!imageUrl || !affiliateUrl)) {
+    if (cached.model_id && (!imageUrl || !affiliateUrl)) {
       const { data: series } = await admin
         .from("club_models")
         .select("image_url, affiliate_url")
-        .eq("id", cached.series_id)
+        .eq("id", cached.model_id)
         .single();
       if (series) {
         imageUrl = imageUrl ?? series.image_url;
