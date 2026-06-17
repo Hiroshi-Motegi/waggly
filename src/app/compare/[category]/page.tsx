@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getModelsByCategory, compareModelSlug } from "@/lib/catalog";
+import { PromoBanner } from "@/components/catalog/promo-banner";
 
 export const revalidate = 86400;
 
@@ -58,27 +60,41 @@ export default async function CompareIndexPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <nav className="text-xs text-[#888] mb-4 flex gap-1">
-          <span>比較</span>
-          <span>/</span>
-          <span>{label}</span>
-        </nav>
+    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <div className="flex flex-col items-center w-full">
+        {/* Header */}
+        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+          <p className="text-sm font-bold text-white">{label} スペック比較</p>
+        </div>
 
-        <h1 className="text-2xl font-bold text-[#222] mb-2">{label} スペック比較</h1>
-        <p className="text-sm text-[#666] mb-6">2モデルのスペックを番手別に比較します</p>
+        {/* Breadcrumb */}
+        <div className="flex items-center px-3 py-1 w-full max-w-screen-sm bg-black/20 border-b border-white/30 overflow-hidden">
+          <p className="text-xs text-white truncate">
+            <span>比較</span>
+            <span> / {label}</span>
+          </p>
+        </div>
+
+        {/* Title bar */}
+        <div className="px-5 py-3 w-full max-w-screen-sm bg-black/20">
+          <h1 className="text-[15px] font-extrabold text-white">{label} スペック比較</h1>
+          <p className="text-xs text-white/70 mt-0.5">2モデルのスペックを番手別に比較</p>
+        </div>
+
+        {/* Banner */}
+        <PromoBanner />
 
         {/* Category nav */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 px-3 pt-4 w-full max-w-screen-sm">
           {ALL_CATEGORIES.map((cat) => (
             <Link
               key={cat}
               href={`/compare/${cat}`}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
                 cat === category
-                  ? "bg-[#006728] text-white"
-                  : "bg-white border border-[#e0e0e0] text-[#555] hover:border-[#006728] hover:text-[#006728]"
+                  ? "bg-[#17552f] border border-white text-white"
+                  : "bg-white text-[#006728]"
               }`}
             >
               {CATEGORY_LABELS[cat]}
@@ -86,25 +102,29 @@ export default async function CompareIndexPage({
           ))}
         </div>
 
-        {pairs.length === 0 ? (
-          <p className="text-sm text-[#888]">比較できるモデルがありません</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {pairs.map((pair) => (
-              <Link
-                key={pair.href}
-                href={pair.href}
-                className="flex items-center gap-2 rounded-xl border border-[#e0e0e0] bg-white px-4 py-3 hover:border-[#006728] hover:shadow-sm transition-all"
-              >
-                <span className="flex-1 text-sm font-medium text-[#222] truncate">{pair.nameA}</span>
-                <span className="shrink-0 text-xs font-bold text-[#006728]">VS</span>
-                <span className="flex-1 text-sm font-medium text-[#222] truncate text-right">{pair.nameB}</span>
-              </Link>
-            ))}
-          </div>
-        )}
+        {/* Content */}
+        <div className="w-full max-w-screen-sm px-3 py-4">
+          {pairs.length === 0 ? (
+            <p className="text-sm text-white/70">比較できるモデルがありません</p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {pairs.map((pair) => (
+                <Link
+                  key={pair.href}
+                  href={pair.href}
+                  className="flex items-center gap-2 rounded-md bg-white px-4 py-3"
+                >
+                  <span className="flex-1 text-sm font-medium text-[#222] truncate">{pair.nameA}</span>
+                  <span className="shrink-0 text-xs font-bold text-[#006728]">VS</span>
+                  <span className="flex-1 text-sm font-medium text-[#222] truncate text-right">{pair.nameB}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
 
-        <p className="mt-10 text-left text-xs text-[#888] leading-relaxed">
+        {/* Disclaimer */}
+        <p className="w-full max-w-screen-sm px-4 py-6 text-left text-xs text-white leading-relaxed">
           ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
         </p>
       </div>
