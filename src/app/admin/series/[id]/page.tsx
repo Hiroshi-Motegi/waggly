@@ -131,6 +131,16 @@ function HeadsInlineEditor({
     setField(b.id, "sort_order", String(orderA));
   }
 
+  async function handleDeleteHead(headId: string, clubNumber: string | null) {
+    if (!confirm(`ヘッド「${clubNumber ?? "?"}」を削除しますか？`)) return;
+    await apiFetch("/api/admin/specs", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: headId }),
+    });
+    onUpdated();
+  }
+
   async function handleSaveHeads() {
     if (changedIds.length === 0) return;
     setSavingHeads(true);
@@ -180,6 +190,7 @@ function HeadsInlineEditor({
                   {FIELDS.map((f) => (
                     <th key={f.key} className="px-1 py-2 text-left text-[11px] text-[#888] font-medium whitespace-nowrap">{f.label}</th>
                   ))}
+                  <th className="w-8"></th>
                 </tr>
               </thead>
               <tbody>
@@ -217,6 +228,13 @@ function HeadsInlineEditor({
                         </div>
                       </td>
                     ))}
+                    <td className="px-1 py-1">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteHead(sp.id, sp.club_number)}
+                        className="text-[10px] text-red-400 hover:text-red-600"
+                      >✕</button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

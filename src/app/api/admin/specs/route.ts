@@ -290,3 +290,12 @@ JSON形式で回答（JSON以外不要）:
 
   return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
+
+/** DELETE /api/admin/specs — ヘッド削除（clubs は ON DELETE CASCADE で連動削除） */
+export async function DELETE(request: NextRequest) {
+  const admin = getAdmin();
+  const { id } = await request.json();
+  if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
+  await admin.from("heads").delete().eq("id", id);
+  return NextResponse.json({ ok: true });
+}
