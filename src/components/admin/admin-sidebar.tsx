@@ -36,7 +36,7 @@ export function AdminSidebar() {
         { href: "/admin/series", label: "シリーズ一覧", match: (p: string) => p.startsWith("/admin/series") },
       ],
     },
-    { title: "クラブ", items: specItems },
+    { title: "ヘッド", items: specItems },
     {
       title: "シャフト",
       items: [

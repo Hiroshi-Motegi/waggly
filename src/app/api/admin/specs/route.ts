@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     if (error.code === "23505") {
-      return NextResponse.json({ error: "既に存在するクラブです" }, { status: 409 });
+      return NextResponse.json({ error: "既に存在するヘッドです" }, { status: 409 });
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
