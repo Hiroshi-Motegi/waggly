@@ -12,13 +12,13 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const { id } = await params;
   const admin = getAdmin();
   const { data, error } = await admin
-    .from("club_spec_series")
+    .from("club_models")
     .select(`
       *,
-      club_spec_heads(id, category, club_number, sort_order, loft, lie, head_volume, head_weight, distance, verified,
-        configurations:club_spec_configurations(id, shaft_id, length, total_weight, swing_weight)
+      heads(id, category, club_number, sort_order, loft, lie, head_volume, head_weight, distance, verified,
+        configurations:clubs(id, shaft_variant_id, length, total_weight, swing_weight)
       ),
-      series_shafts:club_spec_series_shafts(id, is_default, shaft:shafts(id, maker, name, flex, weight))
+      series_shafts:club_model_shafts(id, is_default, shaft_model:shaft_models(id, maker, name, type, variants:shaft_variants(id, flex, weight, torque, kick_point)))
     `)
     .eq("id", id)
     .single();
@@ -28,7 +28,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   }
 
   // Build specs with all configurations (not just default)
-  const specs = (data.club_spec_heads ?? [])
+  const specs = (data.heads ?? [])
     .map((sp: any) => {
       const { configurations, ...rest } = sp;
       return { ...rest, configurations: configurations ?? [] };
@@ -42,15 +42,18 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
   // Build shafts list
   const shafts = (data.series_shafts ?? [])
-    .map((ss: any) => ({ link_id: ss.id, is_default: ss.is_default, ...ss.shaft }))
-    .sort((a: any, b: any) => `${a.maker} ${a.name}`.localeCompare(`${b.maker} ${b.name}`));
+    .map((ss: any) => ({
+      link_id: ss.id,
+      is_default: ss.is_default,
+      shaft_model: ss.shaft_model,
+    }));
 
   return NextResponse.json({
     ...data,
     specs,
     spec_count: specs.length,
     shafts,
-    club_spec_heads: undefined,
+    heads: undefined,
     series_shafts: undefined,
   });
 }
@@ -63,37 +66,40 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   // Add shaft to series
   if (action === "add_shaft") {
-    const { shaft_id, is_default } = body;
+    const { shaft_model_id, is_default } = body;
     const { data, error } = await admin
-      .from("club_spec_series_shafts")
-      .insert({ series_id: seriesId, shaft_id, is_default: is_default ?? false })
-      .select("id, is_default, shaft:shafts(id, maker, name, flex, weight)")
+      .from("club_model_shafts")
+      .insert({ model_id: seriesId, shaft_model_id, is_default: is_default ?? false })
+      .select("id, is_default, shaft_model:shaft_models(id, maker, name, type, variants:shaft_variants(id, flex, weight, torque, kick_point))")
       .single();
     if (error) {
       if (error.code === "23505") return NextResponse.json({ error: "既に追加済みです" }, { status: 409 });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    return NextResponse.json({ link_id: data.id, is_default: data.is_default, ...(data as any).shaft });
+    return NextResponse.json({ link_id: data.id, is_default: data.is_default, shaft_model: (data as any).shaft_model });
   }
 
   // Remove shaft from series
   if (action === "remove_shaft") {
-    const { link_id } = body;
-    await admin.from("club_spec_series_shafts").delete().eq("id", link_id);
-    // Also remove configurations for this shaft under this series' heads
-    const { data: heads } = await admin.from("club_spec_heads").select("id").eq("series_id", seriesId);
-    if (heads && heads.length > 0) {
-      const headIds = heads.map((h: any) => h.id);
-      await admin.from("club_spec_configurations").delete()
-        .eq("shaft_id", body.shaft_id)
-        .in("head_id", headIds);
+    const { link_id, shaft_model_id } = body;
+    await admin.from("club_model_shafts").delete().eq("id", link_id);
+    const { data: variants } = await admin.from("shaft_variants").select("id").eq("model_id", shaft_model_id);
+    if (variants && variants.length > 0) {
+      const variantIds = variants.map((v: any) => v.id);
+      const { data: headRows } = await admin.from("heads").select("id").eq("model_id", seriesId);
+      if (headRows && headRows.length > 0) {
+        const headIds = headRows.map((h: any) => h.id);
+        await admin.from("clubs").delete()
+          .in("shaft_variant_id", variantIds)
+          .in("head_id", headIds);
+      }
     }
     return NextResponse.json({ ok: true });
   }
 
-  // Upsert configuration (head_id + shaft_id → length/total_weight/swing_weight)
+  // Upsert configuration (head_id + shaft_variant_id → length/total_weight/swing_weight)
   if (action === "upsert_config") {
-    const { head_id, shaft_id, length, total_weight, swing_weight } = body;
+    const { head_id, shaft_variant_id, length, total_weight, swing_weight } = body;
     const configFields = {
       length: length ?? null,
       total_weight: total_weight ?? null,
@@ -102,16 +108,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     // Check existing
     const { data: existing } = await admin
-      .from("club_spec_configurations")
+      .from("clubs")
       .select("id")
       .eq("head_id", head_id)
-      .eq("shaft_id", shaft_id)
+      .eq("shaft_variant_id", shaft_variant_id)
       .maybeSingle();
 
     if (existing) {
-      await admin.from("club_spec_configurations").update(configFields).eq("id", existing.id);
+      await admin.from("clubs").update(configFields).eq("id", existing.id);
     } else {
-      await admin.from("club_spec_configurations").insert({ head_id, shaft_id, ...configFields });
+      await admin.from("clubs").insert({ head_id, shaft_variant_id, ...configFields });
     }
     return NextResponse.json({ ok: true });
   }

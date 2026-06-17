@@ -193,7 +193,7 @@ async function collectOne(maker, model, category, clubNumber) {
 
   // Skip if already cached
   const query = supabase
-    .from("club_spec_heads")
+    .from("heads")
     .select("id")
     .eq("maker_normalized", makerNorm)
     .eq("model_normalized", modelNorm)
@@ -215,7 +215,7 @@ async function collectOne(maker, model, category, clubNumber) {
   const rakuten = await searchRakuten(maker, model, clubNumber, category);
 
   // Upsert head
-  const { data: headId, error: headError } = await supabase.rpc("upsert_club_spec_head", {
+  const { data: headId, error: headError } = await supabase.rpc("upsert_head", {
     p_maker: maker,
     p_model: model,
     p_category: category,
@@ -232,13 +232,13 @@ async function collectOne(maker, model, category, clubNumber) {
   });
   if (headError) throw new Error(`Head upsert error: ${headError.message}`);
 
-  // Save default configuration (shaft_id=null)
+  // Save default configuration (shaft_variant_id=null)
   if (headId && (specs.length != null || specs.weight != null || specs.swing_weight != null)) {
     const { data: existingConfig } = await supabase
-      .from("club_spec_configurations")
+      .from("clubs")
       .select("id, verified")
       .eq("head_id", headId)
-      .is("shaft_id", null)
+      .is("shaft_variant_id", null)
       .maybeSingle();
 
     const configFields = {
@@ -250,10 +250,10 @@ async function collectOne(maker, model, category, clubNumber) {
     };
 
     if (existingConfig && !existingConfig.verified) {
-      const { error } = await supabase.from("club_spec_configurations").update(configFields).eq("id", existingConfig.id);
+      const { error } = await supabase.from("clubs").update(configFields).eq("id", existingConfig.id);
       if (error) console.error(`  WARN  config update: ${error.message}`);
     } else if (!existingConfig) {
-      const { error } = await supabase.from("club_spec_configurations").insert(configFields);
+      const { error } = await supabase.from("clubs").insert(configFields);
       if (error) console.error(`  WARN  config insert: ${error.message}`);
     }
   }

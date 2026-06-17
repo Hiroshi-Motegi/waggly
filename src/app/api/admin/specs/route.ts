@@ -35,12 +35,12 @@ function computeSortOrder(clubNumber: string | null | undefined): number | null 
 /** Fetch a single head row with default config flattened for backward-compat */
 async function fetchHeadFlat(admin: ReturnType<typeof getAdmin>, id: string) {
   const { data } = await admin
-    .from("club_spec_heads")
-    .select("*, series:club_spec_series(*), configurations:club_spec_configurations(length, total_weight, swing_weight, shaft_id)")
+    .from("heads")
+    .select("*, series:club_models(*), configurations:clubs(length, total_weight, swing_weight, shaft_variant_id)")
     .eq("id", id)
     .single();
   if (!data) return null;
-  const defaultCfg = (data.configurations ?? []).find((c: any) => c.shaft_id === null);
+  const defaultCfg = (data.configurations ?? []).find((c: any) => c.shaft_variant_id === null);
   const { configurations, ...rest } = data;
   return {
     ...rest,
@@ -60,8 +60,8 @@ export async function GET(request: NextRequest) {
   const category = url.searchParams.get("category");
 
   let query = admin
-    .from("club_spec_heads")
-    .select("*, series:club_spec_series(*), configurations:club_spec_configurations(length, total_weight, swing_weight, shaft_id)", { count: "exact" });
+    .from("heads")
+    .select("*, series:club_models(*), configurations:clubs(length, total_weight, swing_weight, shaft_variant_id)", { count: "exact" });
 
   if (category) query = query.eq("category", category);
 
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 
   // Flatten default configuration into each row
   const flattened = (data ?? []).map((row: any) => {
-    const defaultCfg = (row.configurations ?? []).find((c: any) => c.shaft_id === null);
+    const defaultCfg = (row.configurations ?? []).find((c: any) => c.shaft_variant_id === null);
     const { configurations, ...rest } = row;
     return {
       ...rest,
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
   const sort_order = computeSortOrder(club_number);
 
   const { data, error } = await admin
-    .from("club_spec_heads")
+    .from("heads")
     .insert({
       maker,
       model,
@@ -137,13 +137,13 @@ export async function PATCH(request: NextRequest) {
   const admin = getAdmin();
   const { id, action, data: updateData } = await request.json();
 
-  const { data: spec } = await admin.from("club_spec_heads").select("*").eq("id", id).single();
+  const { data: spec } = await admin.from("heads").select("*").eq("id", id).single();
   if (!spec) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   if (action === "refresh_image") {
     const result = await searchRakutenClub(spec.maker, spec.model, spec.club_number, spec.category);
     if (result.imageUrl || result.affiliateUrl) {
-      await admin.from("club_spec_heads").update({
+      await admin.from("heads").update({
         image_url: result.imageUrl,
         affiliate_url: result.affiliateUrl,
       }).eq("id", id);
@@ -187,8 +187,8 @@ JSON形式で回答（JSON以外不要）:
     if (!jsonMatch) return NextResponse.json({ error: "Parse failed" }, { status: 500 });
     const specs = JSON.parse(jsonMatch[1] ?? jsonMatch[0]);
 
-    // Head fields go to club_spec_heads
-    await admin.from("club_spec_heads").update({
+    // Head fields go to heads
+    await admin.from("heads").update({
       loft: specs.loft ?? null,
       lie: specs.lie ?? null,
       distance: specs.distance ?? null,
@@ -196,24 +196,24 @@ JSON形式で回答（JSON以外不要）:
       head_weight: specs.head_weight ?? null,
     }).eq("id", id);
 
-    // Configuration fields go to club_spec_configurations (default config: shaft_id IS NULL)
-    // Cannot use .upsert() — partial unique indexes don't work with onConflict for null shaft_id
+    // Configuration fields go to clubs (default config: shaft_variant_id IS NULL)
+    // Cannot use .upsert() — partial unique indexes don't work with onConflict for null shaft_variant_id
     const configFields = {
       length: specs.length ?? null,
       total_weight: specs.weight ?? null,
       swing_weight: specs.swing_weight ?? null,
     };
     const { data: existingConfig } = await admin
-      .from("club_spec_configurations")
+      .from("clubs")
       .select("id")
       .eq("head_id", id)
-      .is("shaft_id", null)
+      .is("shaft_variant_id", null)
       .maybeSingle();
 
     if (existingConfig) {
-      await admin.from("club_spec_configurations").update(configFields).eq("id", existingConfig.id);
+      await admin.from("clubs").update(configFields).eq("id", existingConfig.id);
     } else {
-      await admin.from("club_spec_configurations").insert({ head_id: id, shaft_id: null, ...configFields });
+      await admin.from("clubs").insert({ head_id: id, shaft_variant_id: null, ...configFields });
     }
 
     const updated = await fetchHeadFlat(admin, id);
@@ -228,7 +228,7 @@ JSON形式で回答（JSON以外不要）:
     const updates: Record<string, any> = {};
     if (result.imageUrl) updates.image_url = result.imageUrl;
     if (result.affiliateUrl) updates.affiliate_url = result.affiliateUrl;
-    await admin.from("club_spec_heads").update(updates).eq("id", id);
+    await admin.from("heads").update(updates).eq("id", id);
     const updated = await fetchHeadFlat(admin, id);
     return NextResponse.json(updated);
   }
@@ -263,24 +263,24 @@ JSON形式で回答（JSON以外不要）:
       // Manual edits mark source as manual
       if (!("verified" in headUpdates)) headUpdates.source = "manual";
 
-      await admin.from("club_spec_heads").update(headUpdates).eq("id", id);
+      await admin.from("heads").update(headUpdates).eq("id", id);
     }
 
     // Upsert configuration table for length/total_weight/swing_weight
-    // Cannot use .upsert() — partial unique indexes don't work with onConflict for null shaft_id
+    // Cannot use .upsert() — partial unique indexes don't work with onConflict for null shaft_variant_id
     if (Object.keys(configUpdates).length > 0) {
       configUpdates.source = "manual";
       const { data: existingCfg } = await admin
-        .from("club_spec_configurations")
+        .from("clubs")
         .select("id")
         .eq("head_id", id)
-        .is("shaft_id", null)
+        .is("shaft_variant_id", null)
         .maybeSingle();
 
       if (existingCfg) {
-        await admin.from("club_spec_configurations").update(configUpdates).eq("id", existingCfg.id);
+        await admin.from("clubs").update(configUpdates).eq("id", existingCfg.id);
       } else {
-        await admin.from("club_spec_configurations").insert({ head_id: id, shaft_id: null, ...configUpdates });
+        await admin.from("clubs").insert({ head_id: id, shaft_variant_id: null, ...configUpdates });
       }
     }
 

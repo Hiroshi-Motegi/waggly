@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
 
   // 1. Check cache
   const headQuery = admin
-    .from("club_spec_heads")
-    .select("*, configurations:club_spec_configurations(length, total_weight, swing_weight, shaft_id)")
+    .from("heads")
+    .select("*, configurations:clubs(length, total_weight, swing_weight, shaft_variant_id)")
     .eq("maker_normalized", makerNorm)
     .eq("model_normalized", modelNorm)
     .eq("category", category ?? "");
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     let affiliateUrl = cached.affiliate_url;
     if (cached.series_id && (!imageUrl || !affiliateUrl)) {
       const { data: series } = await admin
-        .from("club_spec_series")
+        .from("club_models")
         .select("image_url, affiliate_url")
         .eq("id", cached.series_id)
         .single();
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         affiliateUrl = affiliateUrl ?? series.affiliate_url;
       }
     }
-    const defaultConfig = (cached.configurations ?? []).find((c: any) => c.shaft_id === null);
+    const defaultConfig = (cached.configurations ?? []).find((c: any) => c.shaft_variant_id === null);
     return NextResponse.json({
       loft: cached.loft,
       lie: cached.lie,
@@ -185,7 +185,7 @@ ${searchContext}
     const specs = JSON.parse(jsonStr);
 
     // 4. Save to cache — head + default configuration (skip if verified=true)
-    const { data: headId, error: headError } = await admin.rpc("upsert_club_spec_head", {
+    const { data: headId, error: headError } = await admin.rpc("upsert_head", {
       p_maker: maker,
       p_model: model,
       p_category: category ?? "",
@@ -202,13 +202,13 @@ ${searchContext}
     });
     if (headError) console.error("[autofill] Head save error:", headError.message);
 
-    // Save configuration (length, weight→total_weight, swing_weight) for shaft_id=null
+    // Save configuration (length, weight→total_weight, swing_weight) for shaft_variant_id=null
     if (headId && (specs.length != null || specs.weight != null || specs.swing_weight != null)) {
       const { data: existingConfig } = await admin
-        .from("club_spec_configurations")
+        .from("clubs")
         .select("id, verified")
         .eq("head_id", headId)
-        .is("shaft_id", null)
+        .is("shaft_variant_id", null)
         .maybeSingle();
 
       const configFields = {
@@ -220,9 +220,9 @@ ${searchContext}
       };
 
       if (existingConfig && !existingConfig.verified) {
-        await admin.from("club_spec_configurations").update(configFields).eq("id", existingConfig.id);
+        await admin.from("clubs").update(configFields).eq("id", existingConfig.id);
       } else if (!existingConfig) {
-        await admin.from("club_spec_configurations").insert(configFields);
+        await admin.from("clubs").insert(configFields);
       }
       // Skip if existingConfig.verified === true (preserve verified data)
     }

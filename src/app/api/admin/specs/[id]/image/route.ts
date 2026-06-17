@@ -34,11 +34,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const { data: { publicUrl } } = admin.storage.from(BUCKET).getPublicUrl(filePath);
 
-  await admin.from("club_spec_heads").update({ own_image_url: publicUrl }).eq("id", id);
+  await admin.from("heads").update({ own_image_url: publicUrl }).eq("id", id);
 
   const { data: updated } = await admin
-    .from("club_spec_heads")
-    .select("*, series:club_spec_series(*)")
+    .from("heads")
+    .select("*, series:club_models(*)")
     .eq("id", id)
     .single();
 
@@ -50,11 +50,11 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   const { id } = await params;
   const admin = getAdmin();
 
-  await admin.from("club_spec_heads").update({ own_image_url: null }).eq("id", id);
+  await admin.from("heads").update({ own_image_url: null }).eq("id", id);
 
   const { data: updated } = await admin
-    .from("club_spec_heads")
-    .select("*, series:club_spec_series(*)")
+    .from("heads")
+    .select("*, series:club_models(*)")
     .eq("id", id)
     .single();
 

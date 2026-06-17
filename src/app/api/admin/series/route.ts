@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
   const category = url.searchParams.get("category");
 
   let query = admin
-    .from("club_spec_series")
-    .select("*, club_spec_heads(id, category, club_number, loft, verified)", { count: "exact" });
+    .from("club_models")
+    .select("*, heads(id, category, club_number, loft, verified)", { count: "exact" });
 
   if (category) query = query.eq("category", category);
 
@@ -35,10 +35,10 @@ export async function GET(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const result = (data ?? []).map((s: any) => {
-    const specs = (s.club_spec_heads ?? []).sort((a: any, b: any) =>
+    const specs = (s.heads ?? []).sort((a: any, b: any) =>
       (a.club_number ?? "").localeCompare(b.club_number ?? "")
     );
-    return { ...s, specs, spec_count: specs.length, club_spec_heads: undefined };
+    return { ...s, specs, spec_count: specs.length, heads: undefined };
   });
   return NextResponse.json({ data: result, total: count ?? 0, page, pageSize });
 }
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { data, error } = await admin
-    .from("club_spec_series")
+    .from("club_models")
     .insert({ maker, model, ...(category ? { category } : {}) })
     .select()
     .single();
@@ -76,7 +76,7 @@ export async function PATCH(request: NextRequest) {
   const admin = getAdmin();
   const { id, action, data: updateData } = await request.json();
 
-  const { data: series } = await admin.from("club_spec_series").select("*").eq("id", id).single();
+  const { data: series } = await admin.from("club_models").select("*").eq("id", id).single();
   if (!series) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   if (action === "lookup_rakuten" && updateData?.url) {
@@ -87,8 +87,8 @@ export async function PATCH(request: NextRequest) {
     const updates: Record<string, any> = {};
     if (result.imageUrl) updates.image_url = result.imageUrl;
     if (result.affiliateUrl) updates.affiliate_url = result.affiliateUrl;
-    await admin.from("club_spec_series").update(updates).eq("id", id);
-    const { data: updated } = await admin.from("club_spec_series").select("*").eq("id", id).single();
+    await admin.from("club_models").update(updates).eq("id", id);
+    const { data: updated } = await admin.from("club_models").select("*").eq("id", id).single();
     return NextResponse.json(updated);
   }
 
@@ -101,9 +101,9 @@ export async function PATCH(request: NextRequest) {
     if (Object.keys(fields).length === 0) {
       return NextResponse.json({ error: "No valid fields" }, { status: 400 });
     }
-    await admin.from("club_spec_series").update(fields).eq("id", id);
+    await admin.from("club_models").update(fields).eq("id", id);
 
-    // When maker or model changes, cascade to all linked club_spec_heads
+    // When maker or model changes, cascade to all linked heads
     if ("maker" in fields || "model" in fields) {
       const headUpdates: Record<string, any> = {};
       if ("maker" in fields) {
@@ -114,23 +114,23 @@ export async function PATCH(request: NextRequest) {
         headUpdates.model = fields.model;
         headUpdates.model_normalized = normalizeClubName(fields.model);
       }
-      await admin.from("club_spec_heads").update(headUpdates).eq("series_id", id);
+      await admin.from("heads").update(headUpdates).eq("series_id", id);
     }
 
-    const { data: updated } = await admin.from("club_spec_series").select("*").eq("id", id).single();
+    const { data: updated } = await admin.from("club_models").select("*").eq("id", id).single();
     return NextResponse.json(updated);
   }
 
   // シリーズにspecを紐づけ
   if (action === "assign_specs") {
-    // maker+model が一致する club_spec_heads を全て紐づけ
+    // maker+model が一致する heads を全て紐づけ
     const { count } = await admin
-      .from("club_spec_heads")
+      .from("heads")
       .update({ series_id: id })
       .eq("maker", series.maker)
       .eq("model", series.model);
 
-    const { data: updated } = await admin.from("club_spec_series").select("*").eq("id", id).single();
+    const { data: updated } = await admin.from("club_models").select("*").eq("id", id).single();
     return NextResponse.json({ ...updated, assigned: count });
   }
 
@@ -141,6 +141,6 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const admin = getAdmin();
   const { id } = await request.json();
-  await admin.from("club_spec_series").delete().eq("id", id);
+  await admin.from("club_models").delete().eq("id", id);
   return NextResponse.json({ ok: true });
 }
