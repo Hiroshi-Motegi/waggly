@@ -138,13 +138,24 @@ JSON形式で回答（JSON以外不要）:
     }).eq("id", id);
 
     // Configuration fields go to club_spec_configurations (default config: shaft_id IS NULL)
-    await admin.from("club_spec_configurations").upsert({
-      head_id: id,
-      shaft_id: null,
+    // Cannot use .upsert() — partial unique indexes don't work with onConflict for null shaft_id
+    const configFields = {
       length: specs.length ?? null,
       total_weight: specs.weight ?? null,
       swing_weight: specs.swing_weight ?? null,
-    }, { onConflict: "head_id,shaft_id" });
+    };
+    const { data: existingConfig } = await admin
+      .from("club_spec_configurations")
+      .select("id")
+      .eq("head_id", id)
+      .is("shaft_id", null)
+      .maybeSingle();
+
+    if (existingConfig) {
+      await admin.from("club_spec_configurations").update(configFields).eq("id", existingConfig.id);
+    } else {
+      await admin.from("club_spec_configurations").insert({ head_id: id, shaft_id: null, ...configFields });
+    }
 
     const updated = await fetchHeadFlat(admin, id);
     return NextResponse.json(updated);
@@ -197,12 +208,21 @@ JSON形式で回答（JSON以外不要）:
     }
 
     // Upsert configuration table for length/total_weight/swing_weight
+    // Cannot use .upsert() — partial unique indexes don't work with onConflict for null shaft_id
     if (Object.keys(configUpdates).length > 0) {
-      await admin.from("club_spec_configurations").upsert({
-        head_id: id,
-        shaft_id: null,
-        ...configUpdates,
-      }, { onConflict: "head_id,shaft_id" });
+      configUpdates.source = "manual";
+      const { data: existingCfg } = await admin
+        .from("club_spec_configurations")
+        .select("id")
+        .eq("head_id", id)
+        .is("shaft_id", null)
+        .maybeSingle();
+
+      if (existingCfg) {
+        await admin.from("club_spec_configurations").update(configUpdates).eq("id", existingCfg.id);
+      } else {
+        await admin.from("club_spec_configurations").insert({ head_id: id, shaft_id: null, ...configUpdates });
+      }
     }
 
     const updated = await fetchHeadFlat(admin, id);
