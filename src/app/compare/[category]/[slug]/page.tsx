@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCompareModels } from "@/lib/catalog";
@@ -42,6 +43,29 @@ export async function generateMetadata({
   };
 }
 
+function ModelCard({ model, label }: { model: any; label: string }) {
+  const { catalog_series: s } = model;
+  return (
+    <Link
+      href={`/catalog/${s.maker_slug}/${s.name_slug}/${model.slug}`}
+      className="flex items-center gap-2.5 rounded-md bg-white p-2 w-full"
+    >
+      <div className="flex flex-1 flex-col gap-px min-w-0">
+        <p className="text-sm text-[#6b6b6b] font-bold leading-snug">{s.maker}</p>
+        <p className="text-base font-bold text-[#006728] leading-snug truncate">
+          {s.name} {model.name}
+        </p>
+        <p className="text-xs text-[#7c7c7c] font-medium">
+          {model.release_year ? `${model.release_year}年発売` : ""}
+          {model.release_year && model.price != null ? " | " : ""}
+          {model.price != null ? `¥${model.price.toLocaleString("ja-JP")}〜` : ""}
+        </p>
+      </div>
+      <Image src="/icons/chevron-right.svg" alt="" width={9} height={14} className="shrink-0 opacity-40" />
+    </Link>
+  );
+}
+
 export default async function CompareVsPage({
   params,
 }: {
@@ -49,69 +73,66 @@ export default async function CompareVsPage({
 }) {
   const { category, slug } = await params;
 
-  // Parse "slugA-vs-slugB"
   const vsIndex = slug.indexOf("-vs-");
-  if (vsIndex === -1) {
-    notFound();
-  }
+  if (vsIndex === -1) notFound();
   const slugA = slug.slice(0, vsIndex);
   const slugB = slug.slice(vsIndex + 4);
 
   const { modelA, modelB } = await getCompareModels(category, slugA, slugB);
-
-  if (!modelA || !modelB) {
-    notFound();
-  }
+  if (!modelA || !modelB) notFound();
 
   const label = CATEGORY_LABELS[category] ?? category;
   const nameA = `${modelA.catalog_series.maker} ${modelA.catalog_series.name}${modelA.name ? ` ${modelA.name}` : ""}`;
   const nameB = `${modelB.catalog_series.maker} ${modelB.catalog_series.name}${modelB.name ? ` ${modelB.name}` : ""}`;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-xs text-[#888] mb-4 flex flex-wrap gap-1">
-          <Link href={`/compare/${category}`} className="hover:text-[#006728]">{label}比較</Link>
-          <span>/</span>
-          <span className="truncate">{nameA} vs {nameB}</span>
-        </nav>
-
-        {/* Title */}
-        <h1 className="text-xl font-bold text-[#222] mb-1 leading-tight">
-          {nameA}
-          <span className="mx-2 text-[#006728] font-black">VS</span>
-          {nameB}
-        </h1>
-        <p className="text-sm text-[#666] mb-6">{label} スペック比較</p>
-
-        {/* Model info cards */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {[modelA, modelB].map((model, idx) => (
-            <div key={idx} className="rounded-xl border border-[#e0e0e0] bg-white p-4">
-              <p className="text-xs text-[#888] mb-0.5">{model.catalog_series.maker}</p>
-              <p className="font-bold text-sm text-[#222] leading-tight">
-                {model.catalog_series.name}
-                {model.name ? ` ${model.name}` : ""}
-              </p>
-              {model.release_year && (
-                <p className="text-xs text-[#aaa] mt-1">{model.release_year}年発売</p>
-              )}
-              {model.price !== null && (
-                <p className="text-xs text-[#555] mt-1">¥{model.price.toLocaleString("ja-JP")}〜</p>
-              )}
-              <Link
-                href={`/catalog/${model.catalog_series.maker_slug}/${model.catalog_series.name_slug}/${model.slug}`}
-                className="mt-2 inline-block text-xs text-[#006728] hover:underline"
-              >
-                詳細を見る →
-              </Link>
-            </div>
-          ))}
+    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <div className="flex flex-col items-center w-full">
+        {/* Header */}
+        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+          <p className="text-sm font-bold text-white">{label} スペック比較</p>
         </div>
 
+        {/* Breadcrumb */}
+        <div className="flex items-center px-3 py-1 w-full max-w-screen-sm bg-black/20 border-b border-white/30 overflow-hidden">
+          <p className="text-xs text-white truncate">
+            <Link href={`/compare/${category}`} className="underline">{label}比較</Link>
+            <span className="font-normal"> / {nameA} vs {nameB}</span>
+          </p>
+        </div>
+
+        {/* Title bar */}
+        <div className="flex items-center gap-2 px-5 py-3 w-full max-w-screen-sm bg-black/20">
+          <p className="flex-1 text-[15px] font-extrabold text-white">{label}比較</p>
+          <Link
+            href={`/compare/${category}`}
+            className="shrink-0 rounded-full border border-white bg-[#17552f] px-4 py-2.5 text-xs font-bold text-white"
+          >
+            その他の比較を見る
+          </Link>
+        </div>
+
+        {/* Model cards + VS */}
+        <div className="flex flex-col items-center gap-1.5 px-5 pb-5 w-full max-w-screen-sm bg-black/20">
+          <ModelCard model={modelA} label={label} />
+          <p className="text-lg font-bold text-white">VS</p>
+          <ModelCard model={modelB} label={label} />
+        </div>
+
+        {/* App promo banner (image) */}
+        <Link href="/" target="_blank" className="block w-full max-w-screen-sm border-y-2 border-white">
+          <Image
+            src="/banner/vs_banner.png"
+            alt="自分のクラブセットを管理 ゴルファー名刺にしませんか？"
+            width={480}
+            height={84}
+            className="w-full h-auto"
+          />
+        </Link>
+
         {/* Compare table */}
-        <div className="rounded-xl border border-[#e0e0e0] overflow-hidden">
+        <div className="w-full max-w-screen-sm">
           <CompareTable modelA={modelA} modelB={modelB} />
         </div>
       </div>
