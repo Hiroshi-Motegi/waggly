@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { searchRakutenClub } from "@/lib/rakuten-search";
+import { searchRakutenClub, lookupRakutenUrl } from "@/lib/rakuten-search";
+import { normalizeClubName } from "@/lib/normalize";
 
 function getAdmin() {
   return createClient(
@@ -9,30 +10,43 @@ function getAdmin() {
   );
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const admin = getAdmin();
-  const { data, error } = await admin
+  const url = new URL(request.url);
+  const page = parseInt(url.searchParams.get("page") ?? "1", 10);
+  const pageSize = parseInt(url.searchParams.get("pageSize") ?? "20", 10);
+  const sort = url.searchParams.get("sort") ?? "maker";
+  const order = url.searchParams.get("order") === "desc" ? false : true;
+  const category = url.searchParams.get("category");
+
+  let query = admin
     .from("club_specs")
-    .select("*")
-    .order("maker")
-    .order("model")
-    .order("category")
-    .order("club_number");
+    .select("*, series:club_spec_series(*)", { count: "exact" });
+
+  if (category) query = query.eq("category", category);
+
+  query = query
+    .order(sort, { ascending: order })
+    .order("model", { ascending: true })
+    .order("club_number", { ascending: true })
+    .range((page - 1) * pageSize, page * pageSize - 1);
+
+  const { data, error, count } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json({ data: data ?? [], total: count ?? 0, page, pageSize });
 }
 
 /**
  * PATCH /api/admin/specs
- * body: { id, action: "refresh_image" | "refresh_spec" }
+ * body: { id, action: "refresh_image" | "refresh_spec" | "update", data?: Record<string,any> }
  */
 export async function PATCH(request: NextRequest) {
   const admin = getAdmin();
-  const { id, action } = await request.json();
+  const { id, action, data: updateData } = await request.json();
 
   const { data: spec } = await admin.from("club_specs").select("*").eq("id", id).single();
   if (!spec) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -45,7 +59,7 @@ export async function PATCH(request: NextRequest) {
         affiliate_url: result.affiliateUrl,
       }).eq("id", id);
     }
-    const { data: updated } = await admin.from("club_specs").select("*").eq("id", id).single();
+    const { data: updated } = await admin.from("club_specs").select("*, series:club_spec_series(*)").eq("id", id).single();
     return NextResponse.json(updated);
   }
 
@@ -95,7 +109,44 @@ JSON形式で回答（JSON以外不要）:
       head_weight: specs.head_weight ?? null,
     }).eq("id", id);
 
-    const { data: updated } = await admin.from("club_specs").select("*").eq("id", id).single();
+    const { data: updated } = await admin.from("club_specs").select("*, series:club_spec_series(*)").eq("id", id).single();
+    return NextResponse.json(updated);
+  }
+
+  if (action === "lookup_rakuten" && updateData?.url) {
+    const result = await lookupRakutenUrl(updateData.url);
+    if (!result.imageUrl && !result.affiliateUrl) {
+      return NextResponse.json({ error: "商品が見つかりませんでした" }, { status: 404 });
+    }
+    const updates: Record<string, any> = {};
+    if (result.imageUrl) updates.image_url = result.imageUrl;
+    if (result.affiliateUrl) updates.affiliate_url = result.affiliateUrl;
+    await admin.from("club_specs").update(updates).eq("id", id);
+    const { data: updated } = await admin.from("club_specs").select("*, series:club_spec_series(*)").eq("id", id).single();
+    return NextResponse.json(updated);
+  }
+
+  if (action === "update" && updateData) {
+    const ALLOWED = [
+      "maker", "model", "category", "club_number",
+      "loft", "lie", "length", "distance", "weight", "swing_weight",
+      "head_volume", "head_weight", "image_url", "affiliate_url", "verified", "series_id",
+    ];
+    const fields: Record<string, any> = {};
+    for (const key of ALLOWED) {
+      if (key in updateData) fields[key] = updateData[key];
+    }
+    if (Object.keys(fields).length === 0) {
+      return NextResponse.json({ error: "No valid fields" }, { status: 400 });
+    }
+    // Re-normalize if identity fields changed
+    if ("maker" in fields) fields.maker_normalized = normalizeClubName(fields.maker);
+    if ("model" in fields) fields.model_normalized = normalizeClubName(fields.model);
+    // Manual edits mark source as manual
+    if (!("verified" in fields)) fields.source = "manual";
+
+    await admin.from("club_specs").update(fields).eq("id", id);
+    const { data: updated } = await admin.from("club_specs").select("*, series:club_spec_series(*)").eq("id", id).single();
     return NextResponse.json(updated);
   }
 
