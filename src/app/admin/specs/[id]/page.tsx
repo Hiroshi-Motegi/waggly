@@ -330,7 +330,7 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
       {/* Breadcrumb */}
       <AdminBreadcrumb
         items={[
-          { label: "クラブスペック", href: "/admin/specs" },
+          { label: "クラブ", href: "/admin/specs" },
           { label: categoryLabel },
           { label: titleText },
         ]}
