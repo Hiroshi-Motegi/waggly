@@ -55,6 +55,20 @@ export async function POST(request: NextRequest) {
   const { data: cached } = await query.maybeSingle();
 
   if (cached) {
+    // series画像フォールバック: series → spec → null
+    let imageUrl = cached.image_url;
+    let affiliateUrl = cached.affiliate_url;
+    if (cached.series_id && (!imageUrl || !affiliateUrl)) {
+      const { data: series } = await admin
+        .from("club_spec_series")
+        .select("image_url, affiliate_url")
+        .eq("id", cached.series_id)
+        .single();
+      if (series) {
+        imageUrl = imageUrl ?? series.image_url;
+        affiliateUrl = affiliateUrl ?? series.affiliate_url;
+      }
+    }
     return NextResponse.json({
       loft: cached.loft,
       lie: cached.lie,
@@ -64,8 +78,8 @@ export async function POST(request: NextRequest) {
       swing_weight: cached.swing_weight,
       head_volume: cached.head_volume,
       head_weight: cached.head_weight,
-      image_url: cached.image_url,
-      affiliate_url: cached.affiliate_url,
+      image_url: imageUrl,
+      affiliate_url: affiliateUrl,
     });
   }
 

@@ -17,6 +17,7 @@ interface AdminTableProps<T> {
   sorting: SortingState;
   onSortingChange: (sorting: SortingState) => void;
   onPageChange: (page: number) => void;
+  onRowClick?: (row: T) => void;
 }
 
 export function AdminTable<T>({
@@ -28,6 +29,7 @@ export function AdminTable<T>({
   sorting,
   onSortingChange,
   onPageChange,
+  onRowClick,
 }: AdminTableProps<T>) {
   const table = useReactTable({
     data,
@@ -73,7 +75,9 @@ export function AdminTable<T>({
               </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b border-[#f0f0f0] hover:bg-[#fafafa]">
+                <tr key={row.id}
+                  onClick={() => onRowClick?.(row.original)}
+                  className={`border-b border-[#f0f0f0] hover:bg-[#fafafa] ${onRowClick ? "cursor-pointer" : ""}`}>
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-3 py-2">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

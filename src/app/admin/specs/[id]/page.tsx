@@ -1,11 +1,13 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
-import { Lock, Unlock, ExternalLink, Search, Link2 } from "lucide-react";
+import { use, useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { Lock, Unlock, ExternalLink, Search } from "lucide-react";
 import { AdminBreadcrumb } from "@/components/admin/admin-breadcrumb";
 import { AdminFormSection } from "@/components/admin/admin-form-section";
 import { useAdminOne, useAdminList } from "@/hooks/admin/use-admin-list";
 import { useSpecActions } from "@/hooks/admin/use-spec-actions";
+import { apiFetch } from "@/lib/api-client";
 
 /* ── Types ── */
 
@@ -24,17 +26,105 @@ interface ClubSpec {
   head_volume: number | null;
   head_weight: number | null;
   image_url: string | null;
+  own_image_url: string | null;
   affiliate_url: string | null;
   source: string;
   verified: boolean;
   series_id: string | null;
-  series: { id: string; maker: string; model: string; image_url: string | null; affiliate_url: string | null } | null;
+  series: { id: string; maker: string; model: string; image_url: string | null; own_image_url: string | null; affiliate_url: string | null } | null;
 }
 
 interface SeriesItem {
   id: string;
   maker: string;
   model: string;
+}
+
+/* ── Series Combobox ── */
+
+function SeriesCombobox({
+  seriesList,
+  value,
+  onChange,
+  hasSelection,
+}: {
+  seriesList: SeriesItem[];
+  value: string;
+  onChange: (v: string) => void;
+  hasSelection: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selected = seriesList.find((s) => s.id === value);
+  const filtered = search
+    ? seriesList.filter((s) =>
+        `${s.maker} ${s.model}`.toLowerCase().includes(search.toLowerCase())
+      )
+    : seriesList;
+
+  // Close on outside click
+  useEffect(() => {
+    function handle(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [open]);
+
+  return (
+    <div className="flex flex-col gap-0.5 pt-2" ref={ref}>
+      <label className="text-[10px] text-[#8b8b8b]">シリーズ</label>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => { setOpen(!open); setSearch(""); }}
+          className={`w-full text-left rounded border bg-white px-2 py-1.5 text-sm text-black outline-none ${
+            hasSelection ? "border-amber-400" : "border-[#dfdfdf]"
+          }`}
+        >
+          {selected ? `${selected.maker} ${selected.model}` : "なし（単体）"}
+        </button>
+        {open && (
+          <div className="absolute z-50 mt-1 w-full rounded-lg border border-[#dfdfdf] bg-white shadow-lg">
+            <div className="p-1.5">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="検索..."
+                autoFocus
+                className="w-full rounded border border-[#dfdfdf] px-2 py-1 text-sm outline-none focus:border-[#006728]"
+              />
+            </div>
+            <div className="max-h-48 overflow-y-auto">
+              <button
+                type="button"
+                onClick={() => { onChange(""); setOpen(false); }}
+                className={`w-full text-left px-3 py-1.5 text-sm hover:bg-[#f5f5f5] ${!value ? "font-bold text-[#006728]" : ""}`}
+              >
+                なし（単体）
+              </button>
+              {filtered.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => { onChange(s.id); setOpen(false); }}
+                  className={`w-full text-left px-3 py-1.5 text-sm hover:bg-[#f5f5f5] ${value === s.id ? "font-bold text-[#006728]" : ""}`}
+                >
+                  {s.maker} {s.model}
+                </button>
+              ))}
+              {filtered.length === 0 && (
+                <p className="px-3 py-2 text-xs text-[#8b8b8b]">該当なし</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /* ── Constants ── */
@@ -130,6 +220,8 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
   const [saving, setSaving] = useState(false);
   const [rakutenUrl, setRakutenUrl] = useState("");
   const [lookingUp, setLookingUp] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync form from spec data
   useEffect(() => {
@@ -197,13 +289,35 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
     await mutate();
   }
 
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await apiFetch(`/api/admin/specs/${id}/image`, { method: "POST", body: fd });
+      if (res.ok) await mutate();
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function handleImageDelete() {
+    if (!confirm("自前画像を削除しますか？")) return;
+    await apiFetch(`/api/admin/specs/${id}/image`, { method: "DELETE" });
+    await mutate();
+  }
+
   /* ── Loading ── */
 
   if (isLoading || !spec) return <div className="p-6 text-[#8b8b8b]">読み込み中...</div>;
 
   /* ── Derived values ── */
 
-  const imageSrc = spec.series?.image_url ?? spec.image_url ?? noImage[spec.category] ?? "/no-images/etc.png";
+  const imageSrc = spec.own_image_url ?? spec.series?.own_image_url ?? spec.series?.image_url ?? spec.image_url ?? noImage[spec.category] ?? "/no-images/etc.png";
+  const hasOwnImage = !!spec.own_image_url;
   const categoryLabel = CATEGORY_LABELS[spec.category] ?? spec.category;
   const titleText = `${spec.maker} ${spec.model} ${spec.club_number ?? ""}`.trim();
   const seriesList: SeriesItem[] = seriesData?.data ?? [];
@@ -235,18 +349,9 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
       </div>
 
       {/* 2-column layout */}
-      <div className="flex gap-4">
+      <div className="flex gap-6">
         {/* ── Left column ── */}
-        <div className="w-40 shrink-0 space-y-3">
-          {/* Product image */}
-          <div className="rounded-lg bg-[#f5f5f5] p-2">
-            <img
-              src={imageSrc}
-              alt={titleText}
-              className="w-full aspect-square object-contain"
-            />
-          </div>
-
+        <div className="w-80 shrink-0 space-y-3">
           {/* Lock/Unlock button */}
           <button
             onClick={handleToggleVerified}
@@ -260,21 +365,62 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
             {spec.verified ? "Locked" : "Unlocked"}
           </button>
 
-          {/* Source badge */}
-          <div className="text-center">
-            <span className="inline-block rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#8b8b8b]">
-              {spec.source}
-            </span>
+          {/* Product image */}
+          <div className="rounded-lg bg-[#f5f5f5] p-3">
+            <img
+              src={imageSrc}
+              alt={titleText}
+              className="w-full aspect-square object-contain"
+              onError={(e) => { (e.target as HTMLImageElement).src = noImage[spec.category] ?? "/no-images/etc.png"; }}
+            />
+          </div>
+          {/* Image upload */}
+          <div className="flex items-center gap-2">
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp"
+              onChange={handleImageUpload} className="hidden" />
+            <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+              className="flex-1 rounded border border-[#dfdfdf] bg-white px-2 py-1 text-[11px] font-bold text-[#333] hover:bg-[#f5f5f5] disabled:opacity-40">
+              {uploading ? "アップロード中..." : "画像をアップロード"}
+            </button>
+            {hasOwnImage && (
+              <button onClick={handleImageDelete}
+                className="rounded border border-red-200 bg-white px-2 py-1 text-[11px] font-bold text-red-500 hover:bg-red-50">
+                削除
+              </button>
+            )}
           </div>
 
-          {/* Series badge */}
-          {spec.series && (
-            <div className="text-center">
+          {/* Links: 楽天で見る / Google / 楽天検索 */}
+          <div className="flex flex-wrap items-center gap-3">
+            {affiliateUrl && (
+              <a href={affiliateUrl} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs font-bold text-white bg-[#bf0000] rounded-full px-3 py-1">
+                楽天で見る <ExternalLink size={10} />
+              </a>
+            )}
+            <a href={`https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-blue-600 hover:underline">
+              <Search size={12} />Google <ExternalLink size={10} />
+            </a>
+            <a href={`https://search.rakuten.co.jp/search/mall/${encodeURIComponent(`${form.maker} ${form.model} ${form.club_number}`.trim())}/`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-[#bf0000] hover:underline">
+              <Search size={12} />楽天 <ExternalLink size={10} />
+            </a>
+          </div>
+
+          {/* Source badge */}
+          <div className="flex items-center gap-2">
+            <span className="inline-block rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#8b8b8b]">
+              source: {spec.source}
+            </span>
+            {spec.series && (
               <span className="inline-block rounded-full border border-amber-400 bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">
                 {spec.series.maker} {spec.series.model}
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* ── Right column ── */}
@@ -326,48 +472,14 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
               </div>
             </div>
 
-            {/* Series selector */}
-            <div className="flex flex-col gap-0.5 pt-2">
-              <label className="text-[10px] text-[#8b8b8b]">シリーズ</label>
-              <select
-                value={form.series_id}
-                onChange={(e) => updateField("series_id", e.target.value)}
-                className={`rounded border bg-white px-2 py-1.5 text-sm text-black outline-none focus:border-[#006728] ${
-                  hasSeriesSelected ? "border-amber-400" : "border-[#dfdfdf]"
-                }`}
-              >
-                <option value="">なし（単体）</option>
-                {seriesList.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.maker} {s.model}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Series selector with search */}
+            <SeriesCombobox
+              seriesList={seriesList}
+              value={form.series_id}
+              onChange={(v) => updateField("series_id", v)}
+              hasSelection={hasSeriesSelected}
+            />
 
-            {/* Search links */}
-            <div className="flex items-center gap-3 pt-1">
-              <a
-                href={`https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
-              >
-                <Search size={12} />
-                Googleで検索
-                <ExternalLink size={10} />
-              </a>
-              <a
-                href={`https://search.rakuten.co.jp/search/mall/${encodeURIComponent(`${form.maker} ${form.model}`.trim())}/`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-[#bf0000] hover:underline"
-              >
-                <Search size={12} />
-                楽天で検索
-                <ExternalLink size={10} />
-              </a>
-            </div>
           </AdminFormSection>
 
           {/* スペック */}
@@ -456,8 +568,18 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
             </div>
           </AdminFormSection>
 
-          {/* 画像・リンク — only when no series selected */}
-          {!hasSeriesSelected && (
+          {/* 画像・リンク */}
+          {hasSeriesSelected ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm text-amber-800">
+                画像・リンクはシリーズ「{spec.series?.maker} {spec.series?.model}」で管理されています。
+              </p>
+              <Link href={`/admin/series/${form.series_id}`}
+                className="mt-1 inline-block text-xs font-bold text-amber-700 hover:underline">
+                シリーズ編集ページへ →
+              </Link>
+            </div>
+          ) : (
             <AdminFormSection title="画像・リンク">
               {/* Rakuten lookup */}
               <div className="flex flex-col gap-0.5">
@@ -505,14 +627,12 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
 
           {/* Bottom action bar */}
           <div className="flex items-center gap-2">
-            {/* Left actions */}
             <button
               onClick={handleRefreshSpec}
               className="rounded border border-[#dfdfdf] bg-white px-3 py-1.5 text-xs font-bold text-[#333] hover:bg-[#f5f5f5]"
             >
               AI再取得
             </button>
-
             {!hasSeriesSelected && (
               <button
                 onClick={handleRefreshImage}
@@ -521,43 +641,6 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
                 画像再取得
               </button>
             )}
-
-            {affiliateUrl && (
-              <a
-                href={affiliateUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-[#bf0000] hover:underline"
-              >
-                <Link2 size={12} />
-                楽天で見る
-                <ExternalLink size={10} />
-              </a>
-            )}
-
-            <a
-              href={`https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
-            >
-              <Search size={12} />
-              Google
-              <ExternalLink size={10} />
-            </a>
-
-            <a
-              href={`https://search.rakuten.co.jp/search/mall/${encodeURIComponent(`${form.maker} ${form.model}`.trim())}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs text-[#bf0000] hover:underline"
-            >
-              <Search size={12} />
-              楽天
-              <ExternalLink size={10} />
-            </a>
-
-            {/* Right — save button */}
             <div className="flex-1" />
             <button
               onClick={handleSave}

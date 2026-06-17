@@ -13,7 +13,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const admin = getAdmin();
   const { data, error } = await admin
     .from("club_spec_series")
-    .select("*, club_specs(id, category, club_number, loft, verified)")
+    .select("*, club_specs(id, category, club_number, loft, lie, length, weight, swing_weight, verified)")
     .eq("id", id)
     .single();
 

@@ -21,7 +21,17 @@ interface Series {
   verified: boolean;
   source: string;
   spec_count: number;
-  specs: { id: string; category: string; club_number: string | null; loft: number | null; verified: boolean }[];
+  specs: {
+    id: string;
+    category: string;
+    club_number: string | null;
+    loft: number | null;
+    lie: number | null;
+    length: number | null;
+    weight: number | null;
+    swing_weight: string | null;
+    verified: boolean;
+  }[];
 }
 
 /* ── Constants ── */
@@ -270,25 +280,50 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
           </AdminFormSection>
 
           {/* 紐づきスペック */}
-          <AdminFormSection title="紐づきスペック">
-            <p className="text-[10px] text-[#8b8b8b]">{series.spec_count}件</p>
+          <AdminFormSection title={`紐づきスペック (${series.spec_count}件)`}>
             {series.specs.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
-                {series.specs.map((sp) => (
-                  <Link
-                    key={sp.id}
-                    href={`/admin/specs/${sp.id}`}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold transition-opacity hover:opacity-75 ${
-                      sp.verified
-                        ? "bg-[#006728] text-white"
-                        : "bg-[#f5f5f5] text-[#333] border border-[#dfdfdf]"
-                    }`}
-                  >
-                    {CATEGORY_LABELS[sp.category] ?? sp.category}
-                    {sp.club_number ? ` ${sp.club_number}` : ""}
-                    {sp.loft != null ? ` (${sp.loft}°)` : ""}
-                  </Link>
-                ))}
+              <div className="overflow-hidden rounded-lg border border-[#e5e5e5]">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-[#e5e5e5] bg-[#fafafa]">
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">番手</th>
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">ロフト</th>
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">ライ角</th>
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">長さ</th>
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">重量</th>
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">バランス</th>
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">状態</th>
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {series.specs.map((sp) => (
+                      <tr key={sp.id} className="border-b border-[#f0f0f0] hover:bg-[#fafafa]">
+                        <td className="px-3 py-2 font-medium">
+                          {CATEGORY_LABELS[sp.category] ?? sp.category}
+                          {sp.club_number ? ` ${sp.club_number}` : ""}
+                        </td>
+                        <td className="px-3 py-2">{sp.loft != null ? `${sp.loft}°` : "-"}</td>
+                        <td className="px-3 py-2">{sp.lie != null ? `${sp.lie}°` : "-"}</td>
+                        <td className="px-3 py-2">{sp.length != null ? `${sp.length}"` : "-"}</td>
+                        <td className="px-3 py-2">{sp.weight != null ? `${sp.weight}g` : "-"}</td>
+                        <td className="px-3 py-2">{sp.swing_weight ?? "-"}</td>
+                        <td className="px-3 py-2">
+                          {sp.verified ? (
+                            <span className="rounded-full bg-[#006728] px-2 py-0.5 text-[10px] font-bold text-white">確認済</span>
+                          ) : (
+                            <span className="text-[10px] text-[#8b8b8b]">未確認</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2">
+                          <Link href={`/admin/specs/${sp.id}`} className="text-xs font-bold text-[#006728] hover:underline">
+                            編集
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : (
               <p className="text-[11px] text-[#8b8b8b]">紐づいたスペックがありません</p>

@@ -67,3 +67,67 @@ export async function searchRakutenClub(maker: string, model: string, clubNumber
     return { imageUrl: null, affiliateUrl: null };
   }
 }
+
+/**
+ * Parse a Rakuten product URL and look up the item via API.
+ * Accepts: https://item.rakuten.co.jp/{shopCode}/{itemCode}/
+ * Returns image URL + affiliate URL for the specific product.
+ */
+export async function lookupRakutenUrl(url: string): Promise<{
+  imageUrl: string | null;
+  affiliateUrl: string | null;
+}> {
+  const appId = process.env.RAKUTEN_APP_ID;
+  const accessKey = process.env.RAKUTEN_ACCESS_KEY;
+  const affiliateId = process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID;
+  if (!appId || !accessKey) return { imageUrl: null, affiliateUrl: null };
+
+  // Parse shopCode and itemCode from URL
+  // https://item.rakuten.co.jp/{shopCode}/{itemCode}/
+  const m = url.match(/item\.rakuten\.co\.jp\/([^/]+)\/([^/?#]+)/);
+  if (!m) return { imageUrl: null, affiliateUrl: null };
+  const [, shopCode, itemCode] = m;
+
+  try {
+    const params = new URLSearchParams({
+      format: "json",
+      formatVersion: "2",
+      applicationId: appId,
+      accessKey,
+      shopCode,
+      keyword: itemCode,
+      hits: "5",
+      imageFlag: "1",
+      ...(affiliateId ? { affiliateId } : {}),
+    });
+
+    const res = await fetch(`${RAKUTEN_API}?${params}`, {
+      headers: {
+        Referer: "https://waggly.jp/",
+        Origin: "https://waggly.jp",
+        "User-Agent": "Mozilla/5.0 (compatible; Waggly/1.0)",
+      },
+    });
+    if (!res.ok) return { imageUrl: null, affiliateUrl: null };
+    const data = await res.json();
+
+    // Find exact item by code, or fall back to first result
+    const items = data.Items ?? [];
+    const exact = items.find((i: any) => i.itemCode === `${shopCode}:${itemCode}`);
+    const item = exact ?? items[0];
+    if (!item) return { imageUrl: null, affiliateUrl: null };
+
+    // Build affiliate URL pointing to the product page
+    const productUrl = item.itemUrl ?? `https://item.rakuten.co.jp/${shopCode}/${itemCode}/`;
+    const affiliateUrl = affiliateId
+      ? `https://hb.afl.rakuten.co.jp/hgc/${affiliateId}/?pc=${encodeURIComponent(productUrl)}`
+      : productUrl;
+
+    return {
+      imageUrl: item.mediumImageUrls?.[0] ?? null,
+      affiliateUrl,
+    };
+  } catch {
+    return { imageUrl: null, affiliateUrl: null };
+  }
+}
