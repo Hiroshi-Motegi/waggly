@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { apiFetch } from "@/lib/api-client";
+import { AdminBreadcrumb } from "@/components/admin/admin-breadcrumb";
 
 const categories = [
   { value: "swing_basics", label: "スイング基礎" },
@@ -118,6 +119,10 @@ export default function KnowledgeEditPage({ overrideId }: { overrideId?: string 
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-4">
+      <AdminBreadcrumb items={[
+        { label: "ナレッジ", href: "/admin/knowledge" },
+        { label: isNew ? "新規作成" : (form.title || "編集") },
+      ]} />
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" onClick={() => router.push("/admin/knowledge")}>
           ← 戻る

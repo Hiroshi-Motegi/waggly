@@ -1,14 +1,19 @@
 "use client";
-import { Loading } from "@/components/loading";
 
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
-import { nativeHref } from "@/lib/native-routes";
+import useSWR from "swr";
+import { type ColumnDef, type SortingState } from "@tanstack/react-table";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { AdminTable } from "@/components/admin/admin-table";
+import { AdminBreadcrumb } from "@/components/admin/admin-breadcrumb";
 import { apiFetch } from "@/lib/api-client";
+import { nativeHref } from "@/lib/native-routes";
+
+/* ── Types ── */
 
 interface KnowledgeItem {
   id: string;
@@ -35,6 +40,8 @@ interface AutoRun {
   error_message: string | null;
 }
 
+/* ── Constants ── */
+
 const categories = [
   { value: "swing_basics", label: "スイング基礎" },
   { value: "pga_data", label: "PGAデータ" },
@@ -54,78 +61,231 @@ const statusFilters = [
   { value: "rejected", label: "却下" },
 ];
 
-function statusBadge(status: string) {
+/* ── Helpers ── */
+
+function StatusBadge({ status }: { status: string }) {
   switch (status) {
-    case "draft": return <Badge variant="default">レビュー待ち</Badge>;
-    case "active": return <Badge variant="secondary">有効</Badge>;
-    case "inactive": return <Badge variant="outline">無効</Badge>;
-    case "rejected": return <Badge variant="destructive">却下</Badge>;
-    default: return <Badge variant="outline">{status}</Badge>;
+    case "draft":
+      return (
+        <span className="inline-block rounded-full bg-yellow-100 px-2 py-0.5 text-[11px] font-bold text-yellow-800">
+          レビュー待ち
+        </span>
+      );
+    case "active":
+      return (
+        <span className="inline-block rounded-full bg-[#e6f2eb] px-2 py-0.5 text-[11px] font-bold text-[#006728]">
+          有効
+        </span>
+      );
+    case "inactive":
+      return (
+        <span className="inline-block rounded-full bg-[#f5f5f5] px-2 py-0.5 text-[11px] text-[#8b8b8b]">
+          無効
+        </span>
+      );
+    case "rejected":
+      return (
+        <span className="inline-block rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-700">
+          却下
+        </span>
+      );
+    default:
+      return (
+        <span className="inline-block rounded-full bg-[#f5f5f5] px-2 py-0.5 text-[11px] text-[#8b8b8b]">
+          {status}
+        </span>
+      );
   }
 }
 
-export default function KnowledgePage() {
+/* ── Inner (uses useRouter → must be inside Suspense) ── */
+
+function KnowledgeList() {
   const router = useRouter();
-  const [items, setItems] = useState<KnowledgeItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [filterCategory, setFilterCategory] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [latestRun, setLatestRun] = useState<AutoRun | null>(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [isCollecting, setIsCollecting] = useState(false);
 
-  async function fetchItems() {
-    setIsLoading(true);
+  /* SWR for knowledge items */
+  const itemsKey = (() => {
     const params = new URLSearchParams();
     if (filterCategory) params.set("category", filterCategory);
     if (filterStatus) params.set("status", filterStatus);
     const qs = params.toString();
-    const res = await apiFetch(`/api/admin/knowledge${qs ? `?${qs}` : ""}`);
-    if (res.ok) setItems(await res.json());
-    setIsLoading(false);
-  }
+    return `/api/admin/knowledge${qs ? `?${qs}` : ""}`;
+  })();
 
-  async function fetchLatestRun() {
-    const res = await apiFetch("/api/admin/knowledge/runs");
-    if (res.ok) {
+  const {
+    data: items = [],
+    isLoading,
+    mutate: mutateItems,
+  } = useSWR<KnowledgeItem[]>(itemsKey, async (url: string) => {
+    const res = await apiFetch(url);
+    if (!res.ok) return [];
+    return res.json();
+  });
+
+  /* SWR for latest auto-run */
+  const { data: latestRun, mutate: mutateRun } = useSWR<AutoRun | null>(
+    "/api/admin/knowledge/runs",
+    async (url: string) => {
+      const res = await apiFetch(url);
+      if (!res.ok) return null;
       const runs = await res.json();
-      setLatestRun(runs[0] ?? null);
+      return runs[0] ?? null;
     }
-  }
+  );
 
-  useEffect(() => { fetchItems(); }, [filterCategory, filterStatus]);
-  useEffect(() => { fetchLatestRun(); }, []);
-
+  /* Handlers */
   async function handleStatusChange(id: string, newStatus: string) {
     await apiFetch(`/api/admin/knowledge/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),
     });
-    fetchItems();
+    mutateItems();
   }
 
   async function handleDelete(id: string) {
     if (!confirm("削除しますか？")) return;
     await apiFetch(`/api/admin/knowledge/${id}`, { method: "DELETE" });
-    fetchItems();
+    mutateItems();
   }
 
   async function handleManualCollect() {
     setIsCollecting(true);
     try {
       await apiFetch("/api/admin/knowledge/auto-collect", { method: "POST" });
-      await Promise.all([fetchItems(), fetchLatestRun()]);
+      await Promise.all([mutateItems(), mutateRun()]);
     } finally {
       setIsCollecting(false);
     }
   }
 
-  return (
-    <div className="max-w-2xl mx-auto p-4 space-y-4">
-      <h1 className="text-xl font-bold">教師データ管理</h1>
+  /* Columns */
+  const columns: ColumnDef<KnowledgeItem, any>[] = [
+    {
+      accessorKey: "title",
+      header: "タイトル",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <span className="font-medium text-sm">{row.original.title}</span>
+      ),
+    },
+    {
+      accessorKey: "category",
+      header: "カテゴリ",
+      enableSorting: false,
+      cell: ({ getValue }) => {
+        const val = getValue() as string;
+        return (
+          <span className="text-xs text-[#555]">
+            {categories.find((c) => c.value === val)?.label ?? val}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: "ステータス",
+      enableSorting: false,
+      cell: ({ getValue }) => <StatusBadge status={getValue() as string} />,
+    },
+    {
+      accessorKey: "source",
+      header: "ソース",
+      enableSorting: false,
+      cell: ({ getValue }) => {
+        const val = getValue() as string | null;
+        if (val === "auto-collected") {
+          return (
+            <span className="inline-block rounded border border-[#ddd] px-1.5 py-0.5 text-[11px] text-[#888]">
+              自動生成
+            </span>
+          );
+        }
+        return <span className="text-xs text-[#888]">{val ?? "-"}</span>;
+      },
+    },
+    {
+      id: "actions",
+      header: "操作",
+      enableSorting: false,
+      cell: ({ row }) => {
+        const item = row.original;
+        return (
+          <div className="flex flex-wrap gap-2 text-xs">
+            <Link
+              href={nativeHref(`/admin/knowledge/${item.id}`)}
+              className="font-bold text-[#006728] hover:underline"
+            >
+              編集
+            </Link>
+            {item.status === "draft" && (
+              <>
+                <button
+                  onClick={() => handleStatusChange(item.id, "active")}
+                  className="text-green-700 hover:underline"
+                >
+                  承認
+                </button>
+                <button
+                  onClick={() => handleStatusChange(item.id, "rejected")}
+                  className="text-orange-600 hover:underline"
+                >
+                  却下
+                </button>
+              </>
+            )}
+            {item.status === "active" && (
+              <button
+                onClick={() => handleStatusChange(item.id, "inactive")}
+                className="text-[#8b8b8b] hover:underline"
+              >
+                無効化
+              </button>
+            )}
+            {item.status === "inactive" && (
+              <button
+                onClick={() => handleStatusChange(item.id, "active")}
+                className="text-[#8b8b8b] hover:underline"
+              >
+                有効化
+              </button>
+            )}
+            <button
+              onClick={() => handleDelete(item.id)}
+              className="text-red-600 hover:underline"
+            >
+              削除
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
 
-      {/* Latest run summary */}
-      {latestRun && (
+  return (
+    <div className="space-y-4 p-4">
+      <AdminBreadcrumb items={[{ label: "ナレッジ" }]} />
+
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">
+          教師データ管理
+          {!isLoading && (
+            <span className="ml-2 text-base font-normal text-[#888]">
+              ({items.length}件)
+            </span>
+          )}
+        </h1>
+        <Button size="sm" onClick={() => router.push("/admin/knowledge/new")}>
+          ＋ 追加
+        </Button>
+      </div>
+
+      {/* Latest auto-run summary */}
+      {latestRun ? (
         <Card>
           <CardContent className="p-3 text-base">
             <div className="flex items-center justify-between">
@@ -143,15 +303,24 @@ export default function KnowledgePage() {
                   <p className="text-sm mt-1">{latestRun.summary}</p>
                 )}
               </div>
-              <Button size="sm" variant="outline" onClick={handleManualCollect} disabled={isCollecting}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleManualCollect}
+                disabled={isCollecting}
+              >
                 {isCollecting ? "実行中..." : "今すぐ実行"}
               </Button>
             </div>
           </CardContent>
         </Card>
-      )}
-      {!latestRun && (
-        <Button size="sm" variant="outline" onClick={handleManualCollect} disabled={isCollecting}>
+      ) : (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleManualCollect}
+          disabled={isCollecting}
+        >
           {isCollecting ? "実行中..." : "自動収集を実行"}
         </Button>
       )}
@@ -161,111 +330,55 @@ export default function KnowledgePage() {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="h-11 rounded-md border border-input bg-background px-3 py-2 text-base"
+          className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
         >
           {statusFilters.map((s) => (
-            <option key={s.value} value={s.value}>{s.label}</option>
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
           ))}
         </select>
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
-          className="h-11 rounded-md border border-input bg-background px-3 py-2 text-base"
+          className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
         >
           <option value="">すべてのカテゴリ</option>
           {categories.map((c) => (
-            <option key={c.value} value={c.value}>{c.label}</option>
+            <option key={c.value} value={c.value}>
+              {c.label}
+            </option>
           ))}
         </select>
-        <Button onClick={() => router.push("/admin/knowledge/new")}>＋ 追加</Button>
       </div>
 
-      <p className="text-base text-muted-foreground">{items.length}件</p>
-
+      {/* Table */}
       {isLoading ? (
-        <Loading />
-      ) : (
-        <div className="space-y-2">
-          {items.map((item) => (
-            <Card key={item.id} className={item.status === "inactive" || item.status === "rejected" ? "opacity-50" : ""}>
-              <CardContent className="p-3 space-y-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="secondary">
-                    {categories.find((c) => c.value === item.category)?.label ?? item.category}
-                  </Badge>
-                  <span className="text-base font-medium">{item.title}</span>
-                  {statusBadge(item.status)}
-                  {item.source === "auto-collected" && (
-                    <Badge variant="outline" className="text-sm">自動生成</Badge>
-                  )}
-                </div>
-
-                {/* Analysis summary for drafts */}
-                {item.status === "draft" && item.analysis_summary && (
-                  <p className="text-sm text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 rounded p-2">
-                    分析理由: {item.analysis_summary}
-                  </p>
-                )}
-
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{item.content}</p>
-
-                {item.tags && item.tags.length > 0 && (
-                  <div className="flex gap-1 flex-wrap">
-                    {item.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-sm">{tag}</Badge>
-                    ))}
-                  </div>
-                )}
-
-                {/* Search sources for auto-generated */}
-                {item.search_sources && item.search_sources.length > 0 && (
-                  <div className="text-sm text-muted-foreground">
-                    参照: {item.search_sources.map((url, i) => (
-                      <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline mr-2">
-                        [{i + 1}]
-                      </a>
-                    ))}
-                  </div>
-                )}
-
-                {item.source && item.source !== "auto-collected" && (
-                  <p className="text-sm text-muted-foreground">出典: {item.source}</p>
-                )}
-
-                <Separator />
-                <div className="flex gap-2 text-sm flex-wrap">
-                  <button onClick={() => router.push(nativeHref(`/admin/knowledge/${item.id}`))} className="text-primary hover:underline">
-                    編集
-                  </button>
-                  {item.status === "draft" && (
-                    <>
-                      <button onClick={() => handleStatusChange(item.id, "active")} className="text-green-600 hover:underline">
-                        承認
-                      </button>
-                      <button onClick={() => handleStatusChange(item.id, "rejected")} className="text-orange-600 hover:underline">
-                        却下
-                      </button>
-                    </>
-                  )}
-                  {item.status === "active" && (
-                    <button onClick={() => handleStatusChange(item.id, "inactive")} className="text-muted-foreground hover:underline">
-                      無効化
-                    </button>
-                  )}
-                  {item.status === "inactive" && (
-                    <button onClick={() => handleStatusChange(item.id, "active")} className="text-muted-foreground hover:underline">
-                      有効化
-                    </button>
-                  )}
-                  <button onClick={() => handleDelete(item.id)} className="text-destructive hover:underline">
-                    削除
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="rounded-lg bg-white p-8 text-center text-sm text-[#8b8b8b]">
+          読み込み中...
         </div>
+      ) : (
+        <AdminTable<KnowledgeItem>
+          data={items}
+          columns={columns}
+          total={items.length}
+          page={1}
+          pageSize={1000}
+          sorting={sorting}
+          onSortingChange={setSorting}
+          onPageChange={() => {}}
+        />
       )}
     </div>
+  );
+}
+
+/* ── Page ── */
+
+export default function KnowledgePage() {
+  return (
+    <Suspense>
+      <KnowledgeList />
+    </Suspense>
   );
 }
