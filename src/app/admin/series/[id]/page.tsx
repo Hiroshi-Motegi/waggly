@@ -49,6 +49,154 @@ const CATEGORY_LABELS: Record<string, string> = {
   putter: "パター",
 };
 
+/* ── Inline Heads Editor ── */
+
+type SpecRow = Series["specs"][number];
+type HeadEdits = Record<string, Record<string, string>>;
+
+function parseNum(v: string): number | null {
+  if (v.trim() === "") return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+
+function HeadsInlineEditor({
+  specs,
+  seriesId,
+  maker,
+  model,
+  category,
+  onUpdated,
+}: {
+  specs: SpecRow[];
+  seriesId: string;
+  maker: string;
+  model: string;
+  category: string;
+  onUpdated: () => void;
+}) {
+  const [edits, setEdits] = useState<HeadEdits>({});
+  const [savingHeads, setSavingHeads] = useState(false);
+
+  function setField(id: string, field: string, value: string) {
+    setEdits((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
+  }
+
+  function getVal(sp: SpecRow, field: keyof SpecRow): string {
+    const edited = edits[sp.id]?.[field];
+    if (edited !== undefined) return edited;
+    const v = sp[field];
+    return v != null ? String(v) : "";
+  }
+
+  const changedIds = Object.keys(edits).filter((id) => Object.keys(edits[id]).length > 0);
+
+  async function handleSaveHeads() {
+    if (changedIds.length === 0) return;
+    setSavingHeads(true);
+    try {
+      await Promise.all(
+        changedIds.map((id) => {
+          const changes = edits[id];
+          const payload: Record<string, any> = {};
+          if ("loft" in changes) payload.loft = parseNum(changes.loft);
+          if ("lie" in changes) payload.lie = parseNum(changes.lie);
+          if ("head_volume" in changes) payload.head_volume = parseNum(changes.head_volume);
+          if ("head_weight" in changes) payload.head_weight = parseNum(changes.head_weight);
+          if ("distance" in changes) payload.distance = parseNum(changes.distance);
+          if ("length" in changes) payload.length = parseNum(changes.length);
+          if ("total_weight" in changes) payload.total_weight = parseNum(changes.total_weight);
+          if ("swing_weight" in changes) payload.swing_weight = changes.swing_weight || null;
+          return apiFetch("/api/admin/specs", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, action: "update", data: payload }),
+          });
+        }),
+      );
+      setEdits({});
+      onUpdated();
+    } finally {
+      setSavingHeads(false);
+    }
+  }
+
+  const FIELDS = [
+    { key: "loft", label: "ロフト", suffix: "°", type: "number" as const },
+    { key: "lie", label: "ライ角", suffix: "°", type: "number" as const },
+    { key: "head_volume", label: "体積", suffix: "cc", type: "number" as const },
+    { key: "distance", label: "飛距離", suffix: "yd", type: "number" as const },
+    { key: "length", label: "長さ", suffix: '"', type: "number" as const },
+    { key: "total_weight", label: "重量", suffix: "g", type: "number" as const },
+    { key: "swing_weight", label: "バランス", suffix: "", type: "text" as const },
+  ];
+
+  return (
+    <AdminFormSection title={`ヘッド一覧 (${specs.length}件)`}>
+      {specs.length > 0 && (
+        <>
+          <div className="overflow-x-auto rounded-lg border border-[#e5e5e5]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#e5e5e5] bg-[#fafafa]">
+                  <th className="px-2 py-2 text-left text-[11px] text-[#888] font-medium whitespace-nowrap">番手</th>
+                  {FIELDS.map((f) => (
+                    <th key={f.key} className="px-1 py-2 text-left text-[11px] text-[#888] font-medium whitespace-nowrap">{f.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {specs.map((sp) => (
+                  <tr key={sp.id} className="border-b border-[#f0f0f0]">
+                    <td className="px-2 py-1.5 font-medium whitespace-nowrap">
+                      {sp.club_number ?? (CATEGORY_LABELS[sp.category] ?? sp.category)}
+                    </td>
+                    {FIELDS.map((f) => (
+                      <td key={f.key} className="px-1 py-1">
+                        <div className="flex items-center gap-0.5">
+                          <input
+                            type={f.type}
+                            step="any"
+                            value={getVal(sp, f.key as keyof SpecRow)}
+                            onChange={(e) => setField(sp.id, f.key, e.target.value)}
+                            className="w-16 rounded border border-[#e5e5e5] bg-white px-1.5 py-0.5 text-sm outline-none focus:border-[#006728]"
+                            placeholder="-"
+                          />
+                          {f.suffix && <span className="text-[10px] text-[#888]">{f.suffix}</span>}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {changedIds.length > 0 && (
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={handleSaveHeads}
+                disabled={savingHeads}
+                className="rounded-full bg-[#006728] px-4 py-1.5 text-sm font-bold text-white disabled:opacity-40"
+              >
+                {savingHeads ? "保存中..." : `${changedIds.length}件のヘッドを保存`}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* 番手追加フォーム */}
+      <AddHeadForm
+        seriesId={seriesId}
+        maker={maker}
+        model={model}
+        category={category}
+        onCreated={onUpdated}
+      />
+    </AdminFormSection>
+  );
+}
+
 /* ── Add Head Form ── */
 
 function AddHeadForm({
@@ -379,66 +527,15 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
             </div>
           </AdminFormSection>
 
-          {/* ヘッド（番手）一覧 */}
-          <AdminFormSection title={`ヘッド一覧 (${series.spec_count}件)`}>
-            {series.specs.length > 0 && (
-              <div className="overflow-hidden rounded-lg border border-[#e5e5e5]">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-[#e5e5e5] bg-[#fafafa]">
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">番手</th>
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">ロフト</th>
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">ライ角</th>
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">体積</th>
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">飛距離</th>
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">長さ</th>
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">重量</th>
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">バランス</th>
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">状態</th>
-                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {series.specs.map((sp) => (
-                      <tr key={sp.id} className="border-b border-[#f0f0f0] hover:bg-[#fafafa]">
-                        <td className="px-3 py-2 font-medium">
-                          {sp.club_number ?? (CATEGORY_LABELS[sp.category] ?? sp.category)}
-                        </td>
-                        <td className="px-3 py-2">{sp.loft != null ? `${sp.loft}°` : "-"}</td>
-                        <td className="px-3 py-2">{sp.lie != null ? `${sp.lie}°` : "-"}</td>
-                        <td className="px-3 py-2">{sp.head_volume != null ? `${sp.head_volume}cc` : "-"}</td>
-                        <td className="px-3 py-2">{sp.distance != null ? `${sp.distance}yd` : "-"}</td>
-                        <td className="px-3 py-2">{sp.length != null ? `${sp.length}"` : "-"}</td>
-                        <td className="px-3 py-2">{sp.total_weight != null ? `${sp.total_weight}g` : "-"}</td>
-                        <td className="px-3 py-2">{sp.swing_weight ?? "-"}</td>
-                        <td className="px-3 py-2">
-                          {sp.verified ? (
-                            <span className="rounded-full bg-[#006728] px-2 py-0.5 text-[10px] font-bold text-white">確認済</span>
-                          ) : (
-                            <span className="text-[10px] text-[#8b8b8b]">未確認</span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2">
-                          <Link href={`/admin/specs/${sp.id}`} className="text-xs font-bold text-[#006728] hover:underline">
-                            編集
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* 番手追加フォーム */}
-            <AddHeadForm
-              seriesId={series.id}
-              maker={series.maker}
-              model={series.model}
-              category={series.category ?? "iron"}
-              onCreated={() => mutate()}
-            />
-          </AdminFormSection>
+          {/* ヘッド（番手）一覧 — インライン編集 */}
+          <HeadsInlineEditor
+            specs={series.specs}
+            seriesId={series.id}
+            maker={series.maker}
+            model={series.model}
+            category={series.category ?? "iron"}
+            onUpdated={() => mutate()}
+          />
 
           {/* Bottom action bar */}
           <div className="flex items-center gap-2">
