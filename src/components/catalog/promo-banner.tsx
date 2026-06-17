@@ -15,6 +15,7 @@ export function PromoBanner() {
         alt="自分のクラブセットを管理 ゴルファー名刺にしませんか？"
         width={480}
         height={84}
+        priority
         className="w-full h-auto"
       />
     </Link>

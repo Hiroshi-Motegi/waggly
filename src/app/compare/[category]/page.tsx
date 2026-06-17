@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getModelsByCategory, compareModelSlug } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
+import { CompareSearch } from "@/components/catalog/compare-search";
 
 export const revalidate = 86400;
 
@@ -38,8 +39,14 @@ export default async function CompareIndexPage({
   const models = await getModelsByCategory(category);
   const label = CATEGORY_LABELS[category] ?? category;
 
-  // Generate all combinations
-  const pairs: Array<{ slugA: string; slugB: string; nameA: string; nameB: string; href: string }> = [];
+  // Model options for search
+  const modelOptions = models.map((m) => ({
+    slug: compareModelSlug(m.catalog_series, m),
+    label: `${m.catalog_series.maker} ${m.catalog_series.name}${m.name ? ` ${m.name}` : ""}`,
+  }));
+
+  // Generate all combinations (SEO)
+  const pairs: Array<{ nameA: string; nameB: string; href: string }> = [];
   for (let i = 0; i < models.length; i++) {
     for (let j = i + 1; j < models.length; j++) {
       const a = models[i];
@@ -50,8 +57,6 @@ export default async function CompareIndexPage({
       const nameA = `${a.catalog_series.maker} ${a.catalog_series.name}${a.name ? ` ${a.name}` : ""}`;
       const nameB = `${b.catalog_series.maker} ${b.catalog_series.name}${b.name ? ` ${b.name}` : ""}`;
       pairs.push({
-        slugA: sortedA,
-        slugB: sortedB,
         nameA: sortedA === slugA ? nameA : nameB,
         nameB: sortedA === slugA ? nameB : nameA,
         href: `/compare/${category}/${sortedA}-vs-${sortedB}`,
@@ -79,7 +84,7 @@ export default async function CompareIndexPage({
         {/* Title bar */}
         <div className="px-5 py-3 w-full max-w-screen-sm bg-black/20">
           <h1 className="text-[15px] font-extrabold text-white">{label} スペック比較</h1>
-          <p className="text-xs text-white/70 mt-0.5">2モデルのスペックを番手別に比較</p>
+          <p className="text-xs text-white/70 mt-0.5">2つのモデルを選んで比較</p>
         </div>
 
         {/* Banner */}
@@ -102,26 +107,24 @@ export default async function CompareIndexPage({
           ))}
         </div>
 
-        {/* Content */}
-        <div className="w-full max-w-screen-sm px-3 py-4">
-          {pairs.length === 0 ? (
-            <p className="text-sm text-white/70">比較できるモデルがありません</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {pairs.map((pair) => (
-                <Link
-                  key={pair.href}
-                  href={pair.href}
-                  className="flex items-center gap-2 rounded-md bg-white px-4 py-3"
-                >
-                  <span className="flex-1 text-sm font-medium text-[#222] truncate">{pair.nameA}</span>
-                  <span className="shrink-0 text-xs font-bold text-[#006728]">VS</span>
-                  <span className="flex-1 text-sm font-medium text-[#222] truncate text-right">{pair.nameB}</span>
-                </Link>
-              ))}
-            </div>
-          )}
+        {/* Search UI */}
+        <div className="w-full max-w-screen-sm px-3 pt-4">
+          <CompareSearch category={category} models={modelOptions} />
         </div>
+
+        {/* SEO: hidden pair links for crawlers */}
+        <nav className="sr-only" aria-hidden="false">
+          <h2>{label}比較一覧</h2>
+          <ul>
+            {pairs.map((pair) => (
+              <li key={pair.href}>
+                <Link href={pair.href}>
+                  {pair.nameA} vs {pair.nameB}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
         {/* Disclaimer */}
         <p className="w-full max-w-screen-sm px-4 py-6 text-left text-xs text-white leading-relaxed">
