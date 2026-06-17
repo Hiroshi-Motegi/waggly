@@ -39,9 +39,9 @@ CREATE TRIGGER product_lines_updated_at
 INSERT INTO product_lines (maker, maker_normalized, name, name_normalized, source)
 SELECT DISTINCT ON (maker, model)
   maker,
-  maker_normalized,
+  lower(regexp_replace(normalize(maker, NFKC), '\s+', '', 'g')),
   model,
-  model_normalized,
+  lower(regexp_replace(normalize(model, NFKC), '\s+', '', 'g')),
   'manual'
 FROM club_models
 ORDER BY maker, model, created_at;
