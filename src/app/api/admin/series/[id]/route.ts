@@ -15,7 +15,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     .from("club_models")
     .select(`
       *,
-      heads(id, category, club_number, sort_order, loft, lie, head_volume, head_weight, distance, verified,
+      heads(id, category, club_number, sort_order, loft, lie, bounce, head_volume, head_weight, distance, verified,
         configurations:clubs(id, shaft_variant_id, length, total_weight, swing_weight)
       ),
       series_shafts:club_model_shafts(id, is_default, shaft_model:shaft_models(id, maker, name, type, variants:shaft_variants(id, flex, weight, torque, kick_point)))

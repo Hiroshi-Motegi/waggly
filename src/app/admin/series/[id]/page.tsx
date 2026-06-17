@@ -57,6 +57,7 @@ interface Series {
     sort_order: number | null;
     loft: number | null;
     lie: number | null;
+    bounce: number | null;
     head_volume: number | null;
     head_weight: number | null;
     distance: number | null;
@@ -173,6 +174,7 @@ function HeadsInlineEditor({
   const FIELDS = [
     { key: "loft", label: "ロフト", suffix: "°", type: "number" as const },
     { key: "lie", label: "ライ角", suffix: "°", type: "number" as const },
+    { key: "bounce", label: "バウンス", suffix: "°", type: "number" as const },
     { key: "head_volume", label: "体積", suffix: "cc", type: "number" as const },
     { key: "distance", label: "飛距離", suffix: "yd", type: "number" as const },
   ];

@@ -236,7 +236,7 @@ JSON形式で回答（JSON以外不要）:
   if (action === "update" && updateData) {
     const HEAD_FIELDS = [
       "maker", "model", "category", "club_number", "sort_order",
-      "loft", "lie", "distance",
+      "loft", "lie", "bounce", "distance",
       "head_volume", "head_weight", "image_url", "affiliate_url", "verified", "model_id",
     ];
     const CONFIG_FIELDS = ["length", "total_weight", "swing_weight"];
