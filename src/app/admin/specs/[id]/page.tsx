@@ -21,7 +21,7 @@ interface ClubSpec {
   lie: number | null;
   length: number | null;
   distance: number | null;
-  weight: number | null;
+  total_weight: number | null;
   swing_weight: string | null;
   head_volume: number | null;
   head_weight: number | null;
@@ -166,7 +166,7 @@ interface FormState {
   loft: string;
   lie: string;
   length: string;
-  weight: string;
+  total_weight: string;
   swing_weight: string;
   head_volume: string;
   head_weight: string;
@@ -191,7 +191,7 @@ function specToForm(spec: ClubSpec): FormState {
     loft: spec.loft != null ? String(spec.loft) : "",
     lie: spec.lie != null ? String(spec.lie) : "",
     length: spec.length != null ? String(spec.length) : "",
-    weight: spec.weight != null ? String(spec.weight) : "",
+    total_weight: spec.total_weight != null ? String(spec.total_weight) : "",
     swing_weight: spec.swing_weight ?? "",
     head_volume: spec.head_volume != null ? String(spec.head_volume) : "",
     head_weight: spec.head_weight != null ? String(spec.head_weight) : "",
@@ -213,7 +213,7 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
 
   const [form, setForm] = useState<FormState>({
     maker: "", model: "", category: "driver", club_number: "",
-    loft: "", lie: "", length: "", weight: "", swing_weight: "",
+    loft: "", lie: "", length: "", total_weight: "", swing_weight: "",
     head_volume: "", head_weight: "", distance: "",
     image_url: "", affiliate_url: "", series_id: "",
   });
@@ -243,7 +243,7 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
         loft: parseNum(form.loft),
         lie: parseNum(form.lie),
         length: parseNum(form.length),
-        weight: parseNum(form.weight),
+        total_weight: parseNum(form.total_weight),
         swing_weight: form.swing_weight || null,
         head_volume: parseNum(form.head_volume),
         head_weight: parseNum(form.head_weight),
@@ -519,8 +519,8 @@ export default function SpecEditPage({ params }: { params: Promise<{ id: string 
                 <label className="text-[10px] text-[#8b8b8b]">総重量 (g)</label>
                 <input
                   type="number"
-                  value={form.weight}
-                  onChange={(e) => updateField("weight", e.target.value)}
+                  value={form.total_weight}
+                  onChange={(e) => updateField("total_weight", e.target.value)}
                   className="rounded border border-[#dfdfdf] bg-white px-2 py-1.5 text-sm text-black outline-none focus:border-[#006728]"
                   placeholder="-"
                 />

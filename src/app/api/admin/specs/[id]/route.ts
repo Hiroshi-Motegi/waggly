@@ -12,8 +12,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const { id } = await params;
   const admin = getAdmin();
   const { data, error } = await admin
-    .from("club_specs")
-    .select("*, series:club_spec_series(*)")
+    .from("club_spec_heads")
+    .select("*, series:club_spec_series(*), configurations:club_spec_configurations(length, total_weight, swing_weight, shaft_id)")
     .eq("id", id)
     .single();
 
@@ -21,5 +21,13 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.json(data);
+  // Flatten default configuration (shaft_id === null)
+  const defaultCfg = (data.configurations ?? []).find((c: any) => c.shaft_id === null);
+  const { configurations, ...rest } = data;
+  return NextResponse.json({
+    ...rest,
+    length: defaultCfg?.length ?? null,
+    total_weight: defaultCfg?.total_weight ?? null,
+    swing_weight: defaultCfg?.swing_weight ?? null,
+  });
 }

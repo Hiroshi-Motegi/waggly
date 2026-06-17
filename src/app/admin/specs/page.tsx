@@ -20,7 +20,7 @@ interface ClubSpec {
   lie: number | null;
   length: number | null;
   distance: number | null;
-  weight: number | null;
+  total_weight: number | null;
   swing_weight: string | null;
   head_volume: number | null;
   head_weight: number | null;
@@ -136,7 +136,7 @@ function getViewColumns(router: ReturnType<typeof useRouter>): ColumnDef<ClubSpe
       cell: ({ getValue }) => { const v = getValue() as number | null; return v != null ? `${v}"` : "-"; },
     },
     {
-      accessorKey: "weight", header: "重量", enableSorting: false,
+      accessorKey: "total_weight", header: "重量", enableSorting: false,
       cell: ({ getValue }) => { const v = getValue() as number | null; return v != null ? `${v}g` : "-"; },
     },
     {
@@ -244,7 +244,7 @@ const editColumns: ColumnDef<ClubSpec, any>[] = [
   { id: "loft_edit", header: "ロフト", enableSorting: false, cell: ({ row }) => <EditNumField spec={row.original} field="loft" suffix="°" /> },
   { id: "lie_edit", header: "ライ角", enableSorting: false, cell: ({ row }) => <EditNumField spec={row.original} field="lie" suffix="°" /> },
   { id: "length_edit", header: "長さ", enableSorting: false, cell: ({ row }) => <EditNumField spec={row.original} field="length" suffix='"' /> },
-  { id: "weight_edit", header: "重量", enableSorting: false, cell: ({ row }) => <EditNumField spec={row.original} field="weight" suffix="g" /> },
+  { id: "total_weight_edit", header: "重量", enableSorting: false, cell: ({ row }) => <EditNumField spec={row.original} field="total_weight" suffix="g" /> },
   { id: "swing_weight_edit", header: "バランス", enableSorting: false, cell: ({ row }) => <EditTextField spec={row.original} field="swing_weight" /> },
   { id: "head_volume_edit", header: "体積", enableSorting: false, cell: ({ row }) => <EditNumField spec={row.original} field="head_volume" suffix="cc" /> },
   { id: "head_weight_edit", header: "ヘッド重量", enableSorting: false, cell: ({ row }) => <EditNumField spec={row.original} field="head_weight" suffix="g" /> },
@@ -298,7 +298,7 @@ function SpecsList() {
           if ("loft" in changes) payload.loft = parseNum(changes.loft);
           if ("lie" in changes) payload.lie = parseNum(changes.lie);
           if ("length" in changes) payload.length = parseNum(changes.length);
-          if ("weight" in changes) payload.weight = parseNum(changes.weight);
+          if ("total_weight" in changes) payload.total_weight = parseNum(changes.total_weight);
           if ("swing_weight" in changes) payload.swing_weight = changes.swing_weight || null;
           if ("head_volume" in changes) payload.head_volume = parseNum(changes.head_volume);
           if ("head_weight" in changes) payload.head_weight = parseNum(changes.head_weight);

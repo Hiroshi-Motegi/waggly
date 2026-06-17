@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { lookupRakutenUrl } from "@/lib/rakuten-search";
+import { normalizeClubName } from "@/lib/normalize";
 
 function getAdmin() {
   return createClient(
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error, count } = await admin
     .from("club_spec_series")
-    .select("*, club_specs(id, category, club_number, loft, verified)", { count: "exact" })
+    .select("*, club_spec_heads(id, category, club_number, loft, verified)", { count: "exact" })
     .order(sort, { ascending: order })
     .order("model", { ascending: true })
     .range((page - 1) * pageSize, page * pageSize - 1);
@@ -28,10 +29,10 @@ export async function GET(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const result = (data ?? []).map((s: any) => {
-    const specs = (s.club_specs ?? []).sort((a: any, b: any) =>
+    const specs = (s.club_spec_heads ?? []).sort((a: any, b: any) =>
       (a.club_number ?? "").localeCompare(b.club_number ?? "")
     );
-    return { ...s, specs, spec_count: specs.length, club_specs: undefined };
+    return { ...s, specs, spec_count: specs.length, club_spec_heads: undefined };
   });
   return NextResponse.json({ data: result, total: count ?? 0, page, pageSize });
 }
@@ -95,15 +96,30 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "No valid fields" }, { status: 400 });
     }
     await admin.from("club_spec_series").update(fields).eq("id", id);
+
+    // When maker or model changes, cascade to all linked club_spec_heads
+    if ("maker" in fields || "model" in fields) {
+      const headUpdates: Record<string, any> = {};
+      if ("maker" in fields) {
+        headUpdates.maker = fields.maker;
+        headUpdates.maker_normalized = normalizeClubName(fields.maker);
+      }
+      if ("model" in fields) {
+        headUpdates.model = fields.model;
+        headUpdates.model_normalized = normalizeClubName(fields.model);
+      }
+      await admin.from("club_spec_heads").update(headUpdates).eq("series_id", id);
+    }
+
     const { data: updated } = await admin.from("club_spec_series").select("*").eq("id", id).single();
     return NextResponse.json(updated);
   }
 
   // シリーズにspecを紐づけ
   if (action === "assign_specs") {
-    // maker+model が一致する club_specs を全て紐づけ
+    // maker+model が一致する club_spec_heads を全て紐づけ
     const { count } = await admin
-      .from("club_specs")
+      .from("club_spec_heads")
       .update({ series_id: id })
       .eq("maker", series.maker)
       .eq("model", series.model);

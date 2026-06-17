@@ -10,6 +10,24 @@ function getAdmin() {
   );
 }
 
+/** Fetch a single head row with default config flattened for backward-compat */
+async function fetchHeadFlat(admin: ReturnType<typeof getAdmin>, id: string) {
+  const { data } = await admin
+    .from("club_spec_heads")
+    .select("*, series:club_spec_series(*), configurations:club_spec_configurations(length, total_weight, swing_weight, shaft_id)")
+    .eq("id", id)
+    .single();
+  if (!data) return null;
+  const defaultCfg = (data.configurations ?? []).find((c: any) => c.shaft_id === null);
+  const { configurations, ...rest } = data;
+  return {
+    ...rest,
+    length: defaultCfg?.length ?? null,
+    total_weight: defaultCfg?.total_weight ?? null,
+    swing_weight: defaultCfg?.swing_weight ?? null,
+  };
+}
+
 export async function GET(request: NextRequest) {
   const admin = getAdmin();
   const url = new URL(request.url);
@@ -20,8 +38,8 @@ export async function GET(request: NextRequest) {
   const category = url.searchParams.get("category");
 
   let query = admin
-    .from("club_specs")
-    .select("*, series:club_spec_series(*)", { count: "exact" });
+    .from("club_spec_heads")
+    .select("*, series:club_spec_series(*), configurations:club_spec_configurations(length, total_weight, swing_weight, shaft_id)", { count: "exact" });
 
   if (category) query = query.eq("category", category);
 
@@ -37,7 +55,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ data: data ?? [], total: count ?? 0, page, pageSize });
+  // Flatten default configuration into each row
+  const flattened = (data ?? []).map((row: any) => {
+    const defaultCfg = (row.configurations ?? []).find((c: any) => c.shaft_id === null);
+    const { configurations, ...rest } = row;
+    return {
+      ...rest,
+      length: defaultCfg?.length ?? null,
+      total_weight: defaultCfg?.total_weight ?? null,
+      swing_weight: defaultCfg?.swing_weight ?? null,
+    };
+  });
+
+  return NextResponse.json({ data: flattened, total: count ?? 0, page, pageSize });
 }
 
 /**
@@ -48,18 +78,18 @@ export async function PATCH(request: NextRequest) {
   const admin = getAdmin();
   const { id, action, data: updateData } = await request.json();
 
-  const { data: spec } = await admin.from("club_specs").select("*").eq("id", id).single();
+  const { data: spec } = await admin.from("club_spec_heads").select("*").eq("id", id).single();
   if (!spec) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   if (action === "refresh_image") {
     const result = await searchRakutenClub(spec.maker, spec.model, spec.club_number, spec.category);
     if (result.imageUrl || result.affiliateUrl) {
-      await admin.from("club_specs").update({
+      await admin.from("club_spec_heads").update({
         image_url: result.imageUrl,
         affiliate_url: result.affiliateUrl,
       }).eq("id", id);
     }
-    const { data: updated } = await admin.from("club_specs").select("*, series:club_spec_series(*)").eq("id", id).single();
+    const updated = await fetchHeadFlat(admin, id);
     return NextResponse.json(updated);
   }
 
@@ -98,18 +128,25 @@ JSON形式で回答（JSON以外不要）:
     if (!jsonMatch) return NextResponse.json({ error: "Parse failed" }, { status: 500 });
     const specs = JSON.parse(jsonMatch[1] ?? jsonMatch[0]);
 
-    await admin.from("club_specs").update({
+    // Head fields go to club_spec_heads
+    await admin.from("club_spec_heads").update({
       loft: specs.loft ?? null,
       lie: specs.lie ?? null,
-      length: specs.length ?? null,
       distance: specs.distance ?? null,
-      weight: specs.weight ?? null,
-      swing_weight: specs.swing_weight ?? null,
       head_volume: specs.head_volume ?? null,
       head_weight: specs.head_weight ?? null,
     }).eq("id", id);
 
-    const { data: updated } = await admin.from("club_specs").select("*, series:club_spec_series(*)").eq("id", id).single();
+    // Configuration fields go to club_spec_configurations (default config: shaft_id IS NULL)
+    await admin.from("club_spec_configurations").upsert({
+      head_id: id,
+      shaft_id: null,
+      length: specs.length ?? null,
+      total_weight: specs.weight ?? null,
+      swing_weight: specs.swing_weight ?? null,
+    }, { onConflict: "head_id,shaft_id" });
+
+    const updated = await fetchHeadFlat(admin, id);
     return NextResponse.json(updated);
   }
 
@@ -121,32 +158,54 @@ JSON形式で回答（JSON以外不要）:
     const updates: Record<string, any> = {};
     if (result.imageUrl) updates.image_url = result.imageUrl;
     if (result.affiliateUrl) updates.affiliate_url = result.affiliateUrl;
-    await admin.from("club_specs").update(updates).eq("id", id);
-    const { data: updated } = await admin.from("club_specs").select("*, series:club_spec_series(*)").eq("id", id).single();
+    await admin.from("club_spec_heads").update(updates).eq("id", id);
+    const updated = await fetchHeadFlat(admin, id);
     return NextResponse.json(updated);
   }
 
   if (action === "update" && updateData) {
-    const ALLOWED = [
+    const HEAD_FIELDS = [
       "maker", "model", "category", "club_number",
-      "loft", "lie", "length", "distance", "weight", "swing_weight",
+      "loft", "lie", "distance",
       "head_volume", "head_weight", "image_url", "affiliate_url", "verified", "series_id",
     ];
-    const fields: Record<string, any> = {};
-    for (const key of ALLOWED) {
-      if (key in updateData) fields[key] = updateData[key];
+    const CONFIG_FIELDS = ["length", "total_weight", "swing_weight"];
+
+    const headUpdates: Record<string, any> = {};
+    const configUpdates: Record<string, any> = {};
+
+    for (const key of HEAD_FIELDS) {
+      if (key in updateData) headUpdates[key] = updateData[key];
     }
-    if (Object.keys(fields).length === 0) {
+    for (const key of CONFIG_FIELDS) {
+      if (key in updateData) configUpdates[key] = updateData[key];
+    }
+
+    if (Object.keys(headUpdates).length === 0 && Object.keys(configUpdates).length === 0) {
       return NextResponse.json({ error: "No valid fields" }, { status: 400 });
     }
-    // Re-normalize if identity fields changed
-    if ("maker" in fields) fields.maker_normalized = normalizeClubName(fields.maker);
-    if ("model" in fields) fields.model_normalized = normalizeClubName(fields.model);
-    // Manual edits mark source as manual
-    if (!("verified" in fields)) fields.source = "manual";
 
-    await admin.from("club_specs").update(fields).eq("id", id);
-    const { data: updated } = await admin.from("club_specs").select("*, series:club_spec_series(*)").eq("id", id).single();
+    // Update head table
+    if (Object.keys(headUpdates).length > 0) {
+      // Re-normalize if identity fields changed
+      if ("maker" in headUpdates) headUpdates.maker_normalized = normalizeClubName(headUpdates.maker);
+      if ("model" in headUpdates) headUpdates.model_normalized = normalizeClubName(headUpdates.model);
+      // Manual edits mark source as manual
+      if (!("verified" in headUpdates)) headUpdates.source = "manual";
+
+      await admin.from("club_spec_heads").update(headUpdates).eq("id", id);
+    }
+
+    // Upsert configuration table for length/total_weight/swing_weight
+    if (Object.keys(configUpdates).length > 0) {
+      await admin.from("club_spec_configurations").upsert({
+        head_id: id,
+        shaft_id: null,
+        ...configUpdates,
+      }, { onConflict: "head_id,shaft_id" });
+    }
+
+    const updated = await fetchHeadFlat(admin, id);
     return NextResponse.json(updated);
   }
 

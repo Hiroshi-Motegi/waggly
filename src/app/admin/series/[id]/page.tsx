@@ -27,8 +27,11 @@ interface Series {
     club_number: string | null;
     loft: number | null;
     lie: number | null;
+    head_volume: number | null;
+    head_weight: number | null;
+    distance: number | null;
     length: number | null;
-    weight: number | null;
+    total_weight: number | null;
     swing_weight: string | null;
     verified: boolean;
   }[];
@@ -289,6 +292,8 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
                       <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">番手</th>
                       <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">ロフト</th>
                       <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">ライ角</th>
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">体積</th>
+                      <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">飛距離</th>
                       <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">長さ</th>
                       <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">重量</th>
                       <th className="px-3 py-2 text-left text-[11px] text-[#888] font-medium">バランス</th>
@@ -305,8 +310,10 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
                         </td>
                         <td className="px-3 py-2">{sp.loft != null ? `${sp.loft}°` : "-"}</td>
                         <td className="px-3 py-2">{sp.lie != null ? `${sp.lie}°` : "-"}</td>
+                        <td className="px-3 py-2">{sp.head_volume != null ? `${sp.head_volume}cc` : "-"}</td>
+                        <td className="px-3 py-2">{sp.distance != null ? `${sp.distance}yd` : "-"}</td>
                         <td className="px-3 py-2">{sp.length != null ? `${sp.length}"` : "-"}</td>
-                        <td className="px-3 py-2">{sp.weight != null ? `${sp.weight}g` : "-"}</td>
+                        <td className="px-3 py-2">{sp.total_weight != null ? `${sp.total_weight}g` : "-"}</td>
                         <td className="px-3 py-2">{sp.swing_weight ?? "-"}</td>
                         <td className="px-3 py-2">
                           {sp.verified ? (
