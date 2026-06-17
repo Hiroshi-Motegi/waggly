@@ -53,7 +53,6 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | type | text | `steel` / `carbon` |
 | flex | text | S, SR, R, X等 |
 | weight | numeric | シャフト単体重量 (g)。null許容 |
-| length | numeric | シャフト長 (inch)。null許容 |
 | torque | numeric | トルク (°)。null許容 |
 | kick_point | text | 調子（先, 中, 元）。null許容 |
 | image_url | text | |
@@ -63,6 +62,8 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | updated_at | timestamptz | |
 
 ユニーク: `(maker, name, flex)` ※同名シャフトでもフレックス違いは別レコード
+
+注: `length` カラムは持たない。シャフト単体の長さは番手ごとにカットされるため、シャフトマスタとしては意味がない。クラブ完成長は `configurations.length` で管理。
 
 #### `grips` — グリップ製品マスタ
 
@@ -80,7 +81,7 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-ユニーク: `(maker, name)`
+ユニーク: `(maker, name, COALESCE(size, ''))` — 同じTour Velvetでも M58/M60 は別レコード。sizeがnullの場合はデフォルトサイズとして1レコードのみ。
 
 #### `club_spec_series` — モデル（既存テーブル拡張）
 
@@ -94,8 +95,8 @@ club_spec_series（完成品モデル: PING G440 Iron）
 |--|--|--|
 | id | uuid PK | |
 | series_id | uuid FK → series | null許容（単体管理も可） |
-| maker | text | |
-| model | text | |
+| maker | text | series_id非nullの場合はseriesのmaker/modelが正。単体ヘッド用に必要 |
+| model | text | 同上 |
 | category | text | driver/iron/wedge等 |
 | club_number | text | 7i, 3W, 52°等 |
 | maker_normalized | text | |
@@ -105,6 +106,7 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | head_volume | numeric | ヘッド体積 (cc) |
 | head_weight | numeric | ヘッド重量 (g)。メーカー公表 or 逆算推定 |
 | head_weight_source | text | `published` / `calculated` / null |
+| distance | numeric | 飛距離目安 (yd)。ヘッドのロフト依存が大きいためhead側に配置 |
 | image_url | text | |
 | own_image_url | text | |
 | affiliate_url | text | |
@@ -113,7 +115,10 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-※ length, weight, swing_weight, distance は configurations に移動
+※ length, weight(総重量), swing_weight は configurations に移動
+※ distance はヘッドのロフトに強く依存するためhead側に残す
+
+**maker/modelの整合性ルール:** series_id非nullの場合、series.maker/series.modelが正とする。headsのmaker/modelはseries登録時にseriesの値をコピー。単体ヘッド（series_id=null）の場合のみheadsのmaker/modelを直接使用。
 
 #### `club_spec_series_shafts` — モデルで選べるシャフト
 
@@ -149,13 +154,40 @@ club_spec_series（完成品モデル: PING G440 Iron）
 | length | numeric | クラブ長さ (inch) |
 | total_weight | numeric | 総重量 (g) — ヘッド+シャフト+標準グリップ |
 | swing_weight | text | バランス (D0, D1等) |
-| distance | numeric | 飛距離目安 (yd) |
+| assumed_grip_weight | numeric | 総重量計算に含まれたグリップ重量 (g)。null許容 |
 | source | text | ai / manual |
 | verified | boolean | |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-ユニーク: `(head_id, shaft_id)` ※shaft_id=nullの場合は1レコードのみ許容
+**ユニーク制約:** `(head_id, shaft_id)` — shaft_id=nullの場合は部分ユニークインデックスで1レコードのみ許容:
+```sql
+-- shaft_idありの通常ユニーク
+CREATE UNIQUE INDEX idx_configurations_head_shaft
+  ON club_spec_configurations(head_id, shaft_id)
+  WHERE shaft_id IS NOT NULL;
+
+-- shaft_id=nullは1ヘッドにつき1レコードのみ
+CREATE UNIQUE INDEX idx_configurations_head_null_shaft
+  ON club_spec_configurations(head_id)
+  WHERE shaft_id IS NULL;
+```
+
+**`assumed_grip_weight`について:** configurationsの `total_weight` は `is_default=true` のグリップ重量を含む前提。`assumed_grip_weight` を記録しておくことで、将来グリップマスタの重量が更新されても、このconfigurationが作られた時点の前提を追跡可能。nullの場合は不明（従来データ互換）。
+
+## RLSポリシー
+
+全新規テーブルに既存の `club_specs` / `club_spec_series` と同じRLSポリシーを適用:
+
+```sql
+ALTER TABLE <table_name> ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Deny all for non-service roles" ON <table_name>
+  FOR ALL USING (false);
+```
+
+対象: `shafts`, `grips`, `club_spec_heads`, `club_spec_series_shafts`, `club_spec_series_grips`, `club_spec_configurations`
+
+service roleがRLSをバイパスしてアクセス。anon/authenticatedは全拒否。
 
 ## データの流れ
 
@@ -164,9 +196,9 @@ club_spec_series（完成品モデル: PING G440 Iron）
 ```
 series: PING G440 Iron
   ├── heads（シリーズ内で登録、headsテーブルに保存）:
-  │   ├── 4i: loft 21°, lie 61°
-  │   ├── 5i: loft 24°, lie 61.7°
-  │   ├── 7i: loft 30°, lie 63°
+  │   ├── 4i: loft 21°, lie 61°, distance 190yd
+  │   ├── 5i: loft 24°, lie 61.7°, distance 180yd
+  │   ├── 7i: loft 30°, lie 63°, distance 160yd
   │   └── ...
   ├── shaft_options（shaftsマスタから紐づけ）:
   │   ├── ALTA J CB BLACK (carbon) S   [default]
@@ -177,9 +209,9 @@ series: PING G440 Iron
   ├── grip_options（gripsマスタから紐づけ）:
   │   └── Golf Pride 360 Tour Velvet Aqua 52g [default]
   └── configurations:
-      ├── 7i × ALTA J CB BLACK S:   37.25", 369g, D1
-      ├── 7i × AWT 2.0 LITE S:     36.75", 395g, D1
-      ├── 7i × N.S. Pro 950GH S:   36.75", 398g, D1.5
+      ├── 7i × ALTA J CB BLACK S:   37.25", 369g, D1, grip=52g
+      ├── 7i × AWT 2.0 LITE S:     36.75", 395g, D1, grip=52g
+      ├── 7i × N.S. Pro 950GH S:   36.75", 398g, D1.5, grip=52g
       └── ...
 ```
 
@@ -188,13 +220,13 @@ series: PING G440 Iron
 メーカーがヘッド重量を公表していない場合、configurationsから推定:
 
 ```
-head_weight（推定） = total_weight - shaft.weight - default_grip.weight
+head_weight（推定） = total_weight - shaft.weight - assumed_grip_weight
 
 例: G440 7i × 950GH S
-  398g(総重量) - 98g(950GH) - 52g(Tour Velvet) = 248g(ヘッド)
+  398g(総重量) - 98g(950GH) - 52g(assumed_grip) = 248g(ヘッド)
 ```
 
-推定した場合 `head_weight_source = 'calculated'` で保存。シャフト/グリップの重量データが揃ってないと計算不可（nullのまま）。
+推定した場合 `head_weight_source = 'calculated'` で保存。シャフト重量またはassumed_grip_weightがnullの場合は計算不可（nullのまま）。
 
 ### 組み合わせシミュレーション（将来機能）
 
@@ -204,7 +236,7 @@ head_weight（推定） = total_weight - shaft.weight - default_grip.weight
 例: G440 7i(248g) + Diamana ZF 60 S(62g) + IOMIC(50g) = 360g
 
 グリップ変更のみの場合:
-  = configurations.total_weight - default_grip.weight + selected_grip.weight
+  = configurations.total_weight - assumed_grip_weight + selected_grip.weight
   = 398g - 52g + 50g = 396g
 ```
 
@@ -222,17 +254,38 @@ head_weight（推定） = total_weight - shaft.weight - default_grip.weight
 - シャフト/グリップ製品マスタも最初は name + maker だけで十分。weight等は後から埋める
 - configurationsがなければ、headsのスペックだけ表示（現在と同じ見え方）
 - series_shafts / series_grips が未登録なら「シャフト/グリップ情報なし」
-- head_weightが未入力 + シャフト/グリップ重量データが揃っていれば逆算を試みる
+- head_weightが未入力 + シャフト重量 + assumed_grip_weightが揃っていれば逆算を試みる
 
 ## 既存データの移行
 
-```
-現行 club_specs → club_spec_heads にリネーム
-  length, weight, swing_weight, distance は
-  → club_spec_configurations にシャフト不明(shaft_id=null)で移行
+### 方針
+
+1マイグレーションでリネーム + API変更を同時デプロイ。段階的移行（VIEW等）は不要（管理画面のみの影響で、エンドユーザー影響なし）。
+
+### 手順
+
+```sql
+-- 1. club_specs → club_spec_heads にリネーム
+ALTER TABLE club_specs RENAME TO club_spec_heads;
+
+-- 2. configurations テーブル作成 + データ移行
+INSERT INTO club_spec_configurations (head_id, shaft_id, length, total_weight, swing_weight, source, verified)
+  SELECT id, NULL, length, weight, swing_weight, source, verified
+  FROM club_spec_heads
+  WHERE length IS NOT NULL OR weight IS NOT NULL OR swing_weight IS NOT NULL;
+
+-- 3. heads から移行済みカラムを削除
+ALTER TABLE club_spec_heads DROP COLUMN length, DROP COLUMN weight, DROP COLUMN swing_weight;
+-- distance は heads に残す（ヘッドロフト依存のため）
 ```
 
 shaft_id=null の configuration = 「シャフト未特定の公称スペック」として互換性を維持。
+
+### API変更（同時デプロイ）
+
+- テーブル名 `club_specs` → `club_spec_heads` への変更を全API routeに反映
+- 型定義の更新
+- 管理画面コンポーネントの更新
 
 ## 管理画面の変更
 
@@ -247,15 +300,15 @@ shaft_id=null の configuration = 「シャフト未特定の公称スペック�
 シリーズ編集: PING G440 Iron
 ├── 基本情報: メーカー、モデル、画像
 ├── ヘッド一覧（シリーズ内で追加・編集）
-│   ├── 4i: loft 21°, lie 61°
-│   ├── 7i: loft 30°, lie 63°
+│   ├── 4i: loft 21°, lie 61°, distance 190yd
+│   ├── 7i: loft 30°, lie 63°, distance 160yd
 │   └── [＋ 番手追加]
 ├── シャフト選択（マスタから検索して紐づけ）
 │   ├── ☑ ALTA J CB BLACK S [標準]
 │   ├── ☑ N.S. Pro 950GH neo S
 │   └── [＋ シャフト追加]
 ├── グリップ選択（マスタから検索して紐づけ）
-│   └── ☑ Tour Velvet [標準]
+│   └── ☑ Tour Velvet M60 [標準]
 └── スペック表（番手×シャフトの組み合わせ）
     │  ALTA J CB BLACK S    950GH neo S
     ├── 7i: 37.25"/369g/D1    36.75"/398g/D1.5
@@ -276,16 +329,14 @@ shaft_id=null の configuration = 「シャフト未特定の公称スペック�
 
 ## 実装順序
 
-1. `shafts`, `grips` テーブル作成（マイグレーション）
-2. `club_specs` → `club_spec_heads` リネーム + カラム整理
-3. `club_spec_series_shafts`, `club_spec_series_grips` 作成
-4. `club_spec_configurations` 作成
-5. 既存データ移行（length等をconfigurationsに移動）
-6. API route更新
-7. 管理画面: シャフト/グリップ一覧・編集
-8. 管理画面: シリーズ編集にヘッド管理・シャフト/グリップ選択・configurations表追加
-9. autofill API更新
-10. AI取得プロンプト更新（シャフト別スペック対応）
+1. `shafts`, `grips` テーブル作成 + RLSポリシー（マイグレーション）
+2. `club_spec_series_shafts`, `club_spec_series_grips` 作成 + RLSポリシー
+3. `club_spec_configurations` 作成 + ユニーク制約（部分インデックス）+ RLSポリシー
+4. `club_specs` → `club_spec_heads` リネーム + カラム整理 + distance残留 + head_weight_source追加 + 既存データ移行 + API全変更（同時デプロイ）
+5. 管理画面: シャフト/グリップ一覧・編集
+6. 管理画面: シリーズ編集にヘッド管理・シャフト/グリップ選択・configurations表追加
+7. autofill API更新
+8. AI取得プロンプト更新（シャフト別スペック対応）
 
 ## 将来拡張（今回スコープ外）
 
