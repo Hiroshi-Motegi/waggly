@@ -42,7 +42,7 @@ export function AdminSidebar() {
         { href: "/admin/series", label: "セット一覧", match: (p: string) => p.startsWith("/admin/series") },
       ],
     },
-    { title: "ヘッド", items: specItems },
+    { title: "クラブ", items: specItems },
     {
       title: "シャフト",
       items: [

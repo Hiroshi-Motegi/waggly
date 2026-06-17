@@ -329,7 +329,7 @@ function SpecsList() {
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">
-          ヘッド一覧
+          クラブ一覧
           {data && (
             <span className="ml-2 text-base font-normal text-[#888]">
               ({data.total}件)

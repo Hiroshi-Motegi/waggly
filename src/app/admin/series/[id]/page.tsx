@@ -142,7 +142,7 @@ function HeadsInlineEditor({
   }
 
   async function handleDeleteHead(headId: string, clubNumber: string | null) {
-    if (!confirm(`ヘッド「${clubNumber ?? "?"}」を削除しますか？`)) return;
+    if (!confirm(`クラブ「${clubNumber ?? "?"}」を削除しますか？`)) return;
     await apiFetch("/api/admin/specs", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -189,7 +189,7 @@ function HeadsInlineEditor({
   ];
 
   return (
-    <AdminFormSection title={`ヘッド一覧 (${specs.length}件)`}>
+    <AdminFormSection title={`クラブ一覧 (${specs.length}件)`}>
       {specs.length > 0 && (
         <>
           <div className="overflow-x-auto rounded-lg border border-[#e5e5e5]">
@@ -258,7 +258,7 @@ function HeadsInlineEditor({
                 disabled={savingHeads}
                 className="rounded-full bg-[#006728] px-4 py-1.5 text-sm font-bold text-white disabled:opacity-40"
               >
-                {savingHeads ? "保存中..." : `${changedIds.length}件のヘッドを保存`}
+                {savingHeads ? "保存中..." : `${changedIds.length}件のクラブを保存`}
               </button>
             </div>
           )}
@@ -327,7 +327,7 @@ function AddHeadForm({
   return (
     <div className="flex items-end gap-2 pt-2">
       <div className="flex flex-col gap-0.5">
-        <label className="text-[10px] text-[#8b8b8b]">番手を追加</label>
+        <label className="text-[10px] text-[#8b8b8b]">クラブを追加</label>
         <input
           type="text"
           value={clubNumber}
@@ -969,7 +969,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
             </div>
           </AdminFormSection>
 
-          {/* ヘッド（番手）一覧 — インライン編集 */}
+          {/* クラブ（番手）一覧 — インライン編集 */}
           <HeadsInlineEditor
             specs={series.specs}
             seriesId={series.id}

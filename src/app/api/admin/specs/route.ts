@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
 /** POST /api/admin/specs — ヘッド新規作成 */
 export async function POST(request: NextRequest) {
   const admin = getAdmin();
-  const { maker, model, category, club_number, set_id } = await request.json();
+  const { maker, model, category, club_number, set_id, product_line_id } = await request.json();
 
   if (!maker || !model || !category) {
     return NextResponse.json({ error: "maker, model, category required" }, { status: 400 });
@@ -114,6 +114,7 @@ export async function POST(request: NextRequest) {
       maker_normalized: normalizeClubName(maker),
       model_normalized: normalizeClubName(model),
       set_id: set_id || null,
+      product_line_id: product_line_id || null,
       sort_order,
     })
     .select()
