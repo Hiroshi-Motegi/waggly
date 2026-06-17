@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
+import { use, useState, useEffect } from "react";
 import { Lock, Unlock, ExternalLink, Search, Link2 } from "lucide-react";
 import { AdminBreadcrumb } from "@/components/admin/admin-breadcrumb";
 import { AdminFormSection } from "@/components/admin/admin-form-section";
@@ -116,9 +114,8 @@ function specToForm(spec: ClubSpec): FormState {
 
 /* ── Component ── */
 
-export default function SpecEditPage() {
-  const routeParams = useParams<{ id: string }>();
-  const id = routeParams.id;
+export default function SpecEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
 
   const { data: spec, mutate, isLoading } = useAdminOne<ClubSpec>("specs", id);
   const { data: seriesData } = useAdminList<SeriesItem>("series", { pageSize: 100 });
@@ -146,7 +143,7 @@ export default function SpecEditPage() {
   async function handleSave() {
     setSaving(true);
     try {
-      await updateSpec({
+      const payload: Record<string, any> = {
         maker: form.maker,
         model: form.model,
         category: form.category,
@@ -159,10 +156,13 @@ export default function SpecEditPage() {
         head_volume: parseNum(form.head_volume),
         head_weight: parseNum(form.head_weight),
         distance: parseNum(form.distance),
-        image_url: form.image_url || null,
-        affiliate_url: form.affiliate_url || null,
         series_id: form.series_id || null,
-      });
+      };
+      if (!form.series_id) {
+        payload.image_url = form.image_url || null;
+        payload.affiliate_url = form.affiliate_url || null;
+      }
+      await updateSpec(payload);
       await mutate();
     } finally {
       setSaving(false);
@@ -222,8 +222,17 @@ export default function SpecEditPage() {
         ]}
       />
 
-      {/* Title */}
-      <h1 className="text-lg font-bold text-[#333]">{titleText}</h1>
+      {/* Title + save button */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-bold text-[#333]">{titleText}</h1>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="rounded-full bg-[#006728] px-6 py-1.5 text-sm font-bold text-white disabled:opacity-40"
+        >
+          {saving ? "保存中..." : "保存"}
+        </button>
+      </div>
 
       {/* 2-column layout */}
       <div className="flex gap-4">
@@ -334,6 +343,30 @@ export default function SpecEditPage() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Search links */}
+            <div className="flex items-center gap-3 pt-1">
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+              >
+                <Search size={12} />
+                Googleで検索
+                <ExternalLink size={10} />
+              </a>
+              <a
+                href={`https://search.rakuten.co.jp/search/mall/${encodeURIComponent(`${form.maker} ${form.model}`.trim())}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs text-[#bf0000] hover:underline"
+              >
+                <Search size={12} />
+                楽天で検索
+                <ExternalLink size={10} />
+              </a>
             </div>
           </AdminFormSection>
 
