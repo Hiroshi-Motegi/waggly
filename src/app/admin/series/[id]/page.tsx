@@ -12,6 +12,24 @@ import { apiFetch } from "@/lib/api-client";
 
 /* ── Types ── */
 
+interface Configuration {
+  id: string;
+  shaft_id: string | null;
+  length: number | null;
+  total_weight: number | null;
+  swing_weight: string | null;
+}
+
+interface SeriesShaft {
+  link_id: string;
+  id: string;
+  maker: string;
+  name: string;
+  flex: string | null;
+  weight: number | null;
+  is_default: boolean;
+}
+
 interface Series {
   id: string;
   maker: string;
@@ -32,11 +50,10 @@ interface Series {
     head_volume: number | null;
     head_weight: number | null;
     distance: number | null;
-    length: number | null;
-    total_weight: number | null;
-    swing_weight: string | null;
     verified: boolean;
+    configurations: Configuration[];
   }[];
+  shafts: SeriesShaft[];
 }
 
 /* ── Constants ── */
@@ -118,9 +135,6 @@ function HeadsInlineEditor({
           if ("head_volume" in changes) payload.head_volume = parseNum(changes.head_volume);
           if ("head_weight" in changes) payload.head_weight = parseNum(changes.head_weight);
           if ("distance" in changes) payload.distance = parseNum(changes.distance);
-          if ("length" in changes) payload.length = parseNum(changes.length);
-          if ("total_weight" in changes) payload.total_weight = parseNum(changes.total_weight);
-          if ("swing_weight" in changes) payload.swing_weight = changes.swing_weight || null;
           return apiFetch("/api/admin/specs", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -135,14 +149,12 @@ function HeadsInlineEditor({
     }
   }
 
+  // Head-only fields (length/total_weight/swing_weight are in configurations)
   const FIELDS = [
     { key: "loft", label: "ロフト", suffix: "°", type: "number" as const },
     { key: "lie", label: "ライ角", suffix: "°", type: "number" as const },
     { key: "head_volume", label: "体積", suffix: "cc", type: "number" as const },
     { key: "distance", label: "飛距離", suffix: "yd", type: "number" as const },
-    { key: "length", label: "長さ", suffix: '"', type: "number" as const },
-    { key: "total_weight", label: "重量", suffix: "g", type: "number" as const },
-    { key: "swing_weight", label: "バランス", suffix: "", type: "text" as const },
   ];
 
   return (
@@ -295,6 +307,361 @@ function AddHeadForm({
       </button>
       {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
+  );
+}
+
+/* ── Shaft Linker ── */
+
+interface ShaftSearchResult {
+  id: string;
+  maker: string;
+  name: string;
+  flex: string | null;
+  weight: number | null;
+}
+
+function ShaftLinker({
+  seriesId,
+  shafts,
+  onUpdated,
+}: {
+  seriesId: string;
+  shafts: SeriesShaft[];
+  onUpdated: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<ShaftSearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null);
+
+  async function handleSearch() {
+    const q = query.trim();
+    if (!q) return;
+    setSearching(true);
+    try {
+      const res = await apiFetch(`/api/admin/shafts?search=${encodeURIComponent(q)}&pageSize=10`);
+      if (res.ok) {
+        const data = await res.json();
+        setResults(data.items ?? data);
+      }
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function handleAdd(shaftId: string) {
+    await apiFetch(`/api/admin/series/${seriesId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "add_shaft", shaft_id: shaftId }),
+    });
+    setResults((prev) => prev.filter((r) => r.id !== shaftId));
+    onUpdated();
+  }
+
+  async function handleRemove(linkId: string, shaftId: string) {
+    setRemoving(linkId);
+    try {
+      await apiFetch(`/api/admin/series/${seriesId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "remove_shaft", link_id: linkId, shaft_id: shaftId }),
+      });
+      onUpdated();
+    } finally {
+      setRemoving(null);
+    }
+  }
+
+  // Group shafts by maker+name for display
+  const grouped = shafts.reduce<
+    Record<string, { maker: string; name: string; variants: SeriesShaft[] }>
+  >((acc, s) => {
+    const key = `${s.maker}|||${s.name}`;
+    if (!acc[key]) acc[key] = { maker: s.maker, name: s.name, variants: [] };
+    acc[key].variants.push(s);
+    return acc;
+  }, {});
+
+  // Filter out already-linked shaft IDs from search results
+  const linkedIds = new Set(shafts.map((s) => s.id));
+  const filteredResults = results.filter((r) => !linkedIds.has(r.id));
+
+  return (
+    <AdminFormSection title={`シャフト (${shafts.length}本)`}>
+      {/* Linked shafts */}
+      {Object.entries(grouped).length > 0 && (
+        <div className="space-y-1">
+          {Object.entries(grouped).map(([key, g]) => (
+            <div key={key} className="flex items-center gap-2 rounded border border-[#e5e5e5] bg-white px-3 py-1.5 text-sm">
+              <div className="flex-1">
+                <span className="font-medium">{g.maker} {g.name}</span>
+                <span className="ml-2 text-[#888]">
+                  {g.variants
+                    .map((v) => `${v.flex ?? "?"}${v.weight != null ? ` (${v.weight}g)` : ""}`)
+                    .join(", ")}
+                </span>
+              </div>
+              <div className="flex gap-1">
+                {g.variants.map((v) => (
+                  <button
+                    key={v.link_id}
+                    onClick={() => handleRemove(v.link_id, v.id)}
+                    disabled={removing === v.link_id}
+                    className="text-[10px] text-red-400 hover:text-red-600 disabled:opacity-40"
+                    title={`${v.flex ?? "?"} を削除`}
+                  >
+                    ✕{v.flex ?? ""}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Search input */}
+      <div className="flex items-end gap-2 pt-2">
+        <div className="flex flex-1 flex-col gap-0.5">
+          <label className="text-[10px] text-[#8b8b8b]">シャフトを検索して追加</label>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
+            className="rounded border border-[#dfdfdf] bg-white px-2 py-1.5 text-sm outline-none focus:border-[#006728]"
+            placeholder="シャフト名で検索..."
+          />
+        </div>
+        <button
+          onClick={handleSearch}
+          disabled={searching || !query.trim()}
+          className="shrink-0 rounded-full bg-[#006728] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-40"
+        >
+          {searching ? "検索中..." : "検索"}
+        </button>
+      </div>
+
+      {/* Search results */}
+      {filteredResults.length > 0 && (
+        <div className="mt-2 space-y-1">
+          {filteredResults.map((r) => (
+            <div key={r.id} className="flex items-center gap-2 rounded border border-dashed border-[#ccc] bg-[#fafafa] px-3 py-1 text-sm">
+              <div className="flex-1">
+                {r.maker} {r.name}
+                {r.flex && <span className="ml-1 text-[#888]">{r.flex}</span>}
+                {r.weight != null && <span className="ml-1 text-[#888]">({r.weight}g)</span>}
+              </div>
+              <button
+                onClick={() => handleAdd(r.id)}
+                className="rounded bg-[#006728] px-2 py-0.5 text-[11px] font-bold text-white"
+              >
+                追加
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </AdminFormSection>
+  );
+}
+
+/* ── Configurations Matrix ── */
+
+type ConfigEdits = Record<string, Record<string, { length?: string; total_weight?: string; swing_weight?: string }>>;
+
+function ConfigurationsMatrix({
+  specs,
+  shafts,
+  seriesId,
+  onUpdated,
+}: {
+  specs: Series["specs"];
+  shafts: SeriesShaft[];
+  seriesId: string;
+  onUpdated: () => void;
+}) {
+  const [edits, setEdits] = useState<ConfigEdits>({});
+  const [saving, setSaving] = useState(false);
+
+  function getConfigVal(
+    spec: Series["specs"][number],
+    shaftId: string,
+    field: "length" | "total_weight" | "swing_weight",
+  ): string {
+    const edited = edits[spec.id]?.[shaftId]?.[field];
+    if (edited !== undefined) return edited;
+    const cfg = spec.configurations.find((c) => c.shaft_id === shaftId);
+    if (!cfg) return "";
+    const v = cfg[field];
+    return v != null ? String(v) : "";
+  }
+
+  function setConfigField(specId: string, shaftId: string, field: string, value: string) {
+    setEdits((prev) => ({
+      ...prev,
+      [specId]: {
+        ...prev[specId],
+        [shaftId]: { ...prev[specId]?.[shaftId], [field]: value },
+      },
+    }));
+  }
+
+  // Collect all changed cells
+  const changedCells: { head_id: string; shaft_id: string }[] = [];
+  for (const [specId, shaftMap] of Object.entries(edits)) {
+    for (const [shaftId, fields] of Object.entries(shaftMap)) {
+      if (Object.keys(fields).length > 0) {
+        changedCells.push({ head_id: specId, shaft_id: shaftId });
+      }
+    }
+  }
+
+  async function handleSave() {
+    if (changedCells.length === 0) return;
+    setSaving(true);
+    try {
+      await Promise.all(
+        changedCells.map(({ head_id, shaft_id }) => {
+          const spec = specs.find((s) => s.id === head_id);
+          const fields = edits[head_id]?.[shaft_id] ?? {};
+          // Merge existing values with edits
+          const existing = spec?.configurations.find((c) => c.shaft_id === shaft_id);
+          const length = "length" in fields ? parseNum(fields.length!) : (existing?.length ?? null);
+          const total_weight = "total_weight" in fields ? parseNum(fields.total_weight!) : (existing?.total_weight ?? null);
+          const swing_weight = "swing_weight" in fields
+            ? (fields.swing_weight!.trim() || null)
+            : (existing?.swing_weight ?? null);
+
+          return apiFetch(`/api/admin/series/${seriesId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "upsert_config",
+              head_id,
+              shaft_id,
+              length,
+              total_weight,
+              swing_weight,
+            }),
+          });
+        }),
+      );
+      setEdits({});
+      onUpdated();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // Group shafts by maker+name for column headers
+  const shaftGroups = shafts.reduce<
+    Record<string, { maker: string; name: string; variants: SeriesShaft[] }>
+  >((acc, s) => {
+    const key = `${s.maker}|||${s.name}`;
+    if (!acc[key]) acc[key] = { maker: s.maker, name: s.name, variants: [] };
+    acc[key].variants.push(s);
+    return acc;
+  }, {});
+
+  const sortedSpecs = [...specs].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+  return (
+    <AdminFormSection title="スペック表 (configurations)">
+      <div className="overflow-x-auto rounded-lg border border-[#e5e5e5]">
+        <table className="w-full text-sm">
+          <thead>
+            {/* Group header row */}
+            <tr className="border-b border-[#e5e5e5] bg-[#fafafa]">
+              <th className="sticky left-0 z-10 bg-[#fafafa] px-2 py-1 text-left text-[11px] text-[#888] font-medium" rowSpan={2}>
+                番手
+              </th>
+              {Object.entries(shaftGroups).map(([key, g]) => (
+                <th
+                  key={key}
+                  colSpan={g.variants.length * 3}
+                  className="border-l border-[#e5e5e5] px-2 py-1 text-center text-[11px] text-[#888] font-medium"
+                >
+                  {g.name}
+                </th>
+              ))}
+            </tr>
+            {/* Flex sub-header row */}
+            <tr className="border-b border-[#e5e5e5] bg-[#fafafa]">
+              {Object.entries(shaftGroups).flatMap(([, g]) =>
+                g.variants.map((v) => (
+                  <th
+                    key={v.id}
+                    colSpan={3}
+                    className="border-l border-[#e5e5e5] px-1 py-1 text-center text-[10px] text-[#888] font-normal"
+                  >
+                    {v.flex ?? "?"}
+                    {v.weight != null && <span className="ml-0.5 text-[#aaa]">({v.weight}g)</span>}
+                    <div className="flex justify-center gap-1 text-[9px] text-[#bbb]">
+                      <span>長さ</span><span>重量</span><span>SW</span>
+                    </div>
+                  </th>
+                )),
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {sortedSpecs.map((sp) => (
+              <tr key={sp.id} className="border-b border-[#f0f0f0]">
+                <td className="sticky left-0 z-10 bg-white px-2 py-1 font-medium whitespace-nowrap">
+                  {sp.club_number ?? (CATEGORY_LABELS[sp.category] ?? sp.category)}
+                </td>
+                {Object.entries(shaftGroups).flatMap(([, g]) =>
+                  g.variants.map((v) => (
+                    <td key={`${sp.id}-${v.id}`} className="border-l border-[#f0f0f0] px-0.5 py-0.5">
+                      <div className="flex gap-0.5">
+                        <input
+                          type="number"
+                          step="any"
+                          value={getConfigVal(sp, v.id, "length")}
+                          onChange={(e) => setConfigField(sp.id, v.id, "length", e.target.value)}
+                          className="w-12 rounded border border-[#e5e5e5] bg-white px-1 py-0.5 text-xs outline-none focus:border-[#006728]"
+                          placeholder='"'
+                          title="長さ (inch)"
+                        />
+                        <input
+                          type="number"
+                          step="any"
+                          value={getConfigVal(sp, v.id, "total_weight")}
+                          onChange={(e) => setConfigField(sp.id, v.id, "total_weight", e.target.value)}
+                          className="w-12 rounded border border-[#e5e5e5] bg-white px-1 py-0.5 text-xs outline-none focus:border-[#006728]"
+                          placeholder="g"
+                          title="総重量 (g)"
+                        />
+                        <input
+                          type="text"
+                          value={getConfigVal(sp, v.id, "swing_weight")}
+                          onChange={(e) => setConfigField(sp.id, v.id, "swing_weight", e.target.value)}
+                          className="w-10 rounded border border-[#e5e5e5] bg-white px-1 py-0.5 text-xs outline-none focus:border-[#006728]"
+                          placeholder="SW"
+                          title="スイングウェイト"
+                        />
+                      </div>
+                    </td>
+                  )),
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {changedCells.length > 0 && (
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-full bg-[#006728] px-4 py-1.5 text-sm font-bold text-white disabled:opacity-40"
+          >
+            {saving ? "保存中..." : `${changedCells.length}件の変更を保存`}
+          </button>
+        </div>
+      )}
+    </AdminFormSection>
   );
 }
 
@@ -565,6 +932,23 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
             category={series.category ?? "iron"}
             onUpdated={() => mutate()}
           />
+
+          {/* シャフト */}
+          <ShaftLinker seriesId={series.id} shafts={series.shafts} onUpdated={() => mutate()} />
+
+          {/* スペック表 (configurations) */}
+          {series.shafts.length > 0 ? (
+            <ConfigurationsMatrix
+              specs={series.specs}
+              shafts={series.shafts}
+              seriesId={series.id}
+              onUpdated={() => mutate()}
+            />
+          ) : (
+            <AdminFormSection title="スペック表">
+              <p className="text-sm text-[#8b8b8b]">シャフトを追加するとスペック表が表示されます</p>
+            </AdminFormSection>
+          )}
 
           {/* Bottom action bar */}
           <div className="flex items-center gap-2">
