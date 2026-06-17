@@ -149,6 +149,7 @@ function VariantRow({
       <td className="px-2 py-1">
         <div className="flex gap-1">
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
             className="rounded bg-[#006728] px-2 py-0.5 text-[11px] font-bold text-white disabled:opacity-40"
@@ -156,6 +157,7 @@ function VariantRow({
             {saving ? "..." : "保存"}
           </button>
           <button
+            type="button"
             onClick={handleDelete}
             className="text-[10px] text-red-400 hover:text-red-600"
           >
@@ -213,6 +215,7 @@ function AddVariantForm({
         />
       </div>
       <button
+        type="button"
         onClick={handleAdd}
         disabled={adding || !flex.trim()}
         className="rounded-full bg-[#006728] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-40"
@@ -325,17 +328,19 @@ function ModelExpanded({
         </div>
 
         <div className="flex items-center gap-2 mt-3">
-          <button onClick={handleDeleteModel} className="text-xs font-bold text-red-500 hover:text-red-700">
+          <button type="button" onClick={handleDeleteModel} className="text-xs font-bold text-red-500 hover:text-red-700">
             モデル削除
           </button>
           <div className="flex-1" />
           <button
+            type="button"
             onClick={onClose}
             className="rounded border border-[#dfdfdf] px-3 py-1 text-xs font-bold text-[#333] hover:bg-[#f5f5f5]"
           >
             閉じる
           </button>
           <button
+            type="button"
             onClick={handleSaveModel}
             disabled={saving}
             className="rounded-full bg-[#006728] px-4 py-1 text-xs font-bold text-white disabled:opacity-40"
