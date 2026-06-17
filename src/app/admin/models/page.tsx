@@ -14,7 +14,7 @@ interface ProductLine {
   image_url: string | null;
   affiliate_url: string | null;
   verified: boolean;
-  club_model_count: number;
+  set_count: number;
 }
 
 /* ── Constants ── */
@@ -67,7 +67,7 @@ function ModelExpanded({
   }
 
   async function handleDeleteModel() {
-    if (!confirm(`「${model.maker} ${model.name}」を削除しますか？\nこのモデルに紐づくクラブモデルもすべて削除されます。`)) return;
+    if (!confirm(`「${model.maker} ${model.name}」を削除しますか？\nこのモデルに紐づくセットもすべて削除されます。`)) return;
     await apiFetch("/api/admin/product-lines", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -281,7 +281,7 @@ function ModelsList() {
                     <td className="px-3 py-2">{m.name}</td>
                     <td className="px-3 py-2">
                       <span className="inline-block rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[11px] text-[#555]">
-                        {m.club_model_count}件
+                        {m.set_count}件
                       </span>
                     </td>
                     <td className="px-3 py-2">

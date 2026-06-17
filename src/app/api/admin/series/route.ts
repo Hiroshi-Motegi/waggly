@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   const category = url.searchParams.get("category");
 
   let query = admin
-    .from("club_models")
+    .from("sets")
     .select("*, product_line:product_lines(id, maker, name), heads(id, category, club_number, loft, verified)", { count: "exact" });
 
   if (category) query = query.eq("category", category);
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { data, error } = await admin
-    .from("club_models")
+    .from("sets")
     .insert({
       product_line_id,
       name,
@@ -88,7 +88,7 @@ export async function PATCH(request: NextRequest) {
   const admin = getAdmin();
   const { id, action, data: updateData } = await request.json();
 
-  const { data: series } = await admin.from("club_models").select("*").eq("id", id).single();
+  const { data: series } = await admin.from("sets").select("*").eq("id", id).single();
   if (!series) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   if (action === "lookup_rakuten" && updateData?.url) {
@@ -99,8 +99,8 @@ export async function PATCH(request: NextRequest) {
     const updates: Record<string, any> = {};
     if (result.imageUrl) updates.image_url = result.imageUrl;
     if (result.affiliateUrl) updates.affiliate_url = result.affiliateUrl;
-    await admin.from("club_models").update(updates).eq("id", id);
-    const { data: updated } = await admin.from("club_models").select("*").eq("id", id).single();
+    await admin.from("sets").update(updates).eq("id", id);
+    const { data: updated } = await admin.from("sets").select("*").eq("id", id).single();
     return NextResponse.json(updated);
   }
 
@@ -123,7 +123,7 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    await admin.from("club_models").update(fields).eq("id", id);
+    await admin.from("sets").update(fields).eq("id", id);
 
     // Cascade maker/model changes to all linked heads
     if ("maker" in fields || "model" in fields) {
@@ -136,10 +136,10 @@ export async function PATCH(request: NextRequest) {
         headUpdates.model = fields.model;
         headUpdates.model_normalized = normalizeClubName(fields.model);
       }
-      await admin.from("heads").update(headUpdates).eq("model_id", id);
+      await admin.from("heads").update(headUpdates).eq("set_id", id);
     }
 
-    const { data: updated } = await admin.from("club_models").select("*, product_line:product_lines(id, maker, name)").eq("id", id).single();
+    const { data: updated } = await admin.from("sets").select("*, product_line:product_lines(id, maker, name)").eq("id", id).single();
     return NextResponse.json(updated);
   }
 
@@ -148,21 +148,21 @@ export async function PATCH(request: NextRequest) {
     // maker+model が一致する heads を全て紐づけ
     const { count } = await admin
       .from("heads")
-      .update({ model_id: id })
+      .update({ set_id: id })
       .eq("maker", series.maker)
       .eq("model", series.model);
 
-    const { data: updated } = await admin.from("club_models").select("*").eq("id", id).single();
+    const { data: updated } = await admin.from("sets").select("*").eq("id", id).single();
     return NextResponse.json({ ...updated, assigned: count });
   }
 
   return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
 
-/** DELETE /api/admin/series — シリーズ削除（headsのmodel_idはON DELETE SET NULLで解除） */
+/** DELETE /api/admin/series — シリーズ削除（headsのset_idはON DELETE SET NULLで解除） */
 export async function DELETE(request: NextRequest) {
   const admin = getAdmin();
   const { id } = await request.json();
-  await admin.from("club_models").delete().eq("id", id);
+  await admin.from("sets").delete().eq("id", id);
   return NextResponse.json({ ok: true });
 }

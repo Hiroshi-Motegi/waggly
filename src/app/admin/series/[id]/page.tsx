@@ -309,7 +309,7 @@ function AddHeadForm({
           model,
           category,
           club_number: clubNumber.trim(),
-          model_id: seriesId,
+          set_id: seriesId,
         }),
       });
       if (res.ok) {
@@ -806,7 +806,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
       {/* Breadcrumb */}
       <AdminBreadcrumb
         items={[
-          { label: "クラブ", href: "/admin/series" },
+          { label: "セット", href: "/admin/series" },
           { label: titleText },
         ]}
       />

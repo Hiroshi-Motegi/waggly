@@ -36,7 +36,7 @@ function computeSortOrder(clubNumber: string | null | undefined): number | null 
 async function fetchHeadFlat(admin: ReturnType<typeof getAdmin>, id: string) {
   const { data } = await admin
     .from("heads")
-    .select("*, series:club_models(*), configurations:clubs(length, total_weight, swing_weight, shaft_variant_id)")
+    .select("*, series:sets(*), configurations:clubs(length, total_weight, swing_weight, shaft_variant_id)")
     .eq("id", id)
     .single();
   if (!data) return null;
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 
   let query = admin
     .from("heads")
-    .select("*, series:club_models(*), configurations:clubs(length, total_weight, swing_weight, shaft_variant_id)", { count: "exact" });
+    .select("*, series:sets(*), configurations:clubs(length, total_weight, swing_weight, shaft_variant_id)", { count: "exact" });
 
   if (category) query = query.eq("category", category);
 
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
 /** POST /api/admin/specs — ヘッド新規作成 */
 export async function POST(request: NextRequest) {
   const admin = getAdmin();
-  const { maker, model, category, club_number, model_id } = await request.json();
+  const { maker, model, category, club_number, set_id } = await request.json();
 
   if (!maker || !model || !category) {
     return NextResponse.json({ error: "maker, model, category required" }, { status: 400 });
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       club_number: club_number || null,
       maker_normalized: normalizeClubName(maker),
       model_normalized: normalizeClubName(model),
-      model_id: model_id || null,
+      set_id: set_id || null,
       sort_order,
     })
     .select()
@@ -237,7 +237,7 @@ JSON形式で回答（JSON以外不要）:
     const HEAD_FIELDS = [
       "maker", "model", "category", "club_number", "sort_order",
       "loft", "lie", "bounce", "distance",
-      "head_volume", "head_weight", "image_url", "affiliate_url", "verified", "model_id",
+      "head_volume", "head_weight", "image_url", "affiliate_url", "verified", "set_id",
     ];
     const CONFIG_FIELDS = ["length", "total_weight", "swing_weight"];
 

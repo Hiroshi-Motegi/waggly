@@ -9,7 +9,7 @@ function getAdmin() {
   );
 }
 
-/** GET /api/admin/product-lines — プロダクトライン一覧（club_models数付き） */
+/** GET /api/admin/product-lines — プロダクトライン一覧（sets数付き） */
 export async function GET(request: NextRequest) {
   const admin = getAdmin();
   const url = new URL(request.url);
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   let query = admin
     .from("product_lines")
-    .select("*, club_models(id)", { count: "exact" });
+    .select("*, sets(id)", { count: "exact" });
 
   if (search) {
     const norm = normalizeClubName(search);
@@ -39,8 +39,8 @@ export async function GET(request: NextRequest) {
 
   const result = (data ?? []).map((pl: any) => ({
     ...pl,
-    club_model_count: (pl.club_models ?? []).length,
-    club_models: undefined,
+    set_count: (pl.sets ?? []).length,
+    sets: undefined,
   }));
 
   return NextResponse.json({ data: result, total: count ?? 0, page, pageSize });
@@ -109,21 +109,21 @@ export async function PATCH(request: NextRequest) {
 
     const { data: updated } = await admin
       .from("product_lines")
-      .select("*, club_models(id)")
+      .select("*, sets(id)")
       .eq("id", id)
       .single();
 
     return NextResponse.json({
       ...updated,
-      club_model_count: (updated?.club_models ?? []).length,
-      club_models: undefined,
+      set_count: (updated?.sets ?? []).length,
+      sets: undefined,
     });
   }
 
   return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
 
-/** DELETE /api/admin/product-lines — プロダクトライン削除（CASCADE で club_models も削除） */
+/** DELETE /api/admin/product-lines — プロダクトライン削除（CASCADE で sets も削除） */
 export async function DELETE(request: NextRequest) {
   const admin = getAdmin();
   const { id } = await request.json();

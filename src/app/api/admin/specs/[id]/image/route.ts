@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const { data: updated } = await admin
     .from("heads")
-    .select("*, series:club_models(*)")
+    .select("*, series:sets(*)")
     .eq("id", id)
     .single();
 
@@ -54,7 +54,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
   const { data: updated } = await admin
     .from("heads")
-    .select("*, series:club_models(*)")
+    .select("*, series:sets(*)")
     .eq("id", id)
     .single();
 

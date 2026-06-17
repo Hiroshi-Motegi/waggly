@@ -12,14 +12,14 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const { id } = await params;
   const admin = getAdmin();
   const { data, error } = await admin
-    .from("club_models")
+    .from("sets")
     .select(`
       *,
       product_line:product_lines(id, maker, name),
       heads(id, category, club_number, sort_order, loft, lie, bounce, head_volume, head_weight, distance, verified,
         configurations:clubs(id, shaft_variant_id, length, total_weight, swing_weight)
       ),
-      series_shafts:club_model_shafts(id, is_default, shaft_model:shaft_models(id, maker, name, type, variants:shaft_variants(id, flex, weight, torque, kick_point)))
+      series_shafts:set_shafts(id, is_default, shaft_model:shaft_models(id, maker, name, type, variants:shaft_variants(id, flex, weight, torque, kick_point)))
     `)
     .eq("id", id)
     .single();
@@ -70,8 +70,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (action === "add_shaft") {
     const { shaft_model_id, is_default } = body;
     const { data, error } = await admin
-      .from("club_model_shafts")
-      .insert({ model_id: seriesId, shaft_model_id, is_default: is_default ?? false })
+      .from("set_shafts")
+      .insert({ set_id: seriesId, shaft_model_id, is_default: is_default ?? false })
       .select("id, is_default, shaft_model:shaft_models(id, maker, name, type, variants:shaft_variants(id, flex, weight, torque, kick_point))")
       .single();
     if (error) {
@@ -84,11 +84,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   // Remove shaft from series
   if (action === "remove_shaft") {
     const { link_id, shaft_model_id } = body;
-    await admin.from("club_model_shafts").delete().eq("id", link_id);
+    await admin.from("set_shafts").delete().eq("id", link_id);
     const { data: variants } = await admin.from("shaft_variants").select("id").eq("model_id", shaft_model_id);
     if (variants && variants.length > 0) {
       const variantIds = variants.map((v: any) => v.id);
-      const { data: headRows } = await admin.from("heads").select("id").eq("model_id", seriesId);
+      const { data: headRows } = await admin.from("heads").select("id").eq("set_id", seriesId);
       if (headRows && headRows.length > 0) {
         const headIds = headRows.map((h: any) => h.id);
         await admin.from("clubs").delete()

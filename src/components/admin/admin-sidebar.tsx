@@ -37,9 +37,9 @@ export function AdminSidebar() {
       ],
     },
     {
-      title: "クラブ",
+      title: "セット",
       items: [
-        { href: "/admin/series", label: "クラブ一覧", match: (p: string) => p.startsWith("/admin/series") },
+        { href: "/admin/series", label: "セット一覧", match: (p: string) => p.startsWith("/admin/series") },
       ],
     },
     { title: "ヘッド", items: specItems },
