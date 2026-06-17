@@ -10,6 +10,28 @@ function getAdmin() {
   );
 }
 
+/** Compute sort_order from club_number for natural ordering */
+function computeSortOrder(clubNumber: string | null | undefined): number | null {
+  if (!clubNumber) return null;
+  const cn = clubNumber.trim();
+  const upper = cn.toUpperCase();
+  // Iron: 4I→4, 5I→5, ...
+  if (/^\d+[iI]$/.test(cn)) return parseInt(cn);
+  // Wood: 1W→1, 3W→3, ...
+  if (/^\d+[wW]$/.test(cn)) return parseInt(cn);
+  // Utility/Hybrid: 3U→3, 4H→4, ...
+  if (/^\d+[uUhH]$/.test(cn)) return parseInt(cn);
+  // Named wedges
+  if (upper === "PW") return 100;
+  if (upper === "AW" || upper === "GW") return 110;
+  if (upper === "SW") return 120;
+  if (upper === "LW") return 130;
+  if (upper === "UW") return 140;
+  // Degree wedges: 48, 50, 52, 56, etc.
+  if (/^\d+°?$/.test(cn)) return parseInt(cn) + 100;
+  return 999;
+}
+
 /** Fetch a single head row with default config flattened for backward-compat */
 async function fetchHeadFlat(admin: ReturnType<typeof getAdmin>, id: string) {
   const { data } = await admin
@@ -79,6 +101,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "maker, model, category required" }, { status: 400 });
   }
 
+  // Auto-assign sort_order from club_number
+  const sort_order = computeSortOrder(club_number);
+
   const { data, error } = await admin
     .from("club_spec_heads")
     .insert({
@@ -89,6 +114,7 @@ export async function POST(request: NextRequest) {
       maker_normalized: normalizeClubName(maker),
       model_normalized: normalizeClubName(model),
       series_id: series_id || null,
+      sort_order,
     })
     .select()
     .single();
@@ -209,7 +235,7 @@ JSON形式で回答（JSON以外不要）:
 
   if (action === "update" && updateData) {
     const HEAD_FIELDS = [
-      "maker", "model", "category", "club_number",
+      "maker", "model", "category", "club_number", "sort_order",
       "loft", "lie", "distance",
       "head_volume", "head_weight", "image_url", "affiliate_url", "verified", "series_id",
     ];

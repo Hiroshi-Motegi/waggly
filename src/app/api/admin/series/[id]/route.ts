@@ -13,7 +13,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const admin = getAdmin();
   const { data, error } = await admin
     .from("club_spec_series")
-    .select("*, club_spec_heads(id, category, club_number, loft, lie, head_volume, head_weight, distance, verified, configurations:club_spec_configurations(length, total_weight, swing_weight, shaft_id))")
+    .select("*, club_spec_heads(id, category, club_number, sort_order, loft, lie, head_volume, head_weight, distance, verified, configurations:club_spec_configurations(length, total_weight, swing_weight, shaft_id))")
     .eq("id", id)
     .single();
 
@@ -33,9 +33,12 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         swing_weight: defaultCfg?.swing_weight ?? null,
       };
     })
-    .sort((a: any, b: any) =>
-      (a.club_number ?? "").localeCompare(b.club_number ?? "")
-    );
+    .sort((a: any, b: any) => {
+      const sa = a.sort_order ?? 9999;
+      const sb = b.sort_order ?? 9999;
+      if (sa !== sb) return sa - sb;
+      return (a.club_number ?? "").localeCompare(b.club_number ?? "");
+    });
 
   return NextResponse.json({ ...data, specs, spec_count: specs.length, club_spec_heads: undefined });
 }

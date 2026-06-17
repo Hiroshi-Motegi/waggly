@@ -26,6 +26,7 @@ interface Series {
     id: string;
     category: string;
     club_number: string | null;
+    sort_order: number | null;
     loft: number | null;
     lie: number | null;
     head_volume: number | null;
@@ -91,6 +92,18 @@ function HeadsInlineEditor({
 
   const changedIds = Object.keys(edits).filter((id) => Object.keys(edits[id]).length > 0);
 
+  function handleMove(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= specs.length) return;
+    // Swap sort_order values between the two rows
+    const a = specs[index];
+    const b = specs[target];
+    const orderA = a.sort_order ?? (index + 1) * 10;
+    const orderB = b.sort_order ?? (target + 1) * 10;
+    setField(a.id, "sort_order", String(orderB));
+    setField(b.id, "sort_order", String(orderA));
+  }
+
   async function handleSaveHeads() {
     if (changedIds.length === 0) return;
     setSavingHeads(true);
@@ -99,6 +112,7 @@ function HeadsInlineEditor({
         changedIds.map((id) => {
           const changes = edits[id];
           const payload: Record<string, any> = {};
+          if ("sort_order" in changes) payload.sort_order = parseNum(changes.sort_order);
           if ("loft" in changes) payload.loft = parseNum(changes.loft);
           if ("lie" in changes) payload.lie = parseNum(changes.lie);
           if ("head_volume" in changes) payload.head_volume = parseNum(changes.head_volume);
@@ -139,6 +153,7 @@ function HeadsInlineEditor({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#e5e5e5] bg-[#fafafa]">
+                  <th className="w-8 px-1 py-2 text-center text-[11px] text-[#888] font-medium">順</th>
                   <th className="px-2 py-2 text-left text-[11px] text-[#888] font-medium whitespace-nowrap">番手</th>
                   {FIELDS.map((f) => (
                     <th key={f.key} className="px-1 py-2 text-left text-[11px] text-[#888] font-medium whitespace-nowrap">{f.label}</th>
@@ -146,8 +161,22 @@ function HeadsInlineEditor({
                 </tr>
               </thead>
               <tbody>
-                {specs.map((sp) => (
-                  <tr key={sp.id} className="border-b border-[#f0f0f0]">
+                {specs.map((sp, idx) => (
+                  <tr key={sp.id} className={`border-b border-[#f0f0f0] ${edits[sp.id]?.sort_order !== undefined ? "bg-amber-50" : ""}`}>
+                    <td className="px-1 py-1 text-center">
+                      <div className="flex flex-col items-center gap-0">
+                        <button
+                          onClick={() => handleMove(idx, -1)}
+                          disabled={idx === 0}
+                          className="text-[10px] text-[#888] hover:text-[#006728] disabled:opacity-20 leading-none"
+                        >▲</button>
+                        <button
+                          onClick={() => handleMove(idx, 1)}
+                          disabled={idx === specs.length - 1}
+                          className="text-[10px] text-[#888] hover:text-[#006728] disabled:opacity-20 leading-none"
+                        >▼</button>
+                      </div>
+                    </td>
                     <td className="px-2 py-1.5 font-medium whitespace-nowrap">
                       {sp.club_number ?? (CATEGORY_LABELS[sp.category] ?? sp.category)}
                     </td>
