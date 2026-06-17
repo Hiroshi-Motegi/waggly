@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { use, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Unlock, ExternalLink, Search } from "lucide-react";
 import { AdminBreadcrumb } from "@/components/admin/admin-breadcrumb";
@@ -37,9 +37,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 /* ── Component ── */
 
-export default function SeriesEditPage() {
-  const routeParams = useParams<{ id: string }>();
-  const id = routeParams.id;
+export default function SeriesEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
 
   const { data: series, mutate, isLoading } = useAdminOne<Series>("series", id);
@@ -125,8 +124,17 @@ export default function SeriesEditPage() {
         ]}
       />
 
-      {/* Title */}
-      <h1 className="text-lg font-bold text-[#333]">{titleText}</h1>
+      {/* Title + save button */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-bold text-[#333]">{titleText}</h1>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="rounded-full bg-[#006728] px-6 py-1.5 text-sm font-bold text-white disabled:opacity-40"
+        >
+          {saving ? "保存中..." : "保存"}
+        </button>
+      </div>
 
       {/* 2-column layout */}
       <div className="flex gap-4">
@@ -159,6 +167,11 @@ export default function SeriesEditPage() {
             <span className="inline-block rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#8b8b8b]">
               {series.source}
             </span>
+          </div>
+
+          {/* Spec count */}
+          <div className="text-center text-[10px] text-[#8b8b8b]">
+            スペック: {series.spec_count}件
           </div>
         </div>
 
