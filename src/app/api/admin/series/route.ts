@@ -19,9 +19,15 @@ export async function GET(request: NextRequest) {
   const sort = url.searchParams.get("sort") ?? "maker";
   const order = url.searchParams.get("order") === "desc" ? false : true;
 
-  const { data, error, count } = await admin
+  const category = url.searchParams.get("category");
+
+  let query = admin
     .from("club_spec_series")
-    .select("*, club_spec_heads(id, category, club_number, loft, verified)", { count: "exact" })
+    .select("*, club_spec_heads(id, category, club_number, loft, verified)", { count: "exact" });
+
+  if (category) query = query.eq("category", category);
+
+  const { data, error, count } = await query
     .order(sort, { ascending: order })
     .order("model", { ascending: true })
     .range((page - 1) * pageSize, page * pageSize - 1);
@@ -40,7 +46,7 @@ export async function GET(request: NextRequest) {
 /** POST /api/admin/series — シリーズ作成 */
 export async function POST(request: NextRequest) {
   const admin = getAdmin();
-  const { maker, model } = await request.json();
+  const { maker, model, category } = await request.json();
 
   if (!maker || !model) {
     return NextResponse.json({ error: "maker and model required" }, { status: 400 });
@@ -48,7 +54,7 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await admin
     .from("club_spec_series")
-    .insert({ maker, model })
+    .insert({ maker, model, ...(category ? { category } : {}) })
     .select()
     .single();
 
@@ -87,7 +93,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (action === "update" && updateData) {
-    const ALLOWED = ["maker", "model", "image_url", "affiliate_url", "verified"];
+    const ALLOWED = ["maker", "model", "category", "image_url", "affiliate_url", "verified"];
     const fields: Record<string, any> = {};
     for (const key of ALLOWED) {
       if (key in updateData) fields[key] = updateData[key];

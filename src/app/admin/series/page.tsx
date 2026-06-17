@@ -14,6 +14,7 @@ interface Series {
   id: string;
   maker: string;
   model: string;
+  category: string | null;
   image_url: string | null;
   affiliate_url: string | null;
   verified: boolean;
@@ -21,6 +22,24 @@ interface Series {
   spec_count: number;
   specs: { id: string; category: string; club_number: string | null; loft: number | null; verified: boolean }[];
 }
+
+const CATEGORY_LABELS: Record<string, string> = {
+  driver: "ドライバー",
+  fairway_wood: "FW",
+  utility: "UT",
+  iron: "アイアン",
+  wedge: "ウェッジ",
+  putter: "パター",
+};
+
+const CATEGORY_OPTIONS = [
+  { value: "driver", label: "ドライバー" },
+  { value: "fairway_wood", label: "フェアウェイウッド" },
+  { value: "utility", label: "ユーティリティ" },
+  { value: "iron", label: "アイアン" },
+  { value: "wedge", label: "ウェッジ" },
+  { value: "putter", label: "パター" },
+];
 
 /* ── Columns ── */
 
@@ -47,6 +66,15 @@ const columns: ColumnDef<Series, any>[] = [
     accessorKey: "model",
     header: "モデル",
     enableSorting: true,
+  },
+  {
+    accessorKey: "category",
+    header: "カテゴリ",
+    enableSorting: false,
+    cell: ({ getValue }) => {
+      const v = getValue() as string | null;
+      return v ? CATEGORY_LABELS[v] ?? v : "-";
+    },
   },
   {
     accessorKey: "spec_count",
@@ -89,6 +117,7 @@ function SeriesList() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [newMaker, setNewMaker] = useState("");
   const [newModel, setNewModel] = useState("");
+  const [newCategory, setNewCategory] = useState("iron");
   const [creating, setCreating] = useState(false);
 
   const sort = sorting[0]?.id ?? "";
@@ -107,7 +136,7 @@ function SeriesList() {
       const res = await apiFetch("/api/admin/series", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ maker: newMaker.trim(), model: newModel.trim() }),
+        body: JSON.stringify({ maker: newMaker.trim(), model: newModel.trim(), category: newCategory }),
       });
       if (res.ok) {
         setNewMaker("");
@@ -155,6 +184,18 @@ function SeriesList() {
               placeholder="Apex"
               className="rounded border border-[#dfdfdf] bg-white px-2 py-1.5 text-sm text-black outline-none focus:border-[#006728]"
             />
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <label className="text-[10px] text-[#8b8b8b]">カテゴリ</label>
+            <select
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              className="rounded border border-[#dfdfdf] bg-white px-2 py-1.5 text-sm text-black outline-none focus:border-[#006728]"
+            >
+              {CATEGORY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
           <button
             onClick={handleCreate}

@@ -16,6 +16,7 @@ interface Series {
   id: string;
   maker: string;
   model: string;
+  category: string | null;
   image_url: string | null;
   affiliate_url: string | null;
   verified: boolean;
@@ -57,10 +58,19 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
   const { data: series, mutate, isLoading } = useAdminOne<Series>("series", id);
   const { updateSeries, lookupRakuten, toggleVerified } = useSeriesActions(id, () => mutate());
 
-  const [form, setForm] = useState({ maker: "", model: "", image_url: "", affiliate_url: "" });
+  const [form, setForm] = useState({ maker: "", model: "", category: "", image_url: "", affiliate_url: "" });
   const [saving, setSaving] = useState(false);
   const [rakutenUrl, setRakutenUrl] = useState("");
   const [lookingUp, setLookingUp] = useState(false);
+
+  const CATEGORY_OPTIONS = [
+    { value: "driver", label: "ドライバー" },
+    { value: "fairway_wood", label: "フェアウェイウッド" },
+    { value: "utility", label: "ユーティリティ" },
+    { value: "iron", label: "アイアン" },
+    { value: "wedge", label: "ウェッジ" },
+    { value: "putter", label: "パター" },
+  ];
 
   // Sync form from data
   useEffect(() => {
@@ -68,6 +78,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
       setForm({
         maker: series.maker ?? "",
         model: series.model ?? "",
+        category: series.category ?? "",
         image_url: series.image_url ?? "",
         affiliate_url: series.affiliate_url ?? "",
       });
@@ -80,6 +91,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
       await updateSeries({
         maker: form.maker,
         model: form.model,
+        category: form.category || null,
         image_url: form.image_url || null,
         affiliate_url: form.affiliate_url || null,
       });
@@ -192,7 +204,7 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
         <div className="flex-1 space-y-4">
           {/* 基本情報 */}
           <AdminFormSection title="基本情報">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="flex flex-col gap-0.5">
                 <label className="text-[10px] text-[#8b8b8b]">メーカー</label>
                 <input
@@ -212,6 +224,19 @@ export default function SeriesEditPage({ params }: { params: Promise<{ id: strin
                   className="rounded border border-[#dfdfdf] bg-white px-2 py-1.5 text-sm text-black outline-none focus:border-[#006728]"
                   placeholder="-"
                 />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <label className="text-[10px] text-[#8b8b8b]">カテゴリ</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+                  className="rounded border border-[#dfdfdf] bg-white px-2 py-1.5 text-sm text-black outline-none focus:border-[#006728]"
+                >
+                  <option value="">未設定</option>
+                  {CATEGORY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
