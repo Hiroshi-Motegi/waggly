@@ -8,7 +8,6 @@ interface ModelOption {
   name: string;
   category: string;
   makerSlug: string;
-  seriesSlug: string;
   slug: string;
   maker: string;
 }
@@ -67,10 +66,10 @@ export function CatalogSearch({ models }: { models: ModelOption[] }) {
         <div className="absolute z-10 left-3 right-3 mt-1 max-h-64 overflow-y-auto rounded-lg border border-[#ddd] bg-white shadow-lg">
           {filtered.map((m) => (
             <button
-              key={`${m.makerSlug}/${m.seriesSlug}/${m.slug}`}
+              key={`${m.makerSlug}/${m.slug}`}
               type="button"
               onMouseDown={() => {
-                router.push(`/catalog/${m.makerSlug}/${m.seriesSlug}/${m.slug}`);
+                router.push(`/catalog/${m.makerSlug}/${m.slug}`);
                 setQuery("");
               }}
               className="w-full text-left px-3 py-2.5 text-sm hover:bg-[#e6f2eb] border-b border-[#ececec] last:border-0"

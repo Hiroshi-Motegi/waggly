@@ -18,10 +18,9 @@ export default async function CatalogPage() {
   const searchModels = allModels.map((m) => ({
     name: m.name,
     category: m.category,
-    makerSlug: m.catalog_series.maker_slug,
-    seriesSlug: m.catalog_series.name_slug,
+    makerSlug: m.maker_slug,
     slug: m.slug,
-    maker: m.catalog_series.maker,
+    maker: m.maker,
   }));
 
   const jsonLd = {
