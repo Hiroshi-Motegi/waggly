@@ -20,6 +20,24 @@ export function getAdminClient() {
 }
 
 /**
+ * Create a user-scoped Supabase client from a Bearer token.
+ * Uses anon key + user JWT so RLS policies apply.
+ */
+function createUserClient(token: string) {
+  return createRawClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    }
+  );
+}
+
+/**
  * auth_user_id → users.id 逆引き（user_providers 経由）。
  */
 async function resolveUserId(authUserId: string): Promise<string | null> {
@@ -36,6 +54,9 @@ async function resolveUserId(authUserId: string): Promise<string | null> {
 /**
  * Get Supabase client and userId for API routes.
  * Returns null if not authenticated (caller should return 401).
+ *
+ * The returned `supabase` is a user-scoped client (RLS applies).
+ * Use `getAdminClient()` explicitly for storage or admin operations.
  * userId is users.id (independent UUID), NOT auth.users.id.
  */
 type AppSupabaseClient = SupabaseClient;
@@ -99,7 +120,8 @@ export async function getApiAuth(): Promise<{
     const userId = await resolveUserId(user.id);
     if (!userId) return null;
 
-    return { supabase: adminClient, userId };
+    // Return user-scoped client (RLS applies)
+    return { supabase: createUserClient(token), userId };
   }
 
   // Production: cookie-based auth
@@ -113,12 +135,16 @@ export async function getApiAuth(): Promise<{
   const userId = await resolveUserId(user.id);
   if (!userId) return null;
 
-  return { supabase: getAdminClient(), userId };
+  // Return the SSR client (already user-scoped, RLS applies)
+  return { supabase, userId };
 }
 
 /**
  * getApiAuth() variant that also returns auth_user_id.
  * Used by auth APIs (resolve-session, etc.) that need both IDs.
+ *
+ * NOTE: Returns adminClient since auth routes need elevated access
+ * for cross-user operations (conflict resolution, account linking, etc.).
  */
 export async function getApiAuthWithAuthUserId(): Promise<{
   supabase: AppSupabaseClient;

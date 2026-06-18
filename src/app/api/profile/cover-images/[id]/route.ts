@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
 import { supabaseError } from "@/lib/api-error";
 
 export function generateStaticParams() {
@@ -28,7 +28,7 @@ export async function DELETE(
     const url = new URL(image.image_url);
     const storagePath = url.pathname.split("/object/public/club-images/")[1];
     if (storagePath) {
-      await supabase.storage.from("club-images").remove([storagePath]);
+      await getAdminClient().storage.from("club-images").remove([storagePath]);
     }
   } catch {
     // Storage cleanup failure is non-fatal

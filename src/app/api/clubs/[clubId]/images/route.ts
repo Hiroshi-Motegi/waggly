@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
 import { supabaseError } from "@/lib/api-error";
 
 export function generateStaticParams() {
@@ -41,13 +41,15 @@ export async function POST(
   const ext = extMap[file.type] || "jpg";
   const filePath = `${userId}/${clubId}/${Date.now()}.${ext}`;
 
-  const { error: uploadError } = await supabase.storage
+  const adminStorage = getAdminClient().storage;
+
+  const { error: uploadError } = await adminStorage
     .from("club-images")
     .upload(filePath, file);
 
   if (uploadError) return supabaseError(uploadError);
 
-  const { data: { publicUrl } } = supabase.storage
+  const { data: { publicUrl } } = adminStorage
     .from("club-images")
     .getPublicUrl(filePath);
 

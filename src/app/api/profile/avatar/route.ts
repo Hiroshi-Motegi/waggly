@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
 import { supabaseError } from "@/lib/api-error";
 
 export async function POST(request: NextRequest) {
@@ -24,13 +24,15 @@ export async function POST(request: NextRequest) {
   const ext = extMap[file.type] || "jpg";
   const filePath = `${userId}/${Date.now()}.${ext}`;
 
-  const { error: uploadError } = await supabase.storage
+  const adminStorage = getAdminClient().storage;
+
+  const { error: uploadError } = await adminStorage
     .from("avatars")
     .upload(filePath, file, { upsert: true });
 
   if (uploadError) return supabaseError(uploadError);
 
-  const { data: { publicUrl } } = supabase.storage
+  const { data: { publicUrl } } = adminStorage
     .from("avatars")
     .getPublicUrl(filePath);
 
