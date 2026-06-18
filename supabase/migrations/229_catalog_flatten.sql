@@ -45,6 +45,29 @@ ALTER TABLE catalog_models DROP COLUMN IF EXISTS price_note;
 UPDATE catalog_models SET source_url = url WHERE url IS NOT NULL AND source_url IS NULL;
 ALTER TABLE catalog_models DROP COLUMN IF EXISTS url;
 
+-- 重複する(maker_slug, slug)ペアを解消（古い方を削除、関連specsも先に削除）
+DELETE FROM catalog_specs
+WHERE model_id IN (
+  SELECT id FROM (
+    SELECT id, ROW_NUMBER() OVER (PARTITION BY maker_slug, slug ORDER BY created_at DESC, id DESC) AS rn
+    FROM catalog_models
+  ) dupes WHERE rn > 1
+);
+DELETE FROM favorite_clubs
+WHERE model_id IN (
+  SELECT id FROM (
+    SELECT id, ROW_NUMBER() OVER (PARTITION BY maker_slug, slug ORDER BY created_at DESC, id DESC) AS rn
+    FROM catalog_models
+  ) dupes WHERE rn > 1
+);
+DELETE FROM catalog_models
+WHERE id IN (
+  SELECT id FROM (
+    SELECT id, ROW_NUMBER() OVER (PARTITION BY maker_slug, slug ORDER BY created_at DESC, id DESC) AS rn
+    FROM catalog_models
+  ) dupes WHERE rn > 1
+);
+
 -- 新しいユニーク制約: maker_slug + slug
 CREATE UNIQUE INDEX IF NOT EXISTS idx_catalog_models_maker_slug
   ON catalog_models(maker_slug, slug);
