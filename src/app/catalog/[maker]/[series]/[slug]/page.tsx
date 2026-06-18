@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { BackButton } from "@/components/layout/back-button";
 import { notFound } from "next/navigation";
 import { getModelDetail, getModelsByCategory, compareModelSlug } from "@/lib/catalog";
 import { fetchRelatedNews } from "@/lib/catalog-news";
@@ -72,25 +73,29 @@ export default async function ModelDetailPage({
   // Fetch related news
   const news = await fetchRelatedNews(`${catalogSeries.name} ${categoryLabel}`);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Waggly", item: "https://waggly.jp" },
+      { "@type": "ListItem", position: 2, name: "ゴルフクラブカタログ", item: "https://waggly.jp/catalog" },
+      { "@type": "ListItem", position: 3, name: catalogSeries.maker, item: `https://waggly.jp/catalog/${maker}` },
+      { "@type": "ListItem", position: 4, name: catalogSeries.name, item: `https://waggly.jp/catalog/${maker}/${series}` },
+      { "@type": "ListItem", position: 5, name: `${catalogSeries.name}${model.name ? ` ${model.name}` : ""} ${categoryLabel}` },
+    ],
+  };
+
   return (
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-          <p className="text-sm font-bold text-white">ゴルフクラブカタログ</p>
-        </div>
-
-        {/* Breadcrumb */}
-        <div className="flex items-center px-3 py-1 w-full max-w-screen-sm bg-black/20 border-b border-white/30 overflow-hidden">
-          <p className="text-xs text-white truncate">
-            <Link href="/catalog" className="underline">カタログ</Link>
-            <span> / </span>
-            <Link href={`/catalog/${maker}`} className="underline">{catalogSeries.maker}</Link>
-            <span> / </span>
-            <Link href={`/catalog/${maker}/${series}`} className="underline">{catalogSeries.name}</Link>
-            <span> / {categoryLabel}</span>
-          </p>
+        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
+          <BackButton fallbackHref={`/catalog/${maker}`} />
+          <div className="flex flex-col items-center gap-0.5">
+            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+            <p className="text-sm font-bold text-white">ゴルフクラブカタログ</p>
+          </div>
         </div>
 
         {/* Banner */}
@@ -114,8 +119,7 @@ export default async function ModelDetailPage({
               <div className="min-w-0">
                 <p className="text-xs text-[#888] mb-0.5">{catalogSeries.maker}</p>
                 <h1 className="text-lg font-bold text-[#222] leading-tight">
-                  {catalogSeries.name}
-                  {model.name ? ` ${model.name}` : ""}
+                  {model.name}
                 </h1>
                 <span className="inline-block mt-1 rounded-full bg-[#e6f2eb] px-2 py-0.5 text-xs font-medium text-[#006728]">
                   {categoryLabel}
@@ -177,16 +181,6 @@ export default async function ModelDetailPage({
               </div>
             )}
 
-            {model.url && (
-              <a
-                href={model.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-block text-xs text-[#006728] hover:underline"
-              >
-                公式ページ ↗
-              </a>
-            )}
           </div>
         </div>
 

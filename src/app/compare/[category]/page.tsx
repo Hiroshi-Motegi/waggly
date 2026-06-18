@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BackButton } from "@/components/layout/back-button";
 import { getModelsByCategory, compareModelSlug } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { CompareSearch } from "@/components/catalog/compare-search";
+import { RecentCompares } from "@/components/catalog/recent-compares";
 
 export const revalidate = 86400;
 
@@ -42,89 +44,46 @@ export default async function CompareIndexPage({
   // Model options for search
   const modelOptions = models.map((m) => ({
     slug: compareModelSlug(m.catalog_series, m),
-    label: `${m.catalog_series.maker} ${m.catalog_series.name}${m.name ? ` ${m.name}` : ""}`,
+    label: `${m.catalog_series.maker} ${m.name}`,
   }));
 
-  // Generate all combinations (SEO)
-  const pairs: Array<{ nameA: string; nameB: string; href: string }> = [];
-  for (let i = 0; i < models.length; i++) {
-    for (let j = i + 1; j < models.length; j++) {
-      const a = models[i];
-      const b = models[j];
-      const slugA = compareModelSlug(a.catalog_series, a);
-      const slugB = compareModelSlug(b.catalog_series, b);
-      const [sortedA, sortedB] = [slugA, slugB].sort();
-      const nameA = `${a.catalog_series.maker} ${a.catalog_series.name}${a.name ? ` ${a.name}` : ""}`;
-      const nameB = `${b.catalog_series.maker} ${b.catalog_series.name}${b.name ? ` ${b.name}` : ""}`;
-      pairs.push({
-        nameA: sortedA === slugA ? nameA : nameB,
-        nameB: sortedA === slugA ? nameB : nameA,
-        href: `/compare/${category}/${sortedA}-vs-${sortedB}`,
-      });
-    }
-  }
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Waggly", item: "https://waggly.jp" },
+      { "@type": "ListItem", position: 2, name: "ゴルフクラブ比較", item: "https://waggly.jp/compare" },
+      { "@type": "ListItem", position: 3, name: `${label}比較`, item: `https://waggly.jp/compare/${category}` },
+    ],
+  };
 
   return (
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-          <p className="text-sm font-bold text-white">{label} スペック比較</p>
-        </div>
-
-        {/* Breadcrumb */}
-        <div className="flex items-center px-3 py-1 w-full max-w-screen-sm bg-black/20 border-b border-white/30 overflow-hidden">
-          <p className="text-xs text-white truncate">
-            <span>比較</span>
-            <span> / {label}</span>
-          </p>
-        </div>
-
-        {/* Title bar */}
-        <div className="px-5 py-3 w-full max-w-screen-sm bg-black/20">
-          <h1 className="text-[15px] font-extrabold text-white">{label} スペック比較</h1>
-          <p className="text-xs text-white/70 mt-0.5">2つのモデルを選んで比較</p>
+        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
+          <BackButton fallbackHref="/compare" />
+          <div className="flex flex-col items-center gap-0.5">
+            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+            <h1 className="text-sm font-bold text-white">{label} スペック比較</h1>
+          </div>
         </div>
 
         {/* Banner */}
         <PromoBanner />
-
-        {/* Category nav */}
-        <div className="flex flex-wrap gap-2 px-3 pt-4 w-full max-w-screen-sm">
-          {ALL_CATEGORIES.map((cat) => (
-            <Link
-              key={cat}
-              href={`/compare/${cat}`}
-              className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
-                cat === category
-                  ? "bg-[#17552f] border border-white text-white"
-                  : "bg-white text-[#006728]"
-              }`}
-            >
-              {CATEGORY_LABELS[cat]}
-            </Link>
-          ))}
-        </div>
 
         {/* Search UI */}
         <div className="w-full max-w-screen-sm px-3 pt-4">
           <CompareSearch category={category} models={modelOptions} />
         </div>
 
-        {/* SEO: hidden pair links for crawlers */}
-        <nav className="sr-only" aria-hidden="false">
-          <h2>{label}比較一覧</h2>
-          <ul>
-            {pairs.map((pair) => (
-              <li key={pair.href}>
-                <Link href={pair.href}>
-                  {pair.nameA} vs {pair.nameB}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        {/* Recent compares */}
+        <RecentCompares category={category} />
 
         {/* Disclaimer */}
         <p className="w-full max-w-screen-sm px-4 py-6 text-left text-xs text-white leading-relaxed">

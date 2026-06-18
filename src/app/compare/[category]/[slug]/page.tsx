@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BackButton } from "@/components/layout/back-button";
 import { notFound } from "next/navigation";
 import { getCompareModels } from "@/lib/catalog";
 import { fetchRelatedNews } from "@/lib/catalog-news";
 import { CompareTable } from "@/components/catalog/compare-table";
+import { CompareVisitTracker } from "@/components/catalog/compare-visit-tracker";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 
 export const revalidate = 86400;
@@ -31,8 +33,8 @@ export async function generateMetadata({
   const { modelA, modelB } = await getCompareModels(category, slugA, slugB);
   if (!modelA || !modelB) return {};
 
-  const nameA = `${modelA.catalog_series.maker} ${modelA.catalog_series.name}${modelA.name ? ` ${modelA.name}` : ""}`;
-  const nameB = `${modelB.catalog_series.maker} ${modelB.catalog_series.name}${modelB.name ? ` ${modelB.name}` : ""}`;
+  const nameA = `${modelA.catalog_series.maker} ${modelA.name}`;
+  const nameB = `${modelB.catalog_series.maker} ${modelB.name}`;
   const label = CATEGORY_LABELS[category] ?? category;
 
   return {
@@ -55,7 +57,7 @@ function ModelCard({ model, label }: { model: any; label: string }) {
       <div className="flex flex-1 flex-col gap-px min-w-0">
         <p className="text-sm text-[#6b6b6b] font-bold leading-snug">{s.maker}</p>
         <p className="text-base font-bold text-[#006728] leading-snug truncate">
-          {s.name} {model.name}
+          {model.name}
         </p>
         <p className="text-xs text-[#7c7c7c] font-medium">
           {model.release_year ? `${model.release_year}年発売` : ""}
@@ -84,41 +86,41 @@ export default async function CompareVsPage({
   if (!modelA || !modelB) notFound();
 
   const label = CATEGORY_LABELS[category] ?? category;
-  const nameA = `${modelA.catalog_series.maker} ${modelA.catalog_series.name}${modelA.name ? ` ${modelA.name}` : ""}`;
-  const nameB = `${modelB.catalog_series.maker} ${modelB.catalog_series.name}${modelB.name ? ` ${modelB.name}` : ""}`;
+  const nameA = `${modelA.catalog_series.maker} ${modelA.name}`;
+  const nameB = `${modelB.catalog_series.maker} ${modelB.name}`;
 
   const news = await fetchRelatedNews(`${modelA.catalog_series.name} ${label}`);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Waggly", item: "https://waggly.jp" },
+      { "@type": "ListItem", position: 2, name: "ゴルフクラブ比較", item: "https://waggly.jp/compare" },
+      { "@type": "ListItem", position: 3, name: `${label}比較`, item: `https://waggly.jp/compare/${category}` },
+      { "@type": "ListItem", position: 4, name: `${nameA} vs ${nameB}` },
+    ],
+  };
+
   return (
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <CompareVisitTracker category={category} slug={slug} nameA={nameA} nameB={nameB} />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-          <p className="text-sm font-bold text-white">{label} スペック比較</p>
-        </div>
-
-        {/* Breadcrumb */}
-        <div className="flex items-center px-3 py-1 w-full max-w-screen-sm bg-black/20 border-b border-white/30 overflow-hidden">
-          <p className="text-xs text-white truncate">
-            <Link href={`/compare/${category}`} className="underline">{label}比較</Link>
-            <span className="font-normal"> / {nameA} vs {nameB}</span>
-          </p>
-        </div>
-
-        {/* Title bar */}
-        <div className="flex items-center gap-2 px-5 py-3 w-full max-w-screen-sm bg-black/20">
-          <p className="flex-1 text-[15px] font-extrabold text-white">{label}比較</p>
-          <Link
-            href={`/compare/${category}`}
-            className="shrink-0 rounded-full border border-white bg-[#17552f] px-4 py-2.5 text-xs font-bold text-white"
-          >
-            その他の比較を見る
-          </Link>
+        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
+          <BackButton fallbackHref={`/compare/${category}`} />
+          <div className="flex flex-col items-center gap-0.5">
+            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+            <p className="text-sm font-bold text-white">{label} スペック比較</p>
+          </div>
         </div>
 
         {/* Model cards + VS */}
-        <div className="flex flex-col items-center gap-1.5 px-5 pb-5 w-full max-w-screen-sm bg-black/20">
+        <div className="flex flex-col items-center gap-1.5 px-5 py-5 w-full max-w-screen-sm bg-black/20">
           <ModelCard model={modelA} label={label} />
           <p className="text-lg font-bold text-white">VS</p>
           <ModelCard model={modelB} label={label} />

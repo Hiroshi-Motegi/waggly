@@ -11,8 +11,8 @@ import { AdBanner } from "@/components/ad-banner";
 const featureCards = [
   { href: "/bag", icon: "/icons/my-bag.svg", label: "マイバッグ" },
   { href: "/items", icon: "/icons/items.svg", label: "アイテム" },
-  { href: "/courses", icon: "/icons/golf-course.svg", label: "ゴルフ場を探す", sub: "楽天GORA" },
-  { href: "/coach/plans", icon: "/icons/practice-menu.svg", label: "練習メニュー", sub: "AIに練習メニューを相談" },
+  { href: "/courses", icon: "/icons/golf-course.svg", label: "コースを探す" },
+  { href: "/settings/share", icon: "/icons/my-card.svg", label: "マイ名刺" },
   { href: "/practice", icon: "/icons/nav-practice-g.svg", label: "練習記録" },
   { href: "/settings", icon: "/icons/settings.svg", label: "設定" },
 ];
@@ -28,7 +28,7 @@ export function HomeDashboard() {
       <div className="relative flex flex-col px-2 pt-2 pb-4">
         {/* Logo */}
         <div className="flex items-center justify-center w-full relative h-14">
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={151} height={46} priority />
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={151} height={46} priority style={{ width: 151, height: 46 }} />
           <Link href="/settings" className="absolute right-2">
             {profileLoading ? (
               <div className="h-10 w-10 rounded-full bg-white/20 border-2 border-white/60" />
@@ -48,16 +48,30 @@ export function HomeDashboard() {
         </p>
 
         {/* Feature cards */}
-        <div className="grid grid-cols-2 gap-2 w-full mt-4">
+        <div className="grid grid-cols-3 gap-2 w-full mt-4">
           {featureCards.map((card) => (
             <Link key={card.href} href={card.href}>
-              <div className="flex flex-col items-center justify-center gap-[5px] rounded-lg border border-[#72937f] bg-white p-5 h-[121px] drop-shadow-[2px_2px_0px_#72937f]">
-                <Image src={card.icon} alt={card.label} width={48} height={48} />
+              <div className="flex flex-col items-center justify-center gap-[5px] rounded-lg border border-[#72937f] bg-white p-3 h-[110px] drop-shadow-[2px_2px_0px_#72937f]">
+                <Image src={card.icon} alt={card.label} width={40} height={40} />
                 <div className="flex flex-col items-center gap-[2px] text-center">
-                  <span className="text-base font-bold text-[#006728]">{card.label}</span>
-                  {card.sub && <span className="text-xs text-[#717171]">{card.sub}</span>}
+                  <span className="text-sm font-bold text-[#006728]">{card.label}</span>
+                  {card.sub && <span className="text-[10px] text-[#717171] leading-tight">{card.sub}</span>}
                 </div>
               </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Contents bar */}
+        <div className="flex gap-3 items-start rounded-[9px] bg-[#35611d] px-3 py-4 w-full mt-4">
+          {[
+            { href: "/catalog", icon: "/icons/content-catalog.svg", label: "クラブカタログ" },
+            { href: "/compare", icon: "/icons/content-compare.svg", label: "クラブ比較" },
+            { href: "/coach/plans", icon: "/icons/content-practice-menu.svg", label: "練習メニュー" },
+          ].map((item) => (
+            <Link key={item.href} href={item.href} className="flex flex-1 flex-col items-center gap-[3px]">
+              <Image src={item.icon} alt={item.label} width={32} height={32} />
+              <span className="text-xs font-medium text-white text-center">{item.label}</span>
             </Link>
           ))}
         </div>

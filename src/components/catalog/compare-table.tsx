@@ -191,10 +191,9 @@ function ByClubView({
         const specA = specMapA.get(clubNumber);
         const specB = specMapB.get(clubNumber);
         return (
-          <div key={clubNumber} className="rounded-md bg-white overflow-hidden">
-            <div className="bg-[#006728] px-3 py-1.5">
-              <h3 className="text-sm font-bold text-white">{clubNumber}</h3>
-            </div>
+          <div key={clubNumber}>
+            <h3 className="text-sm font-bold text-white px-1 pb-1">{clubNumber}</h3>
+            <div className="rounded-md bg-white overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#cbcbcb]">
@@ -232,6 +231,7 @@ function ByClubView({
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         );
       })}

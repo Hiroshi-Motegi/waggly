@@ -1,25 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BackButton } from "@/components/layout/back-button";
 import { notFound } from "next/navigation";
-import { getSeriesByMaker } from "@/lib/catalog";
+import { getSeriesWithModelsByMaker } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
+import { MakerCategoryTabs } from "@/components/catalog/maker-category-tabs";
 
 export const revalidate = 86400;
 
 export async function generateMetadata({ params }: { params: Promise<{ maker: string }> }) {
   const { maker } = await params;
-  const series = await getSeriesByMaker(maker);
+  const { series } = await getSeriesWithModelsByMaker(maker);
   if (series.length === 0) return {};
   const makerName = series[0].maker;
   return {
     title: `${makerName}のゴルフクラブカタログ | Waggly`,
-    description: `${makerName}の全シリーズスペックカタログ。`,
+    description: `${makerName}の全クラブスペックカタログ。`,
   };
 }
 
 export default async function MakerPage({ params }: { params: Promise<{ maker: string }> }) {
   const { maker } = await params;
-  const series = await getSeriesByMaker(maker);
+  const { series, modelsBySeries } = await getSeriesWithModelsByMaker(maker);
 
   if (series.length === 0) {
     notFound();
@@ -27,62 +29,46 @@ export default async function MakerPage({ params }: { params: Promise<{ maker: s
 
   const makerName = series[0].maker;
 
+  // Flatten all models with series info for the tab component
+  const allModels = series.flatMap((s) =>
+    (modelsBySeries.get(s.id) ?? []).map((m) => ({
+      id: m.id,
+      name: m.name,
+      category: m.category,
+      slug: m.slug,
+      seriesMakerSlug: s.maker_slug,
+      seriesNameSlug: s.name_slug,
+    }))
+  );
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Waggly", item: "https://waggly.jp" },
+      { "@type": "ListItem", position: 2, name: "ゴルフクラブカタログ", item: "https://waggly.jp/catalog" },
+      { "@type": "ListItem", position: 3, name: makerName, item: `https://waggly.jp/catalog/${maker}` },
+    ],
+  };
+
   return (
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-          <p className="text-sm font-bold text-white">ゴルフクラブカタログ</p>
-        </div>
-
-        {/* Breadcrumb */}
-        <div className="flex items-center px-3 py-1 w-full max-w-screen-sm bg-black/20 border-b border-white/30 overflow-hidden">
-          <p className="text-xs text-white truncate">
-            <Link href="/catalog" className="underline">カタログ</Link>
-            <span> / {makerName}</span>
-          </p>
-        </div>
-
-        {/* Title bar */}
-        <div className="px-5 py-3 w-full max-w-screen-sm bg-black/20">
-          <h1 className="text-[15px] font-extrabold text-white">{makerName} シリーズ一覧</h1>
+        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
+          <BackButton fallbackHref="/catalog" />
+          <div className="flex flex-col items-center gap-0.5">
+            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+            <h1 className="text-sm font-bold text-white">{makerName} クラブカタログ</h1>
+          </div>
         </div>
 
         {/* Banner */}
         <PromoBanner />
 
-        {/* Content */}
-        <div className="w-full max-w-screen-sm px-3 py-4">
-          <div className="grid grid-cols-2 gap-2">
-            {series.map((s) => (
-              <Link
-                key={s.id}
-                href={`/catalog/${s.maker_slug}/${s.name_slug}`}
-                className="block rounded-md bg-white overflow-hidden"
-              >
-                <div className="aspect-video relative bg-[#f5f5f5]">
-                  {s.image_url ? (
-                    <Image
-                      src={s.image_url}
-                      alt={`${s.maker} ${s.name}`}
-                      fill
-                      className="object-contain p-2"
-                      sizes="(max-width: 640px) 50vw, 33vw"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-[#bbb] text-xs">
-                      No Image
-                    </div>
-                  )}
-                </div>
-                <div className="p-2.5">
-                  <p className="font-bold text-sm text-[#006728]">{s.name}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {/* Category tabs + model list */}
+        <MakerCategoryTabs models={allModels} />
       </div>
     </div>
   );

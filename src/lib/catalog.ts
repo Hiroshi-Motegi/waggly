@@ -81,6 +81,28 @@ export async function getSeriesByMaker(makerSlug: string) {
   return data ?? [];
 }
 
+/** メーカー内の全シリーズ+モデルを一括取得 */
+export async function getSeriesWithModelsByMaker(makerSlug: string) {
+  const series = await getSeriesByMaker(makerSlug);
+  if (series.length === 0) return { series: [], modelsBySeries: new Map() as Map<string, (CatalogModel & { catalog_series: CatalogSeries })[]> };
+
+  // Fetch all models for this maker in one query
+  const { data: allModels } = await supabase
+    .from("catalog_models")
+    .select("*, catalog_series!inner(*)")
+    .eq("catalog_series.maker_slug", makerSlug)
+    .order("category");
+
+  const modelsBySeries = new Map<string, (CatalogModel & { catalog_series: CatalogSeries })[]>();
+  for (const model of (allModels ?? []) as (CatalogModel & { catalog_series: CatalogSeries })[]) {
+    const sid = model.series_id;
+    if (!modelsBySeries.has(sid)) modelsBySeries.set(sid, []);
+    modelsBySeries.get(sid)!.push(model);
+  }
+
+  return { series, modelsBySeries };
+}
+
 /** シリーズ内モデル一覧 */
 export async function getModelsBySeries(makerSlug: string, nameSlug: string) {
   const { data } = await supabase

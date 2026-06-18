@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 
 interface ModelOption {
   slug: string;
-  label: string; // "PING G440 MAX" etc.
+  category: string;
+  label: string;
 }
 
-interface CompareSearchProps {
-  category: string;
+interface Props {
   models: ModelOption[];
 }
 
-export function CompareSearch({ category, models }: CompareSearchProps) {
+export function CompareSearchGlobal({ models }: Props) {
   const router = useRouter();
   const [queryA, setQueryA] = useState("");
   const [queryB, setQueryB] = useState("");
@@ -22,6 +22,7 @@ export function CompareSearch({ category, models }: CompareSearchProps) {
   const [focusA, setFocusA] = useState(false);
   const [focusB, setFocusB] = useState(false);
 
+  // Fuzzy AND search: "PING アイアン" → both "ping" AND "アイアン" must match
   function fuzzyMatch(label: string, query: string) {
     const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
     if (tokens.length === 0) return false;
@@ -30,22 +31,28 @@ export function CompareSearch({ category, models }: CompareSearchProps) {
   }
 
   const filteredA = useMemo(() => {
-    if (!queryA) return models.slice(0, 30);
+    if (!queryA || queryA.length < 2) return [];
     return models.filter((m) => fuzzyMatch(m.label, queryA)).slice(0, 30);
   }, [queryA, models]);
 
   const filteredB = useMemo(() => {
-    const base = models.filter((m) => m.slug !== selectedA?.slug);
-    if (!queryB) return base.slice(0, 30);
-    return base.filter((m) => fuzzyMatch(m.label, queryB)).slice(0, 30);
+    if (!queryB || queryB.length < 2) return [];
+    return models
+      .filter((m) => m.slug !== selectedA?.slug)
+      .filter((m) => selectedA ? m.category === selectedA.category : true)
+      .filter((m) => fuzzyMatch(m.label, queryB))
+      .slice(0, 30);
   }, [queryB, models, selectedA]);
 
-  const canCompare = selectedA && selectedB && selectedA.slug !== selectedB.slug;
+  const canCompare =
+    selectedA && selectedB &&
+    selectedA.slug !== selectedB.slug &&
+    selectedA.category === selectedB.category;
 
   function handleCompare() {
     if (!canCompare) return;
     const [slugA, slugB] = [selectedA.slug, selectedB.slug].sort();
-    router.push(`/compare/${category}/${slugA}-vs-${slugB}`);
+    router.push(`/compare/${selectedA.category}/${slugA}-vs-${slugB}`);
   }
 
   return (
@@ -63,13 +70,13 @@ export function CompareSearch({ category, models }: CompareSearchProps) {
             }}
             onFocus={() => setFocusA(true)}
             onBlur={() => setTimeout(() => setFocusA(false), 150)}
-            placeholder="メーカー名・モデル名で検索"
+            placeholder="メーカー名・モデル名で検索（2文字以上）"
             className="w-full rounded-md border border-[#ddd] px-3 py-2.5 text-sm text-[#222] placeholder-[#aaa] focus:border-[#006728] focus:outline-none"
           />
           {focusA && !selectedA && filteredA.length > 0 && (
             <ul className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-md border border-[#ddd] bg-white shadow-lg">
               {filteredA.map((m) => (
-                <li key={m.slug}>
+                <li key={`${m.category}::${m.slug}`}>
                   <button
                     type="button"
                     onMouseDown={() => {
@@ -90,7 +97,10 @@ export function CompareSearch({ category, models }: CompareSearchProps) {
 
         {/* Model B */}
         <div className="relative">
-          <label className="text-xs text-[#888] font-bold mb-1 block">モデルB</label>
+          <label className="text-xs text-[#888] font-bold mb-1 block">
+            モデルB
+            {selectedA && <span className="text-[#006728] ml-1">（同カテゴリのみ）</span>}
+          </label>
           <input
             type="text"
             value={selectedB ? selectedB.label : queryB}
@@ -100,13 +110,13 @@ export function CompareSearch({ category, models }: CompareSearchProps) {
             }}
             onFocus={() => setFocusB(true)}
             onBlur={() => setTimeout(() => setFocusB(false), 150)}
-            placeholder="メーカー名・モデル名で検索"
+            placeholder="メーカー名・モデル名で検索（2文字以上）"
             className="w-full rounded-md border border-[#ddd] px-3 py-2.5 text-sm text-[#222] placeholder-[#aaa] focus:border-[#006728] focus:outline-none"
           />
           {focusB && !selectedB && filteredB.length > 0 && (
             <ul className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-md border border-[#ddd] bg-white shadow-lg">
               {filteredB.map((m) => (
-                <li key={m.slug}>
+                <li key={`${m.category}::${m.slug}`}>
                   <button
                     type="button"
                     onMouseDown={() => {

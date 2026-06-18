@@ -13,19 +13,25 @@ export const metadata = {
 export default async function CatalogPage() {
   const makers = await getMakers();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Waggly", item: "https://waggly.jp" },
+      { "@type": "ListItem", position: 2, name: "ゴルフクラブカタログ", item: "https://waggly.jp/catalog" },
+    ],
+  };
+
   return (
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="flex flex-col items-center justify-center gap-0.5 py-3 w-full max-w-screen-sm">
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-          <p className="text-sm font-bold text-white">ゴルフクラブカタログ</p>
-        </div>
-
-        {/* Title bar */}
-        <div className="px-5 py-3 w-full max-w-screen-sm bg-black/20">
-          <h1 className="text-[15px] font-extrabold text-white">メーカー一覧</h1>
-          <p className="text-xs text-white/70 mt-0.5">メーカーを選択してスペックを確認</p>
+        <div className="flex items-center justify-center w-full max-w-screen-sm py-3">
+          <div className="flex flex-col items-center gap-0.5">
+            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+            <h1 className="text-sm font-bold text-white">ゴルフクラブカタログ</h1>
+          </div>
         </div>
 
         {/* Banner */}
