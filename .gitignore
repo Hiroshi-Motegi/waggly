@@ -48,3 +48,14 @@ next-env.d.ts
 
 # playwright mcp
 .playwright-mcp/
+
+# claude worktrees
+.claude/worktrees/
+
+# scraping / import data
+scripts/*.json
+scripts/import-catalog*.sql
+scripts/import-catalog*.mjs
+
+# superpowers plans (session-local)
+docs/superpowers/plans/
