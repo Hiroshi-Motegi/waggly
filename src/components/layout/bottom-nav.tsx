@@ -27,8 +27,8 @@ function NavItem({ href, label, icon, isActive, onClick }: {
 }) {
   return (
     <Link href={href} onClick={onClick} className="flex flex-col items-center gap-0.5 py-1.5" style={{ width: "20%" }}>
-      <Image src={icon} alt={label} width={28} height={28} />
-      <span className="text-[10px] font-medium tracking-tight text-black text-center">{label}</span>
+      <Image src={icon} alt={label} width={32} height={32} className="w-7 h-7 sm:w-8 sm:h-8" />
+      <span className="text-[10px] sm:text-xs font-medium tracking-tight text-black text-center">{label}</span>
     </Link>
   );
 }
@@ -73,7 +73,7 @@ export function BottomNav() {
       >
         <nav className="bg-white rounded-2xl shadow-[0_-4px_16px_rgba(0,0,0,0.12)] overflow-hidden">
           {/* Main row */}
-          <div className="flex items-center justify-around pt-0.5">
+          <div className={`flex items-center justify-around ${menuOpen ? "pt-3" : "pt-0.5"}`}>
             {mainTabs.map((tab) => (
               <NavItem
                 key={tab.href}
@@ -90,13 +90,13 @@ export function BottomNav() {
             >
               {menuOpen ? (
                 <>
-                  <Image src="/icons/nav-close.svg" alt="閉じる" width={28} height={28} />
-                  <span className="text-[10px] font-medium tracking-tight text-black">閉じる</span>
+                  <Image src="/icons/nav-close.svg" alt="閉じる" width={32} height={32} className="w-7 h-7 sm:w-8 sm:h-8" />
+                  <span className="text-[10px] sm:text-xs font-medium tracking-tight text-black">閉じる</span>
                 </>
               ) : (
                 <>
-                  <Image src="/icons/nav-menu.svg" alt="メニュー" width={28} height={28} />
-                  <span className="text-[10px] font-medium tracking-tight text-black">メニュー</span>
+                  <Image src="/icons/nav-menu.svg" alt="メニュー" width={32} height={32} className="w-7 h-7 sm:w-8 sm:h-8" />
+                  <span className="text-[10px] sm:text-xs font-medium tracking-tight text-black">メニュー</span>
                 </>
               )}
             </button>
