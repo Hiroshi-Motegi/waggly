@@ -11,6 +11,7 @@ export function mockChain(result: any = { data: null, error: null }) {
   const methods = [
     "select", "insert", "update", "delete", "upsert",
     "eq", "neq", "in", "order", "limit", "is",
+    "lt", "gt", "lte", "gte", "not", "like", "ilike", "or", "filter",
   ];
   for (const m of methods) {
     chain[m] = vi.fn().mockReturnValue(chain);
