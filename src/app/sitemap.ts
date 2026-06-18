@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Model detail pages
     for (const model of allModels) {
       catalogUrls.push({
-        url: `${baseUrl}/catalog/${model.catalog_series.maker_slug}/${model.catalog_series.name_slug}/${model.slug}`,
+        url: `${baseUrl}/catalog/${model.maker_slug}/${model.slug}`,
         changeFrequency: "monthly",
         priority: 0.6,
       });

@@ -33,8 +33,8 @@ export async function generateMetadata({
   const { modelA, modelB } = await getCompareModels(category, slugA, slugB);
   if (!modelA || !modelB) return {};
 
-  const nameA = `${modelA.catalog_series.maker} ${modelA.name}`;
-  const nameB = `${modelB.catalog_series.maker} ${modelB.name}`;
+  const nameA = `${modelA.maker} ${modelA.name}`;
+  const nameB = `${modelB.maker} ${modelB.name}`;
   const label = CATEGORY_LABELS[category] ?? category;
 
   return {
@@ -48,14 +48,13 @@ export async function generateMetadata({
 }
 
 function ModelCard({ model, label }: { model: any; label: string }) {
-  const { catalog_series: s } = model;
   return (
     <Link
-      href={`/catalog/${s.maker_slug}/${s.name_slug}/${model.slug}`}
+      href={`/catalog/${model.maker_slug}/${model.slug}`}
       className="flex items-center gap-2.5 rounded-md bg-white p-2 w-full"
     >
       <div className="flex flex-1 flex-col gap-px min-w-0">
-        <p className="text-sm text-[#6b6b6b] font-bold leading-snug">{s.maker}</p>
+        <p className="text-sm text-[#6b6b6b] font-bold leading-snug">{model.maker}</p>
         <p className="text-base font-bold text-[#006728] leading-snug truncate">
           {model.name}
         </p>
@@ -86,10 +85,10 @@ export default async function CompareVsPage({
   if (!modelA || !modelB) notFound();
 
   const label = CATEGORY_LABELS[category] ?? category;
-  const nameA = `${modelA.catalog_series.maker} ${modelA.name}`;
-  const nameB = `${modelB.catalog_series.maker} ${modelB.name}`;
+  const nameA = `${modelA.maker} ${modelA.name}`;
+  const nameB = `${modelB.maker} ${modelB.name}`;
 
-  const news = await fetchRelatedNews(`${modelA.catalog_series.name} ${label}`);
+  const news = await fetchRelatedNews(`${modelA.name} ${label}`);
 
   const jsonLd = {
     "@context": "https://schema.org",

@@ -45,7 +45,7 @@ export default async function CatalogSearchPage({
   if (query.length >= 2) {
     const all = await getAllModels();
     results = all.filter((m) =>
-      fuzzyMatch(`${m.catalog_series.maker} ${m.name}`, query)
+      fuzzyMatch(`${m.maker} ${m.name}`, query)
     );
   }
 
@@ -81,13 +81,13 @@ export default async function CatalogSearchPage({
               {results.map((m, i) => (
                 <Link
                   key={m.id}
-                  href={`/catalog/${m.catalog_series.maker_slug}/${m.catalog_series.name_slug}/${m.slug}`}
+                  href={`/catalog/${m.maker_slug}/${m.slug}`}
                   className={`flex items-center justify-between px-4 py-3 ${i < results.length - 1 ? "border-b border-[#ececec]" : ""}`}
                 >
                   <div className="flex flex-col gap-0.5 min-w-0">
                     <span className="font-bold text-sm text-[#006728] truncate">{m.name}</span>
                     <span className="text-xs text-[#888]">
-                      {m.catalog_series.maker} · {CATEGORY_LABELS[m.category] ?? m.category}
+                      {m.maker} · {CATEGORY_LABELS[m.category] ?? m.category}
                     </span>
                   </div>
                   <ChevronLeft className="h-4 w-4 text-[#bbb] rotate-180 shrink-0" />
