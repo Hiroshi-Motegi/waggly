@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { CatalogModel, CatalogSeries } from "@/lib/catalog";
+import type { CatalogModel } from "@/lib/catalog";
 
 const CATEGORY_LABELS: Record<string, string> = {
   driver: "ドライバー",
@@ -13,21 +13,19 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 interface ModelCardProps {
   model: CatalogModel;
-  series: CatalogSeries;
 }
 
-export function ModelCard({ model, series }: ModelCardProps) {
-  const href = `/catalog/${series.maker_slug}/${series.name_slug}/${model.slug}`;
+export function ModelCard({ model }: ModelCardProps) {
+  const href = `/catalog/${model.maker_slug}/${model.slug}`;
   const categoryLabel = CATEGORY_LABELS[model.category] ?? model.category;
-  const imageUrl = model.image_url ?? series.image_url;
 
   return (
     <Link href={href} className="group block rounded-xl border border-[#e0e0e0] bg-white overflow-hidden hover:shadow-md transition-shadow">
       <div className="aspect-video relative bg-[#f5f5f5]">
-        {imageUrl ? (
+        {model.image_url ? (
           <Image
-            src={imageUrl}
-            alt={`${series.maker} ${series.name} ${model.name}`}
+            src={model.image_url}
+            alt={`${model.maker} ${model.name}`}
             fill
             className="object-contain p-2"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -39,10 +37,9 @@ export function ModelCard({ model, series }: ModelCardProps) {
         )}
       </div>
       <div className="p-3">
-        <p className="text-xs text-[#888] mb-0.5">{series.maker}</p>
+        <p className="text-xs text-[#888] mb-0.5">{model.maker}</p>
         <p className="font-bold text-sm text-[#222] group-hover:text-[#006728] leading-tight">
-          {series.name}
-          {model.name ? ` ${model.name}` : ""}
+          {model.name}
         </p>
         <div className="mt-1.5 flex items-center gap-2">
           <span className="inline-block rounded-full bg-[#e6f2eb] px-2 py-0.5 text-[11px] font-medium text-[#006728]">

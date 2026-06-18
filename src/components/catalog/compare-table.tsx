@@ -34,8 +34,8 @@ export function CompareTable({ modelA, modelB, news = [] }: CompareTableProps) {
   const specMapA = new Map<string, CatalogSpec>(modelA.catalog_specs.map((s) => [s.club_number, s]));
   const specMapB = new Map<string, CatalogSpec>(modelB.catalog_specs.map((s) => [s.club_number, s]));
 
-  const nameA = `${modelA.catalog_series.name}`;
-  const nameB = `${modelB.catalog_series.name}`;
+  const nameA = modelA.name;
+  const nameB = modelB.name;
 
   const availableKeys = specKeys.filter((key) =>
     allNumbers.some((cn) => {

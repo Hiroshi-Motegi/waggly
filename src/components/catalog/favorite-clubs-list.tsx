@@ -22,11 +22,8 @@ interface FavoriteClub {
     name: string;
     category: string;
     slug: string;
-    catalog_series: {
-      maker: string;
-      maker_slug: string;
-      name_slug: string;
-    };
+    maker: string;
+    maker_slug: string;
   };
 }
 
@@ -64,17 +61,16 @@ export function FavoriteClubsList() {
       <div className="rounded-lg bg-white overflow-hidden">
         {display.map((fav, i) => {
           const m = fav.catalog_models;
-          const s = m.catalog_series;
           return (
             <Link
               key={fav.id}
-              href={`/catalog/${s.maker_slug}/${s.name_slug}/${m.slug}`}
+              href={`/catalog/${m.maker_slug}/${m.slug}`}
               className={`flex items-center justify-between px-4 py-3 ${i < display.length - 1 ? "border-b border-[#ececec]" : ""}`}
             >
               <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="font-bold text-sm text-[#006728] truncate">{m.name}</span>
                 <span className="text-xs text-[#888]">
-                  {s.maker} · {CATEGORY_LABELS[m.category] ?? m.category}
+                  {m.maker} · {CATEGORY_LABELS[m.category] ?? m.category}
                 </span>
               </div>
               <ChevronLeft className="h-4 w-4 text-[#bbb] rotate-180 shrink-0" />
