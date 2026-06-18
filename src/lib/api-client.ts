@@ -82,13 +82,14 @@ async function handleLocalRequest(path: string, init?: RequestInit): Promise<Res
   const { query, execute } = await import("@/lib/sqlite/database");
 
   try {
-    const result = await routeLocal(path, method, body, query, execute);
+    const result = await routeLocal(path, method, body ?? {}, query, execute);
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), {
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Unknown error";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
@@ -98,10 +99,10 @@ async function handleLocalRequest(path: string, init?: RequestInit): Promise<Res
 async function routeLocal(
   path: string,
   method: string,
-  body: any,
+  body: Record<string, any>,
   q: typeof import("@/lib/sqlite/database").query,
   ex: typeof import("@/lib/sqlite/database").execute
-): Promise<any> {
+): Promise<unknown> {
   // ---- Clubs ----
 
   // GET /api/clubs?status=bag&bag_number=1
@@ -648,12 +649,13 @@ async function handleLocalImageUpload(path: string, method: string, formData: Fo
     }
 
     return jsonResponse({ image_url: localUri });
-  } catch (e: any) {
-    return jsonResponse({ error: e.message ?? "Failed to save image" }, 500);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to save image";
+    return jsonResponse({ error: message }, 500);
   }
 }
 
-function jsonResponse(data: any, status = 200): Response {
+function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: { "Content-Type": "application/json" },
