@@ -244,23 +244,25 @@ export default function SettingsPage() {
                   const { signInWithGoogle } = await import("@/lib/native-auth");
                   const result = await signInWithGoogle();
                   if (result.conflict) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const c = result.conflict as any;
                     const conflictInfo = {
                       scenario: "first-signin",
-                      provider: result.conflict.provider,
-                      providerSub: result.conflict.providerSub,
+                      provider: c.provider,
+                      providerSub: c.providerSub,
                       sourceA: {
                         label: "ローカルのデータ",
                         isNew: true,
                         wid: null,
-                        lastUpdated: result.conflict.localSummary.lastUpdated,
-                        counts: result.conflict.localSummary.counts,
+                        lastUpdated: c.localSummary.lastUpdated,
+                        counts: c.localSummary.counts,
                       },
                       sourceB: {
                         label: "サーバーのデータ",
                         isNew: false,
-                        wid: result.conflict.existingUser.userId,
-                        lastUpdated: result.conflict.existingUser.lastUpdated,
-                        counts: result.conflict.existingUser.counts,
+                        wid: c.existingUser.userId,
+                        lastUpdated: c.existingUser.lastUpdated,
+                        counts: c.existingUser.counts,
                       },
                     };
                     setConflictInfo(conflictInfo);
@@ -308,23 +310,25 @@ export default function SettingsPage() {
                     return;
                   }
                   if (result.conflict) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const c = result.conflict as any;
                     const conflictInfo = {
                       scenario: "first-signin",
-                      provider: result.conflict.provider,
-                      providerSub: result.conflict.providerSub,
+                      provider: c.provider,
+                      providerSub: c.providerSub,
                       sourceA: {
                         label: "ローカルのデータ",
                         isNew: true,
                         wid: null,
-                        lastUpdated: result.conflict.localSummary.lastUpdated,
-                        counts: result.conflict.localSummary.counts,
+                        lastUpdated: c.localSummary.lastUpdated,
+                        counts: c.localSummary.counts,
                       },
                       sourceB: {
                         label: "サーバーのデータ",
                         isNew: false,
-                        wid: result.conflict.existingUser.userId,
-                        lastUpdated: result.conflict.existingUser.lastUpdated,
-                        counts: result.conflict.existingUser.counts,
+                        wid: c.existingUser.userId,
+                        lastUpdated: c.existingUser.lastUpdated,
+                        counts: c.existingUser.counts,
                       },
                     };
                     setConflictInfo(conflictInfo);

@@ -4,7 +4,7 @@ import type { User } from "@/types/database";
 
 interface NativeSignInResult {
   user: User | null;
-  conflict: any | null;
+  conflict: Record<string, unknown> | null;
   error: string | null;
 }
 
@@ -42,8 +42,8 @@ export async function signInWithGoogle(): Promise<NativeSignInResult> {
     if (error) return { user: null, conflict: null, error: error.message };
 
     return await resolveSessionAfterSignIn();
-  } catch (e: any) {
-    return { user: null, conflict: null, error: e.message ?? "Google sign-in failed" };
+  } catch (e) {
+    return { user: null, conflict: null, error: e instanceof Error ? e.message : "Google sign-in failed" };
   }
 }
 
@@ -70,8 +70,8 @@ export async function signInWithApple(): Promise<NativeSignInResult> {
     if (error) return { user: null, conflict: null, error: error.message };
 
     return await resolveSessionAfterSignIn();
-  } catch (e: any) {
-    return { user: null, conflict: null, error: e.message ?? "Apple sign-in failed" };
+  } catch (e) {
+    return { user: null, conflict: null, error: e instanceof Error ? e.message : "Apple sign-in failed" };
   }
 }
 
@@ -109,11 +109,12 @@ export async function signInWithLine(): Promise<NativeSignInResult> {
     await supabase.auth.setSession({ access_token, refresh_token });
 
     return await resolveSessionAfterSignIn();
-  } catch (e: any) {
-    if (e.message?.includes("cancel") || e.message?.includes("CANCELLED")) {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : undefined;
+    if (msg?.includes("cancel") || msg?.includes("CANCELLED")) {
       return { user: null, conflict: null, error: null };
     }
-    return { user: null, conflict: null, error: e.message ?? "LINE sign-in failed" };
+    return { user: null, conflict: null, error: msg ?? "LINE sign-in failed" };
   }
 }
 
@@ -141,8 +142,8 @@ export async function nativeLineLogin(): Promise<{
       accessToken: result.accessToken,
       error: null,
     };
-  } catch (e: any) {
-    return { userId: "", displayName: "", error: e.message ?? "LINE login failed" };
+  } catch (e) {
+    return { userId: "", displayName: "", error: e instanceof Error ? e.message : "LINE login failed" };
   }
 }
 
