@@ -10,12 +10,14 @@ export default function HelpIndexPage() {
     { href: "/help/plans", label: "プランについて" },
     { href: "/help/ads", label: "広告表示について" },
     { href: "/help/golfer-card", label: "ゴルファー名刺について" },
+    { href: "/help/catalog", label: "クラブカタログ・比較について" },
+    { href: "/help/ai", label: "AI機能について" },
     { href: "/help/delete-account", label: "データの削除・退会について" },
     { href: "/help/contact", label: "お問い合わせ" },
   ];
 
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2">
+    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       <div className="relative flex flex-col space-y-2">
         <PageHeader title="ご利用ガイド" variant="dark" />
 

@@ -9,7 +9,7 @@ export default function TermsPage() {
       <PageHeader title="利用規約" variant="dark" />
 
       <div className="rounded-lg bg-white p-4 space-y-5 leading-relaxed">
-        <p className="text-xs text-[#8b8b8b]">最終更新日: 2026年6月15日</p>
+        <p className="text-xs text-[#8b8b8b]">最終更新日: 2026年6月18日</p>
 
         <section className="space-y-1">
           <h3 className="text-base font-bold text-[#006728]">第1条（サービス内容）</h3>
@@ -97,12 +97,22 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-1">
-          <h3 className="text-base font-bold text-[#006728]">第12条（サービスの変更・停止）</h3>
+          <h3 className="text-base font-bold text-[#006728]">第12条（カタログ情報の正確性）</h3>
+          <p className="text-base">当サービスが提供するゴルフクラブのスペック情報・価格情報等は、公開情報を元に収集したものであり、最新性・正確性を保証するものではありません。正確な情報は各メーカーの公式サイトをご確認ください。</p>
+        </section>
+
+        <section className="space-y-1">
+          <h3 className="text-base font-bold text-[#006728]">第13条（商標について）</h3>
+          <p className="text-base">当サービスに掲載されるメーカー名・ブランド名・商品名等は、各権利者の商標または登録商標です。当サービスはこれらの商標権者との提携・推奨関係を示すものではありません。</p>
+        </section>
+
+        <section className="space-y-1">
+          <h3 className="text-base font-bold text-[#006728]">第14条（サービスの変更・停止）</h3>
           <p className="text-base">運営者は、事前の通知なくサービス内容の変更、または提供の停止を行うことがあります。サービス停止の場合、有料プランの未消化期間については返金を行います。</p>
         </section>
 
         <section className="space-y-1">
-          <h3 className="text-base font-bold text-[#006728]">第13条（規約の変更）</h3>
+          <h3 className="text-base font-bold text-[#006728]">第15条（規約の変更）</h3>
           <p className="text-base">本規約は予告なく変更することがあります。変更後の規約は本ページに掲載した時点で効力を生じます。有料プランの料金に関わる重要な変更については、変更の30日前までにアプリ内で通知します。</p>
         </section>
       </div>
