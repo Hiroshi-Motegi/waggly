@@ -55,7 +55,6 @@ export function HomeDashboard() {
                 <Image src={card.icon} alt={card.label} width={40} height={40} />
                 <div className="flex flex-col items-center gap-[2px] text-center">
                   <span className="text-sm font-bold text-[#006728]">{card.label}</span>
-                  {card.sub && <span className="text-[10px] text-[#717171] leading-tight">{card.sub}</span>}
                 </div>
               </div>
             </Link>
