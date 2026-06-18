@@ -4,8 +4,9 @@ import { requireAdmin, isErrorResponse } from "@/lib/admin-auth";
 import { badRequest, supabaseError } from "@/lib/api-error";
 
 const createModelSchema = z.object({
-  series_id: z.string().uuid(),
   name: z.string().min(1).max(200),
+  maker: z.string().min(1).max(100),
+  maker_slug: z.string().min(1).max(100),
   category: z.string().min(1).max(50),
   slug: z.string().min(1).max(200).optional(),
   image_url: z.string().url().optional().nullable(),
@@ -17,12 +18,12 @@ export async function GET(request: NextRequest) {
   if (isErrorResponse(result)) return result;
   const { supabase } = result;
 
-  const seriesId = request.nextUrl.searchParams.get("series_id");
+  const makerSlug = request.nextUrl.searchParams.get("maker_slug");
   let query = supabase
     .from("catalog_models")
-    .select("*, catalog_series(*), catalog_specs(count)")
+    .select("*, catalog_specs(count)")
     .order("category");
-  if (seriesId) query = query.eq("series_id", seriesId);
+  if (makerSlug) query = query.eq("maker_slug", makerSlug);
 
   const { data, error } = await query;
   if (error) return supabaseError(error);

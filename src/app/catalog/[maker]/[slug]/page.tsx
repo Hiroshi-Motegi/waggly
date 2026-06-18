@@ -22,19 +22,18 @@ const CATEGORY_LABELS: Record<string, string> = {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ maker: string; series: string; slug: string }>;
+  params: Promise<{ maker: string; slug: string }>;
 }) {
-  const { maker, series, slug } = await params;
-  const model = await getModelDetail(maker, series, slug);
+  const { maker, slug } = await params;
+  const model = await getModelDetail(maker, slug);
   if (!model) return {};
-  const { catalog_series: s } = model;
   const categoryLabel = CATEGORY_LABELS[model.category] ?? model.category;
   return {
-    title: `${s.maker} ${model.name} スペック`,
-    description: `${s.maker} ${model.name}のスペック詳細。ロフト角・ライ角・クラブ長さなど番手別スペックを掲載。`,
+    title: `${model.maker} ${model.name} スペック`,
+    description: `${model.maker} ${model.name}のスペック詳細。ロフト角・ライ角・クラブ長さなど番手別スペックを掲載。`,
     openGraph: {
-      title: `${s.maker} ${model.name} スペック`,
-      description: `${s.maker} ${model.name}の詳細スペック`,
+      title: `${model.maker} ${model.name} スペック`,
+      description: `${model.maker} ${model.name}の詳細スペック`,
     },
   };
 }
@@ -42,16 +41,15 @@ export async function generateMetadata({
 export default async function ModelDetailPage({
   params,
 }: {
-  params: Promise<{ maker: string; series: string; slug: string }>;
+  params: Promise<{ maker: string; slug: string }>;
 }) {
-  const { maker, series, slug } = await params;
-  const model = await getModelDetail(maker, series, slug);
+  const { maker, slug } = await params;
+  const model = await getModelDetail(maker, slug);
 
   if (!model) {
     notFound();
   }
 
-  const { catalog_series: catalogSeries } = model;
   const categoryLabel = CATEGORY_LABELS[model.category] ?? model.category;
 
   // Fetch other models in the same category for compare links
@@ -59,20 +57,18 @@ export default async function ModelDetailPage({
   const otherModels = categoryModels.filter((m) => m.id !== model.id);
 
   // Generate compare links (sort slugs alphabetically)
-  const mySlug = compareModelSlug(catalogSeries, model);
+  const mySlug = compareModelSlug(model);
   const compareLinks = otherModels.slice(0, 8).map((other) => {
-    const otherSlug = compareModelSlug(other.catalog_series, other);
+    const otherSlug = compareModelSlug(other);
     const [slugA, slugB] = [mySlug, otherSlug].sort();
     return {
       href: `/compare/${model.category}/${slugA}-vs-${slugB}`,
-      label: `${other.catalog_series.maker} ${other.catalog_series.name}${other.name ? ` ${other.name}` : ""}`,
+      label: `${other.maker} ${other.name}`,
     };
   });
 
-  const imageUrl = model.image_url ?? catalogSeries.image_url;
-
   // Fetch related news
-  const news = await fetchRelatedNews(`${catalogSeries.name} ${categoryLabel}`);
+  const news = await fetchRelatedNews(`${model.name} ${categoryLabel}`);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -80,9 +76,8 @@ export default async function ModelDetailPage({
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Waggly", item: "https://waggly.jp" },
       { "@type": "ListItem", position: 2, name: "ゴルフクラブカタログ", item: "https://waggly.jp/catalog" },
-      { "@type": "ListItem", position: 3, name: catalogSeries.maker, item: `https://waggly.jp/catalog/${maker}` },
-      { "@type": "ListItem", position: 4, name: catalogSeries.name, item: `https://waggly.jp/catalog/${maker}/${series}` },
-      { "@type": "ListItem", position: 5, name: `${catalogSeries.name}${model.name ? ` ${model.name}` : ""} ${categoryLabel}` },
+      { "@type": "ListItem", position: 3, name: model.maker, item: `https://waggly.jp/catalog/${maker}` },
+      { "@type": "ListItem", position: 4, name: `${model.name} ${categoryLabel}` },
     ],
   };
 
@@ -109,11 +104,11 @@ export default async function ModelDetailPage({
               <FavoriteClubButton modelId={model.id} />
             </div>
             <div className="flex gap-4">
-              {imageUrl && (
+              {model.image_url && (
                 <div className="relative w-20 h-20 shrink-0 bg-[#f5f5f5] rounded-lg overflow-hidden">
                   <Image
-                    src={imageUrl}
-                    alt={`${catalogSeries.maker} ${catalogSeries.name}`}
+                    src={model.image_url}
+                    alt={`${model.maker} ${model.name}`}
                     fill
                     className="object-contain p-1"
                     sizes="80px"
@@ -121,7 +116,7 @@ export default async function ModelDetailPage({
                 </div>
               )}
               <div className="min-w-0">
-                <p className="text-xs text-[#888] mb-0.5">{catalogSeries.maker}</p>
+                <p className="text-xs text-[#888] mb-0.5">{model.maker}</p>
                 <h1 className="text-lg font-bold text-[#222] leading-tight">
                   {model.name}
                 </h1>
@@ -131,12 +126,20 @@ export default async function ModelDetailPage({
               </div>
             </div>
 
+            {/* Description */}
+            {model.description && (
+              <p className="mt-3 text-sm text-[#555] leading-relaxed">{model.description}</p>
+            )}
+
             {/* Basic info */}
             <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
               {model.release_year && (
                 <div>
                   <span className="text-xs text-[#888]">発売年</span>
-                  <p className="font-medium">{model.release_year}年</p>
+                  <p className="font-medium">
+                    {model.release_year}年
+                    {model.release_month ? `${model.release_month}月` : ""}
+                  </p>
                 </div>
               )}
               {model.price !== null && (
@@ -144,7 +147,6 @@ export default async function ModelDetailPage({
                   <span className="text-xs text-[#888]">価格</span>
                   <p className="font-medium">
                     ¥{model.price.toLocaleString("ja-JP")}〜
-                    {model.price_note && <span className="text-xs text-[#888] ml-1">{model.price_note}</span>}
                   </p>
                 </div>
               )}
@@ -154,16 +156,22 @@ export default async function ModelDetailPage({
                   <p className="font-medium">{model.head_material}</p>
                 </div>
               )}
-              {model.finish && (
+              {model.head_finish && (
                 <div>
                   <span className="text-xs text-[#888]">フィニッシュ</span>
-                  <p className="font-medium">{model.finish}</p>
+                  <p className="font-medium">{model.head_finish}</p>
                 </div>
               )}
-              {model.grip_name && (
+              {model.head_manufacture && (
                 <div>
-                  <span className="text-xs text-[#888]">グリップ</span>
-                  <p className="font-medium">{model.grip_name}</p>
+                  <span className="text-xs text-[#888]">製造</span>
+                  <p className="font-medium">{model.head_manufacture}</p>
+                </div>
+              )}
+              {model.sle_rule !== null && (
+                <div>
+                  <span className="text-xs text-[#888]">SLEルール</span>
+                  <p className="font-medium">{model.sle_rule ? "適合" : "非適合"}</p>
                 </div>
               )}
             </div>

@@ -43,8 +43,8 @@ export default async function CompareIndexPage({
 
   // Model options for search
   const modelOptions = models.map((m) => ({
-    slug: compareModelSlug(m.catalog_series, m),
-    label: `${m.catalog_series.maker} ${m.name}`,
+    slug: compareModelSlug(m),
+    label: `${m.maker} ${m.name}`,
   }));
 
 

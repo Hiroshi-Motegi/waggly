@@ -36,9 +36,9 @@ export default async function CompareTopPage() {
 
   const allModelOptions = categoryData.flatMap((cat) =>
     cat.models.map((m) => ({
-      slug: compareModelSlug(m.catalog_series, m),
+      slug: compareModelSlug(m),
       category: cat.key,
-      label: `${m.catalog_series.maker} ${m.name}`,
+      label: `${m.maker} ${m.name}`,
     }))
   );
 

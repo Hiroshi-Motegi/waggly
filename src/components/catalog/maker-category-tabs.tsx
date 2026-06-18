@@ -20,8 +20,7 @@ interface Model {
   name: string;
   category: string;
   slug: string;
-  seriesMakerSlug: string;
-  seriesNameSlug: string;
+  makerSlug: string;
 }
 
 export function MakerCategoryTabs({ models }: { models: Model[] }) {
@@ -57,7 +56,7 @@ export function MakerCategoryTabs({ models }: { models: Model[] }) {
           {filtered.map((m, i) => (
             <Link
               key={m.id}
-              href={`/catalog/${m.seriesMakerSlug}/${m.seriesNameSlug}/${m.slug}`}
+              href={`/catalog/${m.makerSlug}/${m.slug}`}
               className={`flex items-center justify-between px-4 py-3 ${i < filtered.length - 1 ? "border-b border-[#ececec]" : ""}`}
             >
               <span className="font-bold text-sm text-[#006728] truncate">{m.name}</span>

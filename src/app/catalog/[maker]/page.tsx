@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BackButton } from "@/components/layout/back-button";
 import { notFound } from "next/navigation";
-import { getSeriesWithModelsByMaker } from "@/lib/catalog";
+import { getModelsByMaker } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { MakerCategoryTabs } from "@/components/catalog/maker-category-tabs";
 
@@ -10,9 +10,9 @@ export const revalidate = 86400;
 
 export async function generateMetadata({ params }: { params: Promise<{ maker: string }> }) {
   const { maker } = await params;
-  const { series } = await getSeriesWithModelsByMaker(maker);
-  if (series.length === 0) return {};
-  const makerName = series[0].maker;
+  const models = await getModelsByMaker(maker);
+  if (models.length === 0) return {};
+  const makerName = models[0].maker;
   return {
     title: `${makerName}のゴルフクラブカタログ | Waggly`,
     description: `${makerName}の全クラブスペックカタログ。`,
@@ -21,25 +21,21 @@ export async function generateMetadata({ params }: { params: Promise<{ maker: st
 
 export default async function MakerPage({ params }: { params: Promise<{ maker: string }> }) {
   const { maker } = await params;
-  const { series, modelsBySeries } = await getSeriesWithModelsByMaker(maker);
+  const models = await getModelsByMaker(maker);
 
-  if (series.length === 0) {
+  if (models.length === 0) {
     notFound();
   }
 
-  const makerName = series[0].maker;
+  const makerName = models[0].maker;
 
-  // Flatten all models with series info for the tab component
-  const allModels = series.flatMap((s) =>
-    (modelsBySeries.get(s.id) ?? []).map((m) => ({
-      id: m.id,
-      name: m.name,
-      category: m.category,
-      slug: m.slug,
-      seriesMakerSlug: s.maker_slug,
-      seriesNameSlug: s.name_slug,
-    }))
-  );
+  const allModels = models.map((m) => ({
+    id: m.id,
+    name: m.name,
+    category: m.category,
+    slug: m.slug,
+    makerSlug: m.maker_slug,
+  }));
 
   const jsonLd = {
     "@context": "https://schema.org",
