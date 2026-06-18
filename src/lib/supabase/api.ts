@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createRawClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/supabase";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -16,7 +17,7 @@ let _adminClient: ReturnType<typeof createRawClient> | null = null;
 
 export function getAdminClient() {
   if (!_adminClient) {
-    _adminClient = createRawClient(
+    _adminClient = createRawClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
@@ -29,7 +30,7 @@ export function getAdminClient() {
  * Uses anon key + user JWT so RLS policies apply.
  */
 function createUserClient(token: string) {
-  return createRawClient(
+  return createRawClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
