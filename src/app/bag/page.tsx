@@ -12,10 +12,18 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useClubs, updateClub } from "@/hooks/use-clubs";
 import type { ClubStatus, ClubWithImages } from "@/types/database";
 import { ShareWitbButton } from "@/components/bag/share-witb-button";
+import dynamic from "next/dynamic";
 import { getDistanceStaircaseData, getWeightFlowData, getDistanceInsights, getWeightInsights } from "@/lib/gap-analysis";
-import { DistanceStaircase } from "@/components/charts/distance-staircase";
-import { WeightFlow } from "@/components/charts/weight-flow";
 import { ChartInsights } from "@/components/charts/chart-insights";
+
+const DistanceStaircase = dynamic(
+  () => import("@/components/charts/distance-staircase").then((m) => m.DistanceStaircase),
+  { ssr: false, loading: () => <div className="h-[240px]" /> }
+);
+const WeightFlow = dynamic(
+  () => import("@/components/charts/weight-flow").then((m) => m.WeightFlow),
+  { ssr: false, loading: () => <div className="h-[240px]" /> }
+);
 import { ViewModeToggle } from "@/components/ui/view-mode-toggle";
 
 const MAX_BAG_CLUBS = 14;

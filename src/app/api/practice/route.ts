@@ -1,18 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-
-interface ClubBallInput {
-  club_id: string;
-  balls: number;
-  avg_distance?: number | null;
-  memo?: {
-    condition: string;
-    memo?: string;
-    symptom_tags?: string[];
-    feeling_tags?: string[];
-    gear_tags?: string[];
-  } | null;
-}
+import { createPracticeSchema } from "@/lib/api-schemas";
+import { badRequest } from "@/lib/api-error";
 
 export async function GET(request: NextRequest) {
   const auth = await getApiAuth();
@@ -48,7 +37,12 @@ export async function POST(request: NextRequest) {
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  const { clubs: clubBalls, ...sessionData } = await request.json();
+  const raw = await request.json();
+  const parsed = createPracticeSchema.safeParse(raw);
+  if (!parsed.success) {
+    return badRequest(parsed.error.issues.map((i) => i.message).join(", "));
+  }
+  const { clubs: clubBalls, ...sessionData } = parsed.data;
 
   // Create session
   const { data: session, error: sessionError } = await supabase
@@ -64,7 +58,7 @@ export async function POST(request: NextRequest) {
 
   // Create per-club records
   if (clubBalls && clubBalls.length > 0) {
-    const records = (clubBalls as ClubBallInput[])
+    const records = (clubBalls as NonNullable<typeof clubBalls>)
       .filter((cb) => cb.balls > 0)
       .map((cb) => ({
         session_id: session.id,
@@ -85,7 +79,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create club memos linked to this session
-    const memoRecords = (clubBalls as ClubBallInput[])
+    const memoRecords = (clubBalls as NonNullable<typeof clubBalls>)
       .filter((cb) => cb.memo?.condition)
       .map((cb) => {
         const memo = cb.memo!;

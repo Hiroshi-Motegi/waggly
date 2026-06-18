@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { updateClubSchema } from "@/lib/api-schemas";
+import { badRequest } from "@/lib/api-error";
 
 export function generateStaticParams() {
   return [{ clubId: "_" }];
@@ -34,19 +36,16 @@ export async function PATCH(
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  const body = await request.json();
-
-  const ALLOWED = [
-    "category", "club_number", "maker", "model", "shaft_name", "shaft_flex",
-    "loft", "lie", "length", "distance", "release_year", "memo",
-    "purchase_date", "purchase_shop", "purchase_price", "status", "bag_number", "sort_order",
-    "weight", "swing_weight", "frequency", "kick_point", "head_volume", "head_weight",
-    "grip_name", "grip_size", "bounce", "sole_shape", "face_angle", "shaft_weight",
-    "rating", "hidden_from_profile",
-  ];
-  const updates = Object.fromEntries(
-    Object.entries(body).filter(([k]) => ALLOWED.includes(k))
-  );
+  const raw = await request.json();
+  const parsed = updateClubSchema.safeParse(raw);
+  if (!parsed.success) {
+    return badRequest(parsed.error.issues.map((i) => i.message).join(", "));
+  }
+  // Also allow sort_order through (numeric only)
+  const updates: Record<string, unknown> = { ...parsed.data };
+  if (typeof raw.sort_order === "number") {
+    updates.sort_order = raw.sort_order;
+  }
 
   const { data, error } = await supabase
     .from("clubs")

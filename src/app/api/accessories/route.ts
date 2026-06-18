@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { createAccessorySchema } from "@/lib/api-schemas";
+import { badRequest } from "@/lib/api-error";
 
 
 export async function GET(request: NextRequest) {
@@ -38,7 +40,12 @@ export async function POST(request: NextRequest) {
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  const body = await request.json();
+  const raw = await request.json();
+  const parsed = createAccessorySchema.safeParse(raw);
+  if (!parsed.success) {
+    return badRequest(parsed.error.issues.map((i) => i.message).join(", "));
+  }
+  const body = parsed.data;
 
   const { data, error } = await supabase
     .from("accessories")

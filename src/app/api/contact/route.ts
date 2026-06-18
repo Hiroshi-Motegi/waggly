@@ -5,6 +5,7 @@ import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { sendAdminEmail } from "@/lib/send-admin-email";
 import { buildInquiryEmail } from "@/lib/email-templates";
+import { contactSchema } from "@/lib/api-schemas";
 
 function getAdminClient() {
   return createAdminClient(
@@ -24,25 +25,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
+  const raw = await request.json();
 
-  // 2. Turnstile verification
-  if (!body.turnstileToken) {
-    return NextResponse.json({ error: "認証に失敗しました" }, { status: 403 });
-  }
-  const turnstileOk = await verifyTurnstile(body.turnstileToken);
-  if (!turnstileOk) {
-    return NextResponse.json({ error: "認証に失敗しました" }, { status: 403 });
-  }
-
-  // 3. Validation
-  const { name, email, category, message } = body;
-  if (!email || !category || !message) {
+  // 2. Validate input
+  const parsed = contactSchema.safeParse(raw);
+  if (!parsed.success) {
     return NextResponse.json({ error: "必須項目を入力してください" }, { status: 400 });
   }
-  const validCategories = ["bug", "feature", "question", "other"];
-  if (!validCategories.includes(category)) {
-    return NextResponse.json({ error: "無効なカテゴリです" }, { status: 400 });
+  const { turnstileToken, name: rawName, email, category, message } = parsed.data;
+  const name = rawName ?? null;
+
+  // 3. Turnstile verification
+  const turnstileOk = await verifyTurnstile(turnstileToken);
+  if (!turnstileOk) {
+    return NextResponse.json({ error: "認証に失敗しました" }, { status: 403 });
   }
 
   // 4. Check auth (optional)

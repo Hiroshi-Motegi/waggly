@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { createClubSchema } from "@/lib/api-schemas";
+import { badRequest } from "@/lib/api-error";
 
 
 export async function GET(request: NextRequest) {
@@ -27,30 +29,28 @@ export async function GET(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Fetch latest distance per club from memos and practice
+  // Fetch latest distance per club from memos and practice (parallel)
   if (data && data.length > 0) {
     const clubIds = data.map((c: { id: string }) => c.id);
 
-    // Latest memo distance per club
-    const { data: latestMemos } = await supabase
-      .from("club_memos")
-      .select("club_id, distance, created_at")
-      .in("club_id", clubIds)
-      .not("distance", "is", null)
-      .order("created_at", { ascending: false });
-
-    // Latest practice avg_distance per club (join session for practiced_at as timestamp)
-    const { data: latestPractice } = await supabase
-      .from("practice_clubs")
-      .select("club_id, avg_distance, session:practice_sessions(practiced_at, created_at)")
-      .in("club_id", clubIds)
-      .not("avg_distance", "is", null);
+    const [{ data: latestMemos }, { data: latestPractice }] = await Promise.all([
+      supabase
+        .from("club_memos")
+        .select("club_id, distance, created_at")
+        .in("club_id", clubIds)
+        .not("distance", "is", null)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("practice_clubs")
+        .select("club_id, avg_distance, session:practice_sessions(practiced_at, created_at)")
+        .in("club_id", clubIds)
+        .not("avg_distance", "is", null),
+    ]);
 
     // Pick the most recent distance from either source
     const latestByClub = new Map<string, number>();
-
-    // Collect candidates: { club_id, distance, timestamp }
     const candidates: { club_id: string; distance: number; timestamp: string }[] = [];
+
     if (latestMemos) {
       for (const row of latestMemos) {
         candidates.push({ club_id: row.club_id, distance: row.distance!, timestamp: row.created_at });
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         }
       }
     }
-    // Sort by timestamp desc, keep first per club
+
     candidates.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
     for (const c of candidates) {
       if (!latestByClub.has(c.club_id)) {
@@ -116,7 +116,12 @@ export async function POST(request: NextRequest) {
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
 
-  const body = await request.json();
+  const raw = await request.json();
+  const parsed = createClubSchema.safeParse(raw);
+  if (!parsed.success) {
+    return badRequest(parsed.error.issues.map((i) => i.message).join(", "));
+  }
+  const body = parsed.data;
   const sortOrder = computeSortOrder(body.category ?? "", body.club_number ?? "");
 
   const { data, error } = await supabase
