@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-
+import { requireAdmin, isErrorResponse } from "@/lib/admin-auth";
+import { supabaseError } from "@/lib/api-error";
 
 export async function GET() {
-  const auth = await getApiAuth();
-  if (!auth) return unauthorized();
-  const { supabase } = auth;
+  const result = await requireAdmin();
+  if (isErrorResponse(result)) return result;
+  const { supabase } = result;
 
   const { data, error } = await supabase
     .from("knowledge_auto_runs")
@@ -13,6 +13,6 @@ export async function GET() {
     .order("ran_at", { ascending: false })
     .limit(10);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data);
 }

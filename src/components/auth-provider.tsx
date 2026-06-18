@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 google_email: null,
                 agreed_terms_at: new Date().toISOString(),
                 onboarding_version: 1,
+                is_admin: true,
                 created_at: new Date().toISOString(),
               });
             }

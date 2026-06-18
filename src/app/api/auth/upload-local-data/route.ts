@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
     );
     await insertLocalData(supabaseAdmin, auth.userId, localData);
     return NextResponse.json({ success: true });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[upload-local-data] Error:", e);
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ error: e instanceof Error ? e.message : "Unknown error" }, { status: 500 });
   }
 }

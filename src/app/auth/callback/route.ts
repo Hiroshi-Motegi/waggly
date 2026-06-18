@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/auth-helpers";
 import { getUserDataSummary } from "@/lib/user-data-summary";
+import type { AuthUser } from "@supabase/supabase-js";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
  */
 async function handleGoogleLink(
   request: NextRequest,
-  googleUser: any,
+  googleUser: AuthUser,
   origin: string
 ) {
   const { searchParams } = new URL(request.url);

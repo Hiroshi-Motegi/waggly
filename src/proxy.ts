@@ -35,6 +35,31 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // CSRF protection for state-changing API requests
+  if (
+    pathname.startsWith("/api/") &&
+    !["GET", "HEAD", "OPTIONS"].includes(request.method)
+  ) {
+    const origin = request.headers.get("origin");
+    const host = request.headers.get("host");
+    // Allow requests without Origin header (non-browser clients, native apps with Bearer token)
+    if (origin && host) {
+      const allowedOrigins = [
+        `https://${host}`,
+        `http://${host}`,
+        "https://waggly.jp",
+        "capacitor://localhost",
+        "http://localhost",
+      ];
+      if (!allowedOrigins.some((allowed) => origin === allowed)) {
+        return NextResponse.json(
+          { error: "Forbidden: invalid origin" },
+          { status: 403 }
+        );
+      }
+    }
+  }
+
   // Skip auth in development only
   if (process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true") {
     if (process.env.NODE_ENV !== "development") {
@@ -42,10 +67,25 @@ export async function proxy(request: NextRequest) {
       console.error("CRITICAL: DEV_SKIP_AUTH is set in non-development environment. Ignoring.");
     }
     if (process.env.NODE_ENV === "development") {
-      return NextResponse.next();
+      const response = NextResponse.next();
+      addSecurityHeaders(response);
+      return response;
     }
   }
-  return await updateSession(request);
+
+  const response = await updateSession(request);
+  addSecurityHeaders(response);
+  return response;
+}
+
+function addSecurityHeaders(response: NextResponse) {
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(self), microphone=(), geolocation=()"
+  );
 }
 
 export const config = {

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { getApiAuth } from "@/lib/supabase/api";
+import { requireAdmin, isErrorResponse } from "@/lib/admin-auth";
 import { runAutoCollectPipeline } from "@/lib/knowledge/pipeline";
-
 
 export const maxDuration = 60;
 
@@ -11,16 +10,16 @@ export async function POST(request: NextRequest) {
   let supabase;
 
   if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
+    // Cron job: use service role directly
     supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
   } else {
-    const auth = await getApiAuth();
-    if (!auth) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    supabase = auth.supabase;
+    // Manual trigger: require admin
+    const result = await requireAdmin();
+    if (isErrorResponse(result)) return result;
+    supabase = result.supabase;
   }
 
   try {
@@ -42,6 +41,10 @@ export async function POST(request: NextRequest) {
       });
     } catch { /* ignore logging error */ }
 
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[Auto-collect Pipeline Error]", message);
+    return NextResponse.json(
+      { error: process.env.NODE_ENV === "development" ? message : "Internal server error" },
+      { status: 500 }
+    );
   }
 }

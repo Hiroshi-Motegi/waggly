@@ -9,7 +9,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("practice_plans")
-    .select("*, practice_plan_items(*, club:clubs(id, club_number))")
+    .select("*, practice_plan_items(*)")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(20);

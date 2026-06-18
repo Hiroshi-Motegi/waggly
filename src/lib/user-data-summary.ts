@@ -2,7 +2,9 @@
  * Shared helper to get data counts and last updated for a user.
  * Used by conflict-check, resolve-conflict, data-summary, and link APIs.
  */
-export async function getUserDataSummary(supabase: any, userId: string) {
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+export async function getUserDataSummary(supabase: SupabaseClient, userId: string) {
   const [clubsRes, practicesRes, accessoriesRes] = await Promise.all([
     supabase.from("clubs").select("*", { count: "exact", head: true }).eq("user_id", userId),
     supabase.from("practice_sessions").select("*", { count: "exact", head: true }).eq("user_id", userId),
@@ -11,7 +13,7 @@ export async function getUserDataSummary(supabase: any, userId: string) {
 
   // ユーザーのクラブIDを取得して子テーブルの最終更新を検索
   const { data: userClubs } = await supabase.from("clubs").select("id").eq("user_id", userId);
-  const clubIds = (userClubs ?? []).map((c: any) => c.id);
+  const clubIds = (userClubs ?? []).map((c: { id: string }) => c.id);
 
   const baseQueries = [
     supabase.from("clubs").select("created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
@@ -28,7 +30,7 @@ export async function getUserDataSummary(supabase: any, userId: string) {
   const results = await Promise.all([...baseQueries, ...childQueries]);
 
   const dates = results
-    .map((r: any) => r.data?.created_at)
+    .map((r: { data?: { created_at?: string } | null }) => r.data?.created_at)
     .filter(Boolean) as string[];
 
   return {

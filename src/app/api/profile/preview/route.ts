@@ -31,7 +31,7 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   const filteredClubs = (clubs ?? []).filter(
-    (c: any) => c.status === "reserve" || (c.status === "bag" && (c.bag_number === 1 || c.bag_number === 2))
+    (c: { status: string; bag_number: number }) => c.status === "reserve" || (c.status === "bag" && (c.bag_number === 1 || c.bag_number === 2))
   );
 
   const { data: items } = await supabase

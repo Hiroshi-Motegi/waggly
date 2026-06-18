@@ -33,10 +33,10 @@ export async function runMigrations(): Promise<void> {
     }
     try {
       await execute(migration);
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Ignore "duplicate column" errors — V1 schema already includes
       // columns that V2/V3 try to ADD via ALTER TABLE
-      if (!e.message?.includes("duplicate column")) {
+      if (!(e instanceof Error) || !e.message?.includes("duplicate column")) {
         throw e;
       }
     }

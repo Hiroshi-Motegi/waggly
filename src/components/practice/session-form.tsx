@@ -61,7 +61,7 @@ export function SessionForm({ clubs, bag2Clubs, reserveClubs, pastLocations, ini
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validateOnSubmit({ location } as any)) return;
+    if (!validateOnSubmit({ location })) return;
     const computedTotal = ballsTab === "per_club"
       ? clubBalls.reduce((sum, cb) => sum + cb.balls, 0)
       : totalBalls;

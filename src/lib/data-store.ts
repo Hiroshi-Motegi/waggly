@@ -12,7 +12,7 @@ async function checkOnline(): Promise<boolean> {
  * Read data: online → API (+ cache to SQLite), offline → SQLite.
  * On web, always uses API (no SQLite).
  */
-export async function fetchData<T = any>(
+export async function fetchData<T = Record<string, unknown>>(
   apiPath: string,
   tableName: string,
   queryOverride?: string
@@ -33,7 +33,7 @@ export async function fetchData<T = any>(
 
     // Cache to SQLite (best-effort)
     try {
-      for (const row of data as any[]) {
+      for (const row of data as Record<string, unknown>[]) {
         const keys = Object.keys(row).filter((k) => !Array.isArray(row[k]) && typeof row[k] !== "object");
         const placeholders = keys.map(() => "?").join(", ");
         const values = keys.map((k) => row[k]);
@@ -58,10 +58,10 @@ export async function fetchData<T = any>(
 /**
  * Write data: online → API送信, offline → pending_syncにキュー。
  */
-export async function mutateData<T = any>(
+export async function mutateData<T = Record<string, unknown>>(
   apiPath: string,
   method: "POST" | "PATCH" | "DELETE",
-  payload?: any
+  payload?: Record<string, unknown>
 ): Promise<T | null> {
   if (!isNative()) {
     const res = await apiFetch(apiPath, {

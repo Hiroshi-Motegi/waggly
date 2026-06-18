@@ -208,7 +208,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "最低1つのログイン方法が必要です" }, { status: 400 });
   }
 
-  const targetProvider = providers.find((p: any) => p.provider === provider);
+  const targetProvider = providers.find((p: { provider: string }) => p.provider === provider);
   if (!targetProvider) {
     return NextResponse.json({ error: "Provider not linked" }, { status: 404 });
   }

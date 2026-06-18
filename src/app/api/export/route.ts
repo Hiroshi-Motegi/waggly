@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       .order("sort_order", { ascending: true });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const rows = (data ?? []).map((c: any) => ({
+    const rows = (data ?? []).map((c: Record<string, unknown> & { category: string; status: string }) => ({
       ...c,
       category: categoryLabels[c.category] ?? c.category,
       status: statusLabels[c.status] ?? c.status,
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const rows = (data ?? []).map((a: any) => ({
+    const rows = (data ?? []).map((a: Record<string, unknown> & { category: string; status: string }) => ({
       ...a,
       category: accessoryCategoryLabels[a.category] ?? a.category,
       status: accessoryStatusLabels[a.status] ?? a.status,
@@ -98,9 +98,9 @@ export async function GET(request: NextRequest) {
       .order("practiced_at", { ascending: false });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const rows = (data ?? []).map((s: any) => {
+    const rows = (data ?? []).map((s: Record<string, unknown> & { practice_clubs?: { balls: number; avg_distance: number | null; club: { maker: string | null; model: string | null; club_number: string } | null }[] }) => {
       const clubDetails = (s.practice_clubs ?? [])
-        .map((pc: any) => {
+        .map((pc: { balls: number; avg_distance: number | null; club: { maker: string | null; model: string | null; club_number: string } | null }) => {
           const c = pc.club;
           const name = c ? `${c.maker ?? ""}${c.model ? " " + c.model : ""} ${c.club_number}` : "不明";
           return `${name.trim()}:${pc.balls}球${pc.avg_distance ? `(${pc.avg_distance}y)` : ""}`;

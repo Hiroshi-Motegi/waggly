@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Merge primary image into image_url for backward compatibility
-  const result = (data ?? []).map(({ accessory_images, ...rest }: any) => ({
+  const result = (data ?? []).map(({ accessory_images, ...rest }: { accessory_images?: { image_url: string }[]; image_url: string | null; [key: string]: unknown }) => ({
     ...rest,
     image_url: rest.image_url ?? accessory_images?.[0]?.image_url ?? null,
   }));

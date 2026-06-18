@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
+interface ClubBallInput {
+  club_id: string;
+  balls: number;
+  avg_distance?: number | null;
+  memo?: {
+    condition: string;
+    memo?: string;
+    symptom_tags?: string[];
+    feeling_tags?: string[];
+    gear_tags?: string[];
+  } | null;
+}
 
 export async function GET(request: NextRequest) {
   const auth = await getApiAuth();
@@ -52,9 +64,9 @@ export async function POST(request: NextRequest) {
 
   // Create per-club records
   if (clubBalls && clubBalls.length > 0) {
-    const records = clubBalls
-      .filter((cb: any) => cb.balls > 0)
-      .map((cb: any) => ({
+    const records = (clubBalls as ClubBallInput[])
+      .filter((cb) => cb.balls > 0)
+      .map((cb) => ({
         session_id: session.id,
         club_id: cb.club_id,
         balls: cb.balls,
@@ -73,18 +85,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Create club memos linked to this session
-    const memoRecords = clubBalls
-      .filter((cb: any) => cb.memo?.condition)
-      .map((cb: any) => ({
-        club_id: cb.club_id,
-        practice_session_id: session.id,
-        distance: cb.avg_distance ?? null,
-        memo: cb.memo.memo || null,
-        condition: cb.memo.condition,
-        symptom_tags: cb.memo.symptom_tags || [],
-        feeling_tags: cb.memo.condition === "good" ? [] : (cb.memo.feeling_tags || []),
-        gear_tags: cb.memo.condition === "good" ? [] : (cb.memo.gear_tags || []),
-      }));
+    const memoRecords = (clubBalls as ClubBallInput[])
+      .filter((cb) => cb.memo?.condition)
+      .map((cb) => {
+        const memo = cb.memo!;
+        return {
+          club_id: cb.club_id,
+          practice_session_id: session.id,
+          distance: cb.avg_distance ?? null,
+          memo: memo.memo || null,
+          condition: memo.condition,
+          symptom_tags: memo.symptom_tags || [],
+          feeling_tags: memo.condition === "good" ? [] : (memo.feeling_tags || []),
+          gear_tags: memo.condition === "good" ? [] : (memo.gear_tags || []),
+        };
+      });
 
     if (memoRecords.length > 0) {
       const { error: memoError } = await supabase

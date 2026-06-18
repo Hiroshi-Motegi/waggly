@@ -40,7 +40,7 @@ export async function GET(
 
   // Filter out bag_number=0 for bag status clubs
   const filteredClubs = (clubs ?? []).filter(
-    (c: any) => c.status === "reserve" || (c.status === "bag" && (c.bag_number === 1 || c.bag_number === 2))
+    (c: { status: string; bag_number: number }) => c.status === "reserve" || (c.status === "bag" && (c.bag_number === 1 || c.bag_number === 2))
   );
 
   // Items: active, excluding hidden

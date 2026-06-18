@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
   // Fetch latest distance per club from memos and practice
   if (data && data.length > 0) {
-    const clubIds = data.map((c: any) => c.id);
+    const clubIds = data.map((c: { id: string }) => c.id);
 
     // Latest memo distance per club
     const { data: latestMemos } = await supabase
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     }
     if (latestPractice) {
       for (const row of latestPractice) {
-        const session = row.session as any;
+        const session = row.session as { created_at?: string; practiced_at?: string } | null;
         const ts = session?.created_at ?? session?.practiced_at ?? "";
         if (ts) {
           candidates.push({ club_id: row.club_id, distance: row.avg_distance!, timestamp: ts });
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     for (const club of data) {
       const dist = latestByClub.get(club.id);
       if (dist != null) {
-        (club as any).latest_avg_distance = dist;
+        (club as Record<string, unknown>).latest_avg_distance = dist;
       }
     }
   }

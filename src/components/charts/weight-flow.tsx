@@ -7,8 +7,9 @@ interface Props {
   data: WeightFlowItem[];
 }
 
-function CustomDot(props: any) {
-  const { cx, cy, payload } = props;
+function CustomDot(props: { cx?: number; cy?: number; payload?: WeightFlowItem }) {
+  const { cx = 0, cy = 0, payload } = props;
+  if (!payload) return null;
   return (
     <Dot
       cx={cx}

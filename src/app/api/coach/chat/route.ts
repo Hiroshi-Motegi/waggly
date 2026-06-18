@@ -144,8 +144,9 @@ export async function POST(request: Request) {
     await decrementUsageCounter(userId, "chat");
     throw streamError;
   }
-  } catch (error: any) {
-    console.error("[chat] Error:", error?.message ?? error);
-    return new Response(JSON.stringify({ error: error?.message ?? "Unknown error" }), { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[chat] Error:", message);
+    return new Response(JSON.stringify({ error: message }), { status: 500 });
   }
 }

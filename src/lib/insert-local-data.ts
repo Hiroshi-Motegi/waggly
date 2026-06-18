@@ -2,7 +2,25 @@
  * Insert local data into Supabase under a given user ID.
  * Shared by resolve-conflict and upload-local-data APIs.
  */
-export async function insertLocalData(supabase: any, userId: string, localData: any) {
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+interface LocalClub extends Record<string, unknown> {
+  club_memos?: Record<string, unknown>[];
+  club_images?: Record<string, unknown>[];
+  maintenances?: Record<string, unknown>[];
+}
+
+interface LocalSession extends Record<string, unknown> {
+  practice_clubs?: Record<string, unknown>[];
+}
+
+interface LocalData {
+  clubs?: LocalClub[];
+  accessories?: Record<string, unknown>[];
+  practiceSessions?: LocalSession[];
+}
+
+export async function insertLocalData(supabase: SupabaseClient, userId: string, localData: LocalData) {
   const { clubs = [], accessories = [], practiceSessions = [] } = localData;
 
   for (const club of clubs) {

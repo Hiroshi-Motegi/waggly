@@ -72,7 +72,7 @@ export default function NewItemPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validateOnSubmit(form as any)) return;
+    if (!validateOnSubmit(form)) return;
     setIsSubmitting(true);
     try {
       const body = {

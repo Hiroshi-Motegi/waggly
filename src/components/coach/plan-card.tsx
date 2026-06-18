@@ -50,7 +50,7 @@ export function PlanCard({ plan, onUpdate }: PlanCardProps) {
         {plan.practice_plan_items?.map((item) => (
           <div key={item.id} className="flex items-center justify-between text-base">
             <div className="flex items-center gap-2">
-              <Badge variant="outline">{item.club?.club_number ?? "?"}</Badge>
+              <Badge variant="outline">{item.club_number ?? "?"}</Badge>
               <span>{item.focus}</span>
             </div>
             <span className="font-medium">{item.balls}球</span>

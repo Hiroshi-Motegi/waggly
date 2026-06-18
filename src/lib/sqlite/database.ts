@@ -45,7 +45,7 @@ export async function closeDb(): Promise<void> {
   }
 }
 
-export async function execute(sql: string, values?: any[]): Promise<void> {
+export async function execute(sql: string, values?: unknown[]): Promise<void> {
   const database = await getDb();
   if (values && values.length > 0) {
     // Parameterized DML (INSERT, UPDATE, DELETE) uses run()
@@ -56,9 +56,10 @@ export async function execute(sql: string, values?: any[]): Promise<void> {
   }
 }
 
-export async function query<T = any>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function query<T = Record<string, any>>(
   sql: string,
-  values?: any[]
+  values?: unknown[]
 ): Promise<T[]> {
   const database = await getDb();
   const result = await database.query(sql, values);

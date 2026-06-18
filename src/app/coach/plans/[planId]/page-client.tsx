@@ -10,6 +10,7 @@ import { updatePlan } from "@/hooks/use-plans";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
 import { showError } from "@/lib/toast";
+import type { PracticePlanItem, PracticePlanWithItems } from "@/types/database";
 
 const statusLabels: Record<string, string> = {
   new: "未実行",
@@ -23,7 +24,7 @@ const statusColors: Record<string, string> = {
   skipped: "bg-[#e0e0e0] text-black",
 };
 
-function PlanItem({ item, isLast }: { item: any; isLast: boolean }) {
+function PlanItem({ item, isLast }: { item: PracticePlanItem; isLast: boolean }) {
   const [open, setOpen] = useState(false);
   const hasDetail = !!item.detail;
 
@@ -38,7 +39,7 @@ function PlanItem({ item, isLast }: { item: any; isLast: boolean }) {
           <p className="text-base font-bold text-[#006728]">{item.focus}</p>
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
-              {item.club?.club_number ?? item.club_number ?? "—"}
+              {item.club_number ?? "—"}
             </span>
             <span className="text-sm text-[#5c5c5c]">{item.balls}球</span>
           </div>
@@ -64,7 +65,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
   const { planId } = use(params);
   const { user } = useAuth();
   const router = useRouter();
-  const [plan, setPlan] = useState<any>(null);
+  const [plan, setPlan] = useState<PracticePlanWithItems | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -76,7 +77,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (Array.isArray(data)) {
-          setPlan(data.find((p: any) => p.id === planId) ?? null);
+          setPlan(data.find((p: PracticePlanWithItems) => p.id === planId) ?? null);
         } else if (data) {
           setPlan(data);
         }
@@ -91,7 +92,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
 
   async function handleSkip() {
     await updatePlan(planId, { status: "skipped" });
-    setPlan({ ...plan, status: "skipped" });
+    if (plan) setPlan({ ...plan, status: "skipped" });
   }
 
   async function handleDelete() {
@@ -103,7 +104,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
   if (isLoading) return <Loading variant="light" />;
   if (!plan) return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">見つかりません</p></div></div>;
 
-  const totalBalls = plan.practice_plan_items?.reduce((sum: number, i: any) => sum + i.balls, 0) ?? 0;
+  const totalBalls = plan.practice_plan_items?.reduce((sum: number, i: PracticePlanItem) => sum + i.balls, 0) ?? 0;
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
@@ -128,7 +129,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
       {/* Items */}
       <h3 className="px-1 pt-4 text-lg font-bold text-white">練習内容</h3>
       <div className="flex flex-col rounded-lg bg-white p-3">
-        {plan.practice_plan_items?.map((item: any, index: number) => (
+        {plan.practice_plan_items?.map((item: PracticePlanItem, index: number) => (
           <PlanItem key={item.id} item={item} isLast={index === (plan.practice_plan_items?.length ?? 0) - 1} />
         ))}
       </div>

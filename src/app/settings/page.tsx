@@ -18,6 +18,35 @@ import { useProfile } from "@/hooks/use-profile";
 import { useAdFree } from "@/hooks/use-ad-free";
 import { showError } from "@/lib/toast";
 
+interface DataCounts {
+  clubs: number;
+  practices: number;
+  accessories: number;
+}
+
+interface ConflictSource {
+  label: string;
+  isNew: boolean;
+  wid: string | null;
+  lastUpdated: string | null;
+  counts: DataCounts;
+}
+
+interface NativeConflictData {
+  provider: string;
+  providerSub: string;
+  localSummary: { lastUpdated: string | null; counts: DataCounts };
+  existingUser: { userId: string; lastUpdated: string | null; counts: DataCounts };
+}
+
+interface ConflictInfo {
+  scenario: "first-signin" | "account-linking";
+  provider: string;
+  providerSub: string;
+  sourceA: ConflictSource;
+  sourceB: ConflictSource;
+}
+
 interface UsageData {
   chat: { used: number; limit: number; remaining: number };
   plan: { used: number; limit: number; remaining: number };
@@ -88,7 +117,7 @@ export default function SettingsPage() {
 
   const [processing, setProcessing] = useState<string | null>(null);
   const [isLineApp, setIsLineApp] = useState(false);
-  const [conflictInfo, setConflictInfo] = useState<any>(null);
+  const [conflictInfo, setConflictInfo] = useState<ConflictInfo | null>(null);
   const [conflictSelected, setConflictSelected] = useState<"a" | "b" | null>(null);
   const [conflictConfirm, setConflictConfirm] = useState(false);
 
@@ -168,7 +197,7 @@ export default function SettingsPage() {
                     } else {
                       // first-signin: resolve-session PUT
                       const isLocal = source.wid === null;
-                      const resolveBody: any = {
+                      const resolveBody: Record<string, unknown> = {
                         choice: isLocal ? "local" : "server",
                         existingUserId: conflictInfo.sourceB.wid,
                         provider: conflictInfo.provider,
@@ -244,9 +273,8 @@ export default function SettingsPage() {
                   const { signInWithGoogle } = await import("@/lib/native-auth");
                   const result = await signInWithGoogle();
                   if (result.conflict) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const c = result.conflict as any;
-                    const conflictInfo = {
+                    const c = result.conflict as unknown as NativeConflictData;
+                    const info: ConflictInfo = {
                       scenario: "first-signin",
                       provider: c.provider,
                       providerSub: c.providerSub,
@@ -265,7 +293,7 @@ export default function SettingsPage() {
                         counts: c.existingUser.counts,
                       },
                     };
-                    setConflictInfo(conflictInfo);
+                    setConflictInfo(info);
                     setProcessing(null);
                     return;
                   }
@@ -280,7 +308,7 @@ export default function SettingsPage() {
                   } else {
                     setProcessing(null);
                   }
-                } catch (e: any) {
+                } catch {
                   alert("サインインに失敗しました");
                   setProcessing(null);
                 }
@@ -310,9 +338,8 @@ export default function SettingsPage() {
                     return;
                   }
                   if (result.conflict) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const c = result.conflict as any;
-                    const conflictInfo = {
+                    const c = result.conflict as unknown as NativeConflictData;
+                    const info: ConflictInfo = {
                       scenario: "first-signin",
                       provider: c.provider,
                       providerSub: c.providerSub,
@@ -331,7 +358,7 @@ export default function SettingsPage() {
                         counts: c.existingUser.counts,
                       },
                     };
-                    setConflictInfo(conflictInfo);
+                    setConflictInfo(info);
                     setProcessing(null);
                     return;
                   }
@@ -346,7 +373,7 @@ export default function SettingsPage() {
                   } else {
                     setProcessing(null);
                   }
-                } catch (e: any) {
+                } catch {
                   alert("サインインに失敗しました");
                   setProcessing(null);
                 }
@@ -658,7 +685,7 @@ function AccountLinking({
   setProcessing,
 }: {
   user: User;
-  onConflict: (info: any) => void;
+  onConflict: (info: ConflictInfo) => void;
   setProcessing: (msg: string | null) => void;
 }) {
   const { setUser } = useAuth();
@@ -757,9 +784,9 @@ function AccountLinking({
       const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
       const state = crypto.randomUUID();
       window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("linkLine error:", e);
-      alert(e.message || "LINE連携に失敗しました");
+      alert(e instanceof Error ? e.message : "LINE連携に失敗しました");
       setProcessing(null);
     }
   }
@@ -785,7 +812,7 @@ function AccountLinking({
     // No setProcessing(null) — browser navigates away
   }
 
-  function handleLinkConflict(provider: string, linkResult: any) {
+  function handleLinkConflict(provider: string, linkResult: { providerId: string; currentAccount: { lastUpdated: string | null; counts: ConflictSource["counts"] }; existingAccount: { id: string; lastUpdated: string | null; counts: ConflictSource["counts"] } }) {
     onConflict({
       scenario: "account-linking",
       provider,

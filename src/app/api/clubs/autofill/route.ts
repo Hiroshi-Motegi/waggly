@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         affiliateUrl = affiliateUrl ?? series.affiliate_url;
       }
     }
-    const defaultConfig = (cached.configurations ?? []).find((c: any) => c.shaft_variant_id === null);
+    const defaultConfig = (cached.configurations ?? []).find((c: { shaft_variant_id: string | null }) => c.shaft_variant_id === null);
     return NextResponse.json({
       loft: cached.loft,
       lie: cached.lie,
@@ -232,8 +232,9 @@ ${searchContext}
       image_url: rakutenResult.imageUrl,
       affiliate_url: rakutenResult.affiliateUrl,
     });
-  } catch (error: any) {
-    console.error("[autofill] Error:", error?.message);
-    return NextResponse.json({ error: error?.message ?? "Unknown error" }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[autofill] Error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

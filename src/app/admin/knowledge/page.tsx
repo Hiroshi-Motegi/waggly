@@ -164,7 +164,7 @@ function KnowledgeList() {
   }
 
   /* Columns */
-  const columns: ColumnDef<KnowledgeItem, any>[] = [
+  const columns: ColumnDef<KnowledgeItem>[] = [
     {
       accessorKey: "title",
       header: "タイトル",

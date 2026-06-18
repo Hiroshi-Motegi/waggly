@@ -71,8 +71,8 @@ export default function ShareSettingsPage() {
       await setUsernameApi(username);
       setIsEditingUsername(false);
       refetch();
-    } catch (err: any) {
-      setUsernameError(err.message);
+    } catch (err: unknown) {
+      setUsernameError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
       setIsSavingUsername(false);
     }
@@ -82,8 +82,8 @@ export default function ShareSettingsPage() {
     try {
       await updateProfile({ is_public: !profile?.is_public });
       refetch();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "エラーが発生しました");
     }
   }
 

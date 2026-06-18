@@ -104,8 +104,9 @@ export async function POST(req: Request) {
         if (customerId) {
           try {
             await getPayjpClient().customers.update(customerId, { card: token });
-          } catch (e: any) {
-            if (e?.body?.error?.code !== "already_have_card") throw e;
+          } catch (e: unknown) {
+            const code = (e as { body?: { error?: { code?: string } } })?.body?.error?.code;
+            if (code !== "already_have_card") throw e;
           }
         } else {
           const customer = await getPayjpClient().customers.create({ card: token });

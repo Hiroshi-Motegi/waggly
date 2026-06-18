@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 
+interface ClubBallInput {
+  club_id: string;
+  balls: number;
+  avg_distance?: number | null;
+  memo?: {
+    condition: string;
+    memo?: string;
+    symptom_tags?: string[];
+    feeling_tags?: string[];
+    gear_tags?: string[];
+  } | null;
+}
+
 export function generateStaticParams() {
   return [{ sessionId: "_" }];
 }
@@ -33,8 +46,8 @@ export async function GET(
 
   // Merge memos into practice_clubs
   if (data.practice_clubs && memos) {
-    const memoByClub = new Map(memos.map((m: any) => [m.club_id, m]));
-    data.practice_clubs = data.practice_clubs.map((pc: any) => ({
+    const memoByClub = new Map(memos.map((m: { club_id: string }) => [m.club_id, m]));
+    data.practice_clubs = data.practice_clubs.map((pc: { club_id: string; [key: string]: unknown }) => ({
       ...pc,
       memo: memoByClub.get(pc.club_id) ?? null,
     }));
@@ -75,9 +88,9 @@ export async function PATCH(
   if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 });
 
   if (clubBalls && clubBalls.length > 0) {
-    const records = clubBalls
-      .filter((cb: any) => cb.balls > 0)
-      .map((cb: any) => ({
+    const records = (clubBalls as ClubBallInput[])
+      .filter((cb) => cb.balls > 0)
+      .map((cb) => ({
         session_id: sessionId,
         club_id: cb.club_id,
         balls: cb.balls,
@@ -102,18 +115,21 @@ export async function PATCH(
   if (memoDeleteError) return NextResponse.json({ error: memoDeleteError.message }, { status: 500 });
 
   if (clubBalls && clubBalls.length > 0) {
-    const memoRecords = clubBalls
-      .filter((cb: any) => cb.memo?.condition)
-      .map((cb: any) => ({
-        club_id: cb.club_id,
-        practice_session_id: sessionId,
-        distance: cb.avg_distance ?? null,
-        memo: cb.memo.memo || null,
-        condition: cb.memo.condition,
-        symptom_tags: cb.memo.symptom_tags || [],
-        feeling_tags: cb.memo.condition === "good" ? [] : (cb.memo.feeling_tags || []),
-        gear_tags: cb.memo.condition === "good" ? [] : (cb.memo.gear_tags || []),
-      }));
+    const memoRecords = (clubBalls as ClubBallInput[])
+      .filter((cb) => cb.memo?.condition)
+      .map((cb) => {
+        const memo = cb.memo!;
+        return {
+          club_id: cb.club_id,
+          practice_session_id: sessionId,
+          distance: cb.avg_distance ?? null,
+          memo: memo.memo || null,
+          condition: memo.condition,
+          symptom_tags: memo.symptom_tags || [],
+          feeling_tags: memo.condition === "good" ? [] : (memo.feeling_tags || []),
+          gear_tags: memo.condition === "good" ? [] : (memo.gear_tags || []),
+        };
+      });
 
     if (memoRecords.length > 0) {
       const { error: memoError } = await supabase

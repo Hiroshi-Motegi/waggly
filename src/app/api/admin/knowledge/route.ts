@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { z } from "zod";
+import { requireAdmin, isErrorResponse } from "@/lib/admin-auth";
+import { badRequest, supabaseError } from "@/lib/api-error";
 
+const createKnowledgeSchema = z.object({
+  title: z.string().min(1).max(500),
+  content: z.string().min(1).max(10000),
+  category: z.string().min(1).max(100).optional(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
+  source: z.string().max(500).optional(),
+  tags: z.array(z.string()).optional(),
+});
 
 export async function GET(request: NextRequest) {
-  const auth = await getApiAuth();
-  if (!auth) return unauthorized();
-  const { supabase } = auth;
+  const result = await requireAdmin();
+  if (isErrorResponse(result)) return result;
+  const { supabase } = result;
 
   const category = request.nextUrl.searchParams.get("category");
   const status = request.nextUrl.searchParams.get("status");
@@ -19,23 +29,25 @@ export async function GET(request: NextRequest) {
   if (status) query = query.eq("status", status);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data);
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await getApiAuth();
-  if (!auth) return unauthorized();
-  const { supabase } = auth;
+  const result = await requireAdmin();
+  if (isErrorResponse(result)) return result;
+  const { supabase } = result;
 
-  const body = await request.json();
+  const raw = await request.json();
+  const parsed = createKnowledgeSchema.safeParse(raw);
+  if (!parsed.success) return badRequest(parsed.error.issues[0].message);
 
   const { data, error } = await supabase
     .from("knowledge_base")
-    .insert(body)
+    .insert(parsed.data)
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data, { status: 201 });
 }

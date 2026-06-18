@@ -33,12 +33,13 @@ export function usePracticeSessionsByMonth(monthKey: string | null) {
   return { sessions: data ?? [], isLoading };
 }
 
-interface CreateSessionData {
+export interface CreateSessionData {
   practiced_at: string;
   location: string;
   total_balls: number;
   memo: string;
   rating: number | null;
+  plan_id?: string;
   clubs: { club_id: string; balls: number; avg_distance?: number | null; memo?: InlineClubMemoValue | null }[];
 }
 
@@ -53,7 +54,7 @@ export async function createPracticeSession(data: CreateSessionData) {
   return res.json();
 }
 
-export async function updatePracticeSession(sessionId: string, data: any) {
+export async function updatePracticeSession(sessionId: string, data: Partial<CreateSessionData>) {
   const res = await apiFetch(`/api/practice/${sessionId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },

@@ -5,9 +5,9 @@ export type ValidationRule = {
   pattern?: { value: RegExp; message: string };
 };
 
-export type ValidationSchema<T = any> = Partial<Record<keyof T, ValidationRule>>;
+export type ValidationSchema<T = Record<string, unknown>> = Partial<Record<keyof T, ValidationRule>>;
 
-export function validateField(value: any, rule: ValidationRule): string | null {
+export function validateField(value: unknown, rule: ValidationRule): string | null {
   if (rule.required) {
     if (value === null || value === undefined || value === "") {
       return rule.required;
@@ -36,7 +36,7 @@ export function validateField(value: any, rule: ValidationRule): string | null {
   return null;
 }
 
-export function validateForm<T extends Record<string, any>>(
+export function validateForm<T extends Record<string, unknown>>(
   form: T,
   schema: ValidationSchema<T>
 ): Record<string, string> {

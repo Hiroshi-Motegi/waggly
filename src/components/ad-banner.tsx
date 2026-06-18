@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 declare global {
   interface Window {
-    adsbygoogle?: any[];
+    adsbygoogle?: Record<string, unknown>[];
   }
 }
 
@@ -22,7 +22,16 @@ export function AdBanner({ slot, format = "auto" }: { slot: string; format?: str
   const [filled, setFilled] = useState(false);
 
   useEffect(() => {
-    if (isAdFree || !user || pushed.current) return;
+    if (isAdFree || !user) return;
+
+    const el = adRef.current;
+    if (!el) return;
+
+    // Strict Mode 対策: ins が既に処理済みなら push しない
+    const ins = el.querySelector("ins.adsbygoogle");
+    if (ins && (ins as HTMLElement).dataset.adStatus) return;
+    if (pushed.current) return;
+
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
@@ -31,11 +40,9 @@ export function AdBanner({ slot, format = "auto" }: { slot: string; format?: str
     }
 
     // AdSense が広告を埋めたか監視（未承認時は空 iframe になるため）
-    const el = adRef.current;
-    if (!el) return;
     const observer = new MutationObserver(() => {
-      const ins = el.querySelector("ins.adsbygoogle");
-      if (ins && (ins as HTMLElement).dataset.adStatus === "filled") {
+      const insEl = el.querySelector("ins.adsbygoogle");
+      if (insEl && (insEl as HTMLElement).dataset.adStatus === "filled") {
         setFilled(true);
         observer.disconnect();
       }
@@ -48,7 +55,7 @@ export function AdBanner({ slot, format = "auto" }: { slot: string; format?: str
 
   return (
     <>
-      <div ref={adRef} className="w-full overflow-hidden" style={{ display: filled ? "block" : "none" }}>
+      <div ref={adRef} className="w-full" style={{ height: filled ? "auto" : 0, overflow: "hidden" }}>
         <ins
           className="adsbygoogle"
           style={{ display: "block" }}

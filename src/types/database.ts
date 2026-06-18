@@ -15,6 +15,7 @@ export interface User {
   google_email: string | null;
   agreed_terms_at: string | null;
   onboarding_version: number;
+  is_admin: boolean;
   created_at: string;
 }
 
@@ -123,6 +124,8 @@ export interface PracticePlanItem {
   balls: number;
   focus: string;
   sort_order: number;
+  club_number: string | null;
+  detail: string | null;
 }
 
 export interface AiChat {
@@ -193,7 +196,7 @@ export interface PracticeSessionWithClubs extends PracticeSession {
 }
 
 export interface PracticePlanWithItems extends PracticePlan {
-  practice_plan_items: (PracticePlanItem & { club: Club | null })[];
+  practice_plan_items: PracticePlanItem[];
 }
 
 export interface Profile {

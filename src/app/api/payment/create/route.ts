@@ -103,9 +103,10 @@ export async function POST(req: Request) {
     if (customerId) {
       try {
         await getPayjpClient().customers.update(customerId, { card: token });
-      } catch (e: any) {
+      } catch (e: unknown) {
         // 同じカードの場合はスキップ（already_have_card）
-        if (e?.body?.error?.code !== "already_have_card") throw e;
+        const code = (e as { body?: { error?: { code?: string } } })?.body?.error?.code;
+        if (code !== "already_have_card") throw e;
       }
     } else {
       const customer = await getPayjpClient().customers.create({ card: token });
@@ -251,7 +252,7 @@ export async function POST(req: Request) {
         p_coupon_id: couponId,
       });
     }
-    const errCode = (e as any)?.body?.error?.code ?? "unknown";
+    const errCode = (e as { body?: { error?: { code?: string } } })?.body?.error?.code ?? "unknown";
     console.error(`Payment failed: code=${errCode}, userId=${userId}`);
     return NextResponse.json({ error: "決済に失敗しました。再度お試しください。" }, { status: 500 });
   }

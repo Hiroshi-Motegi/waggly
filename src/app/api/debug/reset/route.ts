@@ -18,13 +18,13 @@ export async function POST() {
     .select("user_id")
     .eq("provider", "dev");
 
-  const devUserIds = new Set((devProviders ?? []).map((p: any) => p.user_id));
+  const devUserIds = new Set((devProviders ?? []).map((p: { user_id: string }) => p.user_id));
 
   const { data: users } = await supabase
     .from("users")
     .select("id, display_name");
 
-  const nonDevUsers = (users ?? []).filter((u: any) => !devUserIds.has(u.id));
+  const nonDevUsers = (users ?? []).filter((u: { id: string }) => !devUserIds.has(u.id));
 
   if (!nonDevUsers.length) {
     return NextResponse.json({ message: "No users to delete" });
@@ -55,5 +55,5 @@ export async function POST() {
     console.log("[reset] Deleted:", u.id, u.display_name);
   }
 
-  return NextResponse.json({ deleted: nonDevUsers.length, users: nonDevUsers.map((u: any) => u.display_name) });
+  return NextResponse.json({ deleted: nonDevUsers.length, users: nonDevUsers.map((u: { display_name: string }) => u.display_name) });
 }

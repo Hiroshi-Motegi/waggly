@@ -27,7 +27,7 @@ export async function GET() {
   }
 
   // Mask sensitive IDs but show enough to identify
-  const masked = (users ?? []).map((u: any) => ({
+  const masked = (users ?? []).map((u: { id: string; display_name: string; created_at: string }) => ({
     id: u.id?.substring(0, 8) + "...",
     display_name: u.display_name,
     providers: (providersByUser[u.id] ?? []).map((p) => ({

@@ -12,7 +12,7 @@ export function useFavoriteClubs() {
       const res = await apiFetch("/api/catalog/favorites");
       if (!res.ok) return;
       const data = await res.json();
-      setFavoriteModelIds(new Set(data.map((f: any) => f.model_id)));
+      setFavoriteModelIds(new Set(data.map((f: { model_id: string }) => f.model_id)));
     } catch {} finally {
       setIsLoading(false);
     }

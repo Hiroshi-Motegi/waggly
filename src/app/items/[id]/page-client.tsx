@@ -129,7 +129,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!validateOnSubmit(editForm as any)) return;
+    if (!validateOnSubmit(editForm)) return;
     setIsSubmitting(true);
     try {
       const body = {

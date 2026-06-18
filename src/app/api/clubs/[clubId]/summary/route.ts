@@ -39,10 +39,10 @@ export async function GET(
     .gte("created_at", threeMonthsAgo.toISOString())
     .order("created_at", { ascending: false });
 
-  const totalBalls = (practiceClubs ?? []).reduce((sum: number, pc: any) => sum + (pc.balls ?? 0), 0);
+  const totalBalls = (practiceClubs ?? []).reduce((sum: number, pc: { balls: number }) => sum + (pc.balls ?? 0), 0);
   const distances = (practiceClubs ?? [])
-    .map((pc: any) => pc.avg_distance)
-    .filter((d: any) => d != null);
+    .map((pc: { avg_distance: number | null }) => pc.avg_distance)
+    .filter((d: number | null): d is number => d != null);
   const avgDistance = distances.length > 0
     ? Math.round(distances.reduce((a: number, b: number) => a + b, 0) / distances.length)
     : null;
@@ -50,7 +50,7 @@ export async function GET(
   const tagCounts: Record<string, number> = {};
   const conditionCounts = { good: 0, normal: 0, bad: 0 };
 
-  (memos ?? []).forEach((m: any) => {
+  (memos ?? []).forEach((m: { condition: string | null; symptom_tags: string[] | null; feeling_tags: string[] | null; gear_tags: string[] | null }) => {
     if (m.condition) conditionCounts[m.condition as keyof typeof conditionCounts]++;
     [...(m.symptom_tags ?? []), ...(m.feeling_tags ?? []), ...(m.gear_tags ?? [])].forEach((tag: string) => {
       tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;

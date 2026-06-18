@@ -4,7 +4,7 @@ import useSWR, { mutate } from "swr";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
 import { isNative } from "@/lib/platform";
-import type { Club, ClubWithImages, ClubStatus } from "@/types/database";
+import type { Club, ClubWithImages, ClubStatus, Maintenance } from "@/types/database";
 
 async function fetcher(url: string) {
   const res = await apiFetch(url);
@@ -31,7 +31,7 @@ export function useClub(clubId: string) {
   const { user } = useAuth();
   const key = (user || isNative()) ? `/api/clubs/${clubId}` : null;
 
-  const { data, isLoading } = useSWR<ClubWithImages & { maintenances: any[] }>(key, fetcher);
+  const { data, isLoading } = useSWR<ClubWithImages & { maintenances: Maintenance[] }>(key, fetcher);
 
   return { club: data ?? null, isLoading };
 }

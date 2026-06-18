@@ -101,7 +101,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validateOnSubmit(form as any)) return;
+    if (!validateOnSubmit(form)) return;
     const cleaned = Object.fromEntries(
       Object.entries(form).map(([k, v]) => [k, v === "" ? null : v])
     );

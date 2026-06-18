@@ -17,7 +17,16 @@ export async function POST(req: Request) {
 
   const body = await req.text();
 
-  let event: any;
+  let event: {
+    id?: string;
+    type?: string;
+    data?: {
+      id?: string;
+      customer?: string;
+      current_period_start?: number;
+      current_period_end?: number;
+    };
+  };
   try {
     event = JSON.parse(body);
   } catch {
@@ -47,6 +56,9 @@ export async function POST(req: Request) {
     .insert({ id: eventId, event_type: eventType });
 
   const subscriptionData = event.data;
+  if (!subscriptionData) {
+    return NextResponse.json({ error: "missing event data" }, { status: 400 });
+  }
 
   switch (eventType) {
     case "subscription.renewed": {
@@ -55,10 +67,10 @@ export async function POST(req: Request) {
         .from("subscriptions")
         .update({
           current_period_start: new Date(
-            subscriptionData.current_period_start * 1000
+            subscriptionData.current_period_start! * 1000
           ).toISOString(),
           current_period_end: new Date(
-            subscriptionData.current_period_end * 1000
+            subscriptionData.current_period_end! * 1000
           ).toISOString(),
           grace_period_end: null,
         })

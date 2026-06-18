@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       .map((cat) => ({
         category: cat,
         label: categoryLabels[cat] ?? cat,
-        clubs: clubs.filter((c: any) => c.category === cat),
+        clubs: clubs.filter((c: { category: string }) => c.category === cat),
       }))
       .filter((g) => g.clubs.length > 0);
 
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
                   <span style={{ fontSize: "12px", opacity: 0.7, marginBottom: "8px", textTransform: "uppercase" as const }}>
                     {group.label}
                   </span>
-                  {group.clubs.map((club: any, i: number) => (
+                  {group.clubs.map((club: { club_number: string; distance: number | null; maker: string | null; model: string | null; shaft_name: string | null; shaft_flex: string | null }, i: number) => (
                     <div key={i} style={{ display: "flex", flexDirection: "column", marginBottom: "8px" }}>
                       <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
                         <span style={{ fontSize: "20px", fontWeight: "bold" }}>{club.club_number}</span>
@@ -205,8 +205,10 @@ export async function GET(request: NextRequest) {
         height: 810,
       }
     );
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message, stack: e.stack }), {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Unknown error";
+    const stack = e instanceof Error ? e.stack : undefined;
+    return new Response(JSON.stringify({ error: message, stack }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

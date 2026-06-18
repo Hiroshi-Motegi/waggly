@@ -8,12 +8,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { isNative } from "@/lib/platform";
 import { SessionForm } from "@/components/practice/session-form";
 import { useClubs } from "@/hooks/use-clubs";
-import { updatePracticeSession, deletePracticeSession } from "@/hooks/use-practice";
+import { updatePracticeSession, deletePracticeSession, type CreateSessionData } from "@/hooks/use-practice";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import { showError } from "@/lib/toast";
-import type { PracticeSessionWithClubs } from "@/types/database";
+import type { PracticeSessionWithClubs, PracticePlanItem, PracticePlanWithItems } from "@/types/database";
 
 export default function EditPracticePage({ overrideSessionId }: { overrideSessionId?: string } = {}) {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
 
   const [pastLocations, setPastLocations] = useState<string[]>([]);
   const [session, setSession] = useState<PracticeSessionWithClubs | null>(null);
-  const [plan, setPlan] = useState<any>(null);
+  const [plan, setPlan] = useState<PracticePlanWithItems | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,7 +55,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
             if (planRes.ok) {
               const plans = await planRes.json();
               if (Array.isArray(plans)) {
-                setPlan(plans.find((p: any) => p.id === data.plan_id) ?? null);
+                setPlan(plans.find((p: PracticePlanWithItems) => p.id === data.plan_id) ?? null);
               }
             }
           }
@@ -71,7 +71,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
     fetchSession();
   }, [sessionId, user, authLoading]);
 
-  async function handleSubmit(data: any) {
+  async function handleSubmit(data: CreateSessionData) {
     setIsSubmitting(true);
     try {
       await updatePracticeSession(sessionId, data);
@@ -148,11 +148,11 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
           {planOpen && (
             <div className="mt-2 pt-2 border-t border-[#dfdfdf] flex flex-col gap-2">
               <p className="text-sm text-[#8b8b8b]">{plan.summary}</p>
-              {plan.practice_plan_items?.map((item: any, index: number) => (
+              {plan.practice_plan_items?.map((item: PracticePlanItem, index: number) => (
                 <div key={item.id} className={index > 0 ? "border-t border-[#dfdfdf] pt-2" : ""}>
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
-                      {item.club?.club_number ?? "?"}
+                      {item.club_number ?? "?"}
                     </span>
                     <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.balls}球</span>
                   </div>

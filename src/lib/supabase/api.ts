@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createRawClient } from "@supabase/supabase-js";
+import { createClient as createRawClient, type SupabaseClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -38,8 +38,7 @@ async function resolveUserId(authUserId: string): Promise<string | null> {
  * Returns null if not authenticated (caller should return 401).
  * userId is users.id (independent UUID), NOT auth.users.id.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AppSupabaseClient = ReturnType<typeof createRawClient<any>>;
+type AppSupabaseClient = SupabaseClient;
 
 export async function getApiAuth(): Promise<{
   supabase: AppSupabaseClient;

@@ -8,10 +8,11 @@ import { nativeHref } from "@/lib/native-routes";
 import { PageHeader } from "@/components/layout/page-header";
 import { SessionForm } from "@/components/practice/session-form";
 import { useClubs } from "@/hooks/use-clubs";
-import { createPracticeSession } from "@/hooks/use-practice";
+import { createPracticeSession, type CreateSessionData } from "@/hooks/use-practice";
 import { apiFetch } from "@/lib/api-client";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import { showError } from "@/lib/toast";
+import type { PracticePlanItem, PracticePlanWithItems } from "@/types/database";
 
 export default function NewPracticePage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function NewPracticePage() {
   const [pastLocations, setPastLocations] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [plan, setPlan] = useState<any>(null);
+  const [plan, setPlan] = useState<PracticePlanWithItems | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function NewPracticePage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (Array.isArray(data)) {
-          setPlan(data.find((p: any) => p.id === planId) ?? null);
+          setPlan(data.find((p: PracticePlanWithItems) => p.id === planId) ?? null);
         } else if (data) {
           setPlan(data);
         }
@@ -47,7 +48,7 @@ export default function NewPracticePage() {
       .catch((e) => showError(e));
   }, [planId]);
 
-  async function handleSubmit(data: any) {
+  async function handleSubmit(data: CreateSessionData) {
     setIsSubmitting(true);
     try {
       await createPracticeSession({ ...data, plan_id: planId ?? undefined });
@@ -128,11 +129,11 @@ export default function NewPracticePage() {
           {planOpen && (
             <div className="mt-2 pt-2 border-t border-[#dfdfdf] flex flex-col gap-2">
               <p className="text-sm text-[#8b8b8b]">{plan.summary}</p>
-              {plan.practice_plan_items?.map((item: any, index: number) => (
+              {plan.practice_plan_items?.map((item: PracticePlanItem, index: number) => (
                 <div key={item.id} className={index > 0 ? "border-t border-[#dfdfdf] pt-2" : ""}>
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-[#c7e2ca] px-2.5 py-1 text-xs font-bold text-black">
-                      {item.club?.club_number ?? "?"}
+                      {item.club_number ?? "?"}
                     </span>
                     <span className="rounded-full border border-[#8b8b8b] px-2.5 py-1 text-xs font-bold text-black">{item.balls}球</span>
                   </div>
