@@ -24,7 +24,7 @@ export type CatalogModel = {
   release_month: number | null;
   shaft_names: string[] | null;
   head_manufacture: string | null;
-  sle_rule: boolean | null;
+  sle_rule: string | null;
   source_url: string | null;
   image_url: string | null;
   alpen_pid: string | null;
