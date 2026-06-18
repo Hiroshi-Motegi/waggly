@@ -164,12 +164,6 @@ export default async function ModelDetailPage({
                 </div>
               )}
             </div>
-            {model.head_material && (
-              <div className="mt-2 text-sm">
-                <span className="text-xs text-[#888]">ヘッド素材</span>
-                <p className="font-medium">{model.head_material}</p>
-              </div>
-            )}
             {model.sle_rule !== null && (
               <div className="mt-2 text-sm">
                 <span className="text-xs text-[#888]">SLEルール</span>
