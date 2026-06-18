@@ -22,13 +22,16 @@ export function ModelCard({ model }: ModelCardProps) {
   return (
     <Link href={href} className="group block rounded-xl border border-[#e0e0e0] bg-white overflow-hidden hover:shadow-md transition-shadow">
       <div className="aspect-video relative bg-[#f5f5f5]">
-        {model.image_url ? (
+        {(model.alpen_pid || model.image_url) ? (
           <Image
-            src={model.image_url}
+            src={model.alpen_pid
+              ? `https://img.alpen-group.jp/Contents/ProductImages/0/${model.alpen_pid}_L.jpg`
+              : model.image_url!}
             alt={`${model.maker} ${model.name}`}
             fill
             className="object-contain p-2"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            unoptimized={!!model.alpen_pid}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-[#bbb] text-xs">

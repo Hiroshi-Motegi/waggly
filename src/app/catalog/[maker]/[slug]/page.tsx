@@ -7,6 +7,8 @@ import { fetchRelatedNews } from "@/lib/catalog-news";
 import { SpecTable } from "@/components/catalog/spec-table";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { FavoriteClubButton } from "@/components/catalog/favorite-club-button";
+import { AlpenAdImage } from "@/components/catalog/alpen-ad-image";
+import { AlpenBuyLink } from "@/components/catalog/alpen-buy-link";
 
 export const revalidate = 86400;
 
@@ -104,7 +106,15 @@ export default async function ModelDetailPage({
               <FavoriteClubButton modelId={model.id} />
             </div>
             <div className="flex gap-4">
-              {model.image_url && (
+              {model.alpen_pid ? (
+                <div className="relative w-20 h-20 shrink-0 bg-[#f5f5f5] rounded-lg overflow-hidden">
+                  <AlpenAdImage
+                    alpenPid={model.alpen_pid}
+                    alt={`${model.maker} ${model.name}`}
+                    className="w-full h-full"
+                  />
+                </div>
+              ) : model.image_url ? (
                 <div className="relative w-20 h-20 shrink-0 bg-[#f5f5f5] rounded-lg overflow-hidden">
                   <Image
                     src={model.image_url}
@@ -114,7 +124,7 @@ export default async function ModelDetailPage({
                     sizes="80px"
                   />
                 </div>
-              )}
+              ) : null}
               <div className="min-w-0">
                 <p className="text-xs text-[#888] mb-0.5">{model.maker}</p>
                 <h1 className="text-lg font-bold text-[#222] leading-tight">
@@ -127,9 +137,6 @@ export default async function ModelDetailPage({
             </div>
 
             {/* Description */}
-            {model.description && (
-              <p className="mt-3 text-sm text-[#555] leading-relaxed">{model.description}</p>
-            )}
 
             {/* Basic info */}
             <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
@@ -150,31 +157,25 @@ export default async function ModelDetailPage({
                   </p>
                 </div>
               )}
-              {model.head_material && (
-                <div>
-                  <span className="text-xs text-[#888]">ヘッド素材</span>
-                  <p className="font-medium">{model.head_material}</p>
-                </div>
-              )}
               {model.head_finish && (
                 <div>
                   <span className="text-xs text-[#888]">フィニッシュ</span>
                   <p className="font-medium">{model.head_finish}</p>
                 </div>
               )}
-              {model.head_manufacture && (
-                <div>
-                  <span className="text-xs text-[#888]">製造</span>
-                  <p className="font-medium">{model.head_manufacture}</p>
-                </div>
-              )}
-              {model.sle_rule !== null && (
-                <div>
-                  <span className="text-xs text-[#888]">SLEルール</span>
-                  <p className="font-medium">{model.sle_rule ? "適合" : "非適合"}</p>
-                </div>
-              )}
             </div>
+            {model.head_material && (
+              <div className="mt-2 text-sm">
+                <span className="text-xs text-[#888]">ヘッド素材</span>
+                <p className="font-medium">{model.head_material}</p>
+              </div>
+            )}
+            {model.sle_rule !== null && (
+              <div className="mt-2 text-sm">
+                <span className="text-xs text-[#888]">SLEルール</span>
+                <p className="font-medium">{model.sle_rule ? "適合" : "非適合"}</p>
+              </div>
+            )}
 
             {/* Shaft list */}
             {model.shaft_names && model.shaft_names.length > 0 && (
@@ -202,6 +203,22 @@ export default async function ModelDetailPage({
             <h2 className="text-sm font-bold text-white mb-2">スペック詳細</h2>
             <div className="rounded-md overflow-hidden">
               <SpecTable specs={model.catalog_specs} category={model.category} />
+            </div>
+          </div>
+        )}
+
+        {/* Alpen buy link */}
+        {model.alpen_pid && (
+          <div className="w-full max-w-screen-sm px-3 pt-4">
+            <h2 className="text-sm font-bold text-white mb-2">購入する</h2>
+            <div className="rounded-md bg-white p-4 flex flex-col items-center gap-3">
+              <AlpenAdImage
+                alpenPid={model.alpen_pid}
+                alt={`${model.maker} ${model.name}`}
+                className="w-full max-h-48"
+              />
+              <AlpenBuyLink alpenPid={model.alpen_pid} />
+              <p className="text-xs text-[#888] text-center">アルペングループオンラインストア</p>
             </div>
           </div>
         )}
