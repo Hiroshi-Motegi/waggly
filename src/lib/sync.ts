@@ -60,7 +60,7 @@ export async function fullSync(): Promise<void> {
       const res = await apiFetch(apiPath);
       if (!res.ok) continue;
 
-      const rows: any[] = await res.json();
+      const rows: Record<string, unknown>[] = await res.json();
 
       // Clear local table and child tables
       assertValidTable(table);
@@ -171,22 +171,22 @@ export async function getLocalDataSummary(): Promise<DataSummary> {
 }
 
 export async function collectLocalData(): Promise<{
-  clubs: any[];
-  accessories: any[];
-  practiceSessions: any[];
+  clubs: Record<string, unknown>[];
+  accessories: Record<string, unknown>[];
+  practiceSessions: Record<string, unknown>[];
 }> {
-  const clubs = await query<any>("SELECT * FROM clubs");
+  const clubs = await query<Record<string, unknown>>("SELECT * FROM clubs");
   for (const club of clubs) {
-    club.club_memos = await query<any>("SELECT * FROM club_memos WHERE club_id = ?", [club.id]);
-    club.club_images = await query<any>("SELECT * FROM club_images WHERE club_id = ?", [club.id]);
-    club.maintenances = await query<any>("SELECT * FROM maintenances WHERE club_id = ?", [club.id]);
+    club.club_memos = await query<Record<string, unknown>>("SELECT * FROM club_memos WHERE club_id = ?", [club.id as string]);
+    club.club_images = await query<Record<string, unknown>>("SELECT * FROM club_images WHERE club_id = ?", [club.id as string]);
+    club.maintenances = await query<Record<string, unknown>>("SELECT * FROM maintenances WHERE club_id = ?", [club.id as string]);
   }
 
-  const accessories = await query<any>("SELECT * FROM accessories");
+  const accessories = await query<Record<string, unknown>>("SELECT * FROM accessories");
 
-  const practiceSessions = await query<any>("SELECT * FROM practice_sessions");
+  const practiceSessions = await query<Record<string, unknown>>("SELECT * FROM practice_sessions");
   for (const session of practiceSessions) {
-    session.practice_clubs = await query<any>("SELECT * FROM practice_clubs WHERE session_id = ?", [session.id]);
+    session.practice_clubs = await query<Record<string, unknown>>("SELECT * FROM practice_clubs WHERE session_id = ?", [session.id as string]);
   }
 
   return { clubs, accessories, practiceSessions };
@@ -197,17 +197,18 @@ export async function collectLocalData(): Promise<{
  * Reads image files from the device filesystem and POSTs them
  * to the server's image upload API.
  */
-export async function uploadLocalImages(localData: { clubs: any[] }): Promise<void> {
+export async function uploadLocalImages(localData: { clubs: Record<string, unknown>[] }): Promise<void> {
   for (const club of localData.clubs) {
-    const images = club.club_images ?? [];
+    const images = (club.club_images as Record<string, unknown>[]) ?? [];
     for (const img of images) {
       if (!img.image_url) continue;
+      const imageUrl = img.image_url as string;
       try {
         // Fetch the local image (accessible in WebView via capacitor:// URL)
-        const res = await fetch(img.image_url);
+        const res = await fetch(imageUrl);
         if (!res.ok) continue;
         const blob = await res.blob();
-        const ext = img.image_url.split(".").pop()?.split("?")[0] ?? "jpg";
+        const ext = imageUrl.split(".").pop()?.split("?")[0] ?? "jpg";
         const file = new File([blob], `upload.${ext}`, { type: blob.type || "image/jpeg" });
 
         const formData = new FormData();
