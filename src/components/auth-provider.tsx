@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { isNative } from "@/lib/platform";
 import { trackEvent } from "@/lib/gtm";
 import type { User } from "@/types/database";
+import { showError } from "@/lib/toast";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -197,6 +198,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (deepLink) router.replace(deepLink);
       } catch (error) {
         console.error("Authentication error:", error);
+        showError(error);
       } finally {
         setIsLoading(false);
       }

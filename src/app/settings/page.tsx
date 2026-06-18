@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/layout/page-header";
 import { useProfile } from "@/hooks/use-profile";
 import { useAdFree } from "@/hooks/use-ad-free";
+import { showError } from "@/lib/toast";
 
 interface UsageData {
   chat: { used: number; limit: number; remaining: number };
@@ -80,9 +81,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!user) return;
-    apiFetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch(() => {}).finally(() => setUsageLoaded(true));
-    apiFetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch(() => {});
-    apiFetch("/api/payment/card-info").then((r) => r.ok ? r.json() : null).then((d) => setCardInfo(d?.card ?? null)).catch(() => {});
+    apiFetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch((e) => showError(e)).finally(() => setUsageLoaded(true));
+    apiFetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch((e) => showError(e));
+    apiFetch("/api/payment/card-info").then((r) => r.ok ? r.json() : null).then((d) => setCardInfo(d?.card ?? null)).catch((e) => showError(e));
   }, [user]);
 
   const [processing, setProcessing] = useState<string | null>(null);
@@ -610,6 +611,7 @@ function ExportSection() {
       URL.revokeObjectURL(url);
     } catch (e) {
       console.error(`Export ${label} failed:`, e);
+      showError(e);
     } finally {
       setDownloading(null);
     }
@@ -666,7 +668,7 @@ function AccountLinking({
     apiFetch("/api/auth/providers")
       .then((r) => r.ok ? r.json() : [])
       .then(setProviders)
-      .catch(() => {})
+      .catch((e) => showError(e))
       .finally(() => setLoading(false));
   }, []);
 

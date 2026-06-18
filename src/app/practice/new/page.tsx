@@ -11,6 +11,7 @@ import { useClubs } from "@/hooks/use-clubs";
 import { createPracticeSession } from "@/hooks/use-practice";
 import { apiFetch } from "@/lib/api-client";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
+import { showError } from "@/lib/toast";
 
 export default function NewPracticePage() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function NewPracticePage() {
     apiFetch("/api/practice/locations")
       .then((r) => r.ok ? r.json() : [])
       .then(setPastLocations)
-      .catch(() => {});
+      .catch((e) => showError(e));
   }, []);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function NewPracticePage() {
           setPlan(data);
         }
       })
-      .catch(() => {});
+      .catch((e) => showError(e));
   }, [planId]);
 
   async function handleSubmit(data: any) {
@@ -62,6 +63,7 @@ export default function NewPracticePage() {
       setSaved(true);
     } catch (error) {
       console.error("Failed to create practice session:", error);
+      showError(error);
     } finally {
       setIsSubmitting(false);
     }

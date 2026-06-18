@@ -17,6 +17,7 @@ import { useSubscription } from "@/hooks/use-subscription";
 import { PLAN_ID } from "@/lib/plans";
 import { LimitReachedCard } from "@/components/limit-reached-card";
 import { AdBanner } from "@/components/ad-banner";
+import { showError } from "@/lib/toast";
 
 type ConversationItem = {
   id: string;
@@ -262,6 +263,7 @@ export default function CoachPage() {
         }
       } catch (error) {
         console.error("Failed to load chat history:", error);
+        showError(error);
         setConversationId(crypto.randomUUID());
         setInitialMessages([]);
       } finally {
@@ -289,6 +291,7 @@ export default function CoachPage() {
       setConversations(data);
     } catch (error) {
       console.error("Failed to load conversation list:", error);
+      showError(error);
       setConversations([]);
     } finally {
       setHistoryFetching(false);
@@ -307,6 +310,7 @@ export default function CoachPage() {
       }
     } catch (error) {
       console.error("Failed to delete conversation:", error);
+      showError(error);
     }
   }
 
@@ -328,6 +332,7 @@ export default function CoachPage() {
       setChatKey((k) => k + 1);
     } catch (error) {
       console.error("Failed to load conversation:", error);
+      showError(error);
     }
   }
 
