@@ -12,6 +12,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useClubs, updateClub } from "@/hooks/use-clubs";
 import type { ClubStatus, ClubWithImages } from "@/types/database";
 import { ShareWitbButton } from "@/components/bag/share-witb-button";
+import { computeSortOrder } from "@/lib/club-sort";
 import dynamic from "next/dynamic";
 import { getDistanceStaircaseData, getWeightFlowData, getDistanceInsights, getWeightInsights } from "@/lib/gap-analysis";
 import { ChartInsights } from "@/components/charts/chart-insights";
@@ -37,19 +38,8 @@ const clubNoImage: Record<string, string> = {
   putter: "/no-images/putter.png",
 };
 
-const categoryOrder: Record<string, number> = {
-  driver: 100, fairway_wood: 200, utility: 300, iron: 400, wedge: 500, putter: 600,
-};
-const wedgeOrder: Record<string, number> = { PW: 1, AW: 2, SW: 3, LW: 4 };
-
 function clubSortKey(club: ClubWithImages): number {
-  // If sort_order was explicitly set by user reordering, use it
-  // Otherwise compute from category + club_number
-  const base = categoryOrder[club.category] ?? 900;
-  if (club.category === "driver" || club.category === "putter") return base;
-  if (club.category === "wedge" && wedgeOrder[club.club_number]) return base + wedgeOrder[club.club_number];
-  const num = parseInt(club.club_number, 10);
-  return base + (isNaN(num) ? 50 : num);
+  return computeSortOrder(club.category, club.club_number);
 }
 
 const statusLabels: Record<string, string> = {

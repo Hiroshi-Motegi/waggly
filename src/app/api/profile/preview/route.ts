@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { supabaseError } from "@/lib/api-error";
 
 export async function GET() {
   const auth = await getApiAuth();
@@ -12,7 +13,7 @@ export async function GET() {
     .eq("id", userId)
     .maybeSingle();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   if (!profile) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const { data: courses } = await supabase

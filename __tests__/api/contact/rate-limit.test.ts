@@ -4,6 +4,7 @@ import { createMockSupabase, createMockRequest } from "../../helpers/mock-supaba
 // --- Mocks ---
 vi.mock("@/lib/supabase/api", () => ({
   getApiAuth: vi.fn().mockResolvedValue(null),
+  getAdminClient: vi.fn(() => createMockSupabase()),
 }));
 
 vi.mock("@/lib/rate-limit", () => ({
@@ -24,10 +25,6 @@ vi.mock("@/lib/email-templates", () => ({
     subject: "Test",
     html: "<p>Test</p>",
   }),
-}));
-
-vi.mock("@supabase/supabase-js", () => ({
-  createClient: vi.fn(() => createMockSupabase()),
 }));
 
 import { POST } from "@/app/api/contact/route";
@@ -64,10 +61,10 @@ describe("POST /api/contact - rate limiting", () => {
   it("proceeds past rate limit when allowed", async () => {
     vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true, remaining: 2 });
 
-    const { createClient } = await import("@supabase/supabase-js");
+    const { getAdminClient } = await import("@/lib/supabase/api");
     const mockSupa = createMockSupabase();
     mockSupa.queueResult("inquiries", { data: null, error: null });
-    vi.mocked(createClient as any).mockReturnValue(mockSupa);
+    vi.mocked(getAdminClient as any).mockReturnValue(mockSupa);
 
     const req = createMockRequest(BASE_URL, {
       method: "POST",

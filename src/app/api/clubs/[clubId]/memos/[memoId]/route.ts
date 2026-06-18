@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { supabaseError } from "@/lib/api-error";
 
 export function generateStaticParams() {
   return [{ clubId: "_", memoId: "_" }];
@@ -35,7 +36,7 @@ export async function GET(
     .eq("club_id", clubId)
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(data);
 }
@@ -68,7 +69,7 @@ export async function PATCH(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(data);
 }
@@ -91,6 +92,6 @@ export async function DELETE(
     .eq("id", memoId)
     .eq("club_id", clubId);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return new NextResponse(null, { status: 204 });
 }

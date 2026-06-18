@@ -426,16 +426,27 @@ async function routeLocal(
     const rows = await q("SELECT * FROM practice_sessions WHERE id = ?", [match[1]]);
     if (!rows.length) return null;
     const clubs = await q("SELECT pc.*, c.club_number, c.category, c.maker, c.model FROM practice_clubs pc LEFT JOIN clubs c ON pc.club_id = c.id WHERE pc.session_id = ?", [match[1]]);
-    // Attach memo for each practice club
-    const clubsWithMemos = await Promise.all(clubs.map(async (pc: any) => {
-      const memos = await q("SELECT * FROM club_memos WHERE club_id = ? AND practice_session_id = ?", [pc.club_id, match![1]]);
-      const memo = memos[0] ?? null;
+    // Batch-fetch all memos for this session (avoids N+1)
+    const clubIds = clubs.map((pc: Record<string, unknown>) => pc.club_id as string);
+    let memosByClub = new Map<string, Record<string, unknown>>();
+    if (clubIds.length > 0) {
+      const placeholders = clubIds.map(() => "?").join(",");
+      const allMemos = await q(
+        `SELECT * FROM club_memos WHERE practice_session_id = ? AND club_id IN (${placeholders})`,
+        [match[1], ...clubIds]
+      );
+      for (const memo of allMemos) {
+        memosByClub.set(memo.club_id as string, memo as Record<string, unknown>);
+      }
+    }
+    const clubsWithMemos = clubs.map((pc: Record<string, unknown>) => {
+      const memo = memosByClub.get(pc.club_id as string) ?? null;
       return {
         ...pc,
         club: { id: pc.club_id, club_number: pc.club_number, category: pc.category, maker: pc.maker, model: pc.model },
-        memo: memo ? { ...memo, symptom_tags: JSON.parse(memo.symptom_tags || "[]"), feeling_tags: JSON.parse(memo.feeling_tags || "[]"), gear_tags: JSON.parse(memo.gear_tags || "[]") } : null,
+        memo: memo ? { ...memo, symptom_tags: JSON.parse((memo.symptom_tags as string) || "[]"), feeling_tags: JSON.parse((memo.feeling_tags as string) || "[]"), gear_tags: JSON.parse((memo.gear_tags as string) || "[]") } : null,
       };
-    }));
+    });
     return { ...rows[0], practice_clubs: clubsWithMemos };
   }
 

@@ -1,18 +1,11 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import { NextRequest, NextResponse } from "next/server";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
-import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
 import { normalizeClubName } from "@/lib/normalize";
 import { searchGolfKnowledge } from "@/lib/knowledge/search";
 import { searchRakutenClub } from "@/lib/rakuten-search";
-
-function getAdminClient() {
-  return createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
+import { internalError } from "@/lib/api-error";
 
 const CATEGORY_LABELS: Record<string, string> = {
   driver: "ドライバー",
@@ -233,8 +226,6 @@ ${searchContext}
       affiliate_url: rakutenResult.affiliateUrl,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("[autofill] Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return internalError(error);
   }
 }

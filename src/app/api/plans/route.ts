@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { supabaseError } from "@/lib/api-error";
 
 
 export async function GET() {
@@ -12,6 +13,6 @@ export async function GET() {
     .select("*")
     .order("price", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data);
 }

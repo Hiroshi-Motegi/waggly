@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { supabaseError } from "@/lib/api-error";
 
 interface ClubBallInput {
   club_id: string;
@@ -35,7 +36,7 @@ export async function GET(
     .eq("user_id", userId)
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // Fetch memos linked to this session
@@ -76,7 +77,7 @@ export async function PATCH(
     .select()
     .single();
 
-  if (sessionError) return NextResponse.json({ error: sessionError.message }, { status: 500 });
+  if (sessionError) return supabaseError(sessionError);
   if (!session) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // Replace club balls: delete existing then insert new
@@ -85,7 +86,7 @@ export async function PATCH(
     .delete()
     .eq("session_id", sessionId);
 
-  if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 });
+  if (deleteError) return supabaseError(deleteError);
 
   if (clubBalls && clubBalls.length > 0) {
     const records = (clubBalls as ClubBallInput[])
@@ -102,7 +103,7 @@ export async function PATCH(
         .from("practice_clubs")
         .insert(records);
 
-      if (clubError) return NextResponse.json({ error: clubError.message }, { status: 500 });
+      if (clubError) return supabaseError(clubError);
     }
   }
 
@@ -112,7 +113,7 @@ export async function PATCH(
     .delete()
     .eq("practice_session_id", sessionId);
 
-  if (memoDeleteError) return NextResponse.json({ error: memoDeleteError.message }, { status: 500 });
+  if (memoDeleteError) return supabaseError(memoDeleteError);
 
   if (clubBalls && clubBalls.length > 0) {
     const memoRecords = (clubBalls as ClubBallInput[])
@@ -136,7 +137,7 @@ export async function PATCH(
         .from("club_memos")
         .insert(memoRecords);
 
-      if (memoError) return NextResponse.json({ error: memoError.message }, { status: 500 });
+      if (memoError) return supabaseError(memoError);
     }
   }
 
@@ -159,6 +160,6 @@ export async function DELETE(
     .eq("id", sessionId)
     .eq("user_id", userId);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json({ success: true });
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { supabaseError } from "@/lib/api-error";
 
 
 export async function DELETE(request: NextRequest) {
@@ -18,7 +19,7 @@ export async function DELETE(request: NextRequest) {
     .eq("user_id", userId)
     .eq("conversation_id", conversationId);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json({ success: true });
 }
 
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
       .eq("role", "user")
       .order("created_at", { ascending: true });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return supabaseError(error);
 
     // Group by conversation_id, take first user message as title
     const conversations = new Map<string, { id: string; title: string; created_at: string }>();
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return supabaseError(error);
     return NextResponse.json(data);
   }
 
@@ -88,6 +89,6 @@ export async function GET(request: NextRequest) {
     .eq("conversation_id", latest.conversation_id)
     .order("created_at", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json({ conversationId: latest.conversation_id, messages: data });
 }

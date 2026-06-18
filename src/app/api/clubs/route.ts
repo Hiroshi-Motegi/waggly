@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { createClubSchema } from "@/lib/api-schemas";
-import { badRequest } from "@/lib/api-error";
+import { badRequest, supabaseError } from "@/lib/api-error";
+import { computeSortOrder } from "@/lib/club-sort";
 
 
 export async function GET(request: NextRequest) {
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
 
   // Fetch latest distance per club from memos and practice (parallel)
   if (data && data.length > 0) {
@@ -84,33 +85,6 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(data);
 }
 
-/**
- * Standard golf club sort order:
- * DR(1W) → FW(2W-9W) → UT(2U-7U) → Iron(3I-9I) → Wedge(PW,AW,SW,LW) → Putter
- */
-function computeSortOrder(category: string, clubNumber: string): number {
-  const categoryOrder: Record<string, number> = {
-    driver: 100,
-    fairway_wood: 200,
-    utility: 300,
-    iron: 400,
-    wedge: 500,
-    putter: 600,
-  };
-  const base = categoryOrder[category] ?? 900;
-
-  // Extract numeric part from club_number (e.g. "5W" → 5, "PW" → special)
-  const wedgeOrder: Record<string, number> = { PW: 1, AW: 2, SW: 3, LW: 4 };
-  if (category === "wedge" && wedgeOrder[clubNumber]) {
-    return base + wedgeOrder[clubNumber];
-  }
-  if (category === "driver") return base;
-  if (category === "putter") return base;
-
-  const num = parseInt(clubNumber, 10);
-  return base + (isNaN(num) ? 50 : num);
-}
-
 export async function POST(request: NextRequest) {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -130,6 +104,6 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data, { status: 201 });
 }

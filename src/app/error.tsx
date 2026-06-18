@@ -18,11 +18,11 @@ export default function GlobalError({
       <div className="text-center space-y-4">
         <h2 className="text-xl font-bold">エラーが発生しました</h2>
         <p className="text-gray-600 text-sm">
-          {error.message || "予期しないエラーが発生しました"}
+          予期しないエラーが発生しました
         </p>
         <button
           onClick={reset}
-          className="rounded-lg bg-green-700 px-4 py-2 text-white text-sm hover:bg-green-800"
+          className="rounded-lg bg-green-700 px-4 py-2 text-white text-sm hover:bg-green-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
         >
           再試行
         </button>

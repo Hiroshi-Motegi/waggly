@@ -6,25 +6,26 @@ import { query, execute } from "@/lib/sqlite/database";
 
 // ---------- Clubs ----------
 
-export async function getLocalClubs(status?: string, bagNumber?: number): Promise<any[]> {
+export async function getLocalClubs(status?: string, bagNumber?: number): Promise<Record<string, unknown>[]> {
   let sql = "SELECT * FROM clubs";
   const conditions: string[] = [];
-  if (status) conditions.push(`status = '${status}'`);
-  if (bagNumber != null) conditions.push(`bag_number = ${bagNumber}`);
+  const values: (string | number)[] = [];
+  if (status) { conditions.push("status = ?"); values.push(status); }
+  if (bagNumber != null) { conditions.push("bag_number = ?"); values.push(bagNumber); }
   if (conditions.length > 0) sql += " WHERE " + conditions.join(" AND ");
   sql += " ORDER BY sort_order ASC";
-  const clubs = await query(sql);
+  const clubs = await query(sql, values);
   // Attach empty club_images array for compatibility with ClubWithImages
-  return clubs.map((c: any) => ({ ...c, club_images: [] }));
+  return clubs.map((c: Record<string, unknown>) => ({ ...c, club_images: [] }));
 }
 
-export async function getLocalClub(clubId: string): Promise<any | null> {
+export async function getLocalClub(clubId: string): Promise<Record<string, unknown> | null> {
   const rows = await query("SELECT * FROM clubs WHERE id = ?", [clubId]);
   if (rows.length === 0) return null;
   return { ...rows[0], club_images: [], maintenances: [] };
 }
 
-export async function saveLocalClub(club: any): Promise<any> {
+export async function saveLocalClub(club: Record<string, unknown>): Promise<Record<string, unknown>> {
   const id = club.id || crypto.randomUUID();
   const now = new Date().toISOString();
   await execute(
@@ -41,20 +42,20 @@ export async function deleteLocalClub(clubId: string): Promise<void> {
 
 // ---------- Practice Sessions ----------
 
-export async function getLocalPracticeSessions(): Promise<any[]> {
+export async function getLocalPracticeSessions(): Promise<Record<string, unknown>[]> {
   const sessions = await query("SELECT * FROM practice_sessions ORDER BY practiced_at DESC");
   // Attach empty practice_clubs for compatibility
-  return sessions.map((s: any) => ({ ...s, practice_clubs: [] }));
+  return sessions.map((s: Record<string, unknown>) => ({ ...s, practice_clubs: [] }));
 }
 
-export async function getLocalPracticeSession(sessionId: string): Promise<any | null> {
+export async function getLocalPracticeSession(sessionId: string): Promise<Record<string, unknown> | null> {
   const rows = await query("SELECT * FROM practice_sessions WHERE id = ?", [sessionId]);
   if (rows.length === 0) return null;
   const clubs = await query("SELECT * FROM practice_clubs WHERE session_id = ?", [sessionId]);
   return { ...rows[0], practice_clubs: clubs };
 }
 
-export async function saveLocalPracticeSession(data: any): Promise<any> {
+export async function saveLocalPracticeSession(data: Record<string, unknown> & { clubs?: { club_id: string; balls: number; avg_distance?: number | null }[] }): Promise<Record<string, unknown>> {
   const id = data.id || crypto.randomUUID();
   const now = new Date().toISOString();
   await execute(
@@ -63,7 +64,7 @@ export async function saveLocalPracticeSession(data: any): Promise<any> {
     [id, "local", data.practiced_at, data.location ?? null, data.total_balls ?? null, data.memo ?? null, data.rating ?? null, data.plan_id ?? null, data.created_at ?? now]
   );
   // Save practice clubs
-  if (data.clubs?.length > 0) {
+  if (data.clubs && data.clubs.length > 0) {
     for (const club of data.clubs) {
       const pcId = crypto.randomUUID();
       await execute(
@@ -82,6 +83,6 @@ export async function deleteLocalPracticeSession(sessionId: string): Promise<voi
 
 // ---------- Accessories ----------
 
-export async function getLocalAccessories(): Promise<any[]> {
+export async function getLocalAccessories(): Promise<Record<string, unknown>[]> {
   return query("SELECT * FROM accessories ORDER BY created_at DESC");
 }

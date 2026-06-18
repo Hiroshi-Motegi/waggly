@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { supabaseError } from "@/lib/api-error";
 
 const MAX_COVER_IMAGES = 5;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -17,7 +18,7 @@ export async function GET() {
     .eq("user_id", userId)
     .order("sort_order", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data);
 }
 
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
     .from("club-images")
     .upload(filePath, file);
 
-  if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
+  if (uploadError) return supabaseError(uploadError);
 
   const { data: { publicUrl } } = supabase.storage
     .from("club-images")
@@ -70,6 +71,6 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(image, { status: 201 });
 }

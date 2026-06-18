@@ -1,13 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabase/api";
 import { PLAN_ID, FREE_PLAN, getMonthJST } from "@/lib/plans";
 import type { Plan } from "@/lib/plans";
-
-function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 /** ユーザーのアクティブプランの上限を取得 */
 export async function getUserPlanLimits(userId: string): Promise<Plan> {

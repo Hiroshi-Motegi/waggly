@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { createAccessorySchema } from "@/lib/api-schemas";
-import { badRequest } from "@/lib/api-error";
+import { badRequest, supabaseError } from "@/lib/api-error";
 
 
 export async function GET(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
 
   // Merge primary image into image_url for backward compatibility
   const result = (data ?? []).map(({ accessory_images, ...rest }: { accessory_images?: { image_url: string }[]; image_url: string | null; [key: string]: unknown }) => ({
@@ -53,6 +53,6 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data, { status: 201 });
 }

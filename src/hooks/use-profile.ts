@@ -3,14 +3,9 @@
 import useSWR, { mutate } from "swr";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
+import { fetcher } from "@/lib/fetcher";
 import { isNative } from "@/lib/platform";
 import type { Profile, FavoriteCourse } from "@/types/database";
-
-async function fetcher(url: string) {
-  const res = await apiFetch(url);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
-}
 
 export function useProfile() {
   const { user } = useAuth();

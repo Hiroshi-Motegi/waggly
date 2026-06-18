@@ -4,8 +4,8 @@ import { createMockSupabase } from "../../helpers/mock-supabase";
 // --- Mocks ---
 const mockSupabase = createMockSupabase();
 
-vi.mock("@supabase/supabase-js", () => ({
-  createClient: vi.fn(() => mockSupabase),
+vi.mock("@/lib/supabase/api", () => ({
+  getAdminClient: vi.fn(() => mockSupabase),
 }));
 
 import { POST } from "@/app/api/webhook/payjp/route";

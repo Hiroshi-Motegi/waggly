@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { createPracticeSchema } from "@/lib/api-schemas";
-import { badRequest } from "@/lib/api-error";
+import { badRequest, supabaseError } from "@/lib/api-error";
 
 export async function GET(request: NextRequest) {
   const auth = await getApiAuth();
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data);
 }
 
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
   if (sessionError) {
     console.error("practice session insert error:", sessionError.message, sessionData);
-    return NextResponse.json({ error: sessionError.message }, { status: 500 });
+    return supabaseError(sessionError);
   }
 
   // Create per-club records
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
       if (clubError) {
         console.error("practice clubs insert error:", clubError.message, records);
-        return NextResponse.json({ error: clubError.message }, { status: 500 });
+        return supabaseError(clubError);
       }
     }
 
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 
       if (memoError) {
         console.error("club memos insert error:", memoError.message, memoRecords);
-        return NextResponse.json({ error: memoError.message }, { status: 500 });
+        return supabaseError(memoError);
       }
     }
   }

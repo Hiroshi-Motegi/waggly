@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { supabaseError } from "@/lib/api-error";
 
 export async function GET() {
   const auth = await getApiAuth();
@@ -13,7 +14,7 @@ export async function GET() {
     .eq("id", userId)
     .maybeSingle();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
 
   // Create if not exists — users テーブルの表示名・アバターを初期値に
   if (!data) {
@@ -32,7 +33,7 @@ export async function GET() {
       })
       .select()
       .single();
-    if (createError) return NextResponse.json({ error: createError.message }, { status: 500 });
+    if (createError) return supabaseError(createError);
     data = created;
   }
 
@@ -73,6 +74,6 @@ export async function PUT(request: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data);
 }

@@ -87,6 +87,8 @@ export function BottomNav() {
               onClick={menuOpen ? closeMenu : openMenu}
               className="flex flex-col items-center gap-0.5 py-1.5"
               style={{ width: "20%" }}
+              aria-expanded={menuOpen}
+              aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
             >
               {menuOpen ? (
                 <>
@@ -107,6 +109,7 @@ export function BottomNav() {
             className={`transition-all duration-200 ease-out overflow-hidden ${
               menuOpen && menuVisible ? "max-h-[300px]" : "max-h-0"
             }`}
+            aria-hidden={!menuOpen || !menuVisible}
           >
             <div className="flex flex-wrap pt-4 pb-3 gap-y-2">
               {extraTabs.map((tab) => (

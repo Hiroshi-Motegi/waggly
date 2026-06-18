@@ -1,13 +1,5 @@
 import { NextResponse } from "next/server";
-import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { createClient } from "@supabase/supabase-js";
-
-function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
+import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
 
 export async function GET() {
   const auth = await getApiAuth();

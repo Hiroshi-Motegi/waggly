@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { updateClubSchema } from "@/lib/api-schemas";
-import { badRequest } from "@/lib/api-error";
+import { badRequest, notFound, supabaseError } from "@/lib/api-error";
 
 export function generateStaticParams() {
   return [{ clubId: "_" }];
@@ -23,7 +23,7 @@ export async function GET(
     .eq("user_id", userId)
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 404 });
+  if (error) return notFound();
   return NextResponse.json(data);
 }
 
@@ -55,7 +55,7 @@ export async function PATCH(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data);
 }
 
@@ -74,6 +74,6 @@ export async function DELETE(
     .eq("id", clubId)
     .eq("user_id", userId);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json({ success: true });
 }

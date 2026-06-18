@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { supabaseError } from "@/lib/api-error";
 
 
 function escapeCsv(value: unknown): string {
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
       .select("*")
       .eq("user_id", userId)
       .order("sort_order", { ascending: true });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return supabaseError(error);
 
     const rows = (data ?? []).map((c: Record<string, unknown> & { category: string; status: string }) => ({
       ...c,
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return supabaseError(error);
 
     const rows = (data ?? []).map((a: Record<string, unknown> & { category: string; status: string }) => ({
       ...a,
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       .select("*, practice_clubs(*, club:clubs(category, club_number, maker, model))")
       .eq("user_id", userId)
       .order("practiced_at", { ascending: false });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return supabaseError(error);
 
     const rows = (data ?? []).map((s: Record<string, unknown> & { practice_clubs?: { balls: number; avg_distance: number | null; club: { maker: string | null; model: string | null; club_number: string } | null }[] }) => {
       const clubDetails = (s.practice_clubs ?? [])

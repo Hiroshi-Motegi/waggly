@@ -2,13 +2,8 @@
 
 import useSWR, { mutate } from "swr";
 import { apiFetch } from "@/lib/api-client";
+import { fetcher } from "@/lib/fetcher";
 import type { PracticePlanWithItems } from "@/types/database";
-
-async function fetcher(url: string) {
-  const res = await apiFetch(url);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
-}
 
 export function usePlans() {
   const { data, isLoading, mutate: refetch } = useSWR<PracticePlanWithItems[]>("/api/coach/plans", fetcher);

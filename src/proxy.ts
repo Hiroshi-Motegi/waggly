@@ -63,8 +63,12 @@ export async function proxy(request: NextRequest) {
   // Skip auth in development only
   if (process.env.NEXT_PUBLIC_DEV_SKIP_AUTH === "true") {
     if (process.env.NODE_ENV !== "development") {
-      // Defense-in-depth: refuse to skip auth outside development
-      console.error("CRITICAL: DEV_SKIP_AUTH is set in non-development environment. Ignoring.");
+      // Defense-in-depth: hard-block auth bypass outside development
+      console.error("CRITICAL: DEV_SKIP_AUTH is set in non-development environment. Blocking.");
+      return NextResponse.json(
+        { error: "Server misconfiguration" },
+        { status: 500 }
+      );
     }
     if (process.env.NODE_ENV === "development") {
       const response = NextResponse.next();

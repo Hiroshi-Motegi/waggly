@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, isErrorResponse } from "@/lib/admin-auth";
+import { supabaseError } from "@/lib/api-error";
 
 export async function GET(request: NextRequest) {
   const result = await requireAdmin();
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
   if (pidStatus === "missing") query = query.is("alpen_pid", null);
 
   const { data, error } = await query.limit(200);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(data);
 }
 
@@ -40,6 +41,6 @@ export async function PATCH(request: NextRequest) {
     .update({ alpen_pid: alpen_pid || null })
     .eq("id", model_id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json({ ok: true });
 }

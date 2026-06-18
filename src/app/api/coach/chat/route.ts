@@ -5,6 +5,7 @@ import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 import { analyzeGaps } from "@/lib/gap-analysis";
 
 import { incrementUsageCounter, decrementUsageCounter } from "@/lib/ai/usage-counter";
+import { internalError } from "@/lib/api-error";
 
 export async function POST(request: Request) {
   try {
@@ -145,8 +146,6 @@ export async function POST(request: Request) {
     throw streamError;
   }
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("[chat] Error:", message);
-    return new Response(JSON.stringify({ error: message }), { status: 500 });
+    return internalError(error);
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { supabaseError } from "@/lib/api-error";
 
 export function generateStaticParams() {
   return [{ clubId: "_" }];
@@ -40,7 +41,7 @@ export async function POST(
     .from("club-images")
     .upload(filePath, file);
 
-  if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
+  if (uploadError) return supabaseError(uploadError);
 
   const { data: { publicUrl } } = supabase.storage
     .from("club-images")
@@ -62,6 +63,6 @@ export async function POST(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json(image, { status: 201 });
 }

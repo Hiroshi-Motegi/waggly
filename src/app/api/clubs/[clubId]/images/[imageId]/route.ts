@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { supabaseError } from "@/lib/api-error";
 
 export function generateStaticParams() {
   return [{ clubId: "_", imageId: "_" }];
@@ -30,6 +31,6 @@ export async function DELETE(
     .eq("id", imageId)
     .eq("club_id", clubId);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return supabaseError(error);
   return NextResponse.json({ ok: true });
 }

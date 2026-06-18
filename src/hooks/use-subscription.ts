@@ -1,18 +1,12 @@
 "use client";
 
 import useSWR from "swr";
-import { apiFetch } from "@/lib/api-client";
+import { fetcher } from "@/lib/fetcher";
 import type { Plan, Subscription } from "@/lib/plans";
 
 interface SubscriptionData {
   subscription: Subscription | null;
   plan: Plan;
-}
-
-async function fetcher(url: string) {
-  const res = await apiFetch(url);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
 }
 
 export function useSubscription() {

@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
-import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { createClient } from "@supabase/supabase-js";
+import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
-
-function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function POST(req: Request) {
   // レートリミット: IP あたり 1分5回（ブルートフォース対策）

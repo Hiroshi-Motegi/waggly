@@ -1,13 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabase/api";
 import { FREE_PLAN } from "@/lib/plans";
 import type { Subscription, Plan } from "@/lib/plans";
-
-function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 /** アクティブサブスク取得。canceled→expired の遷移も処理 */
 export async function getActiveSubscription(

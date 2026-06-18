@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
-import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { createClient } from "@supabase/supabase-js";
+import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
 import { getPayjpClient } from "@/lib/payjp";
-
-function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function PATCH(req: Request) {
   const auth = await getApiAuth();
