@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getMakers } from "@/lib/catalog";
+import { getMakers, getAllModels } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
+import { CatalogSearch } from "@/components/catalog/catalog-search";
 
 export const revalidate = 86400;
 
@@ -11,7 +12,16 @@ export const metadata = {
 };
 
 export default async function CatalogPage() {
-  const makers = await getMakers();
+  const [makers, allModels] = await Promise.all([getMakers(), getAllModels()]);
+
+  const searchModels = allModels.map((m) => ({
+    name: m.name,
+    category: m.category,
+    makerSlug: m.catalog_series.maker_slug,
+    seriesSlug: m.catalog_series.name_slug,
+    slug: m.slug,
+    maker: m.catalog_series.maker,
+  }));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -37,8 +47,15 @@ export default async function CatalogPage() {
         {/* Banner */}
         <PromoBanner />
 
+        {/* Search */}
+        <div className="w-full max-w-screen-sm px-4 pt-4 pb-2">
+          <h2 className="text-sm font-bold text-white">クラブを検索</h2>
+        </div>
+        <CatalogSearch models={searchModels} />
+
         {/* Content */}
-        <div className="w-full max-w-screen-sm px-3 py-4">
+        <div className="w-full max-w-screen-sm px-3 pt-4 pb-4">
+          <h2 className="text-sm font-bold text-white px-1 pb-2">ブランドから選ぶ</h2>
           {makers.length === 0 ? (
             <p className="text-sm text-white/70">カタログデータがありません</p>
           ) : (

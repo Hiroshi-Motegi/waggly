@@ -68,6 +68,7 @@ export function HomeDashboard() {
             { href: "/catalog", icon: "/icons/content-catalog.svg", label: "クラブカタログ" },
             { href: "/compare", icon: "/icons/content-compare.svg", label: "クラブ比較" },
             { href: "/coach/plans", icon: "/icons/content-practice-menu.svg", label: "練習メニュー" },
+            { href: "/coach", icon: "/icons/content-ai-chat.svg", label: "AI相談" },
           ].map((item) => (
             <Link key={item.href} href={item.href} className="flex flex-1 flex-col items-center gap-[3px]">
               <Image src={item.icon} alt={item.label} width={32} height={32} />

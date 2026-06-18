@@ -10,7 +10,7 @@ const tabs = [
   { href: "/bag", label: "マイバッグ", icon: "/icons/nav-bag.svg" },
   { href: "/items", label: "アイテム", icon: "/icons/nav-items.svg" },
   { href: "/practice", label: "練習記録", icon: "/icons/nav-practice.svg" },
-  { href: "/coach", label: "AIに相談", icon: "/icons/nav-ai.svg" },
+  { href: "/settings", label: "メニュー", icon: "/icons/nav-menu.svg" },
 ];
 
 export function BottomNav() {

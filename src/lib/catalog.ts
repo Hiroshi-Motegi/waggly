@@ -127,6 +127,25 @@ export async function getModelDetail(makerSlug: string, nameSlug: string, slug: 
   return data as CatalogModelWithSpecs | null;
 }
 
+/** 全モデル一覧（検索用、ページネーション対応） */
+export async function getAllModels() {
+  const all: (CatalogModel & { catalog_series: CatalogSeries })[] = [];
+  let offset = 0;
+  const pageSize = 1000;
+  while (true) {
+    const { data } = await supabase
+      .from("catalog_models")
+      .select("*, catalog_series!inner(*)")
+      .order("name")
+      .range(offset, offset + pageSize - 1);
+    if (!data || data.length === 0) break;
+    all.push(...(data as (CatalogModel & { catalog_series: CatalogSeries })[]));
+    if (data.length < pageSize) break;
+    offset += pageSize;
+  }
+  return all;
+}
+
 /** カテゴリ内の全モデル一覧（比較インデックス用） */
 export async function getModelsByCategory(category: string) {
   const { data } = await supabase

@@ -6,6 +6,7 @@ import { getModelDetail, getModelsByCategory, compareModelSlug } from "@/lib/cat
 import { fetchRelatedNews } from "@/lib/catalog-news";
 import { SpecTable } from "@/components/catalog/spec-table";
 import { PromoBanner } from "@/components/catalog/promo-banner";
+import { FavoriteClubButton } from "@/components/catalog/favorite-club-button";
 
 export const revalidate = 86400;
 
@@ -103,7 +104,10 @@ export default async function ModelDetailPage({
 
         {/* Model header card */}
         <div className="w-full max-w-screen-sm px-3 pt-4">
-          <div className="rounded-md bg-white p-4">
+          <div className="rounded-md bg-white p-4 relative">
+            <div className="absolute top-3 right-3">
+              <FavoriteClubButton modelId={model.id} />
+            </div>
             <div className="flex gap-4">
               {imageUrl && (
                 <div className="relative w-20 h-20 shrink-0 bg-[#f5f5f5] rounded-lg overflow-hidden">
