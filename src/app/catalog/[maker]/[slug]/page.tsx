@@ -210,15 +210,15 @@ export default async function ModelDetailPage({
         {/* Alpen buy link */}
         {model.alpen_pid && (
           <div className="w-full max-w-screen-sm px-3 pt-4">
-            <h2 className="text-sm font-bold text-white mb-2">購入する</h2>
-            <div className="rounded-md bg-white p-4 flex flex-col items-center gap-3">
+            <div className="rounded-md bg-white p-4 flex items-center gap-4">
               <AlpenAdImage
                 alpenPid={model.alpen_pid}
                 alt={`${model.maker} ${model.name}`}
-                className="w-full max-h-48"
+                className="w-20 h-20 shrink-0"
               />
-              <AlpenBuyLink alpenPid={model.alpen_pid} />
-              <p className="text-xs text-[#888] text-center">アルペングループオンラインストア</p>
+              <div className="flex-1">
+                <AlpenBuyLink alpenPid={model.alpen_pid} />
+              </div>
             </div>
           </div>
         )}

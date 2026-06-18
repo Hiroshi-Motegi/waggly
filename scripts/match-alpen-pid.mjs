@@ -69,22 +69,37 @@ async function searchAlpen(page, maker, modelName, category) {
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 15000 });
     await page.waitForTimeout(1000);
 
-    const result = await page.evaluate(() => {
+    const result = await page.evaluate((query) => {
+      // 検索結果が0件かチェック（「該当する商品がありません」等）
+      const bodyText = document.body.innerText;
+      if (bodyText.includes("該当する商品がありません") || bodyText.includes("0件")) return null;
+
       const links = [...document.querySelectorAll("a[href*='ProductDetail']")];
       if (links.length === 0) return null;
 
+      // 最初の商品のPIDと名前を取得
       const href = links[0].getAttribute("href") || "";
       const pidMatch = href.match(/pid=([^&]+)/);
       if (!pidMatch) return null;
 
-      const nameEl = links[0].closest(".product-item")?.querySelector(".product-name")
-        || links[0].querySelector("img")?.getAttribute("alt");
+      // 商品名を取得（画像altまたは親要素のテキスト）
+      const img = links[0].querySelector("img");
+      const productName = img?.getAttribute("alt") || links[0].textContent?.trim() || "";
 
-      return {
-        pid: pidMatch[1],
-        name: typeof nameEl === "string" ? nameEl : nameEl?.textContent?.trim() || "",
-      };
-    });
+      return { pid: pidMatch[1], name: productName };
+    }, searchQuery);
+
+    // 商品名にモデル名の主要キーワードが含まれるかチェック
+    if (result && result.name) {
+      // 検索クエリのキーワードを抽出（メーカー名除去、2文字以上）
+      const keywords = cleanName.split(/\s+/).filter(w => w.length >= 2);
+      const nameLower = result.name.toLowerCase();
+      // キーワードの半分以上がマッチすればOK
+      const matchCount = keywords.filter(kw => nameLower.includes(kw.toLowerCase())).length;
+      if (keywords.length > 0 && matchCount < Math.max(1, Math.ceil(keywords.length * 0.3))) {
+        return null; // キーワード不一致→誤マッチ
+      }
+    }
 
     return result;
   } catch {
@@ -105,7 +120,7 @@ async function main() {
   while (true) {
     const { data } = await supabase
       .from("catalog_models")
-      .select("id, name, maker, slug, category")
+      .select("id, name, maker, maker_slug, slug, category")
       .is("alpen_pid", null)
       .order("maker")
       .range(offset, offset + 999);
@@ -114,6 +129,16 @@ async function main() {
     if (data.length < 1000) break;
     offset += 1000;
   }
+  // メジャーメーカー優先（アルペンに在庫がある可能性が高い）
+  const PRIORITY_MAKERS = new Set([
+    "ping", "taylormade", "callaway", "titleist", "mizuno", "bridgestone",
+    "dunlop", "yamaha", "prgr", "cleveland", "odyssey", "fourteen",
+  ]);
+  allModels.sort((a, b) => {
+    const aP = PRIORITY_MAKERS.has(a.maker_slug) ? 0 : 1;
+    const bP = PRIORITY_MAKERS.has(b.maker_slug) ? 0 : 1;
+    return aP - bP || a.maker.localeCompare(b.maker, "ja");
+  });
   console.log(`${allModels.length} models without alpen_pid`);
 
   // 中断再開用: 既処理slugをスキップ

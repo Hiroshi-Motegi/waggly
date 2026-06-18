@@ -74,10 +74,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           strategy="afterInteractive"
           crossOrigin="anonymous"
         />
-        <Script
-          src="//statics.a8.net/ad/ad.js"
-          strategy="lazyOnload"
-        />
         <Toaster position="top-center" richColors />
       </body>
     </html>

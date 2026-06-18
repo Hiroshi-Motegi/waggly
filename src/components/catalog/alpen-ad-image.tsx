@@ -1,6 +1,5 @@
-"use client";
-
-import { useEffect, useRef } from "react";
+const A8_MAT = "4B5X8H+6G750Q+3OSK+BW8O2";
+const TRACKING_PIXEL = `https://www13.a8.net/0.gif?a8mat=${A8_MAT}`;
 
 interface AlpenAdImageProps {
   alpenPid: string;
@@ -8,58 +7,19 @@ interface AlpenAdImageProps {
   className?: string;
 }
 
-declare global {
-  interface Window {
-    a8adscript?: (target: string) => {
-      showAd: (config: Record<string, unknown>) => void;
-    };
-  }
-}
-
 export function AlpenAdImage({ alpenPid, alt, className }: AlpenAdImageProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!containerRef.current || !alpenPid) return;
-
-    const productUrl = `https://store.alpen-group.jp/Form/Product/ProductDetail.aspx?shop=0&pid=${alpenPid}`;
-    const imageUrl = `https://img.alpen-group.jp/Contents/ProductImages/0/${alpenPid}_L.jpg`;
-
-    const tryShowAd = () => {
-      if (window.a8adscript && containerRef.current) {
-        const containerId = `alpen-ad-${alpenPid}`;
-        containerRef.current.id = containerId;
-
-        window.a8adscript("body").showAd({
-          req: {
-            mat: "4B5X8H+6G750Q+3OSK+BWGDT",
-            alt: alt,
-            id: containerId,
-          },
-          goods: {
-            ejp: productUrl,
-            imu: imageUrl,
-          },
-        });
-      }
-    };
-
-    if (window.a8adscript) {
-      tryShowAd();
-    } else {
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        if (window.a8adscript || attempts > 10) {
-          clearInterval(interval);
-          tryShowAd();
-        }
-      }, 500);
-      return () => clearInterval(interval);
-    }
-  }, [alpenPid, alt]);
-
   if (!alpenPid) return null;
 
-  return <div ref={containerRef} className={className} />;
+  const alpenUrl = `https://store.alpen-group.jp/Form/Product/ProductDetail.aspx?shop=0&pid=${alpenPid}`;
+  const imageUrl = `https://img.alpen-group.jp/Contents/ProductImages/0/${alpenPid}_L.jpg`;
+  const a8Link = `https://px.a8.net/svt/ejp?a8mat=${A8_MAT}&a8ejpredirect=${encodeURIComponent(alpenUrl)}`;
+
+  return (
+    <a href={a8Link} rel="nofollow" target="_blank" className={className}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={imageUrl} alt={alt} className="w-full h-full object-contain" loading="lazy" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={TRACKING_PIXEL} width={1} height={1} alt="" className="hidden" />
+    </a>
+  );
 }
