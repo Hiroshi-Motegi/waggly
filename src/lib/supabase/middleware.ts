@@ -45,7 +45,9 @@ export async function updateSession(request: NextRequest) {
       pathname.startsWith("/report") ||
       pathname === "/terms" ||
       pathname === "/privacy" ||
-      pathname === "/legal";
+      pathname === "/legal" ||
+      pathname === "/sitemap.xml" ||
+      pathname === "/robots.txt";
 
     if (!isPublic) {
       return NextResponse.redirect(new URL("/", request.url));
