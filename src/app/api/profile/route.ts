@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest) {
 
   const { data, error } = await supabase
     .from("profiles")
-    .update(updates)
+    .update(updates as any)
     .eq("id", userId)
     .select()
     .single();

@@ -50,7 +50,7 @@ export async function GET(
   const tagCounts: Record<string, number> = {};
   const conditionCounts = { good: 0, normal: 0, bad: 0 };
 
-  (memos ?? []).forEach((m: { condition: string | null; symptom_tags: string[] | null; feeling_tags: string[] | null; gear_tags: string[] | null }) => {
+  (memos ?? []).forEach((m: any) => {
     if (m.condition) conditionCounts[m.condition as keyof typeof conditionCounts]++;
     [...(m.symptom_tags ?? []), ...(m.feeling_tags ?? []), ...(m.gear_tags ?? [])].forEach((tag: string) => {
       tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;

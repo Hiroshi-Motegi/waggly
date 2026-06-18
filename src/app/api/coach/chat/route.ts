@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       .order("created_at", { ascending: false })
       .limit(3),
     supabase.from("accessories").select("*").eq("user_id", userId).eq("status", "active"),
-    supabase.from("knowledge_base").select("category, title, content").eq("status", "active").limit(30),
+    supabase.from("knowledge_base").select("category, title, content").eq("status" as any, "active").limit(30),
   ]);
 
   const clubs = clubsRes.data ?? [];
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
   const accessories = accessoriesRes.data ?? [];
   const knowledge = knowledgeRes.data ?? [];
 
-  const gapAnalysis = analyzeGaps(clubs);
+  const gapAnalysis = analyzeGaps(clubs as any);
 
   const systemPrompt = buildSystemPrompt({
     clubs: clubs.map((c: any) => ({

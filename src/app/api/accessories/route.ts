@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await supabase
     .from("accessories")
-    .insert({ ...body, user_id: userId })
+    .insert({ ...body, user_id: userId } as any)
     .select()
     .single();
 

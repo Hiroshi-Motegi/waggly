@@ -13,9 +13,9 @@ function isDevMode() {
   );
 }
 
-let _adminClient: ReturnType<typeof createRawClient> | null = null;
+let _adminClient: SupabaseClient<Database> | null = null;
 
-export function getAdminClient() {
+export function getAdminClient(): SupabaseClient<Database> {
   if (!_adminClient) {
     _adminClient = createRawClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -66,7 +66,7 @@ async function resolveUserId(authUserId: string): Promise<string | null> {
  * Use `getAdminClient()` explicitly for storage or admin operations.
  * userId is users.id (independent UUID), NOT auth.users.id.
  */
-type AppSupabaseClient = SupabaseClient;
+type AppSupabaseClient = SupabaseClient<Database>;
 
 export async function getApiAuth(): Promise<{
   supabase: AppSupabaseClient;

@@ -50,7 +50,7 @@ export async function GET() {
     .eq("user_id", userId)
     .order("sort_order", { ascending: true });
 
-  const vf = profile.visible_fields ?? {};
+  const vf = (profile.visible_fields ?? {}) as Record<string, boolean>;
   const publicProfile: Record<string, any> = {
     username: profile.username,
     avatar_url: profile.avatar_url,

@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
   const modelNorm = normalizeClubName(model);
   const admin = getAdminClient();
 
-  // 1. Check cache
-  const headQuery = admin
+  // 1. Check cache (heads/sets tables not in generated types)
+  const headQuery = (admin as any)
     .from("heads")
     .select("*, configurations:clubs(length, total_weight, swing_weight, shaft_variant_id)")
     .eq("maker_normalized", makerNorm)
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     let imageUrl = cached.image_url;
     let affiliateUrl = cached.affiliate_url;
     if (cached.set_id && (!imageUrl || !affiliateUrl)) {
-      const { data: series } = await admin
+      const { data: series } = await (admin as any)
         .from("sets")
         .select("image_url, affiliate_url")
         .eq("id", cached.set_id)
@@ -197,14 +197,15 @@ ${searchContext}
       p_head_volume: specs.head_volume ?? null,
       p_head_weight: specs.head_weight ?? null,
       p_distance: specs.distance ?? null,
-      p_image_url: rakutenResult.imageUrl,
-      p_affiliate_url: rakutenResult.affiliateUrl,
+      p_image_url: rakutenResult.imageUrl ?? "",
+      p_affiliate_url: rakutenResult.affiliateUrl ?? "",
     });
     if (headError) console.error("[autofill] Head save error:", headError.message);
 
     // Save configuration (length, weight→total_weight, swing_weight) for shaft_variant_id=null
+    // head_id, verified, total_weight, shaft_variant_id, source not in generated types
     if (headId && (specs.length != null || specs.weight != null || specs.swing_weight != null)) {
-      const { data: existingConfig } = await admin
+      const { data: existingConfig } = await (admin as any)
         .from("clubs")
         .select("id, verified")
         .eq("head_id", headId)
@@ -220,9 +221,9 @@ ${searchContext}
       };
 
       if (existingConfig && !existingConfig.verified) {
-        await admin.from("clubs").update(configFields).eq("id", existingConfig.id);
+        await admin.from("clubs").update(configFields as any).eq("id", existingConfig.id);
       } else if (!existingConfig) {
-        await admin.from("clubs").insert(configFields);
+        await admin.from("clubs").insert(configFields as any);
       }
       // Skip if existingConfig.verified === true (preserve verified data)
     }

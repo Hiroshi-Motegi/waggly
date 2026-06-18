@@ -48,7 +48,7 @@ export async function GET(
   // Merge memos into practice_clubs
   if (data.practice_clubs && memos) {
     const memoByClub = new Map(memos.map((m: { club_id: string }) => [m.club_id, m]));
-    data.practice_clubs = data.practice_clubs.map((pc: { club_id: string; [key: string]: unknown }) => ({
+    (data as any).practice_clubs = data.practice_clubs.map((pc: { club_id: string; [key: string]: unknown }) => ({
       ...pc,
       memo: memoByClub.get(pc.club_id) ?? null,
     }));

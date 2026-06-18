@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
   switch (eventType) {
     case "subscription.renewed": {
-      const payjpSubId = subscriptionData.id;
+      const payjpSubId = subscriptionData.id!;
       await supabase
         .from("subscriptions")
         .update({
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       break;
     }
     case "subscription.canceled": {
-      const payjpSubId = subscriptionData.id;
+      const payjpSubId = subscriptionData.id!;
       await supabase
         .from("subscriptions")
         .update({ status: "canceled" })
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
       break;
     }
     case "charge.succeeded": {
-      const customerId = subscriptionData.customer;
+      const customerId = subscriptionData.customer!;
       await supabase
         .from("subscriptions")
         .update({ grace_period_end: null })
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
       break;
     }
     case "charge.failed": {
-      const customerId = subscriptionData.customer;
+      const customerId = subscriptionData.customer!;
       const graceEnd = new Date(
         Date.now() + 7 * 24 * 60 * 60 * 1000
       ).toISOString();
