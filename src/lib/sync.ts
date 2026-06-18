@@ -1,5 +1,6 @@
 import { query, execute } from "@/lib/sqlite/database";
 import { apiFetch } from "@/lib/api-client";
+import { assertValidTable, assertValidColumns } from "@/lib/sql-safe";
 
 interface PendingSyncRow {
   id: number;
@@ -62,6 +63,7 @@ export async function fullSync(): Promise<void> {
       const rows: any[] = await res.json();
 
       // Clear local table and child tables
+      assertValidTable(table);
       await execute(`DELETE FROM ${table}`);
       if (table === "clubs") {
         await execute("DELETE FROM club_images");
@@ -80,6 +82,8 @@ export async function fullSync(): Promise<void> {
         const placeholders = keys.map(() => "?").join(", ");
         const values = keys.map((k) => row[k]);
         const cols = keys.join(", ");
+        assertValidTable(table);
+        assertValidColumns(keys);
         await execute(
           `INSERT OR REPLACE INTO ${table} (${cols}) VALUES (${placeholders})`,
           values
@@ -106,6 +110,8 @@ export async function fullSync(): Promise<void> {
                 return typeof v === "object" ? JSON.stringify(v) : v;
               });
               const childCols = childKeys.join(", ");
+              assertValidTable(childTable);
+              assertValidColumns(childKeys);
               await execute(
                 `INSERT OR REPLACE INTO ${childTable} (${childCols}) VALUES (${childPlaceholders})`,
                 childValues

@@ -290,7 +290,11 @@ async function routeLocal(
 
   // PATCH /api/clubs/:clubId/memos/:memoId
   if (match && method === "PATCH") {
-    const fields = Object.keys(body).filter((k) => k !== "id");
+    const MEMO_COLUMNS = new Set([
+      "distance", "balls", "condition", "memo",
+      "symptom_tags", "feeling_tags", "gear_tags",
+    ]);
+    const fields = Object.keys(body).filter((k) => k !== "id" && MEMO_COLUMNS.has(k));
     if (fields.length > 0) {
       const sets = fields.map((k) => `${k} = ?`).join(", ");
       const vals = fields.map((k) => Array.isArray(body[k]) ? JSON.stringify(body[k]) : body[k]);
@@ -336,7 +340,10 @@ async function routeLocal(
 
   // PATCH /api/clubs/:clubId/maintenances/:maintenanceId
   if (match && method === "PATCH") {
-    const fields = Object.keys(body).filter((k) => k !== "id");
+    const MAINTENANCE_COLUMNS = new Set([
+      "type", "description", "shop", "cost", "done_at",
+    ]);
+    const fields = Object.keys(body).filter((k) => k !== "id" && MAINTENANCE_COLUMNS.has(k));
     if (fields.length > 0) {
       const sets = fields.map((k) => `${k} = ?`).join(", ");
       const vals = fields.map((k) => body[k]);
