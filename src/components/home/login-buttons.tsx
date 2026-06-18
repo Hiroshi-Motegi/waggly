@@ -25,11 +25,13 @@ function loginLine() {
 
 async function loginGoogle() {
   localStorage.setItem("login_method", "google");
+  const redirect = sessionStorage.getItem("login_redirect") || "/";
+  sessionStorage.removeItem("login_redirect");
   const { createClient } = await import("@/lib/supabase/client");
   const supabase = createClient();
   await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: { prompt: "select_account" } },
+    options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`, queryParams: { prompt: "select_account" } },
   });
 }
 

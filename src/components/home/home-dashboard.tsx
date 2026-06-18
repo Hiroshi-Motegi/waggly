@@ -71,7 +71,7 @@ export function HomeDashboard() {
           ].map((item) => (
             <Link key={item.href} href={item.href} className="flex flex-1 flex-col items-center gap-[3px]">
               <Image src={item.icon} alt={item.label} width={32} height={32} />
-              <span className="text-xs font-medium text-white text-center">{item.label}</span>
+              <span className="text-[10px] font-medium text-white text-center">{item.label}</span>
             </Link>
           ))}
         </div>

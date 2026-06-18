@@ -38,7 +38,7 @@ export function FavoriteClubButton({ modelId }: { modelId: string }) {
               <button onClick={() => setShowLoginPrompt(false)} className="flex-1 rounded-full border border-[#ccc] py-2 text-sm font-bold text-[#666]">
                 閉じる
               </button>
-              <a href="/auth/login" className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white text-center">
+              <a href={`/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`} className="flex-1 rounded-full bg-[#006728] py-2 text-sm font-bold text-white text-center">
                 ログイン
               </a>
             </div>

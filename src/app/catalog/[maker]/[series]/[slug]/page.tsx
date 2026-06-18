@@ -30,11 +30,11 @@ export async function generateMetadata({
   const { catalog_series: s } = model;
   const categoryLabel = CATEGORY_LABELS[model.category] ?? model.category;
   return {
-    title: `${s.maker} ${s.name} ${model.name || ""} ${categoryLabel} スペック | Waggly`,
-    description: `${s.maker} ${s.name}${model.name ? ` ${model.name}` : ""}の${categoryLabel}スペック詳細。ロフト角・ライ角・クラブ長さなど番手別スペックを掲載。`,
+    title: `${s.maker} ${model.name} スペック`,
+    description: `${s.maker} ${model.name}のスペック詳細。ロフト角・ライ角・クラブ長さなど番手別スペックを掲載。`,
     openGraph: {
-      title: `${s.maker} ${s.name} ${categoryLabel} スペック`,
-      description: `${s.maker} ${s.name}の${categoryLabel}詳細スペック`,
+      title: `${s.maker} ${model.name} スペック`,
+      description: `${s.maker} ${model.name}の詳細スペック`,
     },
   };
 }

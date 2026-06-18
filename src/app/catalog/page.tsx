@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getMakers, getAllModels } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { CatalogSearch } from "@/components/catalog/catalog-search";
+import { FavoriteClubsList } from "@/components/catalog/favorite-clubs-list";
 
 export const revalidate = 86400;
 
@@ -72,6 +73,9 @@ export default async function CatalogPage() {
             </div>
           )}
         </div>
+
+        {/* Favorite clubs */}
+        <FavoriteClubsList />
       </div>
     </div>
   );

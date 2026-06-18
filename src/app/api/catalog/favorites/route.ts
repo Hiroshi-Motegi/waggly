@@ -8,7 +8,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("favorite_clubs")
-    .select("*, catalog_models(*, catalog_series(*))")
+    .select("*, catalog_models(id, name, category, slug, series_id, catalog_series(maker, maker_slug, name_slug))")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 

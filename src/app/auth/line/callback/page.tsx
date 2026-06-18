@@ -95,7 +95,9 @@ export default function LineCallbackPage() {
           await supabase.auth.setSession({ access_token, refresh_token });
           localStorage.setItem("login_method", "line");
 
-          window.location.href = "/";
+          const loginRedirect = sessionStorage.getItem("login_redirect");
+          sessionStorage.removeItem("login_redirect");
+          window.location.href = loginRedirect || "/";
         }
       } catch (e) {
         console.error("LINE auth error:", e);
