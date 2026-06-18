@@ -1,10 +1,17 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/api";
 
 export async function POST(req: Request) {
-  // 簡易認証（cron secret）
+  // 簡易認証（cron secret, タイミングセーフ比較）
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const expected = process.env.CRON_SECRET ? `Bearer ${process.env.CRON_SECRET}` : "";
+  if (!authHeader || !expected) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const bufA = Buffer.from(authHeader);
+  const bufB = Buffer.from(expected);
+  if (bufA.length !== bufB.length || !crypto.timingSafeEqual(bufA, bufB)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

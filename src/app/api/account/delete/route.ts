@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getApiAuthWithAuthUserId, getAdminClient, unauthorized } from "@/lib/supabase/api";
 import { getPayjpClient } from "@/lib/payjp";
+import { deleteUserAuthAccounts } from "@/lib/auth-helpers";
 
 export async function POST(req: Request) {
   const auth = await getApiAuthWithAuthUserId();
@@ -52,7 +53,15 @@ export async function POST(req: Request) {
     }
   }
 
-  // 3. users 行を削除（CASCADE で全関連データ削除）
+  // 3. Supabase auth ユーザーを全プロバイダ分削除（user_providers が存在する段階で実行）
+  try {
+    await deleteUserAuthAccounts(supabase, userId);
+  } catch (e) {
+    console.error("Auth user delete failed:", e);
+    // auth 削除失敗してもアカウント削除は続行
+  }
+
+  // 4. users 行を削除（CASCADE で全関連データ + user_providers 削除）
   const { error: deleteError } = await supabase
     .from("users")
     .delete()
@@ -64,15 +73,6 @@ export async function POST(req: Request) {
       { error: "アカウント削除に失敗しました。" },
       { status: 500 }
     );
-  }
-
-  // 4. Supabase auth ユーザーを削除
-  const { error: authDeleteError } =
-    await supabase.auth.admin.deleteUser(authUserId);
-
-  if (authDeleteError) {
-    console.error("Auth user delete failed:", authDeleteError);
-    // DB は既に削除済みなのでエラーでも成功扱い
   }
 
   return NextResponse.json({ success: true });

@@ -16,7 +16,6 @@ import { useUsage } from "@/hooks/use-usage";
 import { useSubscription } from "@/hooks/use-subscription";
 import { PLAN_ID } from "@/lib/plans";
 import { LimitReachedCard } from "@/components/limit-reached-card";
-import { AdBanner } from "@/components/ad-banner";
 import { showError } from "@/lib/toast";
 
 type ConversationItem = {

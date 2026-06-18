@@ -125,6 +125,10 @@ describe("POST /api/auth/link-provider", () => {
     const supabase = createMockSupabase();
     vi.mocked(getApiAuth).mockResolvedValue({ userId: "user-1" } as any);
     vi.mocked(getSupabaseAdmin).mockReturnValue(supabase);
+    vi.mocked(verifyGoogleIdToken).mockResolvedValue({
+      sub: "google-sub-conflict",
+      email: "other@gmail.com",
+    } as any);
 
     // 1) Conflict check → provider belongs to other-user
     supabase.queueResult("user_providers", {
@@ -162,8 +166,8 @@ describe("POST /api/auth/link-provider", () => {
       method: "POST",
       body: {
         provider: "google",
+        idToken: "valid-token",
         confirmMerge: true,
-        providerSub: "google-sub-conflict",
         keepAccountId: "user-1",
       },
     });

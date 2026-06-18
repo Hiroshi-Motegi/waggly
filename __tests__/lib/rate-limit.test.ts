@@ -39,20 +39,20 @@ describe("checkRateLimit", () => {
 });
 
 describe("getClientIP", () => {
-  it("returns x-forwarded-for first entry", async () => {
+  it("returns x-real-ip as priority", async () => {
+    const { getClientIP } = await import("@/lib/rate-limit");
+    const req = new Request("http://localhost", {
+      headers: { "x-real-ip": "9.8.7.6", "x-forwarded-for": "1.2.3.4, 5.6.7.8" },
+    });
+    expect(getClientIP(req)).toBe("9.8.7.6");
+  });
+
+  it("returns x-forwarded-for last entry when no x-real-ip", async () => {
     const { getClientIP } = await import("@/lib/rate-limit");
     const req = new Request("http://localhost", {
       headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" },
     });
-    expect(getClientIP(req)).toBe("1.2.3.4");
-  });
-
-  it("returns x-real-ip as fallback", async () => {
-    const { getClientIP } = await import("@/lib/rate-limit");
-    const req = new Request("http://localhost", {
-      headers: { "x-real-ip": "9.8.7.6" },
-    });
-    expect(getClientIP(req)).toBe("9.8.7.6");
+    expect(getClientIP(req)).toBe("5.6.7.8");
   });
 
   it("returns unknown when no IP headers", async () => {

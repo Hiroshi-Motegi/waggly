@@ -295,6 +295,8 @@ describe("PUT /api/auth/resolve-session", () => {
 
     const localData = { clubs: [{ id: "c1", name: "Driver" }] };
 
+    // ownership check (user_providers)
+    supabase.queueResult("user_providers", { data: { user_id: "user-1" }, error: null });
     // user_providers update
     supabase.queueResult("user_providers", { data: null, error: null });
     // users select at end
@@ -324,6 +326,8 @@ describe("PUT /api/auth/resolve-session", () => {
     const supabase = createMockSupabase();
     setupAuth(supabase);
 
+    // ownership check (user_providers)
+    supabase.queueResult("user_providers", { data: { user_id: "user-1" }, error: null });
     // user_providers update
     supabase.queueResult("user_providers", { data: null, error: null });
     // users select at end
@@ -351,7 +355,9 @@ describe("PUT /api/auth/resolve-session", () => {
     const supabase = createMockSupabase();
     setupAuth(supabase);
 
-    // Only users select at end (no user_providers call expected)
+    // ownership check (user_providers)
+    supabase.queueResult("user_providers", { data: { user_id: "user-1" }, error: null });
+    // users select at end
     supabase.queueResult("users", { data: mockUser, error: null });
 
     const req = createMockRequest(BASE_URL, {
@@ -366,8 +372,9 @@ describe("PUT /api/auth/resolve-session", () => {
 
     expect(res.status).toBe(200);
     expect(json.user).toEqual(mockUser);
-    // from() should only be called once (for users select), not for user_providers
+    // from() should be called for user_providers (ownership check) and users select
+    // but NOT for user_providers update (since provider/providerSub not provided)
     const fromCalls = supabase.from.mock.calls.map((c: any) => c[0]);
-    expect(fromCalls).not.toContain("user_providers");
+    expect(fromCalls.filter((t: string) => t === "user_providers").length).toBe(1); // ownership check only
   });
 });

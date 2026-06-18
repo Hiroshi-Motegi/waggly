@@ -70,9 +70,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         />
         <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3196641615749613"
+          id="adsbygoogle"
           strategy="afterInteractive"
-          crossOrigin="anonymous"
+          dangerouslySetInnerHTML={{
+            __html: `
+              var s = document.createElement('script');
+              s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3196641615749613';
+              s.crossOrigin = 'anonymous';
+              s.async = true;
+              document.head.appendChild(s);
+            `,
+          }}
         />
         <Toaster position="top-center" richColors />
       </body>

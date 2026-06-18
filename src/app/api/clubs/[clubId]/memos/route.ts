@@ -55,16 +55,29 @@ export async function POST(
   if (!club) return NextResponse.json({ error: "Club not found" }, { status: 404 });
 
   const body = await request.json();
+
+  // 入力バリデーション
+  if (body.memo && typeof body.memo === "string" && body.memo.length > 2000) {
+    return NextResponse.json({ error: "Memo too long (max 2000 chars)" }, { status: 400 });
+  }
+  if (body.condition && !["good", "bad", "normal"].includes(body.condition)) {
+    return NextResponse.json({ error: "Invalid condition" }, { status: 400 });
+  }
+  const validateTags = (tags: unknown): string[] => {
+    if (!Array.isArray(tags)) return [];
+    return tags.filter((t): t is string => typeof t === "string").slice(0, 20);
+  };
+
   const { data, error } = await supabase
     .from("club_memos")
     .insert({
       club_id: clubId,
-      distance: body.distance || null,
-      memo: body.memo || null,
+      distance: typeof body.distance === "number" ? body.distance : null,
+      memo: (typeof body.memo === "string" ? body.memo.slice(0, 2000) : null) || null,
       condition: body.condition || null,
-      symptom_tags: body.symptom_tags || [],
-      feeling_tags: body.feeling_tags || [],
-      gear_tags: body.gear_tags || [],
+      symptom_tags: validateTags(body.symptom_tags),
+      feeling_tags: validateTags(body.feeling_tags),
+      gear_tags: validateTags(body.gear_tags),
     })
     .select()
     .single();

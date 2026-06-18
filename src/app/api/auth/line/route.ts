@@ -24,10 +24,6 @@ export async function POST(request: NextRequest) {
     lineUserId = verified.sub;
     displayName = body.displayName || verified.name;
     avatarUrl = body.avatarUrl || verified.picture || null;
-  } else if (process.env.NODE_ENV === "development") {
-    lineUserId = body.lineUserId;
-    displayName = body.displayName;
-    avatarUrl = body.avatarUrl ?? null;
   } else {
     return NextResponse.json({ error: "ID token required" }, { status: 400 });
   }

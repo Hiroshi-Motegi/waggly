@@ -200,6 +200,24 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // existingUserId が呼び出し元セッションに紐づくことを検証
+  // （provider+providerSub 経由の衝突か、authUserId 経由の再ログイン衝突のいずれか）
+  const { data: ownershipCheck } = await supabase
+    .from("user_providers")
+    .select("user_id")
+    .eq("user_id", existingUserId)
+    .or(
+      provider && providerSub
+        ? `auth_user_id.eq.${authUserId},and(provider.eq.${provider},provider_sub.eq.${providerSub})`
+        : `auth_user_id.eq.${authUserId}`
+    )
+    .limit(1)
+    .maybeSingle();
+
+  if (!ownershipCheck) {
+    return NextResponse.json({ error: "Forbidden: no claim to this user" }, { status: 403 });
+  }
+
   if (choice === "local" && localData) {
     await deleteUserData(supabase, existingUserId);
     await insertLocalData(supabase, existingUserId, localData);

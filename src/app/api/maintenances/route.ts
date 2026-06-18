@@ -22,7 +22,14 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await supabase
     .from("maintenances")
-    .insert(body)
+    .insert({
+      club_id: body.club_id,
+      type: body.type,
+      description: body.description || null,
+      shop: body.shop || null,
+      cost: body.cost ?? null,
+      done_at: body.done_at || null,
+    })
     .select()
     .single();
 

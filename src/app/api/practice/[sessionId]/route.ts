@@ -80,64 +80,67 @@ export async function PATCH(
   if (sessionError) return supabaseError(sessionError);
   if (!session) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  // Replace club balls: delete existing then insert new
-  const { error: deleteError } = await supabase
-    .from("practice_clubs")
-    .delete()
-    .eq("session_id", sessionId);
+  // clubBalls が送信された場合のみ practice_clubs と club_memos を置き換え
+  if (clubBalls !== undefined) {
+    // Replace club balls: delete existing then insert new
+    const { error: deleteError } = await supabase
+      .from("practice_clubs")
+      .delete()
+      .eq("session_id", sessionId);
 
-  if (deleteError) return supabaseError(deleteError);
+    if (deleteError) return supabaseError(deleteError);
 
-  if (clubBalls && clubBalls.length > 0) {
-    const records = (clubBalls as ClubBallInput[])
-      .filter((cb) => cb.balls > 0)
-      .map((cb) => ({
-        session_id: sessionId,
-        club_id: cb.club_id,
-        balls: cb.balls,
-        avg_distance: cb.avg_distance ?? null,
-      }));
-
-    if (records.length > 0) {
-      const { error: clubError } = await supabase
-        .from("practice_clubs")
-        .insert(records);
-
-      if (clubError) return supabaseError(clubError);
-    }
-  }
-
-  // Replace memos linked to this session: delete existing then insert new
-  const { error: memoDeleteError } = await supabase
-    .from("club_memos")
-    .delete()
-    .eq("practice_session_id", sessionId);
-
-  if (memoDeleteError) return supabaseError(memoDeleteError);
-
-  if (clubBalls && clubBalls.length > 0) {
-    const memoRecords = (clubBalls as ClubBallInput[])
-      .filter((cb) => cb.memo?.condition)
-      .map((cb) => {
-        const memo = cb.memo!;
-        return {
+    if (clubBalls && clubBalls.length > 0) {
+      const records = (clubBalls as ClubBallInput[])
+        .filter((cb) => cb.balls > 0)
+        .map((cb) => ({
+          session_id: sessionId,
           club_id: cb.club_id,
-          practice_session_id: sessionId,
-          distance: cb.avg_distance ?? null,
-          memo: memo.memo || null,
-          condition: memo.condition,
-          symptom_tags: memo.symptom_tags || [],
-          feeling_tags: memo.condition === "good" ? [] : (memo.feeling_tags || []),
-          gear_tags: memo.condition === "good" ? [] : (memo.gear_tags || []),
-        };
-      });
+          balls: cb.balls,
+          avg_distance: cb.avg_distance ?? null,
+        }));
 
-    if (memoRecords.length > 0) {
-      const { error: memoError } = await supabase
-        .from("club_memos")
-        .insert(memoRecords);
+      if (records.length > 0) {
+        const { error: clubError } = await supabase
+          .from("practice_clubs")
+          .insert(records);
 
-      if (memoError) return supabaseError(memoError);
+        if (clubError) return supabaseError(clubError);
+      }
+    }
+
+    // Replace memos linked to this session: delete existing then insert new
+    const { error: memoDeleteError } = await supabase
+      .from("club_memos")
+      .delete()
+      .eq("practice_session_id", sessionId);
+
+    if (memoDeleteError) return supabaseError(memoDeleteError);
+
+    if (clubBalls && clubBalls.length > 0) {
+      const memoRecords = (clubBalls as ClubBallInput[])
+        .filter((cb) => cb.memo?.condition)
+        .map((cb) => {
+          const memo = cb.memo!;
+          return {
+            club_id: cb.club_id,
+            practice_session_id: sessionId,
+            distance: cb.avg_distance ?? null,
+            memo: memo.memo || null,
+            condition: memo.condition,
+            symptom_tags: memo.symptom_tags || [],
+            feeling_tags: memo.condition === "good" ? [] : (memo.feeling_tags || []),
+            gear_tags: memo.condition === "good" ? [] : (memo.gear_tags || []),
+          };
+        });
+
+      if (memoRecords.length > 0) {
+        const { error: memoError } = await supabase
+          .from("club_memos")
+          .insert(memoRecords);
+
+        if (memoError) return supabaseError(memoError);
+      }
     }
   }
 

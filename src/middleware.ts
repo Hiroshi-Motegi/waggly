@@ -22,7 +22,7 @@ function checkBasicAuth(request: NextRequest): NextResponse | null {
   });
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Basic auth for admin pages and APIs
   const { pathname } = request.nextUrl;
   if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {

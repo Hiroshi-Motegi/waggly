@@ -25,6 +25,14 @@ export async function POST(request: Request) {
   const body = await request.json();
   const { messages, conversationId } = body;
 
+  // メッセージ配列のバリデーション
+  if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50) {
+    return new Response(
+      JSON.stringify({ error: "メッセージ数が不正です" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   // Fetch user's context data in parallel
   const [clubsRes, sessionsRes, plansRes, accessoriesRes, knowledgeRes] = await Promise.all([
     supabase.from("clubs").select("*").eq("user_id", userId).order("sort_order"),
@@ -39,7 +47,7 @@ export async function POST(request: Request) {
       .order("created_at", { ascending: false })
       .limit(3),
     supabase.from("accessories").select("*").eq("user_id", userId).eq("status", "active"),
-    supabase.from("knowledge_base").select("category, title, content").eq("status", "active"),
+    supabase.from("knowledge_base").select("category, title, content").eq("status", "active").limit(30),
   ]);
 
   const clubs = clubsRes.data ?? [];

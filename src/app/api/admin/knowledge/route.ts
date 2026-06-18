@@ -7,7 +7,7 @@ const createKnowledgeSchema = z.object({
   title: z.string().min(1).max(500),
   content: z.string().min(1).max(10000),
   category: z.string().min(1).max(100).optional(),
-  status: z.enum(["draft", "published", "archived"]).optional(),
+  status: z.enum(["draft", "active", "inactive", "rejected"]).optional(),
   source: z.string().max(500).optional(),
   tags: z.array(z.string()).optional(),
 });

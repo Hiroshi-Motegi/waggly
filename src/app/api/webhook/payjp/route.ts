@@ -1,10 +1,19 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/api";
 
+function timingSafeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 export async function POST(req: Request) {
-  // Pay.jp 発信元トークン検証
+  // Pay.jp 発信元トークン検証（タイミングセーフ比較）
   const webhookToken = req.headers.get("x-payjp-webhook-token");
-  if (!webhookToken || webhookToken !== process.env.PAYJP_WEBHOOK_TOKEN) {
+  const expectedToken = process.env.PAYJP_WEBHOOK_TOKEN;
+  if (!webhookToken || !expectedToken || !timingSafeEqual(webhookToken, expectedToken)) {
     return NextResponse.json({ error: "invalid signature" }, { status: 401 });
   }
 

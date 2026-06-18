@@ -66,13 +66,16 @@ export async function POST(req: Request) {
 
       amount = Math.round(amount * (1 - coupon.discount_percent / 100));
 
-      // クーポン使用記録
+      // クーポン使用記録（アトミック: increment が失敗したらロールバック）
+      const { data: updated } = await supabase.rpc("increment_coupon_usage", { p_coupon_id: coupon.id });
+      if (!updated) {
+        return NextResponse.json({ error: "コードは使い切られています。" }, { status: 400 });
+      }
       await supabase.from("coupon_redemptions").insert({
         user_id: userId,
         coupon_id: coupon.id,
         purpose: "ad_free",
       });
-      await supabase.rpc("increment_coupon_usage", { p_coupon_id: coupon.id });
     }
   }
 

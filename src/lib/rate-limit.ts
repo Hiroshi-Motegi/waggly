@@ -65,11 +65,17 @@ export async function checkRateLimit(
   return checkRateLimitInMemory(key, limit, windowMs);
 }
 
-/** Extract client IP from request headers. */
+/** Extract client IP from request headers.
+ * x-real-ip を優先（Vercel が設定、クライアント偽装不可）。
+ * x-forwarded-for は最後の値を使用（最も信頼できるプロキシが追加した値）。
+ */
 export function getClientIP(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
   const real = req.headers.get("x-real-ip");
-  if (real) return real;
+  if (real) return real.trim();
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const ips = forwarded.split(",").map(s => s.trim());
+    return ips[ips.length - 1];
+  }
   return "unknown";
 }

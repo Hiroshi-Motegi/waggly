@@ -50,7 +50,7 @@ export function RecentPractice({ sessions }: RecentPracticeProps) {
                     alt=""
                     width={6}
                     height={10}
-                    className="opacity-60"
+                    className="opacity-60 w-auto h-auto"
                   />
                 </div>
               </Link>

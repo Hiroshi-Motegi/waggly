@@ -11,6 +11,10 @@ export async function POST(request: NextRequest) {
   const file = formData.get("file") as File;
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  if (file.size > MAX_FILE_SIZE) {
+    return NextResponse.json({ error: "File too large (max 5MB)" }, { status: 413 });
+  }
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   if (!ALLOWED_TYPES.includes(file.type)) {
     return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
