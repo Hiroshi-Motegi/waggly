@@ -201,18 +201,33 @@ export async function PUT(request: NextRequest) {
   }
 
   // existingUserId が呼び出し元セッションに紐づくことを検証
-  // （provider+providerSub 経由の衝突か、authUserId 経由の再ログイン衝突のいずれか）
-  const { data: ownershipCheck } = await supabase
+  // （auth_user_id 経由 or provider+providerSub 経由）
+  let ownershipCheck = null;
+
+  // 1. auth_user_id で紐づくか
+  const { data: byAuth } = await supabase
     .from("user_providers")
     .select("user_id")
     .eq("user_id", existingUserId)
-    .or(
-      provider && providerSub
-        ? `auth_user_id.eq.${authUserId},and(provider.eq.${provider},provider_sub.eq.${providerSub})`
-        : `auth_user_id.eq.${authUserId}`
-    )
+    .eq("auth_user_id", authUserId)
     .limit(1)
     .maybeSingle();
+
+  ownershipCheck = byAuth;
+
+  // 2. provider+providerSub でも紐づくか（auth_user_id で見つからなかった場合）
+  if (!ownershipCheck && provider && providerSub) {
+    const { data: byProvider } = await supabase
+      .from("user_providers")
+      .select("user_id")
+      .eq("user_id", existingUserId)
+      .eq("provider", provider)
+      .eq("provider_sub", providerSub)
+      .limit(1)
+      .maybeSingle();
+
+    ownershipCheck = byProvider;
+  }
 
   if (!ownershipCheck) {
     return NextResponse.json({ error: "Forbidden: no claim to this user" }, { status: 403 });

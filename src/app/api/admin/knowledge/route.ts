@@ -15,12 +15,12 @@ const createKnowledgeSchema = z.object({
 export async function GET(request: NextRequest) {
   const result = await requireAdmin();
   if (isErrorResponse(result)) return result;
-  const { supabase } = result;
+  const { adminClient } = result;
 
   const category = request.nextUrl.searchParams.get("category");
   const status = request.nextUrl.searchParams.get("status");
 
-  let query = supabase
+  let query = adminClient
     .from("knowledge_base")
     .select("*")
     .order("created_at", { ascending: false });
@@ -36,13 +36,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const result = await requireAdmin();
   if (isErrorResponse(result)) return result;
-  const { supabase } = result;
+  const { adminClient } = result;
 
   const raw = await request.json();
   const parsed = createKnowledgeSchema.safeParse(raw);
   if (!parsed.success) return badRequest(parsed.error.issues[0].message);
 
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from("knowledge_base")
     .insert(parsed.data)
     .select()

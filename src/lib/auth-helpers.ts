@@ -153,6 +153,8 @@ export async function verifyGoogleIdToken(
     if (!res.ok) return null;
     const data = await res.json();
     if (!data.sub) return null;
+    // aud検証: 自アプリ発行のトークンのみ受け付ける
+    if (data.aud !== process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) return null;
     return {
       sub: data.sub,
       email: data.email,

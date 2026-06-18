@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { Loading } from "@/components/loading";
 
 import { useState, useEffect } from "react";
@@ -38,7 +39,7 @@ function formatDate(dateStr: string): string {
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
-export default function PracticePage() {
+function PracticePageInner() {
   const now = new Date();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -213,4 +214,8 @@ export default function PracticePage() {
       )}
     </div>
   );
+}
+
+export default function PracticePage() {
+  return <Suspense><PracticePageInner /></Suspense>;
 }

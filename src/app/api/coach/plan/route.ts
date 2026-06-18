@@ -7,8 +7,15 @@ import { buildSystemPrompt } from "@/lib/ai/system-prompt";
 import { analyzeGaps } from "@/lib/gap-analysis";
 import { parsePlanResponse } from "@/lib/ai/plan-parser";
 import { incrementUsageCounter, decrementUsageCounter } from "@/lib/ai/usage-counter";
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
+  const ip = getClientIP(request);
+  const { allowed } = await checkRateLimit(`plan:${ip}`, 10, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "リクエストが多すぎます。しばらく待ってからお試しください。" }, { status: 429 });
+  }
+
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;

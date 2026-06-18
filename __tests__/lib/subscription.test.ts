@@ -19,11 +19,7 @@ describe("getActiveSubscription", () => {
   });
 
   it("returns FREE_PLAN when no active subscription exists", async () => {
-    // 1st call: update canceled -> expired (subscriptions)
-    mockSupabase.queueResult("subscriptions", { data: null, error: null });
-    // 2nd call: update grace_period_end expired (subscriptions)
-    mockSupabase.queueResult("subscriptions", { data: null, error: null });
-    // 3rd call: select active/paused subscription (subscriptions)
+    // select active/paused subscription (subscriptions)
     mockSupabase.queueResult("subscriptions", { data: null, error: null });
 
     const result = await getActiveSubscription(USER_ID);
@@ -56,11 +52,7 @@ describe("getActiveSubscription", () => {
       plan: proPlan,
     };
 
-    // 1st call: update canceled -> expired
-    mockSupabase.queueResult("subscriptions", { data: null, error: null });
-    // 2nd call: update grace_period_end expired
-    mockSupabase.queueResult("subscriptions", { data: null, error: null });
-    // 3rd call: select active/paused
+    // select active/paused
     mockSupabase.queueResult("subscriptions", { data: activeSub, error: null });
 
     const result = await getActiveSubscription(USER_ID);
@@ -72,11 +64,7 @@ describe("getActiveSubscription", () => {
   });
 
   it("returns FREE_PLAN when subscription query errors", async () => {
-    // 1st call: update canceled -> expired
-    mockSupabase.queueResult("subscriptions", { data: null, error: null });
-    // 2nd call: update grace_period_end expired
-    mockSupabase.queueResult("subscriptions", { data: null, error: null });
-    // 3rd call: select returns error
+    // select returns error
     mockSupabase.queueResult("subscriptions", {
       data: null,
       error: { message: "query error" },
@@ -111,8 +99,6 @@ describe("getActiveSubscription", () => {
       },
     };
 
-    mockSupabase.queueResult("subscriptions", { data: null, error: null });
-    mockSupabase.queueResult("subscriptions", { data: null, error: null });
     mockSupabase.queueResult("subscriptions", { data: pausedSub, error: null });
 
     const result = await getActiveSubscription(USER_ID);

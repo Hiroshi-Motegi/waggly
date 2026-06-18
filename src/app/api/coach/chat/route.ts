@@ -6,9 +6,19 @@ import { analyzeGaps } from "@/lib/gap-analysis";
 
 import { incrementUsageCounter, decrementUsageCounter } from "@/lib/ai/usage-counter";
 import { internalError } from "@/lib/api-error";
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+  const ip = getClientIP(request);
+  const { allowed } = await checkRateLimit(`chat:${ip}`, 10, 60_000);
+  if (!allowed) {
+    return new Response(
+      JSON.stringify({ error: "リクエストが多すぎます。しばらく待ってからお試しください。" }),
+      { status: 429, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   const auth = await getApiAuth();
   if (!auth) return new Response("Unauthorized", { status: 401 });
   const { supabase, userId } = auth;

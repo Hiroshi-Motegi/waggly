@@ -12,11 +12,16 @@ function isDevMode() {
   );
 }
 
+let _adminClient: ReturnType<typeof createRawClient> | null = null;
+
 export function getAdminClient() {
-  return createRawClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  if (!_adminClient) {
+    _adminClient = createRawClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _adminClient;
 }
 
 /**

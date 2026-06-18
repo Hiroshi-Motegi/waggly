@@ -28,6 +28,32 @@ const clubNumbersByCategory: Record<string, string[]> = {
   putter: [],
 };
 
+function SpecCell({ label, unit, value, onChange, type = "number", step, min, max, placeholder = "—" }: {
+  label: string; unit?: string; value: string | number | undefined | null;
+  onChange: (v: string) => void; type?: "number" | "text"; step?: string; min?: number; max?: number; placeholder?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const display = value != null && value !== "" ? `${value}${unit ? unit : ""}` : null;
+  return editing ? (
+    <div className="flex flex-col gap-0.5 rounded-lg border border-[#006728] bg-white p-2">
+      <span className="text-[10px] text-[#8b8b8b]">{label}</span>
+      <input
+        type={type} step={step} min={min} max={max} value={value ?? ""} placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={() => setEditing(false)}
+        autoFocus
+        className="w-full bg-transparent text-base font-bold outline-none"
+      />
+    </div>
+  ) : (
+    <button type="button" onClick={() => setEditing(true)}
+      className="flex flex-col items-start rounded-lg border border-[#ececec] bg-[#fafafa] p-2 text-left">
+      <span className="text-[10px] text-[#8b8b8b]">{label}</span>
+      <span className={`text-base font-bold ${display ? "text-black" : "text-[#c4c4c4]"}`}>{display ?? "—"}</span>
+    </button>
+  );
+}
+
 interface ClubFormProps {
   initialData?: Partial<Club>;
   onSubmit: (data: Partial<Club>, pendingImage?: File) => void;
@@ -188,32 +214,6 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
       return { ...prev, [key]: willOpen };
     });
   }, []);
-
-  function SpecCell({ label, unit, value, onChange, type = "number", step, min, max, placeholder = "—" }: {
-    label: string; unit?: string; value: string | number | undefined | null;
-    onChange: (v: string) => void; type?: "number" | "text"; step?: string; min?: number; max?: number; placeholder?: string;
-  }) {
-    const [editing, setEditing] = useState(false);
-    const display = value != null && value !== "" ? `${value}${unit ? unit : ""}` : null;
-    return editing ? (
-      <div className="flex flex-col gap-0.5 rounded-lg border border-[#006728] bg-white p-2">
-        <span className="text-[10px] text-[#8b8b8b]">{label}</span>
-        <input
-          type={type} step={step} min={min} max={max} value={value ?? ""} placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={() => setEditing(false)}
-          autoFocus
-          className="w-full bg-transparent text-base font-bold outline-none"
-        />
-      </div>
-    ) : (
-      <button type="button" onClick={() => setEditing(true)}
-        className="flex flex-col items-start rounded-lg border border-[#ececec] bg-[#fafafa] p-2 text-left">
-        <span className="text-[10px] text-[#8b8b8b]">{label}</span>
-        <span className={`text-base font-bold ${display ? "text-black" : "text-[#c4c4c4]"}`}>{display ?? "—"}</span>
-      </button>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-2">

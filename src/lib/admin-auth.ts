@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 import { type SupabaseClient } from "@supabase/supabase-js";
-import { getApiAuth } from "@/lib/supabase/api";
+import { getApiAuth, getAdminClient } from "@/lib/supabase/api";
 
 interface AdminAuth {
   supabase: SupabaseClient;
+  adminClient: SupabaseClient;
   userId: string;
 }
 
 /**
  * Admin API route guard.
- * Returns { supabase, userId } if the caller is an authenticated admin,
+ * Returns { supabase, adminClient, userId } if the caller is an authenticated admin,
  * or a NextResponse error otherwise.
+ * supabase: user-scoped (RLS applies) — use for reads of user-owned data.
+ * adminClient: service_role — use for writes to admin-only tables (knowledge_base etc.).
  */
 export async function requireAdmin(): Promise<AdminAuth | NextResponse> {
   const auth = await getApiAuth();
@@ -30,7 +33,7 @@ export async function requireAdmin(): Promise<AdminAuth | NextResponse> {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  return { supabase, userId };
+  return { supabase, adminClient: getAdminClient(), userId };
 }
 
 /** Type guard: true when requireAdmin() returned an error response */

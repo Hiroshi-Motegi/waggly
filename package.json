@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",
-    "build:app": "mv src/app/api src/app/_api_backup && mv src/app/auth/callback src/app/auth/_callback_backup && NEXT_OUTPUT=export next build; mv src/app/_api_backup src/app/api && mv src/app/auth/_callback_backup src/app/auth/callback",
+    "build:app": "bash -c 'mv src/app/api src/app/_api_backup && mv src/app/auth/callback src/app/auth/_callback_backup; trap \"mv src/app/_api_backup src/app/api 2>/dev/null; mv src/app/auth/_callback_backup src/app/auth/callback 2>/dev/null\" EXIT; NEXT_OUTPUT=export next build'",
     "cap:sync": "npx cap sync",
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android",

@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { Loading } from "@/components/loading";
 
 import { useMemo, useState } from "react";
@@ -148,7 +149,7 @@ function ClubRow({
 
 const validTabs: FilterTab[] = ["all", "bag1", "bag2", "reserve", "sold"];
 
-export default function BagPage() {
+function BagPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tabParam = searchParams.get("tab") as FilterTab | null;
@@ -438,4 +439,8 @@ export default function BagPage() {
       </div>
     </div>
   );
+}
+
+export default function BagPage() {
+  return <Suspense><BagPageInner /></Suspense>;
 }

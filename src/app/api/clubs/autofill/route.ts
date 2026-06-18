@@ -6,6 +6,7 @@ import { normalizeClubName } from "@/lib/normalize";
 import { searchGolfKnowledge } from "@/lib/knowledge/search";
 import { searchRakutenClub } from "@/lib/rakuten-search";
 import { internalError } from "@/lib/api-error";
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
 const CATEGORY_LABELS: Record<string, string> = {
   driver: "ドライバー",
@@ -17,6 +18,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIP(request);
+  const { allowed } = await checkRateLimit(`autofill:${ip}`, 10, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "リクエストが多すぎます。しばらく待ってからお試しください。" }, { status: 429 });
+  }
+
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;

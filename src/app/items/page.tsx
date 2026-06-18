@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { Loading } from "@/components/loading";
 
 import { useState, useEffect } from "react";
@@ -58,7 +59,7 @@ const filterTabs: { value: FilterTab; label: string }[] = [
 
 const validItemTabs: FilterTab[] = ["all", "active", "past"];
 
-export default function ItemsPage() {
+function ItemsPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tabParam = searchParams.get("tab") as FilterTab | null;
@@ -222,4 +223,8 @@ export default function ItemsPage() {
       </div>
     </div>
   );
+}
+
+export default function ItemsPage() {
+  return <Suspense><ItemsPageInner /></Suspense>;
 }
