@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/help/", "/terms", "/privacy"],
+        allow: ["/", "/help/", "/terms", "/privacy", "/catalog/", "/compare/"],
         disallow: [
           "/p/",
           "/bag/",
@@ -20,6 +20,15 @@ export default function robots(): MetadataRoute.Robots {
           "/auth/",
         ],
       },
+      // AI crawlers - block training
+      { userAgent: "GPTBot", disallow: ["/"] },
+      { userAgent: "ClaudeBot", disallow: ["/"] },
+      { userAgent: "CCBot", disallow: ["/"] },
+      { userAgent: "Google-Extended", disallow: ["/"] },
+      { userAgent: "Bytespider", disallow: ["/"] },
+      { userAgent: "Amazonbot", disallow: ["/"] },
+      { userAgent: "meta-externalagent", disallow: ["/"] },
+      { userAgent: "Applebot-Extended", disallow: ["/"] },
     ],
     sitemap: "https://waggly.jp/sitemap.xml",
   };
