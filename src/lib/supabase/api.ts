@@ -55,7 +55,8 @@ async function resolveUserId(authUserId: string): Promise<string | null> {
  * Get Supabase client and userId for API routes.
  * Returns null if not authenticated (caller should return 401).
  *
- * The returned `supabase` is a user-scoped client (RLS applies).
+ * The returned `supabase` is a user-scoped client (RLS applies via
+ * get_my_user_id() SECURITY DEFINER function — see migration 232).
  * Use `getAdminClient()` explicitly for storage or admin operations.
  * userId is users.id (independent UUID), NOT auth.users.id.
  */
@@ -120,10 +121,8 @@ export async function getApiAuth(): Promise<{
     const userId = await resolveUserId(user.id);
     if (!userId) return null;
 
-    // TODO: RLS有効化時は createUserClient(token) に切り替える
-    // 現状はネストされた select (club_images等) で RLS の EXISTS チェックが
-    // 期待通り動作しないケースがあるため adminClient を使用
-    return { supabase: adminClient, userId };
+    // RLS applies via get_my_user_id() SECURITY DEFINER function
+    return { supabase: createUserClient(token), userId };
   }
 
   // Production: cookie-based auth
@@ -137,8 +136,8 @@ export async function getApiAuth(): Promise<{
   const userId = await resolveUserId(user.id);
   if (!userId) return null;
 
-  // TODO: RLS有効化時は SSR client (supabase) に切り替える
-  return { supabase: getAdminClient(), userId };
+  // SSR client is already user-scoped (RLS applies)
+  return { supabase, userId };
 }
 
 /**
