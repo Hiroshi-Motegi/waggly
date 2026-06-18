@@ -13,7 +13,7 @@ function getAdminClient() {
 export async function POST(req: Request) {
   // レートリミット: IP あたり 1分5回（ブルートフォース対策）
   const ip = getClientIP(req);
-  const { allowed } = checkRateLimit(`coupon:${ip}`, 5, 60_000);
+  const { allowed } = await checkRateLimit(`coupon:${ip}`, 5, 60_000);
   if (!allowed) {
     return NextResponse.json({ error: "リクエストが多すぎます。しばらくしてからお試しください。" }, { status: 429 });
   }

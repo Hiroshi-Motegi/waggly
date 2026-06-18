@@ -40,6 +40,8 @@
     "@tanstack/react-table": "^8.21.3",
     "@tavily/core": "^0.7.5",
     "@types/qrcode": "^1.5.6",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "@vercel/og": "^0.11.1",
     "ai": "^6.0.197",
     "class-variance-authority": "^0.7.1",

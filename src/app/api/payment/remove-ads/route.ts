@@ -14,7 +14,7 @@ function getAdminClient() {
 export async function POST(req: Request) {
   // レートリミット
   const ip = getClientIP(req);
-  const { allowed } = checkRateLimit(`remove-ads:${ip}`, 5, 60_000);
+  const { allowed } = await checkRateLimit(`remove-ads:${ip}`, 5, 60_000);
   if (!allowed) {
     return NextResponse.json(
       { error: "リクエストが多すぎます。しばらくしてからお試しください。" },

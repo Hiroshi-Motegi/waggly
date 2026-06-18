@@ -16,7 +16,7 @@ function getAdminClient() {
 export async function POST(request: NextRequest) {
   // 1. Rate limit
   const ip = getClientIP(request);
-  const { allowed } = checkRateLimit(`contact:${ip}`, 3, 60_000);
+  const { allowed } = await checkRateLimit(`contact:${ip}`, 3, 60_000);
   if (!allowed) {
     return NextResponse.json(
       { error: "送信回数の上限に達しました。しばらくしてからお試しください。" },
