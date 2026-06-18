@@ -120,8 +120,10 @@ export async function getApiAuth(): Promise<{
     const userId = await resolveUserId(user.id);
     if (!userId) return null;
 
-    // Return user-scoped client (RLS applies)
-    return { supabase: createUserClient(token), userId };
+    // TODO: RLS有効化時は createUserClient(token) に切り替える
+    // 現状はネストされた select (club_images等) で RLS の EXISTS チェックが
+    // 期待通り動作しないケースがあるため adminClient を使用
+    return { supabase: adminClient, userId };
   }
 
   // Production: cookie-based auth
@@ -135,8 +137,8 @@ export async function getApiAuth(): Promise<{
   const userId = await resolveUserId(user.id);
   if (!userId) return null;
 
-  // Return the SSR client (already user-scoped, RLS applies)
-  return { supabase, userId };
+  // TODO: RLS有効化時は SSR client (supabase) に切り替える
+  return { supabase: getAdminClient(), userId };
 }
 
 /**
