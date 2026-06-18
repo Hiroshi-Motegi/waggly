@@ -39,6 +39,7 @@ export default function HelpIndexPage() {
                     width={6}
                     height={10}
                     className="opacity-60"
+                    style={{ width: "auto", height: "auto" }}
                   />
                 </div>
               </Link>

@@ -388,23 +388,23 @@ export default function SettingsPage() {
             <div className="flex flex-col gap-2">
               <Link href="/help/contact" className="flex items-center justify-between py-2 border-b border-[#dfdfdf]">
                 <span className="text-base">お問い合わせ</span>
-                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" style={{ width: "auto", height: "auto" }} />
               </Link>
               <Link href="/terms" className="flex items-center justify-between py-2 border-b border-[#dfdfdf]">
                 <span className="text-base">利用規約</span>
-                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" style={{ width: "auto", height: "auto" }} />
               </Link>
               <Link href="/privacy" className="flex items-center justify-between py-2 border-b border-[#dfdfdf]">
                 <span className="text-base">プライバシーポリシー</span>
-                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" style={{ width: "auto", height: "auto" }} />
               </Link>
               <Link href="/legal" className="flex items-center justify-between py-2 border-b border-[#dfdfdf]">
                 <span className="text-base">特定商取引法に基づく表記</span>
-                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" style={{ width: "auto", height: "auto" }} />
               </Link>
               <Link href="/help" className="flex items-center justify-between py-2">
                 <span className="text-base">ご利用ガイド</span>
-                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" />
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40" style={{ width: "auto", height: "auto" }} />
               </Link>
             </div>
           </div>
@@ -448,13 +448,13 @@ export default function SettingsPage() {
         <Link href="/settings/profile">
           <div className="flex items-center justify-between py-3 border-b border-[#ececec]">
             <span className="text-base">プロフィール設定</span>
-            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" style={{ width: "auto", height: "auto" }} />
           </div>
         </Link>
         <Link href="/settings/share">
           <div className={`flex items-center justify-between py-3 ${isPro ? "border-b border-[#ececec]" : ""}`}>
             <span className="text-base">名刺・共有設定</span>
-            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" style={{ width: "auto", height: "auto" }} />
           </div>
         </Link>
         {isPro && (
@@ -465,7 +465,7 @@ export default function SettingsPage() {
                 {cardInfo && (
                   <span className="text-sm text-[#8b8b8b]">下4桁 {cardInfo.last4}</span>
                 )}
-                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" style={{ width: "auto", height: "auto" }} />
               </div>
             </div>
           </Link>
@@ -589,7 +589,7 @@ export default function SettingsPage() {
             <Link key={item.href} href={item.href}>
               <div className={`flex items-center gap-2.5 py-2.5 ${i < arr.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
                 <span className="flex-1 text-base font-bold">{item.label}</span>
-                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" />
+                <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" style={{ width: "auto", height: "auto" }} />
               </div>
             </Link>
           ))}

@@ -153,7 +153,7 @@ export default async function HomePage() {
           ].map((item, i, arr) => (
             <Link key={item.href} href={item.href} className={`flex items-center gap-2.5 px-3 py-4 ${i < arr.length - 1 ? "border-b border-[#dfdfdf]/30" : ""}`}>
               <span className="flex-1 text-base text-white">{item.label}</span>
-              <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60 invert" />
+              <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60 invert" style={{ width: "auto", height: "auto" }} />
             </Link>
           ))}
         </div>

@@ -51,6 +51,7 @@ export function RecentPractice({ sessions }: RecentPracticeProps) {
                     width={6}
                     height={10}
                     className="opacity-60 w-auto h-auto"
+                    style={{ width: "auto", height: "auto" }}
                   />
                 </div>
               </Link>

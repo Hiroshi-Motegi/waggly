@@ -263,7 +263,7 @@ export default function MaintenanceListPage({ params }: { params: Promise<{ club
                       {m.cost != null && <span>{m.cost.toLocaleString()}円</span>}
                     </div>
                   </div>
-                  <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" />
+                  <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" style={{ width: "auto", height: "auto" }} />
                 </div>
               </Link>
             ))}

@@ -211,6 +211,7 @@ export default function ItemsPage() {
                       width={6}
                       height={10}
                       className="shrink-0 opacity-60"
+                      style={{ width: "auto", height: "auto" }}
                     />
                   </div>
                 </Link>

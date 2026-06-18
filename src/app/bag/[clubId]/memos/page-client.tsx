@@ -241,7 +241,7 @@ export default function ActivityListPage({ params }: { params: Promise<{ clubId:
                         <p className="text-sm text-black pt-1.5 pl-1.5 line-clamp-2 overflow-hidden">{memoText}</p>
                       )}
                     </div>
-                    <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" />
+                    <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="shrink-0 opacity-60" style={{ width: "auto", height: "auto" }} />
                   </div>
                 </Link>
               );

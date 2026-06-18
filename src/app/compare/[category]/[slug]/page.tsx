@@ -64,7 +64,7 @@ function ModelCard({ model, label }: { model: any; label: string }) {
           {model.price != null ? `¥${model.price.toLocaleString("ja-JP")}〜` : ""}
         </p>
       </div>
-      <Image src="/icons/chevron-right.svg" alt="" width={9} height={14} className="shrink-0 opacity-40" />
+      <Image src="/icons/chevron-right.svg" alt="" width={9} height={14} className="shrink-0 opacity-40" style={{ width: "auto", height: "auto" }} />
     </Link>
   );
 }
