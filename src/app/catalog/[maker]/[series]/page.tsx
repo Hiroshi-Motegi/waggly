@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { BackButton } from "@/components/layout/back-button";
 import { notFound } from "next/navigation";
 import { getModelsBySeries } from "@/lib/catalog";
