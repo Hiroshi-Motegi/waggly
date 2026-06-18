@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { updatePlan } from "@/hooks/use-plans";
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
+import { showError } from "@/lib/toast";
 
 const statusLabels: Record<string, string> = {
   new: "未実行",
@@ -80,7 +81,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
           setPlan(data);
         }
       })
-      .catch(() => {})
+      .catch((e) => showError(e))
       .finally(() => setIsLoading(false));
   }, [planId, user]);
 

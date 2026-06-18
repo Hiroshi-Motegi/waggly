@@ -12,6 +12,7 @@ import { updatePracticeSession, deletePracticeSession } from "@/hooks/use-practi
 import { useAuth } from "@/hooks/use-auth";
 import { apiFetch } from "@/lib/api-client";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
+import { showError } from "@/lib/toast";
 import type { PracticeSessionWithClubs } from "@/types/database";
 
 export default function EditPracticePage({ overrideSessionId }: { overrideSessionId?: string } = {}) {
@@ -35,7 +36,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
     apiFetch("/api/practice/locations")
       .then((r) => r.ok ? r.json() : [])
       .then(setPastLocations)
-      .catch(() => {});
+      .catch((e) => showError(e));
   }, []);
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
         }
       } catch (error) {
         console.error("Failed to fetch session:", error);
+        showError(error);
       } finally {
         setIsFetching(false);
       }
@@ -76,6 +78,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
       router.push("/practice");
     } catch (error) {
       console.error("Failed to update practice session:", error);
+      showError(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -89,6 +92,7 @@ export default function EditPracticePage({ overrideSessionId }: { overrideSessio
       router.push("/practice");
     } catch (error) {
       console.error("Failed to delete practice session:", error);
+      showError(error);
     } finally {
       setIsDeleting(false);
     }

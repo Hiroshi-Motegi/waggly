@@ -1,12 +1,29 @@
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
 /**
- * シンプルなインメモリレートリミッター
- * Vercel Serverless では関数インスタンス単位のメモリなので完全ではないが、
- * 単一インスタンスへの連続攻撃は防げる。厳密にはUpstash Redis等が必要。
+ * Rate limiter with Upstash Redis for distributed environments (Vercel Serverless).
+ * Falls back to in-memory when UPSTASH_REDIS_REST_URL is not configured.
  */
 
+let ratelimit: Ratelimit | null = null;
+
+function getRatelimit(): Ratelimit | null {
+  if (ratelimit) return ratelimit;
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return null;
+  }
+  ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(10, "60 s"),
+    analytics: false,
+  });
+  return ratelimit;
+}
+
+// In-memory fallback for development / when Upstash is not configured
 const store = new Map<string, { count: number; resetAt: number }>();
 
-// 古いエントリを定期クリーンアップ
 setInterval(() => {
   const now = Date.now();
   for (const [key, val] of store) {
@@ -14,7 +31,7 @@ setInterval(() => {
   }
 }, 60_000);
 
-export function checkRateLimit(
+function checkRateLimitInMemory(
   key: string,
   limit: number,
   windowMs: number
@@ -35,7 +52,20 @@ export function checkRateLimit(
   return { allowed: true, remaining: limit - entry.count };
 }
 
-/** リクエストからIPを取得 */
+export async function checkRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number
+): Promise<{ allowed: boolean; remaining: number }> {
+  const rl = getRatelimit();
+  if (rl) {
+    const result = await rl.limit(key);
+    return { allowed: result.success, remaining: result.remaining };
+  }
+  return checkRateLimitInMemory(key, limit, windowMs);
+}
+
+/** Extract client IP from request headers. */
 export function getClientIP(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();

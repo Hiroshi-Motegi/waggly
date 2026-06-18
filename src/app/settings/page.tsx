@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/layout/page-header";
 import { useProfile } from "@/hooks/use-profile";
 import { useAdFree } from "@/hooks/use-ad-free";
+import { showError } from "@/lib/toast";
 
 interface UsageData {
   chat: { used: number; limit: number; remaining: number };
@@ -80,9 +81,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!user) return;
-    apiFetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch(() => {}).finally(() => setUsageLoaded(true));
-    apiFetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch(() => {});
-    apiFetch("/api/payment/card-info").then((r) => r.ok ? r.json() : null).then((d) => setCardInfo(d?.card ?? null)).catch(() => {});
+    apiFetch("/api/usage").then((r) => r.ok ? r.json() : null).then(setUsage).catch((e) => showError(e)).finally(() => setUsageLoaded(true));
+    apiFetch("/api/subscription").then((r) => r.ok ? r.json() : null).then(setSubscription).catch((e) => showError(e));
+    apiFetch("/api/payment/card-info").then((r) => r.ok ? r.json() : null).then((d) => setCardInfo(d?.card ?? null)).catch((e) => showError(e));
   }, [user]);
 
   const [processing, setProcessing] = useState<string | null>(null);
@@ -243,23 +244,25 @@ export default function SettingsPage() {
                   const { signInWithGoogle } = await import("@/lib/native-auth");
                   const result = await signInWithGoogle();
                   if (result.conflict) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const c = result.conflict as any;
                     const conflictInfo = {
                       scenario: "first-signin",
-                      provider: result.conflict.provider,
-                      providerSub: result.conflict.providerSub,
+                      provider: c.provider,
+                      providerSub: c.providerSub,
                       sourceA: {
                         label: "ローカルのデータ",
                         isNew: true,
                         wid: null,
-                        lastUpdated: result.conflict.localSummary.lastUpdated,
-                        counts: result.conflict.localSummary.counts,
+                        lastUpdated: c.localSummary.lastUpdated,
+                        counts: c.localSummary.counts,
                       },
                       sourceB: {
                         label: "サーバーのデータ",
                         isNew: false,
-                        wid: result.conflict.existingUser.userId,
-                        lastUpdated: result.conflict.existingUser.lastUpdated,
-                        counts: result.conflict.existingUser.counts,
+                        wid: c.existingUser.userId,
+                        lastUpdated: c.existingUser.lastUpdated,
+                        counts: c.existingUser.counts,
                       },
                     };
                     setConflictInfo(conflictInfo);
@@ -307,23 +310,25 @@ export default function SettingsPage() {
                     return;
                   }
                   if (result.conflict) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const c = result.conflict as any;
                     const conflictInfo = {
                       scenario: "first-signin",
-                      provider: result.conflict.provider,
-                      providerSub: result.conflict.providerSub,
+                      provider: c.provider,
+                      providerSub: c.providerSub,
                       sourceA: {
                         label: "ローカルのデータ",
                         isNew: true,
                         wid: null,
-                        lastUpdated: result.conflict.localSummary.lastUpdated,
-                        counts: result.conflict.localSummary.counts,
+                        lastUpdated: c.localSummary.lastUpdated,
+                        counts: c.localSummary.counts,
                       },
                       sourceB: {
                         label: "サーバーのデータ",
                         isNew: false,
-                        wid: result.conflict.existingUser.userId,
-                        lastUpdated: result.conflict.existingUser.lastUpdated,
-                        counts: result.conflict.existingUser.counts,
+                        wid: c.existingUser.userId,
+                        lastUpdated: c.existingUser.lastUpdated,
+                        counts: c.existingUser.counts,
                       },
                     };
                     setConflictInfo(conflictInfo);
@@ -610,6 +615,7 @@ function ExportSection() {
       URL.revokeObjectURL(url);
     } catch (e) {
       console.error(`Export ${label} failed:`, e);
+      showError(e);
     } finally {
       setDownloading(null);
     }
@@ -666,7 +672,7 @@ function AccountLinking({
     apiFetch("/api/auth/providers")
       .then((r) => r.ok ? r.json() : [])
       .then(setProviders)
-      .catch(() => {})
+      .catch((e) => showError(e))
       .finally(() => setLoading(false));
   }, []);
 
