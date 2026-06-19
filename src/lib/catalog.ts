@@ -8,7 +8,16 @@ const supabase: SupabaseClient<any> = createClient(
 
 // --- Types ---
 
+export type CatalogMaker = {
+  id: string;
+  slug: string;
+  name: string;
+  sort_order: number;
+  is_visible: boolean;
+};
+
 export type CatalogModel = {
+  maker_id: string;
   id: string;
   name: string;
   maker: string;
@@ -54,30 +63,31 @@ export type CatalogModelWithSpecs = CatalogModel & {
 
 // --- Queries ---
 
-/** 全メーカー一覧（ユニークなmaker/maker_slug） */
+/** 全メーカー一覧 */
 export async function getMakers() {
   const { data } = await supabase
-    .from("catalog_models")
-    .select("maker, maker_slug")
-    .eq("is_visible", true);
-  if (!data) return [];
-  const map = new Map<string, { maker: string; maker_slug: string }>();
-  for (const d of data) {
-    if (!map.has(d.maker_slug)) {
-      map.set(d.maker_slug, { maker: d.maker, maker_slug: d.maker_slug });
-    }
-  }
-  return Array.from(map.values()).sort((a, b) =>
-    a.maker.localeCompare(b.maker, "ja")
-  );
+    .from("catalog_makers")
+    .select("*")
+    .eq("is_visible", true)
+    .order("sort_order")
+    .order("name");
+  return (data ?? []) as CatalogMaker[];
 }
 
-/** メーカー内モデル一覧 */
+/** メーカー内モデル一覧（メーカー非表示なら空） */
 export async function getModelsByMaker(makerSlug: string) {
+  // メーカーの可視性チェック
+  const { data: maker } = await supabase
+    .from("catalog_makers")
+    .select("id, is_visible")
+    .eq("slug", makerSlug)
+    .single();
+  if (!maker?.is_visible) return [];
+
   const { data } = await supabase
     .from("catalog_models")
     .select("*")
-    .eq("maker_slug", makerSlug)
+    .eq("maker_id", maker.id)
     .eq("is_visible", true)
     .order("category")
     .order("name");

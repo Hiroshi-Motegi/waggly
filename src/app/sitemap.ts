@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Maker pages
     for (const maker of makers) {
       catalogUrls.push({
-        url: `${baseUrl}/catalog/${maker.maker_slug}`,
+        url: `${baseUrl}/catalog/${maker.slug}`,
         changeFrequency: "weekly",
         priority: 0.7,
       });

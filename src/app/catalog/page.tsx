@@ -62,11 +62,11 @@ export default async function CatalogPage() {
             <div className="grid grid-cols-2 gap-2">
               {makers.map((maker) => (
                 <Link
-                  key={maker.maker_slug}
-                  href={`/catalog/${maker.maker_slug}`}
+                  key={maker.slug}
+                  href={`/catalog/${maker.slug}`}
                   className="flex items-center justify-center rounded-md bg-white px-4 py-4 text-center font-bold text-[#222] hover:bg-[#f5f5f5] transition-colors"
                 >
-                  {maker.maker}
+                  {maker.name}
                 </Link>
               ))}
             </div>
