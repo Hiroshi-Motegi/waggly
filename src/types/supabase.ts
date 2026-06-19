@@ -217,6 +217,36 @@ export type Database = {
           },
         ]
       }
+      catalog_makers: {
+        Row: {
+          created_at: string
+          id: string
+          is_visible: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       catalog_models: {
         Row: {
           alpen_pid: string | null
@@ -229,7 +259,9 @@ export type Database = {
           head_material: string | null
           id: string
           image_url: string | null
+          is_visible: boolean
           maker: string
+          maker_id: string
           maker_slug: string
           name: string
           price: number | null
@@ -237,6 +269,7 @@ export type Database = {
           price_min: number | null
           release_month: number | null
           release_year: number | null
+          series_slug: string | null
           shaft_names: string[] | null
           sle_rule: string | null
           slug: string | null
@@ -254,7 +287,9 @@ export type Database = {
           head_material?: string | null
           id?: string
           image_url?: string | null
+          is_visible?: boolean
           maker: string
+          maker_id: string
           maker_slug: string
           name: string
           price?: number | null
@@ -262,6 +297,7 @@ export type Database = {
           price_min?: number | null
           release_month?: number | null
           release_year?: number | null
+          series_slug?: string | null
           shaft_names?: string[] | null
           sle_rule?: string | null
           slug?: string | null
@@ -279,7 +315,9 @@ export type Database = {
           head_material?: string | null
           id?: string
           image_url?: string | null
+          is_visible?: boolean
           maker?: string
+          maker_id?: string
           maker_slug?: string
           name?: string
           price?: number | null
@@ -287,13 +325,22 @@ export type Database = {
           price_min?: number | null
           release_month?: number | null
           release_year?: number | null
+          series_slug?: string | null
           shaft_names?: string[] | null
           sle_rule?: string | null
           slug?: string | null
           source_url?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "catalog_models_maker_id_fkey"
+            columns: ["maker_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_makers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       catalog_specs: {
         Row: {
