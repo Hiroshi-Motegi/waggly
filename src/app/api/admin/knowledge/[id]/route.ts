@@ -11,7 +11,7 @@ const updateKnowledgeSchema = z.object({
   title: z.string().min(1).max(500).optional(),
   content: z.string().min(1).max(10000).optional(),
   category: z.string().min(1).max(100).optional(),
-  status: z.enum(["draft", "active", "inactive", "rejected"]).optional(),
+  is_active: z.boolean().optional(),
   source: z.string().max(500).optional(),
   tags: z.array(z.string()).optional(),
 });

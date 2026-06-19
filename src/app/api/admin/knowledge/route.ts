@@ -7,7 +7,7 @@ const createKnowledgeSchema = z.object({
   title: z.string().min(1).max(500),
   content: z.string().min(1).max(10000),
   category: z.string().min(1).max(100).optional(),
-  status: z.enum(["draft", "active", "inactive", "rejected"]).optional(),
+  is_active: z.boolean().optional(),
   source: z.string().max(500).optional(),
   tags: z.array(z.string()).optional(),
 });
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   const { adminClient } = result;
 
   const category = request.nextUrl.searchParams.get("category");
-  const status = request.nextUrl.searchParams.get("status");
+  const isActive = request.nextUrl.searchParams.get("is_active");
 
   let query = adminClient
     .from("knowledge_base")
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     .order("created_at", { ascending: false });
 
   if (category) query = query.eq("category", category);
-  if (status) query = query.eq("status", status);
+  if (isActive !== null) query = query.eq("is_active", isActive === "true");
 
   const { data, error } = await query;
   if (error) return supabaseError(error);
