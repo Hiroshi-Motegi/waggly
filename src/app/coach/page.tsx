@@ -152,7 +152,7 @@ function HistoryPanel({
   onDelete: (id: string) => void;
   onClose: () => void;
 }) {
-  function formatDate(dateStr: string) {
+  function formatShortDate(dateStr: string) {
     const d = new Date(dateStr);
     return d.toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" });
   }
@@ -188,7 +188,7 @@ function HistoryPanel({
                 >
                   <span className="text-base font-medium truncate flex-1 mr-3">{conv.title}</span>
                   <span className="text-sm text-[#8b8b8b] shrink-0">
-                    {formatDate(conv.created_at)}
+                    {formatShortDate(conv.created_at)}
                   </span>
                 </button>
                 <button

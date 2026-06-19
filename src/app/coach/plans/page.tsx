@@ -1,7 +1,7 @@
 "use client";
 import { Loading } from "@/components/loading";
 
-import { useEffect, useState, useRef } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { nativeHref } from "@/lib/native-routes";
@@ -27,7 +27,7 @@ const statusColors: Record<string, string> = {
   skipped: "bg-[#e0e0e0] text-black",
 };
 
-export default function PlansPage() {
+function PlansPageInner() {
   const { user } = useAuth();
   const { plans, isLoading, refetch } = usePlans();
   const { usage } = useUsage();
@@ -133,4 +133,8 @@ export default function PlansPage() {
       </div>
     </div>
   );
+}
+
+export default function PlansPage() {
+  return <Suspense><PlansPageInner /></Suspense>;
 }

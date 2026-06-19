@@ -11,11 +11,7 @@ import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { ClubMemo } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-}
+import { formatDate } from "@/lib/utils";
 
 export default function MemoDetailPage({ params }: { params: Promise<{ clubId: string; memoId: string }> }) {
   const { clubId, memoId } = use(params);

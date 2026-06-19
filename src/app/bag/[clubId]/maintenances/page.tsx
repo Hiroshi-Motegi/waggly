@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import ClientPage from "./page-client";
 
 export function generateStaticParams() {
@@ -5,5 +6,5 @@ export function generateStaticParams() {
 }
 
 export default function Page(props: { params: Promise<{ clubId: string }> }) {
-  return <ClientPage params={props.params} />;
+  return <Suspense><ClientPage params={props.params} /></Suspense>;
 }

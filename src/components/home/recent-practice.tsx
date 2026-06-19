@@ -4,14 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import type { PracticeSessionWithClubs } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
+import { formatDate } from "@/lib/utils";
 
 interface RecentPracticeProps {
   sessions: PracticeSessionWithClubs[];
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
 export function RecentPractice({ sessions }: RecentPracticeProps) {

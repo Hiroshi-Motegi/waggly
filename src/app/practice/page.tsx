@@ -14,6 +14,7 @@ import { MonthCalendar } from "@/components/practice/month-calendar";
 import { SessionListGrouped } from "@/components/practice/session-list-grouped";
 import { usePracticeSessions, usePracticeSessionsByMonth } from "@/hooks/use-practice";
 import { todayString, monthKey } from "@/lib/calendar-utils";
+import { formatDate } from "@/lib/utils";
 
 function ViewToggle({ mode, onChange }: { mode: "calendar" | "list"; onChange: (m: "calendar" | "list") => void }) {
   return (
@@ -32,11 +33,6 @@ function ViewToggle({ mode, onChange }: { mode: "calendar" | "list"; onChange: (
       </button>
     </div>
   );
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
 function PracticePageInner() {

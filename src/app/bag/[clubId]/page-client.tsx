@@ -12,6 +12,7 @@ import { ClubUsageSummary } from "@/components/club/club-usage-summary";
 import { useAuth } from "@/hooks/use-auth";
 import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
 import { nativeHref } from "@/lib/native-routes";
+import { formatDate } from "@/lib/utils";
 
 const statusLabels: Record<string, string> = {
   bag: "マイバッグ",
@@ -122,11 +123,6 @@ interface ActivityItem {
   maintenance_type?: string;
   maintenance_label?: string;
   description?: string | null;
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr.includes("T") ? dateStr : dateStr + "T00:00:00");
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
 const badgeColors: Record<string, string> = {

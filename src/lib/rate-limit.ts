@@ -24,12 +24,15 @@ function getRatelimit(): Ratelimit | null {
 // In-memory fallback for development / when Upstash is not configured
 const store = new Map<string, { count: number; resetAt: number }>();
 
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, val] of store) {
-    if (val.resetAt < now) store.delete(key);
-  }
-}, 60_000);
+// Upstash未設定時のみインメモリストアのクリーンアップを実行
+if (!process.env.UPSTASH_REDIS_REST_URL) {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, val] of store) {
+      if (val.resetAt < now) store.delete(key);
+    }
+  }, 60_000);
+}
 
 function checkRateLimitInMemory(
   key: string,

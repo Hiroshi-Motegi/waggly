@@ -12,6 +12,7 @@ import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { MemoCondition } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
+import { formatDate } from "@/lib/utils";
 
 interface ActivityItem {
   type: "memo" | "practice" | "maintenance";
@@ -51,11 +52,6 @@ const conditionImage: Record<string, string> = {
   normal: "/images/face-ok.png",
   good: "/images/face-good.png",
 };
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr.includes("T") ? dateStr : dateStr + "T00:00:00");
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-}
 
 export default function ActivityListPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);

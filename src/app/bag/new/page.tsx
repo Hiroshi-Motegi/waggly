@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { nativeHref } from "@/lib/native-routes";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
@@ -10,7 +10,7 @@ import { createClub, useClubs } from "@/hooks/use-clubs";
 import { apiFetch } from "@/lib/api-client";
 import type { Club } from "@/types/database";
 
-export default function NewClubPage() {
+function NewClubPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
@@ -57,4 +57,8 @@ export default function NewClubPage() {
       </div>
     </div>
   );
+}
+
+export default function NewClubPage() {
+  return <Suspense><NewClubPageInner /></Suspense>;
 }

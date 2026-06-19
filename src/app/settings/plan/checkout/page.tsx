@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/api-client";
 import { PageHeader } from "@/components/layout/page-header";
@@ -26,7 +26,7 @@ declare global {
 
 let payjpSingleton: PayjpInstance | null = null;
 
-export default function CheckoutPage() {
+function CheckoutPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const changeCard = searchParams.get("change_card") === "true";
@@ -288,4 +288,8 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
+}
+
+export default function CheckoutPage() {
+  return <Suspense><CheckoutPageInner /></Suspense>;
 }

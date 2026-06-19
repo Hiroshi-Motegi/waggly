@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -14,7 +14,7 @@ import { ProcessingOverlay } from "@/components/ui/processing-overlay";
 import { showError } from "@/lib/toast";
 import type { PracticePlanItem, PracticePlanWithItems } from "@/types/database";
 
-export default function NewPracticePage() {
+function NewPracticePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const planId = searchParams.get("planId");
@@ -149,4 +149,8 @@ export default function NewPracticePage() {
       </div>
     </div>
   );
+}
+
+export default function NewPracticePage() {
+  return <Suspense><NewPracticePageInner /></Suspense>;
 }

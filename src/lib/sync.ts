@@ -29,8 +29,15 @@ export async function flushPendingSync(): Promise<void> {
     });
 
     if (!res.ok) {
-      console.error(`Sync failed for pending_sync id=${row.id}: ${res.status}`);
-      break; // Stop on failure — retry next sync cycle
+      if (res.status >= 400 && res.status < 500) {
+        // 4xx: 永続的失敗（削除済みリソース等）→ スキップして次へ
+        console.error(`Sync permanent failure id=${row.id}: ${res.status}, skipping`);
+        await execute("DELETE FROM pending_sync WHERE id = ?", [row.id]);
+        continue;
+      }
+      // 5xx/ネットワーク: 一時的失敗 → 次のサイクルでリトライ
+      console.error(`Sync transient failure id=${row.id}: ${res.status}, will retry`);
+      break;
     }
 
     await execute("DELETE FROM pending_sync WHERE id = ?", [row.id]);

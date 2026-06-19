@@ -13,11 +13,7 @@ import { getConditionImage } from "@/components/club/inline-club-memo";
 import type { PracticeSessionWithClubs, MemoCondition } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
 import { isNative } from "@/lib/platform";
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-}
+import { formatDate } from "@/lib/utils";
 
 export default function PracticeDetailPage({ overrideSessionId }: { overrideSessionId?: string } = {}) {
   const routeParams = useParams<{ sessionId: string }>();

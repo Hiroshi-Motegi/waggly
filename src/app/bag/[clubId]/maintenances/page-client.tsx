@@ -15,6 +15,7 @@ import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
 import { ProcessingOverlay } from "@/components/ui/processing-overlay";
+import { formatDate } from "@/lib/utils";
 
 const maintenanceTypeLabels: Record<string, string> = {
   grip_change: "グリップ交換",
@@ -29,11 +30,6 @@ const maintenanceTypes = [
   { value: "loft_adjust", label: "ロフト調整" },
   { value: "other", label: "その他" },
 ];
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-}
 
 export default function MaintenanceListPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);

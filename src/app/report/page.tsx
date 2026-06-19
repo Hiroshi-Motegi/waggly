@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { validateForm, type ValidationSchema } from "@/lib/form-validation";
@@ -20,7 +20,7 @@ const reportSchema: ValidationSchema = {
 const inputClass =
   "w-full rounded-lg border border-[#c4c4c4] bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#006728]";
 
-export default function ReportPage() {
+function ReportPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const username = searchParams.get("username") ?? "";
@@ -181,4 +181,8 @@ export default function ReportPage() {
       </form>
     </div>
   );
+}
+
+export default function ReportPage() {
+  return <Suspense><ReportPageInner /></Suspense>;
 }

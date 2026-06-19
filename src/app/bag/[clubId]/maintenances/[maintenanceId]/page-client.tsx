@@ -11,6 +11,7 @@ import { apiFetch } from "@/lib/api-client";
 import { useClub } from "@/hooks/use-clubs";
 import type { Maintenance } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
+import { formatDate } from "@/lib/utils";
 
 const maintenanceTypeLabels: Record<string, string> = {
   grip_change: "グリップ交換",
@@ -18,11 +19,6 @@ const maintenanceTypeLabels: Record<string, string> = {
   loft_adjust: "ロフト調整",
   other: "その他",
 };
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-}
 
 export default function MaintenanceDetailPage({
   params,

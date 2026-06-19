@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Check } from "lucide-react";
@@ -10,7 +10,7 @@ import { apiFetch } from "@/lib/api-client";
 import { PLAN_ID } from "@/lib/plans";
 import { PageHeader } from "@/components/layout/page-header";
 
-export default function PlanPage() {
+function PlanPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const upgraded = searchParams.get("upgraded") === "true";
@@ -200,4 +200,8 @@ export default function PlanPage() {
       </div>
     </div>
   );
+}
+
+export default function PlanPage() {
+  return <Suspense><PlanPageInner /></Suspense>;
 }

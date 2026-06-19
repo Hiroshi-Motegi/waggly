@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { LoginButtons } from "@/components/home/login-buttons";
 
-export default function LoginPage() {
+function LoginPageInner() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
 
@@ -26,4 +26,8 @@ export default function LoginPage() {
       </div>
     </div>
   );
+}
+
+export default function LoginPage() {
+  return <Suspense><LoginPageInner /></Suspense>;
 }
