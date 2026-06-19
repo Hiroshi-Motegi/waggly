@@ -1,6 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabase: SupabaseClient<any> = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
@@ -28,6 +29,7 @@ export type CatalogModel = {
   source_url: string | null;
   image_url: string | null;
   alpen_pid: string | null;
+  is_visible: boolean;
 };
 
 export type CatalogSpec = {
@@ -56,7 +58,8 @@ export type CatalogModelWithSpecs = CatalogModel & {
 export async function getMakers() {
   const { data } = await supabase
     .from("catalog_models")
-    .select("maker, maker_slug");
+    .select("maker, maker_slug")
+    .eq("is_visible", true);
   if (!data) return [];
   const map = new Map<string, { maker: string; maker_slug: string }>();
   for (const d of data) {
@@ -75,6 +78,7 @@ export async function getModelsByMaker(makerSlug: string) {
     .from("catalog_models")
     .select("*")
     .eq("maker_slug", makerSlug)
+    .eq("is_visible", true)
     .order("category")
     .order("name");
   return (data ?? []) as CatalogModel[];
@@ -87,6 +91,7 @@ export async function getModelDetail(makerSlug: string, slug: string) {
     .select("*, catalog_specs(*)")
     .eq("maker_slug", makerSlug)
     .eq("slug", slug)
+    .eq("is_visible", true)
     .order("sort_order", { referencedTable: "catalog_specs" })
     .single();
   return data as CatalogModelWithSpecs | null;
@@ -101,6 +106,7 @@ export async function getAllModels() {
     const { data } = await supabase
       .from("catalog_models")
       .select("*")
+      .eq("is_visible", true)
       .order("name")
       .range(offset, offset + pageSize - 1);
     if (!data || data.length === 0) break;
@@ -117,6 +123,7 @@ export async function getModelsByCategory(category: string) {
     .from("catalog_models")
     .select("*")
     .eq("category", category)
+    .eq("is_visible", true)
     .order("name");
   return (data ?? []) as CatalogModel[];
 }
@@ -128,7 +135,8 @@ async function getModelByCompareSlug(compareSlug: string, category: string) {
   const { data: lightModels } = await supabase
     .from("catalog_models")
     .select("id, maker_slug, slug")
-    .eq("category", category);
+    .eq("category", category)
+    .eq("is_visible", true);
 
   if (!lightModels) return null;
 
