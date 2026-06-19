@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BackButton } from "@/components/layout/back-button";
 import { notFound } from "next/navigation";
-import { getModelsByMaker } from "@/lib/catalog";
+import { getModelsByMaker, getMakerBySlug } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { MakerCategoryTabs } from "@/components/catalog/maker-category-tabs";
 
@@ -10,24 +10,27 @@ export const revalidate = 86400;
 
 export async function generateMetadata({ params }: { params: Promise<{ maker: string }> }) {
   const { maker } = await params;
-  const models = await getModelsByMaker(maker);
-  if (models.length === 0) return {};
-  const makerName = models[0].maker;
+  const makerData = await getMakerBySlug(maker);
+  if (!makerData) return {};
+  const displayName = makerData.name_ja ? `${makerData.name_ja}（${makerData.name}）` : makerData.name;
   return {
-    title: `${makerName}のゴルフクラブカタログ | Waggly`,
-    description: `${makerName}の全クラブスペックカタログ。`,
+    title: `${displayName}のゴルフクラブカタログ | Waggly`,
+    description: `${displayName}の全クラブスペックカタログ。ロフト角・ライ角・クラブ長さなど詳細スペックを確認。`,
   };
 }
 
 export default async function MakerPage({ params }: { params: Promise<{ maker: string }> }) {
   const { maker } = await params;
-  const models = await getModelsByMaker(maker);
+  const [makerData, models] = await Promise.all([
+    getMakerBySlug(maker),
+    getModelsByMaker(maker),
+  ]);
 
-  if (models.length === 0) {
+  if (!makerData || models.length === 0) {
     notFound();
   }
 
-  const makerName = models[0].maker;
+  const makerName = makerData.name_ja ?? makerData.name;
 
   const allModels = models.map((m) => ({
     id: m.id,
@@ -56,7 +59,7 @@ export default async function MakerPage({ params }: { params: Promise<{ maker: s
           <BackButton fallbackHref="/catalog" />
           <div className="flex flex-col items-center gap-0.5">
             <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-            <h1 className="text-sm font-bold text-white">{makerName} クラブカタログ</h1>
+            <h1 className="text-sm font-bold text-white">{makerName}{makerData.name_ja ? ` (${makerData.name})` : ""} クラブカタログ</h1>
           </div>
         </div>
 

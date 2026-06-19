@@ -12,6 +12,7 @@ export type CatalogMaker = {
   id: string;
   slug: string;
   name: string;
+  name_ja: string | null;
   sort_order: number;
   is_visible: boolean;
 };
@@ -74,15 +75,21 @@ export async function getMakers() {
   return (data ?? []) as CatalogMaker[];
 }
 
+/** メーカー取得（slug指定） */
+export async function getMakerBySlug(makerSlug: string) {
+  const { data } = await supabase
+    .from("catalog_makers")
+    .select("*")
+    .eq("slug", makerSlug)
+    .eq("is_visible", true)
+    .single();
+  return data as CatalogMaker | null;
+}
+
 /** メーカー内モデル一覧（メーカー非表示なら空） */
 export async function getModelsByMaker(makerSlug: string) {
-  // メーカーの可視性チェック
-  const { data: maker } = await supabase
-    .from("catalog_makers")
-    .select("id, is_visible")
-    .eq("slug", makerSlug)
-    .single();
-  if (!maker?.is_visible) return [];
+  const maker = await getMakerBySlug(makerSlug);
+  if (!maker) return [];
 
   const { data } = await supabase
     .from("catalog_models")

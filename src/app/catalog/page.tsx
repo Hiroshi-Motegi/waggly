@@ -64,9 +64,10 @@ export default async function CatalogPage() {
                 <Link
                   key={maker.slug}
                   href={`/catalog/${maker.slug}`}
-                  className="flex items-center justify-center rounded-md bg-white px-4 py-4 text-center font-bold text-[#222] hover:bg-[#f5f5f5] transition-colors"
+                  className="flex flex-col items-center justify-center rounded-md bg-white px-4 py-3 text-center hover:bg-[#f5f5f5] transition-colors"
                 >
-                  {maker.name}
+                  <span className="text-base font-bold text-[#222]">{maker.name_ja ?? maker.name}</span>
+                  {maker.name_ja && <span className="text-xs text-[#8b8b8b]">{maker.name}</span>}
                 </Link>
               ))}
             </div>
