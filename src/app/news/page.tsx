@@ -38,14 +38,14 @@ export default async function NewsTopPage() {
               <p className="text-sm text-[#8b8b8b]">現在ニュースがありません</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="rounded-lg bg-white overflow-hidden">
               {news.map((item, i) => (
                 <a
                   key={i}
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col gap-1 rounded-md bg-white p-3"
+                  className={`flex flex-col gap-1 px-4 py-3 ${i < news.length - 1 ? "border-b border-[#ececec]" : ""}`}
                 >
                   <p className="text-sm font-bold text-[#006728] leading-snug">{item.title}</p>
                   <div className="flex items-center gap-2">
