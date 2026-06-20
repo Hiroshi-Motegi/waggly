@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { fetchAnnouncement, categoryLabel } from "@/lib/announcements";
 import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default async function AnnouncementDetailPage({
   params,
@@ -27,7 +28,7 @@ export default async function AnnouncementDetailPage({
         <p className="text-xs text-white mb-4">{dateStr}</p>
       </div>
       <div className="rounded-lg bg-white px-4 py-5 prose prose-sm max-w-none prose-headings:text-[#006728] prose-headings:border-l-4 prose-headings:border-[#006728] prose-headings:pl-2 prose-headings:text-base prose-p:text-[#444] prose-li:text-[#444] prose-strong:text-[#333] prose-strong:font-bold">
-        <Markdown>{item.body}</Markdown>
+        <Markdown remarkPlugins={[remarkGfm]}>{item.body}</Markdown>
       </div>
       <div className="flex justify-center mt-4">
         <a href="/announcements" className="rounded-full border border-white px-6 py-1.5 text-sm font-bold text-white">お知らせ一覧へ</a>
