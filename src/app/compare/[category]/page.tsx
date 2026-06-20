@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BackButton } from "@/components/layout/back-button";
+import { PublicMenuButton } from "@/components/layout/public-menu";
 import { getModelsByCategory, compareModelSlug } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { CompareSearch } from "@/components/catalog/compare-search";
@@ -67,16 +68,17 @@ export default async function CompareIndexPage({
       />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
+        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3 px-3">
           <BackButton fallbackHref="/compare" />
-          <div className="flex flex-col items-center gap-0.5">
-            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-            <h1 className="text-sm font-bold text-white">{label} スペック比較</h1>
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+          <div className="absolute right-3 flex items-center gap-2">
+            <Link href="/login" className="p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
+            <PublicMenuButton />
           </div>
         </div>
-
-        {/* Banner */}
-        <PromoBanner />
+        <div className="w-full bg-black/40 py-3">
+          <h1 className="text-sm font-bold text-white text-center">{label} スペック比較</h1>
+        </div>
 
         {/* Search UI */}
         <div className="w-full max-w-screen-sm px-3 pt-4">

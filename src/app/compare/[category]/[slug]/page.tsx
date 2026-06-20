@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BackButton } from "@/components/layout/back-button";
+import { PublicMenuButton } from "@/components/layout/public-menu";
 import { notFound } from "next/navigation";
 import { getCompareModels } from "@/lib/catalog";
 import { fetchRelatedNews } from "@/lib/catalog-news";
@@ -110,12 +111,16 @@ export default async function CompareVsPage({
       <CompareVisitTracker category={category} slug={slug} nameA={nameA} nameB={nameB} />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
+        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3 px-3">
           <BackButton fallbackHref={`/compare/${category}`} />
-          <div className="flex flex-col items-center gap-0.5">
-            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-            <p className="text-sm font-bold text-white">{label} スペック比較</p>
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+          <div className="absolute right-3 flex items-center gap-2">
+            <Link href="/login" className="p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
+            <PublicMenuButton />
           </div>
+        </div>
+        <div className="w-full bg-black/40 py-3">
+          <p className="text-sm font-bold text-white text-center">{label} スペック比較</p>
         </div>
 
         {/* Model cards + VS */}

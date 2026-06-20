@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BackButton } from "@/components/layout/back-button";
+import { PublicMenuButton } from "@/components/layout/public-menu";
 import { notFound } from "next/navigation";
 import { getModelsByMaker, getMakerBySlug } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
@@ -58,7 +59,10 @@ export default async function MakerPage({ params }: { params: Promise<{ maker: s
         <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3 px-3">
           <BackButton fallbackHref="/catalog" />
           <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-          <Link href="/login" className="absolute right-3 p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
+          <div className="absolute right-3 flex items-center gap-2">
+            <Link href="/login" className="p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
+            <PublicMenuButton />
+          </div>
         </div>
         <div className="w-full bg-black/40 py-3">
           <h1 className="text-sm font-bold text-white text-center">{makerName}{makerData.name_ja ? ` (${makerData.name})` : ""} クラブカタログ</h1>
