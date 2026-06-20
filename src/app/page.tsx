@@ -6,6 +6,7 @@ import { LoginButtons } from "@/components/home/login-buttons";
 import { FeatureSection } from "@/components/home/feature-section";
 import { FloatingCta } from "@/components/home/landing-cta";
 import { PublicFooter } from "@/components/public-footer";
+import { PublicMenuButton } from "@/components/layout/public-menu";
 import { fetchAnnouncements } from "@/lib/announcements";
 import { AnnouncementsSection } from "@/components/home/announcements-section";
 
@@ -24,8 +25,14 @@ export default async function HomePage() {
     <div className="relative flex flex-col" style={{ minHeight: "100dvh" }}>
       <div className="relative z-10 flex flex-col items-center w-full">
 
+        {/* Header */}
+        <div className="flex items-center justify-end gap-2 w-full px-3 py-3">
+          <Link href="/login" className="p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
+          <PublicMenuButton />
+        </div>
+
         {/* Hero */}
-        <div className="flex flex-col items-center px-8 pt-16 pb-4 w-full max-w-sm">
+        <div className="flex flex-col items-center px-8 pt-4 pb-4 w-full max-w-sm">
           <Image src="/images/witb-waggly-text.png" alt="Waggly" width={187} height={60} priority />
           <p className="mt-3 text-lg text-white font-bold tracking-wider text-center">ゴルフギアの管理をこれ一つで</p>
           <p className="mt-3 text-sm text-white/70 text-center leading-relaxed">
