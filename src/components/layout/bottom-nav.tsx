@@ -45,6 +45,12 @@ export function BottomNav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
+  // ページ遷移時にメニューを閉じる
+  useEffect(() => {
+    setMenuOpen(false);
+    setMenuVisible(false);
+  }, [pathname]);
+
   useEffect(() => {
     if (menuOpen) {
       requestAnimationFrame(() => setMenuVisible(true));
