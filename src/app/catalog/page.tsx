@@ -45,6 +45,7 @@ export default async function CatalogPage() {
             <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
             <h1 className="text-sm font-bold text-white">ゴルフクラブカタログ</h1>
           </div>
+          <Link href="/login" className="absolute right-3 text-xs text-white/70 hover:text-white transition-colors">ログイン</Link>
         </div>
 
         {/* Banner */}
