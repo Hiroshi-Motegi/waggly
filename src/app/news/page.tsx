@@ -1,8 +1,8 @@
 import Image from "next/image";
-import { ChevronLeft } from "lucide-react";
 import { fetchRelatedNews } from "@/lib/catalog-news";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { NewsTabBar } from "@/components/news/news-tab-bar";
+import { NewsListInfinite } from "@/components/news/news-list-infinite";
 
 export const revalidate = 3600;
 
@@ -13,7 +13,7 @@ export const metadata = {
 };
 
 export default async function NewsTopPage() {
-  const news = await fetchRelatedNews("クラブ 新製品", 15);
+  const news = await fetchRelatedNews("クラブ 新製品", 50);
 
   return (
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
@@ -34,36 +34,7 @@ export default async function NewsTopPage() {
 
         {/* News list */}
         <div className="w-full max-w-screen-sm px-3 pt-3">
-          {news.length === 0 ? (
-            <div className="rounded-lg bg-white p-4 text-center">
-              <p className="text-sm text-[#8b8b8b]">現在ニュースがありません</p>
-            </div>
-          ) : (
-            <div className="rounded-lg bg-white overflow-hidden">
-              {news.map((item, i) => (
-                <a
-                  key={i}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center gap-2 px-4 py-3 ${i < news.length - 1 ? "border-b border-[#ececec]" : ""}`}
-                >
-                  <div className="flex flex-col gap-1 min-w-0 flex-1">
-                    <p className="text-sm font-bold text-[#006728] leading-snug">{item.title}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-[#888]">{item.source}</span>
-                      {item.date && (
-                        <span className="text-xs text-[#aaa]">
-                          {new Date(item.date).toLocaleDateString("ja-JP")}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <ChevronLeft className="h-4 w-4 text-[#bbb] rotate-180 shrink-0" />
-                </a>
-              ))}
-            </div>
-          )}
+          <NewsListInfinite items={news} />
         </div>
 
         <div className="pb-8" />
