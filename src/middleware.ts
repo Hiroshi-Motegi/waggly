@@ -104,7 +104,7 @@ function addSecurityHeaders(response: NextResponse) {
     "img-src 'self' data: blob: https://*.supabase.co https://*.rakuten.co.jp https://*.google.com https://*.google.co.jp https://*.googletagmanager.com https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://*.adtrafficquality.google https://*.a8.net",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://*.supabase.co https://api.anthropic.com https://*.google.com https://*.google-analytics.com https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://*.adtrafficquality.google wss://*.supabase.co",
-    "frame-src https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://*.google.com",
+    "frame-src https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://*.google.com https://vercel.live",
     "object-src 'none'",
     "base-uri 'self'",
   ].join("; ");
