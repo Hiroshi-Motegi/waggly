@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
 export function generateStaticParams() {
   return [{ clubId: "_" }];
 }
 
-export async function POST(
+export const POST = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ clubId: string }> }
-) {
+) => {
   const { clubId } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -71,4 +71,4 @@ export async function POST(
 
   if (error) return supabaseError(error);
   return NextResponse.json(image, { status: 201 });
-}
+});

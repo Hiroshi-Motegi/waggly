@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
 
 function escapeCsv(value: unknown): string {
@@ -28,7 +28,7 @@ const statusLabels: Record<string, string> = { bag: "マイバッグ", reserve: 
 const accessoryCategoryLabels: Record<string, string> = { ball: "ボール", glove: "グローブ", tee: "ティー", other: "その他" };
 const accessoryStatusLabels: Record<string, string> = { active: "使用中", past: "アーカイブ" };
 
-export async function GET(request: NextRequest) {
+export const GET = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -125,4 +125,4 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ error: "Invalid type. Use: clubs, items, practice" }, { status: 400 });
-}
+});

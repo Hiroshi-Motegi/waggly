@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -45,4 +45,4 @@ export async function POST(request: NextRequest) {
 
   if (error) return supabaseError(error);
   return NextResponse.json(data);
-}
+});

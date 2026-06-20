@@ -4,8 +4,9 @@ import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { sendAdminEmail } from "@/lib/send-admin-email";
 import { buildReportEmail } from "@/lib/email-templates";
+import { withErrorHandler } from "@/lib/api-error";
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   // 1. Rate limit
   const ip = getClientIP(request);
   const { allowed } = await checkRateLimit(`report:${ip}`, 3, 60_000);
@@ -72,4 +73,4 @@ export async function POST(request: NextRequest) {
   await sendAdminEmail(subject, html);
 
   return NextResponse.json({ success: true }, { status: 201 });
-}
+});

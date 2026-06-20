@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { notFound, supabaseError } from "@/lib/api-error";
+import { notFound, supabaseError, withErrorHandler } from "@/lib/api-error";
 import type { Database } from "@/types/supabase";
 
 export function generateStaticParams() {
   return [{ id: "_" }];
 }
 
-export async function GET(
+export const GET = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   const { id } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -25,12 +25,12 @@ export async function GET(
 
   if (error) return notFound();
   return NextResponse.json(data);
-}
+});
 
-export async function PATCH(
+export const PATCH = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   const { id } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -54,12 +54,12 @@ export async function PATCH(
 
   if (error) return supabaseError(error);
   return NextResponse.json(data);
-}
+});
 
-export async function DELETE(
+export const DELETE = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   const { id } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -73,4 +73,4 @@ export async function DELETE(
 
   if (error) return supabaseError(error);
   return NextResponse.json({ success: true });
-}
+});

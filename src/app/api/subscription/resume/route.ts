@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
 import { getPayjpClient } from "@/lib/payjp";
+import { withErrorHandler } from "@/lib/api-error";
 
-export async function POST() {
+export const POST = withErrorHandler(async () => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { userId } = auth;
@@ -34,4 +35,4 @@ export async function POST() {
     .eq("id", sub.id);
 
   return NextResponse.json({ success: true });
-}
+});

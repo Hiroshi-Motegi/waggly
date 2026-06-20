@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 import type { Database } from "@/types/supabase";
 
 export function generateStaticParams() {
   return [{ planId: "_" }];
 }
 
-export async function PATCH(
+export const PATCH = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ planId: string }> }
-) {
+) => {
   const { planId } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -33,12 +33,12 @@ export async function PATCH(
 
   if (error) return supabaseError(error);
   return NextResponse.json(data);
-}
+});
 
-export async function DELETE(
+export const DELETE = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ planId: string }> }
-) {
+) => {
   const { planId } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -46,4 +46,4 @@ export async function DELETE(
 
   await supabase.from("practice_plans").delete().eq("id", planId).eq("user_id", userId);
   return NextResponse.json({ success: true });
-}
+});

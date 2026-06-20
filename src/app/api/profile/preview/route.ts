@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -68,4 +68,4 @@ export async function GET() {
   if (vf.favorite_courses !== false) publicProfile.courses = courses ?? [];
 
   return NextResponse.json(publicProfile);
-}
+});

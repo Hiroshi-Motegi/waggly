@@ -8,6 +8,7 @@ import {
   deleteUserData,
 } from "@/lib/auth-helpers";
 import { getUserDataSummary } from "@/lib/user-data-summary";
+import { withErrorHandler } from "@/lib/api-error";
 
 /**
  * POST /api/auth/link-provider
@@ -15,7 +16,7 @@ import { getUserDataSummary } from "@/lib/user-data-summary";
  * プロバイダ連携。idToken/accessToken/code をサーバー側で検証して
  * provider_sub を取得し、user_providers に行追加。
  */
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { userId } = auth;
@@ -189,14 +190,14 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ linked: true });
-}
+});
 
 /**
  * DELETE /api/auth/link-provider
  *
  * プロバイダ連携解除。
  */
-export async function DELETE(request: NextRequest) {
+export const DELETE = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { userId } = auth;
@@ -263,4 +264,4 @@ export async function DELETE(request: NextRequest) {
   }
 
   return NextResponse.json({ unlinked: true, needsRelogin });
-}
+});

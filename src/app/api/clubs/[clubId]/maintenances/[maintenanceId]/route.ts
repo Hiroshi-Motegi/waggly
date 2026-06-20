@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
 export function generateStaticParams() {
   return [{ clubId: "_", maintenanceId: "_" }];
@@ -17,10 +17,10 @@ async function verifyClubOwnership(supabase: SupabaseClient, clubId: string, use
   return !!data;
 }
 
-export async function GET(
+export const GET = withErrorHandler(async (
   _request: NextRequest,
   { params }: { params: Promise<{ clubId: string; maintenanceId: string }> }
-) {
+) => {
   const { clubId, maintenanceId } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -39,12 +39,12 @@ export async function GET(
   if (error) return supabaseError(error);
   if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(data);
-}
+});
 
-export async function PATCH(
+export const PATCH = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ clubId: string; maintenanceId: string }> }
-) {
+) => {
   const { clubId, maintenanceId } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -65,12 +65,12 @@ export async function PATCH(
   if (error) return supabaseError(error);
   if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(data);
-}
+});
 
-export async function DELETE(
+export const DELETE = withErrorHandler(async (
   _request: NextRequest,
   { params }: { params: Promise<{ clubId: string; maintenanceId: string }> }
-) {
+) => {
   const { clubId, maintenanceId } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -87,4 +87,4 @@ export async function DELETE(
 
   if (error) return supabaseError(error);
   return new NextResponse(null, { status: 204 });
-}
+});

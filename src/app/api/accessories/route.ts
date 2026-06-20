@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { createAccessorySchema } from "@/lib/api-schemas";
-import { badRequest, supabaseError } from "@/lib/api-error";
+import { badRequest, supabaseError, withErrorHandler } from "@/lib/api-error";
 import type { Database } from "@/types/supabase";
 
 
-export async function GET(request: NextRequest) {
+export const GET = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -34,9 +34,9 @@ export async function GET(request: NextRequest) {
   }));
 
   return NextResponse.json(result);
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -57,4 +57,4 @@ export async function POST(request: NextRequest) {
 
   if (error) return supabaseError(error);
   return NextResponse.json(data, { status: 201 });
-}
+});

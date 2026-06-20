@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
 const MAX_COVER_IMAGES = 5;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -20,9 +20,9 @@ export async function GET() {
 
   if (error) return supabaseError(error);
   return NextResponse.json(data);
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -75,4 +75,4 @@ export async function POST(request: NextRequest) {
 
   if (error) return supabaseError(error);
   return NextResponse.json(image, { status: 201 });
-}
+});

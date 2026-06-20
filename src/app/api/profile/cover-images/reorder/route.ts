@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { withErrorHandler } from "@/lib/api-error";
 
-export async function PATCH(request: NextRequest) {
+export const PATCH = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -30,4 +31,4 @@ export async function PATCH(request: NextRequest) {
   }
 
   return NextResponse.json({ success: true });
-}
+});

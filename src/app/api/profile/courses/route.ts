@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -15,9 +15,9 @@ export async function GET() {
 
   if (error) return supabaseError(error);
   return NextResponse.json(data);
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -70,9 +70,9 @@ export async function POST(request: NextRequest) {
 
   if (error) return supabaseError(error);
   return NextResponse.json(data, { status: 201 });
-}
+});
 
-export async function PATCH(request: NextRequest) {
+export const PATCH = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -90,9 +90,9 @@ export async function PATCH(request: NextRequest) {
   );
 
   return NextResponse.json({ ok: true });
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -107,4 +107,4 @@ export async function DELETE(request: NextRequest) {
 
   if (error) return supabaseError(error);
   return NextResponse.json({ ok: true });
-}
+});

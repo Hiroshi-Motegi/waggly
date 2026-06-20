@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
+import { withErrorHandler } from "@/lib/api-error";
 
-export async function POST(req: Request) {
+export const POST = withErrorHandler(async (req: Request) => {
   // レートリミット: IP あたり 1分5回（ブルートフォース対策）
   const ip = getClientIP(req);
   const { allowed } = await checkRateLimit(`coupon:${ip}`, 5, 60_000);
@@ -62,4 +63,4 @@ export async function POST(req: Request) {
     free_months: coupon.free_months,
     free_days: coupon.free_months > 0 ? coupon.free_months * 30 : 0,
   });
-}
+});

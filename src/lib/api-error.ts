@@ -42,6 +42,22 @@ export function internalError(error: unknown) {
   return NextResponse.json({ error: message }, { status: 500 });
 }
 
+/**
+ * Wraps an API route handler with try-catch error handling.
+ * Usage: export const GET = withErrorHandler(async (request) => { ... });
+ */
+export function withErrorHandler<
+  T extends (...args: never[]) => Promise<Response>,
+>(handler: T): T {
+  return (async (...args: Parameters<T>) => {
+    try {
+      return await handler(...args);
+    } catch (error: unknown) {
+      return internalError(error);
+    }
+  }) as T;
+}
+
 /** Wraps a Supabase error into a standardized 500 response */
 export function supabaseError(error: { message: string }) {
   console.error("[Supabase Error]", error.message);

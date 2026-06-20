@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { getSupabaseAdmin } from "@/lib/auth-helpers";
+import { withErrorHandler } from "@/lib/api-error";
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
 
@@ -35,4 +36,4 @@ export async function GET() {
   }));
 
   return NextResponse.json(result);
-}
+});

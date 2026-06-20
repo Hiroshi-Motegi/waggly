@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -21,9 +21,9 @@ export async function DELETE(request: NextRequest) {
 
   if (error) return supabaseError(error);
   return NextResponse.json({ success: true });
-}
+});
 
-export async function GET(request: NextRequest) {
+export const GET = withErrorHandler(async (request: NextRequest) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -91,4 +91,4 @@ export async function GET(request: NextRequest) {
 
   if (error) return supabaseError(error);
   return NextResponse.json({ conversationId: latest.conversation_id, messages: data });
-}
+});

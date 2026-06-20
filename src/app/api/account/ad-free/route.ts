@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, getAdminClient, unauthorized } from "@/lib/supabase/api";
+import { withErrorHandler } from "@/lib/api-error";
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { userId } = auth;
@@ -14,4 +15,4 @@ export async function GET() {
     .single();
 
   return NextResponse.json({ ad_free: data?.ad_free ?? false });
-}
+});

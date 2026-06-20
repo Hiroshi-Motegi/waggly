@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
+import { withErrorHandler } from "@/lib/api-error";
 
 export function generateStaticParams() {
   return [{ clubId: "_" }];
 }
 
-export async function GET(
+export const GET = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ clubId: string }> }
-) {
+) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -75,4 +76,4 @@ export async function GET(
     topTags,
     recentMemos: (memos ?? []).slice(0, 5),
   });
-}
+});

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { getUsageCounts, getUserPlanLimits } from "@/lib/ai/usage-counter";
+import { withErrorHandler } from "@/lib/api-error";
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { userId } = auth;
@@ -26,4 +27,4 @@ export async function GET() {
     },
     limitReached: counts.chat >= chatLimit || counts.plan >= planLimit,
   });
-}
+});

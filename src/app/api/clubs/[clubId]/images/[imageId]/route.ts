@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
 export function generateStaticParams() {
   return [{ clubId: "_", imageId: "_" }];
 }
 
-export async function DELETE(
+export const DELETE = withErrorHandler(async (
   _request: NextRequest,
   { params }: { params: Promise<{ clubId: string; imageId: string }> }
-) {
+) => {
   const { clubId, imageId } = await params;
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
@@ -33,4 +33,4 @@ export async function DELETE(
 
   if (error) return supabaseError(error);
   return NextResponse.json({ ok: true });
-}
+});

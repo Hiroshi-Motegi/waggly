@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
 interface ClubBallInput {
   club_id: string;
@@ -19,10 +19,10 @@ export function generateStaticParams() {
   return [{ sessionId: "_" }];
 }
 
-export async function GET(
+export const GET = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
-) {
+) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -56,12 +56,12 @@ export async function GET(
   }
 
   return NextResponse.json(data);
-}
+});
 
-export async function PATCH(
+export const PATCH = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
-) {
+) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -146,12 +146,12 @@ export async function PATCH(
   }
 
   return NextResponse.json(session);
-}
+});
 
-export async function DELETE(
+export const DELETE = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
-) {
+) => {
   const auth = await getApiAuth();
   if (!auth) return unauthorized();
   const { supabase, userId } = auth;
@@ -166,4 +166,4 @@ export async function DELETE(
 
   if (error) return supabaseError(error);
   return NextResponse.json({ success: true });
-}
+});

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { supabaseError } from "@/lib/api-error";
+import { supabaseError, withErrorHandler } from "@/lib/api-error";
 
-export async function GET(
+export const GET = withErrorHandler(async (
   _request: NextRequest,
   { params }: { params: Promise<{ username: string }> }
-) {
+) => {
   const { username } = await params;
 
   // 他ユーザーの clubs/accessories を読む必要があるため service_role を使用。
@@ -80,4 +80,4 @@ export async function GET(
   if (vf.favorite_courses !== false) publicProfile.courses = courses ?? [];
 
   return NextResponse.json(publicProfile);
-}
+});
