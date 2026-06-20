@@ -253,7 +253,7 @@ export default function SettingsPage() {
       <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         {processing && <ProcessingOverlay message={processing} />}
         <div className="relative z-10 flex flex-col space-y-2">
-          <PageHeader title="設定" variant="dark" />
+          <PageHeader title="設定" variant="dark" backHref="/" />
           <div className="rounded-lg bg-white p-4">
             <h3 className="text-base font-bold mb-2">アカウント</h3>
             <p className="text-sm text-[#8b8b8b] mb-3">サインインするとプロフィール公開・共有、AIコーチ、データのバックアップ・Web版との同期が使えます。</p>
@@ -420,7 +420,7 @@ export default function SettingsPage() {
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
       {processing && <ProcessingOverlay message={processing} />}
       <div className="relative z-10 flex flex-col space-y-2">
-      <PageHeader title="設定" variant="dark" />
+      <PageHeader title="設定" variant="dark" backHref="/" />
 
       {/* プロフィール */}
       <div className="rounded-lg bg-white p-3">

@@ -35,6 +35,13 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
   }, [isDark]);
 
   function handleBack() {
+    // backHrefが明示指定されている場合は常にそれを使う
+    // （OAuth遷移後など、ブラウザ履歴が外部サイトを含む場合にrouter.back()は予測不能）
+    if (backHref) {
+      router.push(backHref);
+      return;
+    }
+
     const blocked = (() => {
       try {
         const prev = sessionStorage.getItem("nav_prev_path");
@@ -45,7 +52,7 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
     })();
 
     if (blocked || window.history.length <= 1) {
-      router.push(backHref ?? "/");
+      router.push("/");
     } else {
       router.back();
     }
