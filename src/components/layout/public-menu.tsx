@@ -11,6 +11,7 @@ const menuLinks = [
   { href: "/compare", label: "クラブ比較", icon: "/icons/nav-guide.svg" },
   { href: "/news", label: "ニュース", icon: "/icons/nav-news.svg" },
   { href: "/help", label: "ご利用ガイド", icon: "/icons/nav-help.svg" },
+  { href: "/announcements", label: "お知らせ", icon: "/icons/nav-announce.svg" },
   { href: "/terms", label: "利用規約" },
   { href: "/privacy", label: "プライバシーポリシー" },
 ];

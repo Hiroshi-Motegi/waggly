@@ -22,6 +22,7 @@ const extraTabs = [
   { href: "/catalog", label: "クラブカタログ", icon: "/icons/nav-catalog.svg" },
   { href: "/compare", label: "クラブ比較", icon: "/icons/nav-guide.svg" },
   { href: "/news", label: "ニュース", icon: "/icons/nav-news.svg" },
+  { href: "/announcements", label: "お知らせ", icon: "/icons/nav-announce.svg" },
   { href: "/settings", label: "設定", icon: "/icons/nav-settings.svg" },
   { href: "/help", label: "ご利用ガイド", icon: "/icons/nav-help.svg" },
 ];
