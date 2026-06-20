@@ -83,13 +83,6 @@ export function HomeDashboard({ announcements }: { announcements: Announcement[]
           <AdBanner slot="HOME_TOP" />
         </div>
 
-        {/* お知らせ */}
-        {announcements.length > 0 && (
-          <div className="mt-4">
-            <AnnouncementsSection items={announcements} />
-          </div>
-        )}
-
         {/* Recent practice */}
         <div className="flex items-center px-1 mt-4 mb-2">
           <h3 className="flex-1 text-lg font-bold text-white">最近の練習記録</h3>
@@ -130,6 +123,14 @@ export function HomeDashboard({ announcements }: { announcements: Announcement[]
             </div>
           )}
         </div>
+
+        {/* お知らせ */}
+        {announcements.length > 0 && (
+          <div className="mt-4">
+            <AnnouncementsSection items={announcements} />
+          </div>
+        )}
+
         <div className="pb-6" />
     </div>
   );
