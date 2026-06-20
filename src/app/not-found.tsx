@@ -23,6 +23,7 @@ export default function NotFound() {
       <p className="text-sm text-white mt-1">ページが見つかりません。</p>
 
       <div className="mt-10 w-full border-t border-white/15 pt-6 px-4">
+        <p className="text-xs text-white/50 text-center mb-5">以下のページからアクセスしてください</p>
         <div className="grid grid-cols-3 gap-y-6">
           {links.map(({ href, label, icon }) => (
             <Link
