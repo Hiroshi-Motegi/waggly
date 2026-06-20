@@ -44,6 +44,11 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
 
     const timers: ReturnType<typeof setTimeout>[] = [];
 
+    // Track navigation for smart back button
+    try {
+      sessionStorage.setItem("nav_prev_path", prev);
+    } catch {}
+
     if (prev !== pathname) {
       scrollToTop();
       requestAnimationFrame(scrollToTop);
@@ -79,7 +84,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       {showInterstitial && (
         <AdInterstitial onClose={() => setShowInterstitial(false)} />
       )}
-      <div className={`flex-1 ${animClass}`}>
+      <div className={`flex-1 flex flex-col ${animClass}`}>
         {children}
       </div>
     </>

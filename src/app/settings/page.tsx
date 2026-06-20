@@ -577,11 +577,11 @@ export default function SettingsPage() {
       <div className="rounded-lg bg-white p-3">
         <div className="flex flex-col">
           {[
-            { href: "/help/contact", label: "お問い合わせ" },
+            { href: "/help", label: "ご利用ガイド" },
             { href: "/terms", label: "利用規約" },
             { href: "/privacy", label: "プライバシーポリシー" },
             { href: "/legal", label: "特定商取引法に基づく表記" },
-            { href: "/help", label: "ご利用ガイド" },
+            { href: "/help/contact", label: "お問い合わせ" },
           ].map((item, i, arr) => (
             <Link key={item.href} href={item.href}>
               <div className={`flex items-center gap-2.5 py-2.5 ${i < arr.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>

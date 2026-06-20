@@ -2,16 +2,13 @@
 
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function DeleteAccountHelpPage() {
   const { user } = useAuth();
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2">
-      <div className="relative flex flex-col space-y-2">
-        <PageHeader title="データの削除・退会について" variant="dark" />
-
+    <PublicPageLayout title="データの削除・退会について" backHref="/help">
         {/* 概要 */}
         <div className="rounded-lg bg-white p-4">
           <p className="text-base leading-relaxed">
@@ -100,7 +97,6 @@ export default function DeleteAccountHelpPage() {
             </Link>
           </div>
         )}
-      </div>
-    </div>
+    </PublicPageLayout>
   );
 }

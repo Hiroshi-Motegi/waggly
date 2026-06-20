@@ -35,8 +35,17 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
   }, [isDark]);
 
   function handleBack() {
-    if (backHref) {
-      router.push(backHref);
+    const blocked = (() => {
+      try {
+        const prev = sessionStorage.getItem("nav_prev_path");
+        if (!prev) return true;
+        if (prev === "/login" || prev.startsWith("/auth/")) return true;
+        return false;
+      } catch { return true; }
+    })();
+
+    if (blocked || window.history.length <= 1) {
+      router.push(backHref ?? "/");
     } else {
       router.back();
     }

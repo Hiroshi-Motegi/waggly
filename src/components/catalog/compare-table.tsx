@@ -56,7 +56,7 @@ export function CompareTable({ modelA, modelB, news = [] }: CompareTableProps) {
   return (
     <div className="w-full">
       {/* Main view tabs */}
-      <div className="flex justify-center gap-2.5 px-3 pt-5 pb-2.5">
+      <div className="flex justify-center gap-2.5 pt-5 pb-2.5">
         {tabs.map((tab) => (
           <button
             key={tab.value}
@@ -74,7 +74,7 @@ export function CompareTable({ modelA, modelB, news = [] }: CompareTableProps) {
 
       {/* Spec sub-tabs (項目別 only) */}
       {view === "by-spec" && availableKeys.length > 0 && (
-        <div className="flex items-center gap-1 px-3 pt-2 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-1 pt-2 overflow-x-auto scrollbar-hide">
           {availableKeys.map((key) => (
             <button
               key={key}
@@ -92,7 +92,7 @@ export function CompareTable({ modelA, modelB, news = [] }: CompareTableProps) {
       )}
 
       {/* Content area */}
-      <div className="px-3 pt-1.5 pb-3">
+      <div className="pt-1.5 pb-3">
         {view === "by-club" && (
           <ByClubView
             allNumbers={allNumbers} specKeys={specKeys}

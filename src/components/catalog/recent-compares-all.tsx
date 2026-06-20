@@ -45,7 +45,7 @@ export function RecentComparesAll() {
   if (entries.length === 0) return null;
 
   return (
-    <div className="w-full max-w-screen-sm px-3 pt-4">
+    <div className="w-full max-w-screen-sm pt-4">
       <h2 className="text-sm font-bold text-white px-1 pb-1">最近の比較</h2>
       <div className="rounded-lg bg-white overflow-hidden">
         {entries.map((e, i) => (

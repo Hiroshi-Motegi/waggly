@@ -2,21 +2,11 @@
 
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 
 export default function PlansHelpPage() {
   return (
-    <div
-      className="relative flex flex-col px-2 py-2 space-y-2"
-      style={{
-        minHeight: "100dvh",
-        paddingBottom: "var(--bottom-nav-height)",
-        marginBottom: "calc(-1 * var(--bottom-nav-height))",
-      }}
-    >
-      <div className="relative flex flex-col space-y-2">
-        <PageHeader title="プランについて" variant="dark" />
-
+    <PublicPageLayout title="プランについて" backHref="/help">
         {/* 概要 */}
         <div className="rounded-lg bg-white p-4">
           <p className="text-base leading-relaxed">
@@ -128,7 +118,6 @@ export default function PlansHelpPage() {
         <p className="text-center text-xs text-white/70 py-4">
           ご不明な点があればお問い合わせください。
         </p>
-      </div>
-    </div>
+    </PublicPageLayout>
   );
 }

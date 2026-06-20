@@ -254,7 +254,7 @@ export default function CoursesPage() {
           )}
 
           {results.pageCount > 1 && (
-            <div className="flex justify-center items-center gap-3 pt-1">
+            <div className="flex justify-center items-center gap-3 py-4">
               <button
                 disabled={currentPage <= 1 || isLoading}
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -262,7 +262,7 @@ export default function CoursesPage() {
               >
                 前へ
               </button>
-              <span className="text-sm text-[#8b8b8b]">
+              <span className="text-sm text-white">
                 {currentPage} / {results.pageCount}
               </span>
               <button

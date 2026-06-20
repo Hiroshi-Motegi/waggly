@@ -1,13 +1,10 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/page-header";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 
 export default function HelpAiPage() {
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-      <div className="relative flex flex-col space-y-2">
-        <PageHeader title="AI機能について" variant="dark" />
-
+    <PublicPageLayout title="AI機能について" backHref="/help">
         <div className="rounded-lg bg-white p-4 space-y-5 leading-relaxed">
           <section className="space-y-1">
             <h3 className="text-base font-bold text-[#006728]">AIチャット</h3>
@@ -41,7 +38,6 @@ export default function HelpAiPage() {
             </ul>
           </section>
         </div>
-      </div>
-    </div>
+    </PublicPageLayout>
   );
 }

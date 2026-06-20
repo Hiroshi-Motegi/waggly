@@ -34,7 +34,7 @@ export function MakerCategoryTabs({ models }: { models: Model[] }) {
   return (
     <>
       {/* Category tabs */}
-      <div className="flex gap-1 px-3 pt-4 w-full max-w-screen-sm overflow-x-auto scrollbar-hide">
+      <div className="flex gap-1 pt-4 w-full max-w-screen-sm overflow-x-auto scrollbar-hide">
         {availableCategories.map((cat) => (
           <button
             key={cat}
@@ -51,7 +51,7 @@ export function MakerCategoryTabs({ models }: { models: Model[] }) {
       </div>
 
       {/* Model list */}
-      <div className="w-full max-w-screen-sm px-3 pt-3 pb-4">
+      <div className="w-full max-w-screen-sm pt-3 pb-4">
         <div className="rounded-lg bg-white overflow-hidden">
           {filtered.map((m, i) => (
             <Link

@@ -140,6 +140,26 @@ export default async function HomePage() {
           ]}
         />
 
+        {/* Public links */}
+        <div className="w-full px-4 py-6 border-t border-white/15">
+          <p className="text-lg font-bold text-white tracking-wider text-center mb-2">コンテンツ</p>
+          <p className="text-sm text-white/70 text-center leading-relaxed mb-4">会員登録なしで使えるコンテンツです。国内外メーカーのクラブスペック閲覧・比較や、ゴルフクラブの最新ニュースをチェックできます。</p>
+          <div className="flex justify-center gap-4">
+            {[
+              { href: "/catalog", icon: "/icons/nav-catalog-w.svg", label: "クラブカタログ" },
+              { href: "/compare", icon: "/icons/nav-guide-w.svg", label: "クラブ比較" },
+              { href: "/news", icon: "/icons/nav-news-w.svg", label: "ニュース" },
+            ].map((item) => (
+              <Link key={item.href} href={item.href} className="flex flex-col items-center gap-2 w-24">
+                <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-black/20 border border-white/15">
+                  <Image src={item.icon} alt={item.label} width={28} height={28} />
+                </div>
+                <span className="text-xs font-bold text-white text-center">{item.label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
         {/* Guide */}
         <div className="w-full bg-black/10">
           <div className="px-4 py-4 flex items-center justify-between">
@@ -156,6 +176,16 @@ export default async function HomePage() {
               <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60 invert" style={{ width: "auto", height: "auto" }} />
             </Link>
           ))}
+        </div>
+
+        {/* SEO content */}
+        <div className="w-full px-4 py-6 border-t border-white/15">
+          <p className="text-lg font-bold text-white tracking-wider text-center mb-4">Waggly（ワグリー）について</p>
+          <div className="text-sm text-white/70 leading-relaxed space-y-2">
+            <p>Wagglyは、ゴルファーのためのギア管理・練習記録アプリです。ドライバー、アイアン、パターなどのクラブ情報をまとめて管理できるほか、練習の記録やAIコーチへの相談機能も備えています。</p>
+            <p>クラブカタログでは、国内外の主要メーカーのゴルフクラブスペックを網羅。ロフト角、ライ角、クラブ長さなどの詳細スペックを確認でき、2モデルの番手別スペック比較も可能です。</p>
+            <p>ゴルフクラブの最新ニュースやレビュー情報もお届け。新製品情報からクラブ選びのヒントまで、あなたのゴルフライフに役立つ情報を発信しています。</p>
+          </div>
         </div>
 
         {/* Login (bottom) */}

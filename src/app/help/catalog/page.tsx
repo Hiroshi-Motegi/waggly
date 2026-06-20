@@ -1,13 +1,10 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/page-header";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 
 export default function HelpCatalogPage() {
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-      <div className="relative flex flex-col space-y-2">
-        <PageHeader title="クラブカタログ・比較について" variant="dark" />
-
+    <PublicPageLayout title="クラブカタログ・比較について" backHref="/help">
         <div className="rounded-lg bg-white p-4 space-y-5 leading-relaxed">
           <section className="space-y-1">
             <h3 className="text-base font-bold text-[#006728]">クラブカタログとは</h3>
@@ -39,7 +36,6 @@ export default function HelpCatalogPage() {
             <p className="text-base">掲載されているメーカー名・ブランド名・商品名等は、各権利者の商標または登録商標です。本サービスはこれらの商標権者との提携・推奨関係を示すものではありません。</p>
           </section>
         </div>
-      </div>
-    </div>
+    </PublicPageLayout>
   );
 }

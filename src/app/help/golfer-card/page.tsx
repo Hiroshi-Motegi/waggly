@@ -1,14 +1,11 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 
 export default function GolferCardHelpPage() {
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2">
-      <div className="relative flex flex-col space-y-2">
-        <PageHeader title="ゴルファー名刺について" variant="dark" />
-
+    <PublicPageLayout title="ゴルファー名刺について" backHref="/help">
         {/* 概要 */}
         <div className="rounded-lg bg-white p-4">
           <p className="text-base leading-relaxed">
@@ -78,7 +75,6 @@ export default function GolferCardHelpPage() {
             ))}
           </div>
         </div>
-      </div>
-    </div>
+    </PublicPageLayout>
   );
 }

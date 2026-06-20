@@ -1,8 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { getMakers, getAllModels } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
-import { PublicMenuButton } from "@/components/layout/public-menu";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { CatalogSearch } from "@/components/catalog/catalog-search";
 import { FavoriteClubsList } from "@/components/catalog/favorite-clubs-list";
 
@@ -34,58 +33,40 @@ export default async function CatalogPage() {
   };
 
   return (
-    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+    <PublicPageLayout title="ゴルフクラブカタログ">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div className="flex flex-col items-center w-full">
-        {/* Header */}
-        <div className="flex items-center w-full max-w-screen-sm py-3 px-3 relative">
-          <Link href="/" className="absolute left-3 p-1 text-white/70 hover:text-white transition-colors">
-            <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </Link>
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} className="mx-auto" />
-          <div className="absolute right-3 flex items-center gap-2">
-            <Link href="/login" className="p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
-            <PublicMenuButton />
-          </div>
-        </div>
 
-        {/* Page title */}
-        <div className="w-full bg-black/40 py-3">
-          <h1 className="text-sm font-bold text-white text-center">ゴルフクラブカタログ</h1>
-        </div>
-
-        {/* Search */}
-        <div className="w-full max-w-screen-sm px-4 pt-4 pb-2">
-          <h2 className="text-sm font-bold text-white">クラブを検索</h2>
-        </div>
-        <CatalogSearch models={searchModels} />
-
-        {/* Content */}
-        <div className="w-full max-w-screen-sm px-3 pt-4 pb-4">
-          <h2 className="text-sm font-bold text-white px-1 pb-2">ブランドから選ぶ</h2>
-          {makers.length === 0 ? (
-            <p className="text-sm text-white/70">カタログデータがありません</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              {makers.map((maker) => (
-                <Link
-                  key={maker.slug}
-                  href={`/catalog/${maker.slug}`}
-                  className="flex flex-col items-center justify-center rounded-md bg-white px-4 py-3 text-center hover:bg-[#f5f5f5] transition-colors"
-                >
-                  <span className="text-base font-bold text-[#222]">{maker.name_ja ?? maker.name}</span>
-                  {maker.name_ja && <span className="text-xs text-[#8b8b8b]">{maker.name}</span>}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Favorite clubs */}
-        <FavoriteClubsList />
-
-        <PromoBanner />
+      {/* Search */}
+      <div className="w-full max-w-screen-sm pt-4 pb-2">
+        <h2 className="text-sm font-bold text-white">クラブを検索</h2>
       </div>
-    </div>
+      <CatalogSearch models={searchModels} />
+
+      {/* Content */}
+      <div className="w-full max-w-screen-sm pt-4 pb-4">
+        <h2 className="text-sm font-bold text-white px-1 pb-2">ブランドから選ぶ</h2>
+        {makers.length === 0 ? (
+          <p className="text-sm text-white/70">カタログデータがありません</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {makers.map((maker) => (
+              <Link
+                key={maker.slug}
+                href={`/catalog/${maker.slug}`}
+                className="flex flex-col items-center justify-center rounded-md bg-white px-4 py-3 text-center hover:bg-[#f5f5f5] transition-colors"
+              >
+                <span className="text-base font-bold text-[#222]">{maker.name_ja ?? maker.name}</span>
+                {maker.name_ja && <span className="text-xs text-[#8b8b8b]">{maker.name}</span>}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Favorite clubs */}
+      <FavoriteClubsList />
+
+      <PromoBanner />
+    </PublicPageLayout>
   );
 }

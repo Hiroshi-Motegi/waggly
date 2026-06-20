@@ -9,10 +9,8 @@ export function PromoBanner() {
   if (user) return null;
 
   return (
-    <>
-      <div className="w-full h-20 bg-black/10" />
-      <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-screen-sm z-40 px-2"
+    <div
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-screen-sm z-40 px-2"
         style={{ paddingBottom: "calc(var(--bottom-nav-padding) + env(safe-area-inset-bottom))" }}
       >
         <Link href="/" className="block w-full max-w-sm mx-auto rounded-2xl shadow-[0_-4px_16px_rgba(0,0,0,0.12)] overflow-hidden">
@@ -25,7 +23,6 @@ export function PromoBanner() {
             className="w-full h-auto"
           />
         </Link>
-      </div>
-    </>
+    </div>
   );
 }

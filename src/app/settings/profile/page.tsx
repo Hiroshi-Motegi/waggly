@@ -278,7 +278,7 @@ export default function ProfileSettingsPage() {
         </div>
 
         {/* Save */}
-        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
+        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-8">
           <button onClick={handleSave} disabled={isSaving} className="w-full max-w-xs rounded-full bg-white py-2.5 text-base font-bold text-[#006728] disabled:opacity-50">
             {isSaving ? "保存中..." : "保存する"}
           </button>

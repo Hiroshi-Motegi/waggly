@@ -63,7 +63,7 @@ export function HomeDashboard() {
         {/* Contents bar */}
         <div className="flex items-start rounded-[9px] bg-[#35611d] px-2 py-4 w-full mt-4">
           {[
-            { href: "/catalog", icon: "/icons/content-catalog.svg", label: "クラブカタログ" },
+            { href: "/catalog", icon: "/icons/content-catalog.svg", label: "カタログ" },
             { href: "/compare", icon: "/icons/content-compare.svg", label: "クラブ比較" },
             { href: "/coach/plans", icon: "/icons/content-practice-menu.svg", label: "練習メニュー" },
             { href: "/coach", icon: "/icons/content-ai-chat.svg", label: "AI相談" },
@@ -121,6 +121,7 @@ export function HomeDashboard() {
             </div>
           )}
         </div>
+        <div className="pb-6" />
     </div>
   );
 }

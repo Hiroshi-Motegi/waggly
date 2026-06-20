@@ -1,13 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BackButton } from "@/components/layout/back-button";
-import { PublicMenuButton } from "@/components/layout/public-menu";
 import { notFound } from "next/navigation";
 import { getCompareModels } from "@/lib/catalog";
 import { fetchRelatedNews } from "@/lib/catalog-news";
 import { CompareTable } from "@/components/catalog/compare-table";
 import { CompareVisitTracker } from "@/components/catalog/compare-visit-tracker";
 import { PromoBanner } from "@/components/catalog/promo-banner";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 
 export const revalidate = 86400;
 
@@ -103,31 +102,21 @@ export default async function CompareVsPage({
   };
 
   return (
-    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <PublicPageLayout title={`${label} スペック比較`} backHref={`/compare/${category}`}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <CompareVisitTracker category={category} slug={slug} nameA={nameA} nameB={nameB} />
-      <div className="flex flex-col items-center w-full">
-        {/* Header */}
-        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3 px-3">
-          <BackButton fallbackHref={`/compare/${category}`} />
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-          <div className="absolute right-3 flex items-center gap-2">
-            <Link href="/login" className="p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
-            <PublicMenuButton />
-          </div>
-        </div>
-        <div className="w-full bg-black/40 py-3">
-          <p className="text-sm font-bold text-white text-center">{label} スペック比較</p>
-        </div>
 
         {/* Model cards + VS */}
-        <div className="flex flex-col items-center gap-1.5 px-5 py-5 w-full max-w-screen-sm bg-black/20">
+        <div className="flex flex-col items-center gap-1.5 px-5 py-5 w-full max-w-screen-sm bg-black/20 rounded-lg">
           <ModelCard model={modelA} label={label} />
           <p className="text-lg font-bold text-white">VS</p>
           <ModelCard model={modelB} label={label} />
+          <Link
+            href={`/compare/${category}`}
+            className="mt-2 w-full text-center text-sm text-white py-2 border border-white rounded-md"
+          >
+            比較対象を変更する
+          </Link>
         </div>
 
         {/* App promo banner (hidden for logged-in users) */}
@@ -139,10 +128,9 @@ export default async function CompareVsPage({
         </div>
 
         {/* Disclaimer */}
-        <p className="w-full max-w-screen-sm px-4 py-6 text-left text-xs text-white leading-relaxed">
+        <p className="w-full max-w-screen-sm py-6 text-left text-xs text-white leading-relaxed">
           ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
         </p>
-      </div>
-    </div>
+    </PublicPageLayout>
   );
 }

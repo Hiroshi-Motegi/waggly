@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PageHeader } from "@/components/layout/page-header";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { validateForm, type ValidationSchema } from "@/lib/form-validation";
 import { Turnstile } from "@marsidev/react-turnstile";
 
@@ -37,12 +37,11 @@ function ReportPageInner() {
 
   if (!username) {
     return (
-      <div className="relative flex flex-col px-2 py-2 space-y-2">
-        <PageHeader title="通報" variant="dark" />
+      <PublicPageLayout title="通報">
         <div className="rounded-lg bg-white p-4 text-center">
           <p className="text-base text-[#8b8b8b]">通報対象が指定されていません。</p>
         </div>
-      </div>
+      </PublicPageLayout>
     );
   }
 
@@ -99,12 +98,10 @@ function ReportPageInner() {
   };
 
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2">
-      <PageHeader title="通報" variant="dark" />
-
+    <PublicPageLayout title="通報">
       <form onSubmit={handleSubmit} className="space-y-2">
         {/* 通報対象 */}
-        <div className="flex flex-col gap-0.5 rounded-lg bg-white p-3 py-1">
+        <div className="flex flex-col gap-0.5 rounded-lg bg-white p-3">
           <span className="text-sm flex items-center">通報対象ユーザー</span>
           <p className="text-base font-bold">{username}</p>
         </div>
@@ -131,7 +128,9 @@ function ReportPageInner() {
 
           {/* 詳細 */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-sm flex items-center">詳細（任意）</span>
+            <span className="text-sm flex items-center">
+              詳細 <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">任意</span>
+            </span>
             <textarea
               value={form.detail}
               onChange={(e) => updateField("detail", e.target.value)}
@@ -142,7 +141,9 @@ function ReportPageInner() {
 
           {/* メールアドレス */}
           <div className="flex flex-col gap-0.5 py-1">
-            <span className="text-sm flex items-center">メールアドレス（任意）</span>
+            <span className="text-sm flex items-center">
+              メールアドレス <span className="ml-auto text-[10px] text-[#8b8b8b] border border-[#c4c4c4] rounded px-1 py-px">任意</span>
+            </span>
             <input
               type="email"
               value={form.reporter_email}
@@ -153,7 +154,7 @@ function ReportPageInner() {
           </div>
 
           {/* Turnstile */}
-          <div className="flex justify-center">
+          <div className="flex justify-center py-3">
             <Turnstile
               siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
               onSuccess={setTurnstileToken}
@@ -169,7 +170,7 @@ function ReportPageInner() {
         </div>
 
         {/* 送信ボタン */}
-        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
+        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-8">
           <button
             type="submit"
             disabled={submitting}
@@ -179,7 +180,7 @@ function ReportPageInner() {
           </button>
         </div>
       </form>
-    </div>
+    </PublicPageLayout>
   );
 }
 

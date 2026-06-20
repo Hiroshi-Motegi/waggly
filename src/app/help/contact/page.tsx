@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/layout/page-header";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { useProfile } from "@/hooks/use-profile";
 import { validateForm, type ValidationSchema } from "@/lib/form-validation";
 import { Turnstile } from "@marsidev/react-turnstile";
@@ -107,9 +107,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2">
-      <PageHeader title="お問い合わせ" variant="dark" />
-
+    <PublicPageLayout title="お問い合わせ" backHref="/help">
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
           {/* 名前 (未ログイン時) or ニックネーム表示 (ログイン時) */}
@@ -183,7 +181,7 @@ export default function ContactPage() {
           </div>
 
           {/* Turnstile */}
-          <div className="flex justify-center">
+          <div className="flex justify-center py-3">
             <Turnstile
               siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
               onSuccess={setTurnstileToken}
@@ -199,7 +197,7 @@ export default function ContactPage() {
         </div>
 
         {/* 送信ボタン */}
-        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-2">
+        <div className="flex flex-col items-center gap-2 px-6 pt-4 pb-8">
           <button
             type="submit"
             disabled={submitting}
@@ -209,6 +207,6 @@ export default function ContactPage() {
           </button>
         </div>
       </form>
-    </div>
+    </PublicPageLayout>
   );
 }

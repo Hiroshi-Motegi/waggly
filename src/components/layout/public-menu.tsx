@@ -3,18 +3,20 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const menuLinks = [
   { href: "/", label: "HOME", icon: "/icons/nav-home.svg" },
   { href: "/catalog", label: "クラブカタログ", icon: "/icons/nav-catalog.svg" },
   { href: "/compare", label: "クラブ比較", icon: "/icons/nav-guide.svg" },
   { href: "/news", label: "ニュース", icon: "/icons/nav-news.svg" },
-  { href: "/help", label: "ヘルプ", icon: "/icons/nav-help.svg" },
+  { href: "/help", label: "ご利用ガイド", icon: "/icons/nav-help.svg" },
   { href: "/terms", label: "利用規約" },
   { href: "/privacy", label: "プライバシーポリシー" },
 ];
 
 export function PublicMenuButton() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -59,7 +61,7 @@ export function PublicMenuButton() {
               </nav>
               <div className="px-5 mt-6">
                 <Link
-                  href="/login"
+                  href={`/login?redirect=${encodeURIComponent(pathname)}`}
                   onClick={close}
                   className="flex h-11 items-center justify-center rounded-full bg-white/10 border border-white/20 text-sm text-white font-medium"
                 >

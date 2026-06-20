@@ -1,13 +1,10 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/page-header";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 
 export default function PrivacyPage() {
   return (
-    <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-      <div className="relative z-10 flex flex-col space-y-2">
-      <PageHeader title="プライバシーポリシー" variant="dark" />
-
+    <PublicPageLayout title="プライバシーポリシー">
       <div className="rounded-lg bg-white p-4 space-y-5 leading-relaxed">
         <p className="text-sm text-[#8b8b8b]">最終更新日: 2026年6月15日</p>
 
@@ -88,7 +85,6 @@ export default function PrivacyPage() {
           <img src="/images/email.svg" alt="メールアドレス" width={210} height={24} className="inline-block" />
         </section>
       </div>
-      </div>
-    </div>
+    </PublicPageLayout>
   );
 }

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BackButton } from "@/components/layout/back-button";
-import { PublicMenuButton } from "@/components/layout/public-menu";
 import { notFound } from "next/navigation";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { getModelDetail, getModelsByCategory, compareModelSlug } from "@/lib/catalog";
 import { fetchRelatedNews } from "@/lib/catalog-news";
 import { SpecTable } from "@/components/catalog/spec-table";
@@ -85,24 +84,11 @@ export default async function ModelDetailPage({
   };
 
   return (
-    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+    <PublicPageLayout title="ゴルフクラブカタログ" backHref={`/catalog/${maker}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div className="flex flex-col items-center w-full">
-        {/* Header */}
-        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3 px-3">
-          <BackButton fallbackHref={`/catalog/${maker}`} />
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-          <div className="absolute right-3 flex items-center gap-2">
-            <Link href="/login" className="p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
-            <PublicMenuButton />
-          </div>
-        </div>
-        <div className="w-full bg-black/40 py-3">
-          <p className="text-sm font-bold text-white text-center">ゴルフクラブカタログ</p>
-        </div>
 
         {/* Model header card */}
-        <div className="w-full max-w-screen-sm px-3 pt-4">
+        <div className="w-full max-w-screen-sm">
           <div className="rounded-md bg-white p-4 relative">
             <div className="absolute top-3 right-3">
               <FavoriteClubButton modelId={model.id} />
@@ -195,7 +181,7 @@ export default async function ModelDetailPage({
 
         {/* Spec table */}
         {model.catalog_specs.length > 0 && (
-          <div className="w-full max-w-screen-sm px-3 pt-4">
+          <div className="w-full max-w-screen-sm pt-4">
             <h2 className="text-sm font-bold text-white mb-2">スペック詳細</h2>
             <div className="rounded-md overflow-hidden">
               <SpecTable specs={model.catalog_specs} category={model.category} />
@@ -205,7 +191,7 @@ export default async function ModelDetailPage({
 
         {/* Alpen buy link */}
         {model.alpen_pid && (
-          <div className="w-full max-w-screen-sm px-3 pt-4">
+          <div className="w-full max-w-screen-sm pt-4">
             <div className="rounded-md bg-white p-4 flex items-center gap-4">
               <AlpenAdImage
                 alpenPid={model.alpen_pid}
@@ -221,7 +207,7 @@ export default async function ModelDetailPage({
 
         {/* Related news */}
         {news.length > 0 && (
-          <div className="w-full max-w-screen-sm px-3 pt-4">
+          <div className="w-full max-w-screen-sm pt-4">
             <h2 className="text-sm font-bold text-white mb-2">関連ニュース</h2>
             <div className="flex flex-col gap-2">
               {news.map((item, i) => (
@@ -249,7 +235,7 @@ export default async function ModelDetailPage({
 
         {/* Compare links */}
         {compareLinks.length > 0 && (
-          <div className="w-full max-w-screen-sm px-3 pt-4">
+          <div className="w-full max-w-screen-sm pt-4">
             <h2 className="text-sm font-bold text-white mb-2">他モデルと比較する</h2>
             <div className="flex flex-wrap gap-2">
               {compareLinks.map((link) => (
@@ -266,12 +252,11 @@ export default async function ModelDetailPage({
         )}
 
         {/* Disclaimer */}
-        <p className="w-full max-w-screen-sm px-4 py-6 text-left text-xs text-white leading-relaxed">
+        <p className="w-full max-w-screen-sm py-6 text-left text-xs text-white leading-relaxed">
           ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
         </p>
 
-        <PromoBanner />
-      </div>
-    </div>
+      <PromoBanner />
+    </PublicPageLayout>
   );
 }

@@ -47,7 +47,7 @@ export function CatalogSearch({ models }: { models: ModelOption[] }) {
   }
 
   return (
-    <div className="relative w-full max-w-screen-sm px-3">
+    <div className="relative w-full max-w-screen-sm">
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#aaa]" />

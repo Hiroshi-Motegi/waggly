@@ -23,7 +23,7 @@ const extraTabs = [
   { href: "/compare", label: "クラブ比較", icon: "/icons/nav-guide.svg" },
   { href: "/news", label: "ニュース", icon: "/icons/nav-news.svg" },
   { href: "/settings", label: "設定", icon: "/icons/nav-settings.svg" },
-  { href: "/help", label: "ヘルプ", icon: "/icons/nav-help.svg" },
+  { href: "/help", label: "ご利用ガイド", icon: "/icons/nav-help.svg" },
 ];
 
 function NavItem({ href, label, icon, isActive, onClick }: {
@@ -83,7 +83,7 @@ export function BottomNav() {
         className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-50 px-2 ${isNative() ? "" : "max-w-screen-sm"}`}
         style={{ paddingBottom: "calc(var(--bottom-nav-padding) + env(safe-area-inset-bottom))" }}
       >
-        <nav className="bg-white rounded-2xl shadow-[0_-4px_16px_rgba(0,0,0,0.12)] overflow-hidden">
+        <nav className="bg-white rounded-lg shadow-[0_-4px_16px_rgba(0,0,0,0.12)] overflow-hidden">
           {/* Main row */}
           <div className={`flex items-center justify-around ${menuOpen ? "pt-3" : "pt-0.5"}`}>
             {mainTabs.map((tab) => (
@@ -137,9 +137,16 @@ export function BottomNav() {
               <button
                 onClick={async () => {
                   closeMenu();
+                  const isPublic = ["/catalog", "/compare", "/news", "/help", "/terms", "/privacy", "/legal"].some(
+                    (p) => pathname === p || pathname.startsWith(p + "/")
+                  );
                   await createClient().auth.signOut();
-                  setUser?.(null);
-                  router.push("/");
+                  if (isPublic) {
+                    window.location.reload();
+                  } else {
+                    setUser?.(null);
+                    router.push("/");
+                  }
                 }}
                 className="flex flex-col items-center gap-0.5 py-1.5"
                 style={{ width: "20%" }}

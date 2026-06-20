@@ -49,7 +49,7 @@ export function FavoriteClubsList() {
   const display = favorites.slice(0, 10);
 
   return (
-    <div className="w-full max-w-screen-sm px-3 pt-4">
+    <div className="w-full max-w-screen-sm pt-4">
       <div className="flex items-center px-1 mb-2">
         <h2 className="flex-1 text-sm font-bold text-white">お気に入りクラブ</h2>
         {favorites.length > 10 && (

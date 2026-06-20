@@ -9,7 +9,7 @@ const links = [
   { href: "/settings/share", label: "マイ名刺", icon: "/icons/nav-card-w.svg" },
   { href: "/coach", label: "AI相談", icon: "/icons/nav-ai-w.svg" },
   { href: "/catalog", label: "クラブカタログ", icon: "/icons/nav-catalog-w.svg" },
-  { href: "/help", label: "ヘルプ", icon: "/icons/nav-help-w.svg" },
+  { href: "/help", label: "ご利用ガイド", icon: "/icons/nav-help-w.svg" },
 ];
 
 export default function NotFound() {

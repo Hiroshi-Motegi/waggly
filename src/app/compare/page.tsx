@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PromoBanner } from "@/components/catalog/promo-banner";
-import { PublicMenuButton } from "@/components/layout/public-menu";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { CompareSearchGlobal } from "@/components/catalog/compare-search-global";
 import { RecentComparesAll } from "@/components/catalog/recent-compares-all";
 import { getModelsByCategory, compareModelSlug } from "@/lib/catalog";
@@ -54,35 +54,19 @@ export default async function CompareTopPage() {
   };
 
   return (
-    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+    <PublicPageLayout title="ゴルフクラブ比較">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="flex flex-col items-center w-full">
-        {/* Header */}
-        <div className="flex items-center w-full max-w-screen-sm py-3 px-3 relative">
-          <Link href="/" className="absolute left-3 p-1 text-white/70 hover:text-white transition-colors">
-            <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </Link>
-          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} className="mx-auto" />
-          <div className="absolute right-3 flex items-center gap-2">
-            <Link href="/login" className="p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
-            <PublicMenuButton />
-          </div>
-        </div>
-
-        <div className="w-full bg-black/40 py-3">
-          <h1 className="text-sm font-bold text-white text-center">ゴルフクラブ比較</h1>
-        </div>
 
         {/* Search */}
-        <div className="w-full max-w-screen-sm px-3 pt-4">
+        <div className="w-full max-w-screen-sm pt-4">
           <CompareSearchGlobal models={allModelOptions} />
         </div>
 
         {/* Category cards */}
-        <div className="w-full max-w-screen-sm px-3 pt-4 pb-2">
+        <div className="w-full max-w-screen-sm pt-4 pb-2">
           <div className="grid grid-cols-2 gap-3">
             {counts.map((cat) => (
               <Link
@@ -104,7 +88,7 @@ export default async function CompareTopPage() {
         <RecentComparesAll />
 
         {/* How to use */}
-        <div className="w-full max-w-screen-sm px-3 pt-4">
+        <div className="w-full max-w-screen-sm pt-4">
           <div className="rounded-xl bg-white/10 p-4">
             <h2 className="text-base font-bold text-white mb-2">使い方</h2>
             <ol className="text-sm text-white/80 space-y-1.5 list-decimal list-inside">
@@ -116,12 +100,11 @@ export default async function CompareTopPage() {
         </div>
 
         {/* Disclaimer */}
-        <p className="w-full max-w-screen-sm px-4 py-6 text-left text-xs text-white leading-relaxed">
+        <p className="w-full max-w-screen-sm py-6 text-left text-xs text-white leading-relaxed">
           ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
         </p>
 
-        <PromoBanner />
-      </div>
-    </div>
+      <PromoBanner />
+    </PublicPageLayout>
   );
 }

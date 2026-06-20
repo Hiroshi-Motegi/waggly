@@ -1,8 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
-import { BackButton } from "@/components/layout/back-button";
 import { getAllModels } from "@/lib/catalog";
+import { PublicPageLayout } from "@/components/layout/public-page-layout";
 
 export const revalidate = 86400;
 
@@ -50,26 +49,17 @@ export default async function CatalogSearchPage({
   }
 
   return (
-    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
-      <div className="flex flex-col items-center w-full">
-        {/* Header */}
-        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
-          <BackButton fallbackHref="/catalog" />
-          <div className="flex flex-col items-center gap-0.5">
-            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-            <p className="text-sm font-bold text-white">検索結果</p>
-          </div>
-        </div>
+    <PublicPageLayout title="検索結果" backHref="/catalog">
 
         {/* Query */}
-        <div className="w-full max-w-screen-sm px-3 pt-2 pb-1">
+        <div className="w-full max-w-screen-sm pt-2 pb-1">
           <p className="text-sm text-white">
             「<span className="font-bold">{query}</span>」{results.length > 0 ? `${results.length}件` : ""}
           </p>
         </div>
 
         {/* Results */}
-        <div className="w-full max-w-screen-sm px-3 pt-2 pb-4">
+        <div className="w-full max-w-screen-sm pt-2 pb-4">
           {results.length === 0 ? (
             <div className="rounded-lg bg-white p-4 text-center">
               <p className="text-sm text-[#8b8b8b]">
@@ -96,7 +86,6 @@ export default async function CatalogSearchPage({
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </PublicPageLayout>
   );
 }
