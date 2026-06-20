@@ -24,8 +24,7 @@ export function HomeDashboard() {
   const { sessions } = usePracticeSessions();
 
   return (
-    <div className="relative" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
-      <div className="relative flex flex-col px-2 pt-2 pb-4">
+    <div className="relative flex flex-col px-2 pt-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         {/* Logo */}
         <div className="flex items-center justify-center w-full relative h-14">
           <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={151} height={46} priority style={{ width: 151, height: 46 }} />
@@ -62,18 +61,21 @@ export function HomeDashboard() {
         </div>
 
         {/* Contents bar */}
-        <div className="flex gap-3 items-start rounded-[9px] bg-[#35611d] px-3 py-4 w-full mt-4">
-          {[
-            { href: "/catalog", icon: "/icons/content-catalog.svg", label: "クラブカタログ" },
-            { href: "/compare", icon: "/icons/content-compare.svg", label: "クラブ比較" },
-            { href: "/coach/plans", icon: "/icons/content-practice-menu.svg", label: "練習メニュー" },
-            { href: "/coach", icon: "/icons/content-ai-chat.svg", label: "AI相談" },
-          ].map((item) => (
-            <Link key={item.href} href={item.href} className="flex flex-1 flex-col items-center gap-[3px]">
-              <Image src={item.icon} alt={item.label} width={32} height={32} />
-              <span className="text-[10px] font-medium text-white text-center">{item.label}</span>
-            </Link>
-          ))}
+        <div className="overflow-x-auto rounded-[9px] bg-[#35611d] mt-4 -mx-1 scrollbar-hide">
+          <div className="flex gap-3 items-start px-3 py-4" style={{ width: "calc(100% + 2rem)" }}>
+            {[
+              { href: "/catalog", icon: "/icons/content-catalog.svg", label: "クラブカタログ" },
+              { href: "/compare", icon: "/icons/content-compare.svg", label: "クラブ比較" },
+              { href: "/coach/plans", icon: "/icons/content-practice-menu.svg", label: "練習メニュー" },
+              { href: "/coach", icon: "/icons/content-ai-chat.svg", label: "AI相談" },
+              { href: "/news", icon: "/icons/nav-news-w.svg", label: "ニュース" },
+            ].map((item) => (
+              <Link key={item.href} href={item.href} className="flex flex-col items-center gap-[3px] shrink-0" style={{ width: "calc((100% - 3rem) / 4.5)" }}>
+                <Image src={item.icon} alt={item.label} width={32} height={32} />
+                <span className="text-[10px] font-medium text-white text-center">{item.label}</span>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* 広告バナー */}
@@ -121,7 +123,6 @@ export function HomeDashboard() {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }
