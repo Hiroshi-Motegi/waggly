@@ -138,7 +138,7 @@ export function BottomNav() {
               <button
                 onClick={async () => {
                   closeMenu();
-                  const isPublic = ["/catalog", "/compare", "/news", "/help", "/terms", "/privacy", "/legal"].some(
+                  const isPublic = ["/catalog", "/compare", "/news", "/help", "/terms", "/privacy", "/legal", "/announcements"].some(
                     (p) => pathname === p || pathname.startsWith(p + "/")
                   );
                   await createClient().auth.signOut();
