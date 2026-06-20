@@ -47,6 +47,12 @@ export function BottomNav() {
   useEffect(() => {
     if (menuOpen) {
       requestAnimationFrame(() => setMenuVisible(true));
+      const onScroll = () => {
+        setMenuVisible(false);
+        setTimeout(() => setMenuOpen(false), 200);
+      };
+      window.addEventListener("scroll", onScroll, { once: true, passive: true });
+      return () => window.removeEventListener("scroll", onScroll);
     }
   }, [menuOpen]);
 
