@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect } from "react";
 
 const links = [
   { href: "/", label: "ホーム" },
@@ -14,33 +11,16 @@ const links = [
   { href: "/help", label: "ヘルプ" },
 ];
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  useEffect(() => {
-    console.error("Unhandled error:", error);
-  }, [error]);
-
+export default function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-16 text-center">
       <p className="text-[96px] font-thin leading-none text-white tracking-[0.15em] select-none">
-        500
+        404
       </p>
-      <p className="text-2xl font-thin text-white mt-2 tracking-[0.2em]">Server Error</p>
-      <p className="text-sm text-white/60 mt-1">エラーが発生しました。</p>
+      <p className="text-2xl font-thin text-white mt-2 tracking-[0.2em]">Not Found</p>
+      <p className="text-sm text-white mt-1">ページが見つかりません。</p>
 
-      <button
-        onClick={reset}
-        className="mt-6 rounded-full border border-white/30 px-5 py-1.5 text-sm text-white/70 hover:text-white hover:border-white/60 transition-colors"
-      >
-        再試行
-      </button>
-
-      <div className="mt-8 w-full max-w-sm border-t border-white/15 pt-6">
+      <div className="mt-10 w-full max-w-sm border-t border-white/15 pt-6">
         <div className="grid grid-cols-2 gap-x-6 gap-y-3">
           {links.map(({ href, label }) => (
             <Link
