@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
   let authUserId: string;
 
   // LINE 専用の auth user (email/password) を作成/取得
-  const { data: created } = await supabaseAdmin.auth.admin.createUser({
+  const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
@@ -88,11 +88,13 @@ export async function POST(request: NextRequest) {
   if (created?.user) {
     authUserId = created.user.id;
   } else {
+    console.error("[line-oauth] createUser failed:", createError);
     // 既存 → signInWithPassword で取得
-    const { data: signIn } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+    const { data: signIn, error: signInError } = await supabaseAdmin.auth.signInWithPassword({ email, password });
     if (signIn?.user) {
       authUserId = signIn.user.id;
     } else {
+      console.error("[line-oauth] signInWithPassword failed:", signInError);
       return NextResponse.json({ error: "LINE auth failed" }, { status: 500 });
     }
   }
