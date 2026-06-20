@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -15,9 +15,10 @@ export function FeatureSection({ icon, title, photo, photoSide, screenshots, des
   details: { heading: string; src: string; text: string }[];
 }) {
   const [open, setOpen] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const isRight = photoSide === "right";
   return (
-    <div className="w-full mb-10">
+    <div ref={sectionRef} className="w-full mb-10">
       {/* Key visual */}
       <div className={`relative ${isRight ? "ml-5 rounded-l-2xl" : "mr-5 rounded-r-2xl"} overflow-hidden h-[254px]`}>
         <img src={photo} alt={title} className="w-full h-full object-cover" />
@@ -74,7 +75,7 @@ export function FeatureSection({ icon, title, photo, photoSide, screenshots, des
               </div>
             ))}
           </div>
-          <button onClick={() => setOpen(false)} className="mt-4 flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2 rounded-full border border-white bg-black/30 text-white text-base font-medium">
+          <button onClick={() => { setOpen(false); setTimeout(() => { const el = sectionRef.current; if (el) { const y = el.getBoundingClientRect().top + window.scrollY - 20; window.scrollTo({ top: y, behavior: "smooth" }); } }, 0); }} className="mt-4 flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2 rounded-full border border-white bg-black/30 text-white text-base font-medium">
             閉じる <ChevronUp className="h-4 w-4" />
           </button>
         </>
