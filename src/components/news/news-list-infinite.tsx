@@ -49,12 +49,20 @@ export function NewsListInfinite({ items }: { items: NewsItem[] }) {
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex items-center gap-2 px-4 py-3 ${i < visible.length - 1 ? "border-b border-[#ececec]" : ""}`}
+            className={`flex items-center gap-3 px-4 py-3 ${i < visible.length - 1 ? "border-b border-[#ececec]" : ""}`}
           >
+            {item.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.imageUrl}
+                alt=""
+                className="w-16 h-16 rounded-md object-cover shrink-0 bg-[#f0f0f0]"
+              />
+            )}
             <div className="flex flex-col gap-1 min-w-0 flex-1">
-              <p className="text-sm font-bold text-[#006728] leading-snug">{item.title}</p>
+              <p className="text-sm font-bold text-[#006728] leading-snug line-clamp-3">{item.title}</p>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[#888]">{item.source}</span>
+                {item.source && <span className="text-xs text-[#888]">{item.source}</span>}
                 {item.date && (
                   <span className="text-xs text-[#aaa]">
                     {new Date(item.date).toLocaleDateString("ja-JP")}
