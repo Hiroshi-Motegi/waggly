@@ -6,13 +6,14 @@ export { categoryLabel, categoryColor } from "@/lib/announcements-types";
 
 export async function fetchAnnouncements(limit = 5): Promise<Announcement[]> {
   const supabase = await createClient();
-  const { data } = await (supabase as any)
+  const { data, error } = await (supabase as any)
     .from("announcements")
     .select("id, title, body, published_at, category")
     .eq("is_published", true)
     .lte("published_at", new Date().toISOString())
     .order("published_at", { ascending: false })
     .limit(limit);
+  if (error) console.error("fetchAnnouncements error:", error);
   return (data as Announcement[]) ?? [];
 }
 
