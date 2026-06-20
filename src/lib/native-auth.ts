@@ -87,8 +87,8 @@ export async function signInWithLine(): Promise<NativeSignInResult> {
     const result = await LineLogin.login({ channelId });
 
     // LINE API でセッション作成
-    const { apiFetch: directFetch } = await import("@/lib/api-client");
-    const lineRes = await fetch(`https://waggly.jp/api/auth/line`, {
+    const { apiFetch } = await import("@/lib/api-client");
+    const lineRes = await apiFetch("/api/auth/line", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

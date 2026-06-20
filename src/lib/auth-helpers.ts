@@ -163,25 +163,27 @@ export async function verifyLineAccessToken(
 }
 
 /**
- * Google IDトークンを検証してsubを取得する。
+ * Google IDトークンをローカルで検証してsubを取得する（jose使用）。
  */
 export async function verifyGoogleIdToken(
   idToken: string
 ): Promise<{ sub: string; email?: string; name?: string; picture?: string } | null> {
   try {
-    const res = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`
+    const { createRemoteJWKSet, jwtVerify } = await import("jose");
+    const JWKS = createRemoteJWKSet(
+      new URL("https://www.googleapis.com/oauth2/v3/certs")
     );
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.sub) return null;
-    // aud検証: 自アプリ発行のトークンのみ受け付ける
-    if (data.aud !== process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) return null;
+    const { payload } = await jwtVerify(idToken, JWKS, {
+      issuer: ["https://accounts.google.com", "accounts.google.com"],
+      audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    });
+    const sub = payload.sub;
+    if (!sub) return null;
     return {
-      sub: data.sub,
-      email: data.email,
-      name: data.name,
-      picture: data.picture,
+      sub,
+      email: payload.email as string | undefined,
+      name: payload.name as string | undefined,
+      picture: payload.picture as string | undefined,
     };
   } catch {
     return null;

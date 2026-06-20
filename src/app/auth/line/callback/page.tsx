@@ -13,10 +13,19 @@ export default function LineCallbackPage() {
     async function handleCallback() {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
+      const stateParam = params.get("state");
       const error = params.get("error");
       const isLinking = params.has("link");
 
       if (error || !code) {
+        window.location.href = "/?error=line_auth_failed";
+        return;
+      }
+
+      // CSRF: validate state
+      const storedState = sessionStorage.getItem("line_oauth_state");
+      sessionStorage.removeItem("line_oauth_state");
+      if (!stateParam || stateParam !== storedState) {
         window.location.href = "/?error=line_auth_failed";
         return;
       }

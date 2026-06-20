@@ -234,6 +234,14 @@ export async function PUT(request: NextRequest) {
   }
 
   if (choice === "local" && localData) {
+    const MAX_ITEMS = 500;
+    if (
+      (localData.clubs?.length ?? 0) > MAX_ITEMS ||
+      (localData.accessories?.length ?? 0) > MAX_ITEMS ||
+      (localData.practiceSessions?.length ?? 0) > MAX_ITEMS
+    ) {
+      return NextResponse.json({ error: "Local data exceeds maximum allowed size" }, { status: 400 });
+    }
     await deleteUserData(supabase, existingUserId);
     await insertLocalData(supabase, existingUserId, localData);
   }

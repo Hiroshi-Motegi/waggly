@@ -3,7 +3,8 @@ import crypto from "crypto";
 import { getSupabaseAdmin, verifyLineIdToken, uploadAvatarFromUrl } from "@/lib/auth-helpers";
 
 function derivePassword(lineUserId: string): string {
-  const secret = process.env.LINE_PASSWORD_SECRET ?? process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const secret = process.env.LINE_PASSWORD_SECRET;
+  if (!secret) throw new Error("LINE_PASSWORD_SECRET is not set");
   return crypto
     .createHmac("sha256", secret)
     .update(lineUserId)

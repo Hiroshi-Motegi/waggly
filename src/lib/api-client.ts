@@ -453,7 +453,8 @@ async function routeLocal(
   // PATCH /api/practice/:id
   if (match && method === "PATCH") {
     const sessionId = match[1];
-    const fields = Object.keys(body).filter((k) => !["id", "clubs"].includes(k));
+    const PRACTICE_SESSION_COLUMNS = new Set(["practiced_at", "location", "total_balls", "memo", "rating"]);
+    const fields = Object.keys(body).filter((k) => PRACTICE_SESSION_COLUMNS.has(k));
     if (fields.length > 0) {
       const sets = fields.map((k) => `${k} = ?`).join(", ");
       const vals = fields.map((k) => body[k]);
