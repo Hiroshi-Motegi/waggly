@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 const menuLinks = [
+  { href: "/", label: "HOME", icon: "/icons/nav-home.svg" },
   { href: "/catalog", label: "クラブカタログ", icon: "/icons/nav-catalog.svg" },
   { href: "/compare", label: "クラブ比較", icon: "/icons/nav-guide.svg" },
   { href: "/news", label: "ニュース", icon: "/icons/nav-news.svg" },
