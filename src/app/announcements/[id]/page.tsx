@@ -18,7 +18,7 @@ export default async function AnnouncementDetailPage({
     <PublicPageLayout title="お知らせ" backHref="/">
       <div className="px-2 space-y-1">
         <div className="flex items-center gap-2">
-          <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded ${categoryColor[item.category]}`}>
+          <span className="text-[10px] font-bold text-white px-1.5 py-0.5 rounded border border-white">
             {categoryLabel[item.category]}
           </span>
         </div>
