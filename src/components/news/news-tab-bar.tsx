@@ -18,17 +18,15 @@ export function NewsTabBar() {
 
   return (
     <div className="w-full max-w-screen-sm overflow-x-auto no-scrollbar">
-      <div className="flex min-w-max px-3 pt-3">
+      <div className="flex bg-black/20 min-w-max">
         {TABS.map((tab) => {
           const isActive = tab.href === "/news" ? pathname === "/news" : pathname === tab.href;
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`px-4 py-2 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${
-                isActive
-                  ? "border-white text-white"
-                  : "border-transparent text-white/50 hover:text-white/70"
+              className={`flex items-center justify-center px-3 py-2.5 text-sm font-semibold whitespace-nowrap text-white border-r border-white/40 last:border-r-0 ${
+                isActive ? "bg-[#17552f]" : ""
               }`}
             >
               {tab.label}
