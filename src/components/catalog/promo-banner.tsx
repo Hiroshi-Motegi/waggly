@@ -9,25 +9,20 @@ export function PromoBanner() {
   if (user) return null;
 
   return (
-    <>
-      {/* Spacer to prevent fixed banner from covering footer */}
-      <div className="w-full pb-20" />
-      {/* Fixed banner */}
-      <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-screen-sm z-40 px-2"
-        style={{ paddingBottom: "calc(var(--bottom-nav-padding) + env(safe-area-inset-bottom))" }}
-      >
-        <Link href="/" className="block w-full rounded-2xl shadow-[0_-4px_16px_rgba(0,0,0,0.12)] overflow-hidden">
-          <Image
-            src="/banner/vs_banner.png"
-            alt="自分のクラブセットを管理 ゴルファー名刺にしませんか？"
-            width={480}
-            height={84}
-            priority
-            className="w-full h-auto"
-          />
-        </Link>
-      </div>
-    </>
+    <div
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-screen-sm z-40 px-2"
+      style={{ paddingBottom: "calc(var(--bottom-nav-padding) + env(safe-area-inset-bottom))" }}
+    >
+      <Link href="/" className="block w-full rounded-2xl shadow-[0_-4px_16px_rgba(0,0,0,0.12)] overflow-hidden">
+        <Image
+          src="/banner/vs_banner.png"
+          alt="自分のクラブセットを管理 ゴルファー名刺にしませんか？"
+          width={480}
+          height={84}
+          priority
+          className="w-full h-auto"
+        />
+      </Link>
+    </div>
   );
 }
