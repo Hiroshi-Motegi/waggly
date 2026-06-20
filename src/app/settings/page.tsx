@@ -70,14 +70,14 @@ export default function SettingsPage() {
     const params = new URLSearchParams(window.location.search);
     const linked = params.get("linked");
     if (linked) {
-      setLinkToast(`${linked === "google" ? "Google" : "LINE"}を連携しました`);
+      setLinkToast(`${linked === "google" ? "Google" : linked === "facebook" ? "Facebook" : "LINE"}を連携しました`);
       window.history.replaceState(null, "", "/settings");
       const timer = setTimeout(() => setLinkToast(null), 3000);
       return () => clearTimeout(timer);
     }
     const conflict = params.get("conflict");
     if (conflict) {
-      // LINE callback uses localStorage, Google callback uses cookie
+      // LINE callback uses localStorage/sessionStorage, Google/Facebook callback uses URL hash
       const stored = localStorage.getItem("conflict_info") || sessionStorage.getItem("conflict_info");
       if (stored) {
         try {
@@ -86,17 +86,13 @@ export default function SettingsPage() {
           sessionStorage.removeItem("conflict_info");
         } catch {}
       } else {
-        // Google callback: cookie
-        const cookieValue = document.cookie
-          .split("; ")
-          .find((c) => c.startsWith("conflict_info="))
-          ?.split("=")
-          .slice(1)
-          .join("=");
-        if (cookieValue) {
+        // Google/Facebook callback: URL hash (base64url encoded)
+        const hash = window.location.hash.slice(1);
+        if (hash) {
           try {
-            setConflictInfo(JSON.parse(decodeURIComponent(cookieValue)));
-            document.cookie = "conflict_info=; path=/; max-age=0";
+            const bytes = atob(hash.replace(/-/g, "+").replace(/_/g, "/"));
+            const utf8 = new TextDecoder("utf-8").decode(Uint8Array.from(bytes, (c) => c.charCodeAt(0)));
+            setConflictInfo(JSON.parse(utf8));
           } catch {}
         }
       }
@@ -239,6 +235,7 @@ export default function SettingsPage() {
                       } catch {}
                     }
                     setConflictInfo(null); setConflictSelected(null); setConflictConfirm(false); setProcessing(null);
+                    window.location.href = "/settings";
                   } catch { alert("処理に失敗しました"); setProcessing(null); setConflictConfirm(false); }
                 }} disabled={!!processing} className="flex-1 py-2.5 rounded-lg bg-[#006728] text-white text-sm font-bold disabled:opacity-50">
                   {processing ? "処理中..." : "OK"}
@@ -705,11 +702,14 @@ function AccountLinking({
 
   const hasLine = providers.some((p) => p.provider === "line");
   const hasGoogle = providers.some((p) => p.provider === "google");
+  const hasFacebook = providers.some((p) => p.provider === "facebook");
   const canUnlinkLine = providers.length >= 2 && !providers.find((p) => p.provider === "line")?.is_current;
   const canUnlinkGoogle = providers.length >= 2 && !providers.find((p) => p.provider === "google")?.is_current;
+  const canUnlinkFacebook = providers.length >= 2 && !providers.find((p) => p.provider === "facebook")?.is_current;
 
-  async function unlinkProvider(provider: "line" | "google") {
-    if (!confirm(`${provider === "line" ? "LINE" : "Google"}の連携を解除しますか？`)) return;
+  async function unlinkProvider(provider: "line" | "google" | "facebook") {
+    const label = provider === "line" ? "LINE" : provider === "facebook" ? "Facebook" : "Google";
+    if (!confirm(`${label}の連携を解除しますか？`)) return;
     setProcessing("解除中...");
     try {
       const res = await apiFetch("/api/auth/link-provider", {
@@ -781,6 +781,7 @@ function AccountLinking({
         alert("LINE Channel ID が設定されていません");
         return;
       }
+      sessionStorage.setItem("link_original_user", user.id);
       const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
       const state = crypto.randomUUID();
       window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
@@ -791,6 +792,13 @@ function AccountLinking({
     }
   }
 
+  function linkFacebook() {
+    const state = btoa(JSON.stringify({ originalUser: user.id }));
+    const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/facebook-link/callback`);
+    window.location.href = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&state=${encodeURIComponent(state)}&scope=email,public_profile`;
+  }
+
   async function linkGoogle() {
     // LINE内ブラウザの場合は外部ブラウザで開く
     const { isLineBrowser } = await import("@/lib/platform");
@@ -798,18 +806,10 @@ function AccountLinking({
       window.open(`${window.location.origin}/settings`, "_blank");
       return;
     }
-    setProcessing("連携中...");
-    sessionStorage.setItem("link_original_user", user.id);
-    const { createClient } = await import("@/lib/supabase/client");
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?link=google&originalUser=${user.id}`,
-        queryParams: { prompt: "select_account" },
-      },
-    });
-    // No setProcessing(null) — browser navigates away
+    const state = btoa(JSON.stringify({ originalUser: user.id }));
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/google-link/callback`);
+    window.location.href = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&state=${encodeURIComponent(state)}&prompt=select_account`;
   }
 
   function handleLinkConflict(provider: string, linkResult: { providerId: string; currentAccount: { lastUpdated: string | null; counts: ConflictSource["counts"] }; existingAccount: { id: string; lastUpdated: string | null; counts: ConflictSource["counts"] } }) {
@@ -825,7 +825,7 @@ function AccountLinking({
         counts: linkResult.currentAccount.counts,
       },
       sourceB: {
-        label: `${provider === "google" ? "Google" : "LINE"}アカウントのデータ`,
+        label: `${provider === "google" ? "Google" : provider === "facebook" ? "Facebook" : "LINE"}アカウントのデータ`,
         isNew: false,
         wid: linkResult.existingAccount.id,
         lastUpdated: linkResult.existingAccount.lastUpdated,
@@ -854,6 +854,24 @@ function AccountLinking({
           </div>
         ) : (
           <button onClick={linkLine} className="text-sm font-bold text-[#006728] border border-[#006728] rounded-full px-3 py-1">連携する</button>
+        )}
+      </div>
+      <div className="flex items-center justify-between py-2 border-b border-[#ececec]">
+        <div className="flex items-center gap-2">
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" style={{color:"#1877F2"}}><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          <span className="text-base">Facebook</span>
+        </div>
+        {loading ? (
+          <div className="h-5 w-16 rounded bg-gray-100 animate-pulse" />
+        ) : hasFacebook ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-[#006728] font-bold">連携済み</span>
+            {canUnlinkFacebook && (
+              <button onClick={() => unlinkProvider("facebook")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5">解除</button>
+            )}
+          </div>
+        ) : (
+          <button onClick={linkFacebook} className="text-sm font-bold text-[#006728] border border-[#006728] rounded-full px-3 py-1">連携する</button>
         )}
       </div>
       <div className="flex items-center justify-between py-2">

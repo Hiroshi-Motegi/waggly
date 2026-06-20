@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   const { userId } = auth;
 
   const body = await request.json();
-  const { provider, idToken, accessToken, code, redirectUri, confirmMerge, keepAccountId } = body;
+  const { provider, idToken, accessToken, code, redirectUri, providerSub: bodyProviderSub, confirmMerge, keepAccountId } = body;
 
   if (!provider) {
     return NextResponse.json({ error: "Missing provider" }, { status: 400 });
@@ -33,13 +33,15 @@ export async function POST(request: NextRequest) {
   let providerSub: string | null = null;
   let providerEmail: string | null = null;
 
-  // confirmMerge でもトークン再検証が必要（HTTP はステートレスなため初回の検証結果を信用できない）
   if (provider === "google") {
     if (idToken) {
       const result = await verifyGoogleIdToken(idToken);
       if (!result) return NextResponse.json({ error: "Invalid Google ID token" }, { status: 401 });
       providerSub = result.sub;
       providerEmail = result.email ?? null;
+    } else if (confirmMerge && bodyProviderSub) {
+      // confirmMerge時: OAuthフローは使い捨てのため再利用不可。初回検証済みのproviderSubをそのまま使用。
+      providerSub = bodyProviderSub;
     } else {
       return NextResponse.json({ error: "Missing idToken for Google" }, { status: 400 });
     }
@@ -52,8 +54,18 @@ export async function POST(request: NextRequest) {
       const result = await exchangeLineCode(code, redirectUri);
       if (!result) return NextResponse.json({ error: "LINE code exchange failed" }, { status: 500 });
       providerSub = result.sub;
+    } else if (confirmMerge && bodyProviderSub) {
+      // confirmMerge時: codeは使い捨てのため再利用不可。初回検証済みのproviderSubをそのまま使用。
+      providerSub = bodyProviderSub;
     } else {
       return NextResponse.json({ error: "Missing accessToken or code for LINE" }, { status: 400 });
+    }
+  } else if (provider === "facebook") {
+    if (confirmMerge && bodyProviderSub) {
+      // confirmMerge時: コールバックで検証済みのproviderSubをそのまま使用。
+      providerSub = bodyProviderSub;
+    } else {
+      return NextResponse.json({ error: "Missing providerSub for Facebook" }, { status: 400 });
     }
   } else {
     return NextResponse.json({ error: "Unsupported provider" }, { status: 400 });
