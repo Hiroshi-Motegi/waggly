@@ -77,6 +77,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  if (!process.env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN) {
+    return NextResponse.json({ error: "LINE_MESSAGING_CHANNEL_ACCESS_TOKEN not set" }, { status: 500 });
+  }
+
   const supabase = getAdminClient();
 
   const addClubTargets = await fetchTargets(supabase, "add_club");
