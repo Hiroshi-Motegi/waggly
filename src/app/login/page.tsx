@@ -15,7 +15,7 @@ export default function LoginPage() {
 
         <div className="w-full mt-12">
           <p className="text-center text-sm font-bold text-white mb-4">
-            ログイン・新規登録（無料）
+            ログイン・新規登録<span className="inline-flex items-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full mx-1.5 -translate-y-px">無料</span>はこちらから
           </p>
           <LoginButtons />
         </div>
