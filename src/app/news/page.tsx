@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ChevronLeft } from "lucide-react";
 import { fetchRelatedNews } from "@/lib/catalog-news";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { NewsTabBar } from "@/components/news/news-tab-bar";
@@ -45,17 +46,20 @@ export default async function NewsTopPage() {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`flex flex-col gap-1 px-4 py-3 ${i < news.length - 1 ? "border-b border-[#ececec]" : ""}`}
+                  className={`flex items-center gap-2 px-4 py-3 ${i < news.length - 1 ? "border-b border-[#ececec]" : ""}`}
                 >
-                  <p className="text-sm font-bold text-[#006728] leading-snug">{item.title}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-[#888]">{item.source}</span>
-                    {item.date && (
-                      <span className="text-xs text-[#aaa]">
-                        {new Date(item.date).toLocaleDateString("ja-JP")}
-                      </span>
-                    )}
+                  <div className="flex flex-col gap-1 min-w-0 flex-1">
+                    <p className="text-sm font-bold text-[#006728] leading-snug">{item.title}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[#888]">{item.source}</span>
+                      {item.date && (
+                        <span className="text-xs text-[#aaa]">
+                          {new Date(item.date).toLocaleDateString("ja-JP")}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  <ChevronLeft className="h-4 w-4 text-[#bbb] rotate-180 shrink-0" />
                 </a>
               ))}
             </div>
