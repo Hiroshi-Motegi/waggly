@@ -44,13 +44,19 @@ export async function middleware(request: NextRequest) {
     const host = request.headers.get("host");
     // Allow requests without Origin header (non-browser clients, native apps with Bearer token)
     if (origin && host) {
-      const allowedOrigins = [
-        `https://${host}`,
-        `http://${host}`,
-        "https://waggly.jp",
-        "capacitor://localhost",
-        "http://localhost",
-      ];
+      const isProduction = process.env.NODE_ENV === "production";
+      const allowedOrigins = isProduction
+        ? [
+            "https://waggly.jp",
+            "capacitor://localhost",
+          ]
+        : [
+            `https://${host}`,
+            `http://${host}`,
+            "https://waggly.jp",
+            "capacitor://localhost",
+            "http://localhost",
+          ];
       if (!allowedOrigins.some((allowed) => origin === allowed)) {
         return NextResponse.json(
           { error: "Forbidden: invalid origin" },
@@ -90,6 +96,19 @@ function addSecurityHeaders(response: NextResponse) {
     "Permissions-Policy",
     "camera=(self), microphone=(), geolocation=()"
   );
+  // Content Security Policy
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://ep2.adtrafficquality.google",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https://*.supabase.co https://*.rakuten.co.jp https://pagead2.googlesyndication.com",
+    "font-src 'self'",
+    "connect-src 'self' https://*.supabase.co https://api.anthropic.com https://pagead2.googlesyndication.com wss://*.supabase.co",
+    "frame-src https://pagead2.googlesyndication.com https://ep2.adtrafficquality.google",
+    "object-src 'none'",
+    "base-uri 'self'",
+  ].join("; ");
+  response.headers.set("Content-Security-Policy", csp);
 }
 
 export const config = {
