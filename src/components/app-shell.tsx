@@ -187,12 +187,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className={`min-h-dvh flex flex-col relative animate-fade-in bg-black/20 ${native ? "w-full overflow-x-clip" : "mx-auto max-w-screen-sm shadow-sm"}`}>
       <main className={hideChrome ? "flex-1 flex flex-col" : "flex-1"} style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
-        {hideChrome && pathname !== "/" && !isPublicPage && !pathname.startsWith("/auth/") && !isLoading && (
-          <>
-            <PublicFooter />
-            {(pathname.startsWith("/catalog") || pathname.startsWith("/compare") || pathname.startsWith("/news")) && <div className="h-20 bg-black/10" />}
-          </>
-        )}
+        {hideChrome && pathname !== "/" && !isPublicPage && !pathname.startsWith("/auth/") && !isLoading && <PublicFooter />}
         <CookieConsent hasBottomNav={!hideChrome} />
       </main>
       {!hideChrome && <BottomNav />}
