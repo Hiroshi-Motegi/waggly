@@ -105,9 +105,12 @@ HAVING MIN(c.created_at) < now() - interval '3 days'; -- 初回クラブ登録3�
 ### `/api/cron/line-notify` (POST)
 
 1. `CRON_SECRET` で認証（既存 cron と同じ timing-safe 比較）
-2. 通知①の対象ユーザーを取得 → LINE push 送信 → ログ記録
-3. 通知②の対象ユーザーを取得 → LINE push 送信 → ログ記録
+2. 通知①の対象ユーザーを取得 → **ログ記録** → ログ挿入成功したユーザーのみ LINE push 送信
+3. 通知②の対象ユーザーを取得 → **ログ記録** → ログ挿入成功したユーザーのみ LINE push 送信
 4. 送信数を JSON で返す
+
+ログを先に記録することで、push 送信後クラッシュによる重複送信を防ぐ（intent-to-send パターン）。  
+LINE API がエラーを返した場合（Bot 未友達追加など）はそのまま無視し、ログは残す。
 
 ```ts
 // レスポンス例
@@ -119,10 +122,20 @@ HAVING MIN(c.created_at) < now() - interval '3 days'; -- 初回クラブ登録3�
 ```sql
 INSERT INTO line_notification_logs (user_id, notification_type)
 VALUES ($1, $2)
-ON CONFLICT (user_id, notification_type) DO NOTHING;
+ON CONFLICT (user_id, notification_type) DO NOTHING
+RETURNING id;
 ```
 
-競合時は無視することでレース条件でも二重送信を防ぐ。
+`RETURNING id` で挿入が実際に行われたかを確認し、競合（既送信）のユーザーはスキップする。  
+ログ挿入成功したユーザーのみ push 送信することで、クラッシュ再実行時の二重送信を防ぐ。
+
+### LINE API エラーハンドリング
+
+| エラー | 対処 |
+|---|---|
+| `403` / 友達未追加（エラーコード 1625） | ログはそのまま残し無視（再送しない） |
+| `429` Rate Limit | ログを残したまま終了し次回 cron に委ねる（ただし次回もスキップされるため事実上送信不可——現状のユーザー規模では発生しない） |
+| その他 5xx | ログはそのまま残し無視 |
 
 ### LINE Messaging API 呼び出し
 
@@ -179,9 +192,16 @@ await fetch("https://api.line.me/v2/bot/message/push", {
 
 ---
 
+## 前提・制約（スケール）
+
+- 対象ユーザー数は数百件以内を想定。1ユーザー1リクエストの逐次処理でも Vercel Cron のタイムアウト（60〜900秒）に収まる規模。
+- 数千件規模になった場合は並列送信またはバッチ分割を検討する。
+
+---
+
 ## スコープ外（今回は対象外）
 
 - 通知文言の管理画面
-- ユーザーによる通知 opt-out 機能
+- ユーザーによる通知 opt-out 機能（LINE ポリシー上、本番運用規模拡大前に対応が必要）
 - リッチメッセージ（画像・ボタン付きフレックスメッセージ）
 - LINE Login 時の Bot Link 機能
