@@ -30,8 +30,8 @@ export default function NotFound() {
               href={href}
               className="flex flex-col items-center gap-1.5 text-white hover:text-white/70 transition-colors"
             >
-              <Image src={icon} alt="" width={28} height={28} />
-              <span className="text-xs">{label}</span>
+              <Image src={icon} alt="" width={40} height={40} />
+              <span className="text-sm">{label}</span>
             </Link>
           ))}
         </div>
