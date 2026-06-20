@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PromoBanner } from "@/components/catalog/promo-banner";
+import { PublicMenuButton } from "@/components/layout/public-menu";
 import { CompareSearchGlobal } from "@/components/catalog/compare-search-global";
 import { RecentComparesAll } from "@/components/catalog/recent-compares-all";
 import { getModelsByCategory, compareModelSlug } from "@/lib/catalog";
@@ -61,11 +62,9 @@ export default async function CompareTopPage() {
       <div className="flex flex-col items-center w-full">
         {/* Header */}
         <div className="flex items-center w-full max-w-screen-sm py-3 px-3 relative">
-          <Link href="/" className="absolute left-3 p-1 text-white/70 hover:text-white transition-colors">
-            <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </Link>
+          <div className="absolute left-3"><PublicMenuButton /></div>
           <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} className="mx-auto" />
-          <Link href="/login" className="absolute right-3 p-1 text-white/70 hover:text-white transition-colors"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={22} height={22} /></Link>
+          <Link href="/login" className="absolute right-3 p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>
         </div>
 
         <div className="w-full bg-black/40 py-3">
