@@ -27,7 +27,7 @@ export default async function AnnouncementDetailPage({
         <h1 className="text-lg font-bold text-white">{item.title}</h1>
         <p className="text-xs text-white mb-4">{dateStr}</p>
       </div>
-      <div className="rounded-lg bg-white px-4 py-5 prose prose-sm max-w-none prose-headings:text-[#006728] prose-headings:border-l-4 prose-headings:border-[#006728] prose-headings:pl-2 prose-headings:text-base prose-p:text-[#444] prose-li:text-[#444] prose-strong:text-[#333] prose-strong:font-bold">
+      <div className="rounded-lg bg-white px-4 py-5 prose prose-sm max-w-none prose-h2:text-[#006728] prose-h2:border-l-4 prose-h2:border-[#006728] prose-h2:pl-2 prose-h2:text-base prose-h3:text-[#006728] prose-h3:text-base prose-p:text-[#444] prose-li:text-[#444] prose-strong:text-[#333] prose-strong:font-bold prose-th:text-sm prose-th:font-bold prose-th:text-[#333] prose-td:text-sm prose-td:text-[#444]">
         <Markdown remarkPlugins={[remarkGfm]}>{item.body}</Markdown>
       </div>
       <div className="flex justify-center my-8">
