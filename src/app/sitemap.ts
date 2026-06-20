@@ -53,12 +53,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // If catalog data is unavailable, skip silently
   }
 
-  // --- Compare category pages (no O(n²) combinations) ---
+  // --- Compare category pages ---
   const compareUrls: MetadataRoute.Sitemap = ALL_CATEGORIES.map((category) => ({
     url: `${baseUrl}/compare/${category}`,
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
 
-  return [...staticUrls, ...catalogUrls, ...compareUrls];
+  // --- News pages ---
+  const newsUrls: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/news`, changeFrequency: "daily" as const, priority: 0.7 },
+    ...ALL_CATEGORIES.map((category) => ({
+      url: `${baseUrl}/news/${category}`,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    })),
+  ];
+
+  return [...staticUrls, ...catalogUrls, ...compareUrls, ...newsUrls];
 }

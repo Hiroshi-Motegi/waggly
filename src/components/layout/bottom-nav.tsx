@@ -19,6 +19,7 @@ const extraTabs = [
   { href: "/coach", label: "AI相談", icon: "/icons/nav-ai-chat.svg" },
   { href: "/catalog", label: "クラブカタログ", icon: "/icons/nav-catalog.svg" },
   { href: "/compare", label: "クラブ比較", icon: "/icons/nav-guide.svg" },
+  { href: "/news", label: "ニュース", icon: "/icons/nav-news.svg" },
   { href: "/settings", label: "設定", icon: "/icons/nav-settings.svg" },
 ];
 
