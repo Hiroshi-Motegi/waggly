@@ -99,7 +99,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
               <div className={`flex flex-col ${isUser ? "items-end" : "items-start"} max-w-[80%]`}>
                 <div className={`rounded-lg border border-[#c5c5c5] px-3 py-2 text-sm ${isUser ? "font-medium" : ""}`}>
                   {message.role === "assistant" ? (
-                    <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_hr]:my-2 [&_strong]:font-bold text-sm">
+                    <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_hr]:my-2 [&_strong]:font-bold [&_h1]:text-base [&_h1]:font-bold [&_h1]:my-1 [&_h2]:text-sm [&_h2]:font-bold [&_h2]:my-1 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:my-0.5 text-sm">
                       <ReactMarkdown>{textContent}</ReactMarkdown>
                     </div>
                   ) : (
