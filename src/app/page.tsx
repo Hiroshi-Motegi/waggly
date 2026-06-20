@@ -166,7 +166,8 @@ export default async function HomePage() {
 
         {/* お知らせ */}
         {announcements.length > 0 && (
-          <div className="w-full px-4 py-6">
+          <div className="w-full px-4 py-6 border-t border-white/15">
+            <p className="text-lg font-bold text-white tracking-wider text-center mb-4">お知らせ</p>
             <AnnouncementsSection items={announcements} />
           </div>
         )}

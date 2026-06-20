@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Announcement } from "@/lib/announcements";
 
@@ -11,19 +12,18 @@ export function AnnouncementsSection({ items }: { items: Announcement[] }) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center px-1 mb-2">
-        <h3 className="flex-1 text-lg font-bold text-white">お知らせ</h3>
-      </div>
       <div className="rounded-lg bg-white divide-y divide-[#dfdfdf]">
         {items.map((item) => (
           <Link
             key={item.id}
             href={`/announcements/${item.id}`}
-            className="flex flex-col gap-1 px-4 py-3"
+            className="flex items-center gap-2.5 px-4 py-3"
           >
-            <span className="text-xs text-[#8b8b8b]">{formatDate(item.published_at)}</span>
-            <span className="text-sm font-bold text-[#333]">{item.title}</span>
-            <span className="text-xs text-[#666] line-clamp-2">{item.body}</span>
+            <div className="flex-1 min-w-0">
+              <span className="text-xs text-[#8b8b8b]">{formatDate(item.published_at)}</span>
+              <p className="text-sm font-bold text-[#333] truncate">{item.title}</p>
+            </div>
+            <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40 shrink-0" style={{ width: "auto", height: "auto" }} />
           </Link>
         ))}
       </div>

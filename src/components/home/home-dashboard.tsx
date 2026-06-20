@@ -127,6 +127,9 @@ export function HomeDashboard({ announcements }: { announcements: Announcement[]
         {/* お知らせ */}
         {announcements.length > 0 && (
           <div className="mt-4">
+            <div className="flex items-center px-1 mb-2">
+              <h3 className="flex-1 text-lg font-bold text-white">お知らせ</h3>
+            </div>
             <AnnouncementsSection items={announcements} />
           </div>
         )}
