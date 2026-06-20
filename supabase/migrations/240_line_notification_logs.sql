@@ -1,4 +1,6 @@
--- 240_line_notification_logs.sql
+-- ============================================================
+-- 240: line_notification_logs テーブル作成
+-- ============================================================
 CREATE TABLE public.line_notification_logs (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id           UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
