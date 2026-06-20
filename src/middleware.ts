@@ -47,12 +47,14 @@ export async function middleware(request: NextRequest) {
       const isDev = process.env.NODE_ENV !== "production";
       const vercelUrl = process.env.VERCEL_URL;
       const allowedOrigins = [
+        // 自ホスト（staging.waggly.jp等カスタムドメイン含む）は常に許可
+        `https://${host}`,
         "https://waggly.jp",
         "capacitor://localhost",
         // Vercel preview/staging deployments
         ...(vercelUrl ? [`https://${vercelUrl}`] : []),
         // Development only
-        ...(isDev ? [`https://${host}`, `http://${host}`, "http://localhost"] : []),
+        ...(isDev ? [`http://${host}`, "http://localhost"] : []),
       ];
       if (!allowedOrigins.some((allowed) => origin === allowed)) {
         return NextResponse.json(
