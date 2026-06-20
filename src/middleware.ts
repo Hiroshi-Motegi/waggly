@@ -44,19 +44,16 @@ export async function middleware(request: NextRequest) {
     const host = request.headers.get("host");
     // Allow requests without Origin header (non-browser clients, native apps with Bearer token)
     if (origin && host) {
-      const isProduction = process.env.NODE_ENV === "production";
-      const allowedOrigins = isProduction
-        ? [
-            "https://waggly.jp",
-            "capacitor://localhost",
-          ]
-        : [
-            `https://${host}`,
-            `http://${host}`,
-            "https://waggly.jp",
-            "capacitor://localhost",
-            "http://localhost",
-          ];
+      const isDev = process.env.NODE_ENV !== "production";
+      const vercelUrl = process.env.VERCEL_URL;
+      const allowedOrigins = [
+        "https://waggly.jp",
+        "capacitor://localhost",
+        // Vercel preview/staging deployments
+        ...(vercelUrl ? [`https://${vercelUrl}`] : []),
+        // Development only
+        ...(isDev ? [`https://${host}`, `http://${host}`, "http://localhost"] : []),
+      ];
       if (!allowedOrigins.some((allowed) => origin === allowed)) {
         return NextResponse.json(
           { error: "Forbidden: invalid origin" },
