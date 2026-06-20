@@ -22,15 +22,15 @@ export default function NotFound() {
       <p className="text-2xl font-thin text-white mt-4 tracking-[0.2em]">Not Found</p>
       <p className="text-sm text-white mt-1">ページが見つかりません。</p>
 
-      <div className="mt-10 w-full max-w-sm border-t border-white/15 pt-6">
-        <div className="grid grid-cols-3 gap-y-5">
+      <div className="mt-10 w-full border-t border-white/15 pt-6 px-4">
+        <div className="grid grid-cols-3 gap-y-6">
           {links.map(({ href, label, icon }) => (
             <Link
               key={href}
               href={href}
-              className="flex flex-col items-center gap-1.5 text-white/60 hover:text-white/90 transition-colors"
+              className="flex flex-col items-center gap-1.5 text-white hover:text-white/70 transition-colors"
             >
-              <Image src={icon} alt="" width={24} height={24} className="opacity-60" />
+              <Image src={icon} alt="" width={28} height={28} />
               <span className="text-xs">{label}</span>
             </Link>
           ))}
