@@ -59,9 +59,11 @@ export function LoginButtons() {
       <button onClick={loginLine} className="flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2.5 rounded-full bg-[#06C755] text-white font-bold text-base shadow-lg">
         {LINE_ICON} LINEでログイン
       </button>
+      {process.env.NEXT_PUBLIC_APP_ENV === "staging" && (
       <button onClick={loginFacebook} className="mt-3 flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2.5 rounded-full bg-[#1877F2] text-white font-bold text-base shadow-lg">
         {FACEBOOK_ICON} Facebookでログイン
       </button>
+      )}
       <button onClick={loginGoogle} className="mt-3 flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2.5 rounded-full bg-white text-gray-800 font-bold text-base shadow-lg">
         {GOOGLE_ICON} Googleでログイン
       </button>
