@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { BackButton } from "@/components/layout/back-button";
 import { fetchRelatedNews } from "@/lib/catalog-news";
 import { PromoBanner } from "@/components/catalog/promo-banner";
+import { NewsTabBar } from "@/components/news/news-tab-bar";
 
 export const revalidate = 3600;
 
@@ -49,18 +49,20 @@ export default async function CategoryNewsPage({
       <div className="flex flex-col items-center w-full">
         {/* Header */}
         <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
-          <BackButton fallbackHref="/news" />
           <div className="flex flex-col items-center gap-0.5">
             <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-            <h1 className="text-sm font-bold text-white">{config.label} ニュース</h1>
+            <h1 className="text-sm font-bold text-white">ゴルフ最新ニュース</h1>
           </div>
         </div>
 
         {/* Banner */}
         <PromoBanner />
 
+        {/* Tabs */}
+        <NewsTabBar />
+
         {/* News list */}
-        <div className="w-full max-w-screen-sm px-3 pt-4">
+        <div className="w-full max-w-screen-sm px-3 pt-3">
           {news.length === 0 ? (
             <div className="rounded-lg bg-white p-4 text-center">
               <p className="text-sm text-[#8b8b8b]">現在ニュースがありません</p>
