@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -15,6 +15,18 @@ const menuLinks = [
 
 export function PublicMenuButton() {
   const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => setVisible(true));
+    }
+  }, [open]);
+
+  function close() {
+    setVisible(false);
+    setTimeout(() => setOpen(false), 300);
+  }
 
   return (
     <>
@@ -25,19 +37,17 @@ export function PublicMenuButton() {
       {open && (
         <div className="fixed inset-0 z-50 flex justify-center">
           <div className="relative w-full max-w-screen-sm">
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-            {/* Drawer */}
-            <div className="absolute inset-0 bg-[#1a3a1a] z-10 animate-fade-in overflow-y-auto">
+            <div className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`} onClick={close} />
+            <div className={`absolute inset-0 bg-[#1a3a1a]/95 z-10 overflow-y-auto transition-transform duration-300 ease-out ${visible ? "translate-y-0" : "-translate-y-full"}`}>
               <div className="flex items-center justify-end px-2 py-2">
-                <button onClick={() => setOpen(false)} className="text-white/60 text-xl p-1">✕</button>
+                <button onClick={close} className="text-white/60 text-xl p-1">✕</button>
               </div>
               <nav className="py-2">
                 {menuLinks.map(({ href, label, icon }) => (
                   <Link
                     key={href}
                     href={href}
-                    onClick={() => setOpen(false)}
+                    onClick={close}
                     className="flex items-center gap-3 px-5 py-3.5 text-base text-white/80 hover:bg-white/10 transition-colors"
                   >
                     {icon && <Image src={icon} alt="" width={28} height={28} className="invert opacity-70" />}
@@ -49,7 +59,7 @@ export function PublicMenuButton() {
               <div className="px-5 mt-6">
                 <Link
                   href="/login"
-                  onClick={() => setOpen(false)}
+                  onClick={close}
                   className="flex h-11 items-center justify-center rounded-full bg-white/10 border border-white/20 text-sm text-white font-medium"
                 >
                   ログイン・新規登録
