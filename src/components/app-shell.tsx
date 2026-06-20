@@ -122,7 +122,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Wait for user data before judging (prevents flash of onboarding for logged-in users)
   if (!native && isLoading) {
     return (
-      <div className="mx-auto max-w-screen-sm min-h-dvh">
+      <div className="mx-auto max-w-screen-sm min-h-dvh bg-black/20 shadow-sm">
         <Loading variant="light" />
       </div>
     );
@@ -185,7 +185,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const hideChrome = isPublicPage || (!user && !native);
   return (
     <div className={`min-h-dvh flex flex-col relative animate-fade-in bg-black/20 ${native ? "w-full overflow-x-clip" : "mx-auto max-w-screen-sm shadow-sm"}`}>
-      <main className={hideChrome ? "flex-1 flex flex-col" : "flex-1"} style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
+      <main className="flex-1 flex flex-col" style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
         {hideChrome && pathname !== "/" && !isPublicPage && !pathname.startsWith("/auth/") && !isLoading && (
           <PublicFooter withBannerPadding={!user && (pathname.startsWith("/catalog") || pathname.startsWith("/compare") || pathname.startsWith("/news"))} />

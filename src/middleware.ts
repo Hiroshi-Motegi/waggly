@@ -101,7 +101,7 @@ function addSecurityHeaders(response: NextResponse) {
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.googletagmanager.com https://*.googlesyndication.com https://*.adtrafficquality.google https://adservice.google.com https://vercel.live",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.supabase.co https://*.rakuten.co.jp https://*.google.com https://*.google.co.jp https://*.googletagmanager.com https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://*.a8.net",
+    "img-src 'self' data: blob: https://*.supabase.co https://*.rakuten.co.jp https://*.google.com https://*.google.co.jp https://*.googletagmanager.com https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://*.adtrafficquality.google https://*.a8.net",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://*.supabase.co https://api.anthropic.com https://*.google.com https://*.google-analytics.com https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://*.adtrafficquality.google wss://*.supabase.co",
     "frame-src https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://*.google.com",
