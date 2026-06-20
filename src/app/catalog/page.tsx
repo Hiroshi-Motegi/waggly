@@ -33,7 +33,7 @@ export default async function CatalogPage() {
   };
 
   return (
-    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
+    <div className="relative min-h-screen bg-black/60" style={{ minHeight: "100dvh" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
