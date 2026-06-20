@@ -784,6 +784,7 @@ function AccountLinking({
       sessionStorage.setItem("link_original_user", user.id);
       const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback?link=1`);
       const state = crypto.randomUUID();
+      sessionStorage.setItem("line_oauth_state", state);
       window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
     } catch (e: unknown) {
       console.error("linkLine error:", e);
