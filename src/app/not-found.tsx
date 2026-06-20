@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const links = [
@@ -17,7 +18,8 @@ export default function NotFound() {
       <p className="text-[96px] font-thin leading-none text-white tracking-[0.15em] select-none">
         404
       </p>
-      <p className="text-2xl font-thin text-white mt-2 tracking-[0.2em]">Not Found</p>
+      <Image src="/ball/ball-sad-w.png" alt="" width={64} height={64} className="mt-4 opacity-80" />
+      <p className="text-2xl font-thin text-white mt-4 tracking-[0.2em]">Not Found</p>
       <p className="text-sm text-white mt-1">ページが見つかりません。</p>
 
       <div className="mt-10 w-full max-w-sm border-t border-white/15 pt-6">
