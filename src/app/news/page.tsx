@@ -23,12 +23,11 @@ export default async function NewsTopPage() {
           <Link href="/" className="absolute left-3 p-1 text-white/70 hover:text-white transition-colors">
             <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </Link>
-          <div className="flex flex-col items-center gap-0.5 mx-auto">
-            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-            <h1 className="text-sm font-bold text-white">ゴルフ最新ニュース</h1>
-          </div>
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} className="mx-auto" />
           <Link href="/login" className="absolute right-3 text-xs text-white/70 hover:text-white transition-colors">ログイン</Link>
         </div>
+
+        <h1 className="text-sm font-bold text-white mt-1">ゴルフ最新ニュース</h1>
 
         {/* Tabs */}
         <NewsTabBar />
