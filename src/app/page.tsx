@@ -6,13 +6,17 @@ import { LoginButtons } from "@/components/home/login-buttons";
 import { FeatureSection } from "@/components/home/feature-section";
 import { FloatingCta } from "@/components/home/landing-cta";
 import { PublicFooter } from "@/components/public-footer";
+import { fetchAnnouncements } from "@/lib/announcements";
+import { AnnouncementsSection } from "@/components/home/announcements-section";
 
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const announcements = await fetchAnnouncements(5);
+
   if (user) {
-    return <HomeDashboard />;
+    return <HomeDashboard announcements={announcements} />;
   }
 
   /* ─── Landing Page (Server-Rendered for SEO) ─── */
@@ -32,7 +36,7 @@ export default async function HomePage() {
         {/* Home image */}
         <div className="flex justify-center">
           <div className="relative border-2 border-b-0 border-white">
-            <Image src="/images/lp/home-image.png" alt="" width={252} height={323} />
+            <Image src="/home-visual.png" alt="" width={252} height={347} />
             <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
         </div>
@@ -187,6 +191,13 @@ export default async function HomePage() {
             <p>ゴルフクラブの最新ニュースやレビュー情報もお届け。新製品情報からクラブ選びのヒントまで、あなたのゴルフライフに役立つ情報を発信しています。</p>
           </div>
         </div>
+
+        {/* お知らせ */}
+        {announcements.length > 0 && (
+          <div className="w-full px-4 py-6">
+            <AnnouncementsSection items={announcements} />
+          </div>
+        )}
 
         {/* Login (bottom) */}
         <div id="login-bottom" className="w-full">

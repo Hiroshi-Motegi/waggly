@@ -7,6 +7,8 @@ import { usePracticeSessions } from "@/hooks/use-practice";
 import { useProfile, useFavoriteCourses } from "@/hooks/use-profile";
 import { RecentPractice } from "@/components/home/recent-practice";
 import { AdBanner } from "@/components/ad-banner";
+import { AnnouncementsSection } from "@/components/home/announcements-section";
+import type { Announcement } from "@/lib/announcements";
 
 const featureCards = [
   { href: "/bag", icon: "/icons/my-bag.svg", label: "マイバッグ" },
@@ -17,7 +19,7 @@ const featureCards = [
   { href: "/settings", icon: "/icons/settings.svg", label: "設定" },
 ];
 
-export function HomeDashboard() {
+export function HomeDashboard({ announcements }: { announcements: Announcement[] }) {
   const { user } = useAuth();
   const { profile, isLoading: profileLoading } = useProfile();
   const { courses: favCourses } = useFavoriteCourses();
@@ -80,6 +82,13 @@ export function HomeDashboard() {
         <div className="mt-4">
           <AdBanner slot="HOME_TOP" />
         </div>
+
+        {/* お知らせ */}
+        {announcements.length > 0 && (
+          <div className="mt-4">
+            <AnnouncementsSection items={announcements} />
+          </div>
+        )}
 
         {/* Recent practice */}
         <div className="flex items-center px-1 mt-4 mb-2">
