@@ -190,7 +190,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {hideChrome && pathname !== "/" && !isPublicPage && !pathname.startsWith("/auth/") && !isLoading && (
           <>
             <PublicFooter />
-            {(pathname.startsWith("/catalog") || pathname.startsWith("/compare") || pathname.startsWith("/news")) && <div className="h-20" />}
+            {(pathname.startsWith("/catalog") || pathname.startsWith("/compare") || pathname.startsWith("/news")) && <div className="h-20 bg-black/10" />}
           </>
         )}
         <CookieConsent hasBottomNav={!hideChrome} />

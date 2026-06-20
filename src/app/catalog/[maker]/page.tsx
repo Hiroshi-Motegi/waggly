@@ -70,6 +70,8 @@ export default async function MakerPage({ params }: { params: Promise<{ maker: s
 
         {/* Category tabs + model list */}
         <MakerCategoryTabs models={allModels} />
+
+        <PromoBanner />
       </div>
     </div>
   );
