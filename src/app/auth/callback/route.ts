@@ -18,12 +18,91 @@ export async function GET(request: NextRequest) {
       if (link === "google") {
         return handleGoogleLink(request, data.user, origin);
       }
+      if (link === "facebook") {
+        return handleProviderLink(request, data.user, origin, "facebook");
+      }
+      if (link === "twitter") {
+        return handleProviderLink(request, data.user, origin, "twitter");
+      }
       // Normal login → auth-provider's resolve-session handles it
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
 
   return NextResponse.redirect(`${origin}/`);
+}
+
+/**
+ * Generic provider linking callback for Facebook, Twitter, etc.
+ */
+async function handleProviderLink(
+  request: NextRequest,
+  authUser: AuthUser,
+  origin: string,
+  provider: string
+) {
+  const { searchParams } = new URL(request.url);
+  const originalUserId = searchParams.get("originalUser");
+  const providerSub = (authUser.user_metadata?.sub ?? authUser.user_metadata?.provider_id ?? authUser.id) as string;
+  const providerEmail = (authUser.user_metadata?.email as string) ?? null;
+
+  if (!originalUserId) {
+    return NextResponse.redirect(`${origin}/settings?error=missing_user`);
+  }
+
+  const supabaseAdmin = getSupabaseAdmin();
+
+  const { data: existingProvider } = await supabaseAdmin
+    .from("user_providers")
+    .select("user_id")
+    .eq("provider", provider)
+    .eq("provider_sub", providerSub)
+    .maybeSingle();
+
+  if (existingProvider && existingProvider.user_id !== originalUserId) {
+    const [currentSummary, existingSummary] = await Promise.all([
+      getUserDataSummary(supabaseAdmin, originalUserId),
+      getUserDataSummary(supabaseAdmin, existingProvider.user_id),
+    ]);
+
+    const conflictInfo = JSON.stringify({
+      scenario: "account-linking",
+      provider,
+      providerSub,
+      sourceA: {
+        label: "現在のアカウントのデータ",
+        isNew: false,
+        wid: originalUserId,
+        lastUpdated: currentSummary.lastUpdated,
+        counts: currentSummary.counts,
+      },
+      sourceB: {
+        label: `${provider}アカウントのデータ`,
+        isNew: true,
+        wid: existingProvider.user_id,
+        lastUpdated: existingSummary.lastUpdated,
+        counts: existingSummary.counts,
+      },
+    });
+
+    const response = NextResponse.redirect(`${origin}/settings?conflict=${provider}`);
+    response.cookies.set("conflict_info", encodeURIComponent(conflictInfo), {
+      path: "/",
+      maxAge: 300,
+      httpOnly: false,
+    });
+    return response;
+  }
+
+  await supabaseAdmin.from("user_providers").insert({
+    user_id: originalUserId,
+    provider,
+    provider_sub: providerSub,
+    provider_email: providerEmail,
+    auth_user_id: authUser.id,
+  });
+
+  return NextResponse.redirect(`${origin}/settings?linked=${provider}`);
 }
 
 /**

@@ -40,6 +40,28 @@ export function extractProviderInfo(authUser: {
     };
   }
 
+  // Facebook
+  if (appMeta.provider === "facebook") {
+    const sub = (userMeta.sub ?? userMeta.provider_id) as string | undefined;
+    if (!sub) return null;
+    return {
+      provider: "facebook",
+      providerSub: sub,
+      providerEmail: (userMeta.email as string) ?? null,
+    };
+  }
+
+  // Twitter / X
+  if (appMeta.provider === "twitter") {
+    const sub = (userMeta.sub ?? userMeta.provider_id) as string | undefined;
+    if (!sub) return null;
+    return {
+      provider: "twitter",
+      providerSub: sub,
+      providerEmail: null,
+    };
+  }
+
   // LINE (email/password auth with line_user_id in metadata)
   if (userMeta.line_user_id) {
     return {

@@ -6,6 +6,12 @@ const LINE_ICON = (
   </svg>
 );
 
+const FACEBOOK_ICON = (
+  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
+
 const GOOGLE_ICON = (
   <svg className="h-5 w-5" viewBox="0 0 24 24">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -21,6 +27,18 @@ function loginLine() {
   const state = crypto.randomUUID();
   sessionStorage.setItem("line_oauth_state", state);
   window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
+}
+
+async function loginFacebook() {
+  localStorage.setItem("login_method", "facebook");
+  const redirect = sessionStorage.getItem("login_redirect") || "/";
+  sessionStorage.removeItem("login_redirect");
+  const { createClient } = await import("@/lib/supabase/client");
+  const supabase = createClient();
+  await supabase.auth.signInWithOAuth({
+    provider: "facebook",
+    options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}` },
+  });
 }
 
 async function loginGoogle() {
@@ -40,6 +58,9 @@ export function LoginButtons() {
     <>
       <button onClick={loginLine} className="flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2.5 rounded-full bg-[#06C755] text-white font-bold text-base shadow-lg">
         {LINE_ICON} LINEでログイン
+      </button>
+      <button onClick={loginFacebook} className="mt-3 flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2.5 rounded-full bg-[#1877F2] text-white font-bold text-base shadow-lg">
+        {FACEBOOK_ICON} Facebookでログイン
       </button>
       <button onClick={loginGoogle} className="mt-3 flex h-12 w-full max-w-64 mx-auto items-center justify-center gap-2.5 rounded-full bg-white text-gray-800 font-bold text-base shadow-lg">
         {GOOGLE_ICON} Googleでログイン
