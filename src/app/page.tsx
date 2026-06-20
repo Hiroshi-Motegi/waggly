@@ -164,6 +164,13 @@ export default async function HomePage() {
           </div>
         </div>
 
+        {/* お知らせ */}
+        {announcements.length > 0 && (
+          <div className="w-full px-4 py-6">
+            <AnnouncementsSection items={announcements} />
+          </div>
+        )}
+
         {/* Guide */}
         <div className="w-full bg-black/10">
           <div className="px-4 py-4 flex items-center justify-between">
@@ -191,13 +198,6 @@ export default async function HomePage() {
             <p>ゴルフクラブの最新ニュースやレビュー情報もお届け。新製品情報からクラブ選びのヒントまで、あなたのゴルフライフに役立つ情報を発信しています。</p>
           </div>
         </div>
-
-        {/* お知らせ */}
-        {announcements.length > 0 && (
-          <div className="w-full px-4 py-6">
-            <AnnouncementsSection items={announcements} />
-          </div>
-        )}
 
         {/* Login (bottom) */}
         <div id="login-bottom" className="w-full">
