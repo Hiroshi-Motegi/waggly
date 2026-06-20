@@ -68,7 +68,9 @@ export default async function CompareTopPage() {
           <Link href="/login" className="absolute right-3 text-xs text-white/70 hover:text-white transition-colors">ログイン</Link>
         </div>
 
-        <h1 className="text-sm font-bold text-white mt-1">ゴルフクラブ比較</h1>
+        <div className="w-full bg-black/40 py-2">
+          <h1 className="text-sm font-bold text-white text-center">ゴルフクラブ比較</h1>
+        </div>
 
         {/* Search */}
         <div className="w-full max-w-screen-sm px-3 pt-4">

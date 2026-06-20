@@ -33,7 +33,7 @@ export default async function CatalogPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-black/60" style={{ minHeight: "100dvh" }}>
+    <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
@@ -46,7 +46,9 @@ export default async function CatalogPage() {
         </div>
 
         {/* Page title */}
-        <h1 className="text-sm font-bold text-white mt-1">ゴルフクラブカタログ</h1>
+        <div className="w-full bg-black/40 py-2">
+          <h1 className="text-sm font-bold text-white text-center">ゴルフクラブカタログ</h1>
+        </div>
 
         {/* Search */}
         <div className="w-full max-w-screen-sm px-4 pt-4 pb-2">

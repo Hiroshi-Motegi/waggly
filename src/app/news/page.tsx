@@ -27,7 +27,9 @@ export default async function NewsTopPage() {
           <Link href="/login" className="absolute right-3 text-xs text-white/70 hover:text-white transition-colors">ログイン</Link>
         </div>
 
-        <h1 className="text-sm font-bold text-white mt-1">ゴルフ最新ニュース</h1>
+        <div className="w-full bg-black/40 py-2">
+          <h1 className="text-sm font-bold text-white text-center">ゴルフ最新ニュース</h1>
+        </div>
 
         {/* Tabs */}
         <NewsTabBar />
