@@ -138,9 +138,10 @@ export async function getAllModels() {
 export async function getModelsByCategory(category: string) {
   const { data } = await supabase
     .from("catalog_models")
-    .select("*")
+    .select("*, catalog_makers!inner(is_visible)")
     .eq("category", category)
     .eq("is_visible", true)
+    .eq("catalog_makers.is_visible", true)
     .order("name");
   return (data ?? []) as CatalogModel[];
 }
@@ -151,9 +152,10 @@ async function getModelByCompareSlug(compareSlug: string, category: string) {
   // Stage 1: lightweight fetch to find the matching model by id+maker_slug+slug
   const { data: lightModels } = await supabase
     .from("catalog_models")
-    .select("id, maker_slug, slug")
+    .select("id, maker_slug, slug, catalog_makers!inner(is_visible)")
     .eq("category", category)
-    .eq("is_visible", true);
+    .eq("is_visible", true)
+    .eq("catalog_makers.is_visible", true);
 
   if (!lightModels) return null;
 
