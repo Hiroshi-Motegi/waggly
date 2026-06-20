@@ -128,7 +128,7 @@ export function BottomNav() {
             className={`transition-all duration-200 ease-out overflow-hidden ${
               menuOpen && menuVisible ? "max-h-[360px]" : "max-h-0"
             }`}
-            aria-hidden={!menuOpen || !menuVisible}
+            inert={!menuOpen || !menuVisible ? true : undefined}
           >
             <div className="flex flex-wrap pt-4 pb-3 gap-y-2">
               {extraTabs.map((tab) => (
