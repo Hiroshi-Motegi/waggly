@@ -45,7 +45,7 @@ export default async function CatalogSearchPage({
   if (query.length >= 2) {
     const all = await getAllModels();
     results = all.filter((m) =>
-      fuzzyMatch(`${m.maker} ${m.name}`, query)
+      fuzzyMatch(`${m.maker} ${m.maker_slug.replace(/-/g, " ")} ${m.name}`, query)
     );
   }
 

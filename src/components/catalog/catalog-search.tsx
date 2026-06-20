@@ -36,7 +36,7 @@ export function CatalogSearch({ models }: { models: ModelOption[] }) {
   const filtered = useMemo(() => {
     if (!query || query.length < 2) return [];
     return models
-      .filter((m) => fuzzyMatch(`${m.maker} ${m.name}`, query))
+      .filter((m) => fuzzyMatch(`${m.maker} ${m.makerSlug.replace(/-/g, " ")} ${m.name}`, query))
       .slice(0, 10);
   }, [query, models]);
 
@@ -55,6 +55,7 @@ export function CatalogSearch({ models }: { models: ModelOption[] }) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && query.length >= 2) { e.preventDefault(); handleSubmit(); } }}
             onFocus={() => setFocus(true)}
             onBlur={() => setTimeout(() => setFocus(false), 150)}
             placeholder="モデル名で検索（2文字以上）"

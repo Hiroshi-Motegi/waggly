@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface ModelOption {
   slug: string;
   label: string; // "PING G440 MAX" etc.
+  makerSlug?: string;
 }
 
 interface CompareSearchProps {
@@ -29,15 +30,19 @@ export function CompareSearch({ category, models }: CompareSearchProps) {
     return tokens.every((t) => lower.includes(t));
   }
 
+  function searchLabel(m: ModelOption) {
+    return `${m.label} ${(m.makerSlug ?? "").replace(/-/g, " ")}`;
+  }
+
   const filteredA = useMemo(() => {
     if (!queryA) return models.slice(0, 30);
-    return models.filter((m) => fuzzyMatch(m.label, queryA)).slice(0, 30);
+    return models.filter((m) => fuzzyMatch(searchLabel(m), queryA)).slice(0, 30);
   }, [queryA, models]);
 
   const filteredB = useMemo(() => {
     const base = models.filter((m) => m.slug !== selectedA?.slug);
     if (!queryB) return base.slice(0, 30);
-    return base.filter((m) => fuzzyMatch(m.label, queryB)).slice(0, 30);
+    return base.filter((m) => fuzzyMatch(searchLabel(m), queryB)).slice(0, 30);
   }, [queryB, models, selectedA]);
 
   const canCompare = selectedA && selectedB && selectedA.slug !== selectedB.slug;

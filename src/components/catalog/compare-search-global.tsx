@@ -7,6 +7,7 @@ interface ModelOption {
   slug: string;
   category: string;
   label: string;
+  makerSlug: string;
 }
 
 interface Props {
@@ -30,9 +31,13 @@ export function CompareSearchGlobal({ models }: Props) {
     return tokens.every((t) => lower.includes(t));
   }
 
+  function searchLabel(m: ModelOption) {
+    return `${m.label} ${m.makerSlug.replace(/-/g, " ")}`;
+  }
+
   const filteredA = useMemo(() => {
     if (!queryA || queryA.length < 2) return [];
-    return models.filter((m) => fuzzyMatch(m.label, queryA)).slice(0, 30);
+    return models.filter((m) => fuzzyMatch(searchLabel(m), queryA)).slice(0, 30);
   }, [queryA, models]);
 
   const filteredB = useMemo(() => {
@@ -40,7 +45,7 @@ export function CompareSearchGlobal({ models }: Props) {
     return models
       .filter((m) => m.slug !== selectedA?.slug)
       .filter((m) => selectedA ? m.category === selectedA.category : true)
-      .filter((m) => fuzzyMatch(m.label, queryB))
+      .filter((m) => fuzzyMatch(searchLabel(m), queryB))
       .slice(0, 30);
   }, [queryB, models, selectedA]);
 

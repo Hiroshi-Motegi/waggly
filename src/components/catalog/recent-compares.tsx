@@ -30,12 +30,26 @@ export function RecentCompares({ category }: { category: string }) {
   const [entries, setEntries] = useState<CompareEntry[]>([]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const list: CompareEntry[] = JSON.parse(raw);
-      setEntries(list.filter((e) => e.category === category).slice(0, 5));
-    } catch {}
+    async function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const list: CompareEntry[] = JSON.parse(raw);
+        const candidates = list.filter((e) => e.category === category).slice(0, 10);
+        const checked = await Promise.all(
+          candidates.map(async (e) => {
+            try {
+              const res = await fetch(`/compare/${e.category}/${e.slug}`, { method: "HEAD" });
+              return res.ok ? e : null;
+            } catch {
+              return e;
+            }
+          })
+        );
+        setEntries(checked.filter(Boolean).slice(0, 5) as CompareEntry[]);
+      } catch {}
+    }
+    load();
   }, [category]);
 
   if (entries.length === 0) return null;

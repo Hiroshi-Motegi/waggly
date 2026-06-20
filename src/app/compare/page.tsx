@@ -39,6 +39,7 @@ export default async function CompareTopPage() {
       slug: compareModelSlug(m),
       category: cat.key,
       label: `${m.maker} ${m.name}`,
+      makerSlug: m.maker_slug,
     }))
   );
 

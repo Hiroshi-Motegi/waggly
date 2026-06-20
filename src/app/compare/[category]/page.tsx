@@ -45,6 +45,7 @@ export default async function CompareIndexPage({
   const modelOptions = models.map((m) => ({
     slug: compareModelSlug(m),
     label: `${m.maker} ${m.name}`,
+    makerSlug: m.maker_slug,
   }));
 
 
