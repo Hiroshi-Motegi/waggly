@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { getAllModels } from "@/lib/catalog";
 import { PublicPageLayout } from "@/components/layout/public-page-layout";
 
