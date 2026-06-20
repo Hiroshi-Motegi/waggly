@@ -98,9 +98,9 @@ function addSecurityHeaders(response: NextResponse) {
   // Content Security Policy
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://*.googlesyndication.com https://ep2.adtrafficquality.google https://www.google.com https://adservice.google.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://*.googlesyndication.com https://ep2.adtrafficquality.google https://www.google.com https://adservice.google.com https://vercel.live",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.supabase.co https://*.rakuten.co.jp https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://www.google.com https://www.google.co.jp https://*.a8.net",
+    "img-src 'self' data: blob: https://*.supabase.co https://*.rakuten.co.jp https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://www.google.com https://www.google.co.jp https://*.a8.net https://www.googletagmanager.com",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://*.supabase.co https://api.anthropic.com https://*.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net wss://*.supabase.co",
     "frame-src https://*.googlesyndication.com https://*.doubleclick.net https://ep2.adtrafficquality.google https://www.google.com",
