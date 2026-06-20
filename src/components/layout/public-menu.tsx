@@ -28,7 +28,7 @@ export function PublicMenuButton() {
             {/* Overlay */}
             <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
             {/* Drawer */}
-            <div className="absolute top-0 left-0 right-0 bg-[#1a3a1a] z-10 shadow-xl animate-fade-in">
+            <div className="absolute inset-0 bg-[#1a3a1a] z-10 animate-fade-in overflow-y-auto">
               <div className="flex items-center justify-end px-2 py-2">
                 <button onClick={() => setOpen(false)} className="text-white/60 text-xl p-1">✕</button>
               </div>
@@ -38,19 +38,19 @@ export function PublicMenuButton() {
                     key={href}
                     href={href}
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-3 px-5 py-3.5 text-base text-white/80 hover:bg-white/10 transition-colors"
                   >
-                    {icon && <Image src={icon} alt="" width={20} height={20} className="invert opacity-70" />}
-                    {!icon && <span className="w-5" />}
+                    {icon && <Image src={icon} alt="" width={28} height={28} className="invert opacity-70" />}
+                    {!icon && <span className="w-7" />}
                     {label}
                   </Link>
                 ))}
               </nav>
-              <div className="px-4 mt-4">
+              <div className="px-5 mt-6">
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="flex h-10 items-center justify-center rounded-full bg-white/10 border border-white/20 text-sm text-white font-medium"
+                  className="flex h-11 items-center justify-center rounded-full bg-white/10 border border-white/20 text-sm text-white font-medium"
                 >
                   ログイン・新規登録
                 </Link>
