@@ -47,8 +47,7 @@ describe("api-error helpers", () => {
   });
 
   it("internalError hides details in production", async () => {
-    const origEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const res = internalError(new Error("secret db error"));
@@ -58,12 +57,11 @@ describe("api-error helpers", () => {
     expect(body.error).not.toContain("secret");
 
     consoleSpy.mockRestore();
-    process.env.NODE_ENV = origEnv;
+    vi.unstubAllEnvs();
   });
 
   it("internalError shows details in development", async () => {
-    const origEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const res = internalError(new Error("db connection failed"));
@@ -71,7 +69,7 @@ describe("api-error helpers", () => {
     expect(body.error).toBe("db connection failed");
 
     consoleSpy.mockRestore();
-    process.env.NODE_ENV = origEnv;
+    vi.unstubAllEnvs();
   });
 
   it("supabaseError returns 500", async () => {
@@ -87,7 +85,7 @@ describe("withErrorHandler", () => {
     const handler = withErrorHandler(async () => {
       return new Response(JSON.stringify({ ok: true }), { status: 200 });
     });
-    const res = await handler(new Request("http://localhost/test"));
+    const res = await handler();
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -98,7 +96,7 @@ describe("withErrorHandler", () => {
     const handler = withErrorHandler(async () => {
       throw new Error("unexpected failure");
     });
-    const res = await handler(new Request("http://localhost/test"));
+    const res = await handler();
     expect(res.status).toBe(500);
     const body = await res.json();
     expect(body.error).toBeDefined();
