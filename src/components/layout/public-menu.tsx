@@ -28,7 +28,7 @@ export function PublicMenuButton() {
             {/* Overlay */}
             <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
             {/* Drawer */}
-            <div className="absolute top-0 left-0 bottom-0 w-[80%] bg-[#1a3a1a] z-10 shadow-xl animate-fade-in">
+            <div className="absolute top-0 left-0 right-0 bg-[#1a3a1a] z-10 shadow-xl animate-fade-in">
               <div className="flex items-center justify-end px-2 py-2">
                 <button onClick={() => setOpen(false)} className="text-white/60 text-xl p-1">✕</button>
               </div>
