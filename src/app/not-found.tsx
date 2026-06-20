@@ -22,10 +22,10 @@ export default function NotFound() {
       </p>
       <Image src="/ball/ball-sad-w.png" alt="" width={64} height={64} className="mt-4" />
       <p className="text-2xl font-thin text-white mt-4 tracking-[0.2em]">Not Found</p>
-      <p className="text-sm text-white mt-1">ページが見つかりません。</p>
+      <p className="text-lg text-white mt-2">ページが見つかりません。</p>
 
       <div className="mt-12 w-full border-t border-white/15 pt-8 px-4">
-        <p className="text-sm text-white text-center mb-8">以下のページからアクセスしてください</p>
+        <p className="text-sm text-white text-center mb-8">下記よりお探しのコンテンツへアクセスください</p>
         <div className="grid grid-cols-3 gap-y-6">
           {links.map(({ href, label, icon }) => (
             <Link
