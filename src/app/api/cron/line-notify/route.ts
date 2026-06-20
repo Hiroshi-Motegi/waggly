@@ -56,9 +56,9 @@ async function logAndSend(
       if (res.ok) {
         sent++;
       }
-      // 失敗（友達未追加 403、rate limit 429 等）はログを残したまま無視
+      // at most once: ログ挿入済みのため失敗（友達未追加 403、rate limit 429 等）でも再送しない
     } catch {
-      // ネットワークエラーもログを残したまま無視
+      // at most once: ネットワークエラーもログを残したまま再送しない
     }
   }
   return sent;
