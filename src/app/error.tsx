@@ -30,8 +30,7 @@ export default function Error({
       <p className="text-[96px] font-thin leading-none text-white tracking-[0.15em] select-none">
         500
       </p>
-      <p className="text-2xl font-thin text-white mt-2 tracking-[0.2em]">Server Error</p>
-      <p className="text-sm text-white/60 mt-1">エラーが発生しました。</p>
+      <p className="text-2xl font-thin text-white mt-2 tracking-wider">エラーが発生しました</p>
 
       <button
         onClick={reset}

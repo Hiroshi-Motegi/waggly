@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { isNative } from "@/lib/platform";
 
 const mainTabs = [
@@ -21,6 +23,7 @@ const extraTabs = [
   { href: "/compare", label: "クラブ比較", icon: "/icons/nav-guide.svg" },
   { href: "/news", label: "ニュース", icon: "/icons/nav-news.svg" },
   { href: "/settings", label: "設定", icon: "/icons/nav-settings.svg" },
+  { href: "/help", label: "ヘルプ", icon: "/icons/nav-help.svg" },
 ];
 
 function NavItem({ href, label, icon, isActive, onClick }: {
@@ -36,6 +39,8 @@ function NavItem({ href, label, icon, isActive, onClick }: {
 
 export function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { setUser } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -108,7 +113,7 @@ export function BottomNav() {
           {/* Extra rows - expand inside the same nav box */}
           <div
             className={`transition-all duration-200 ease-out overflow-hidden ${
-              menuOpen && menuVisible ? "max-h-[300px]" : "max-h-0"
+              menuOpen && menuVisible ? "max-h-[360px]" : "max-h-0"
             }`}
             aria-hidden={!menuOpen || !menuVisible}
           >
@@ -123,6 +128,19 @@ export function BottomNav() {
                   onClick={closeMenu}
                 />
               ))}
+              <button
+                onClick={async () => {
+                  closeMenu();
+                  await createClient().auth.signOut();
+                  setUser?.(null);
+                  router.push("/");
+                }}
+                className="flex flex-col items-center gap-0.5 py-1.5"
+                style={{ width: "20%" }}
+              >
+                <Image src="/icons/nav-logoup.svg" alt="ログアウト" width={32} height={32} className="w-7 h-7 sm:w-8 sm:h-8" />
+                <span className="text-[10px] sm:text-xs font-medium tracking-tight text-black">ログアウト</span>
+              </button>
             </div>
           </div>
         </nav>
