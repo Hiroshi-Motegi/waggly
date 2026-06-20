@@ -55,9 +55,10 @@ export default async function MakerPage({ params }: { params: Promise<{ maker: s
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
+        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3 px-3">
           <BackButton fallbackHref="/catalog" />
           <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
+          <Link href="/login" className="absolute right-3 p-1 text-white/70 hover:text-white transition-colors"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={22} height={22} /></Link>
         </div>
         <div className="w-full bg-black/40 py-3">
           <h1 className="text-sm font-bold text-white text-center">{makerName}{makerData.name_ja ? ` (${makerData.name})` : ""} クラブカタログ</h1>
