@@ -57,14 +57,11 @@ export default async function MakerPage({ params }: { params: Promise<{ maker: s
         {/* Header */}
         <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
           <BackButton fallbackHref="/catalog" />
-          <div className="flex flex-col items-center gap-0.5">
-            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-            <h1 className="text-sm font-bold text-white">{makerName}{makerData.name_ja ? ` (${makerData.name})` : ""} クラブカタログ</h1>
-          </div>
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
         </div>
-
-        {/* Banner */}
-        <PromoBanner />
+        <div className="w-full bg-black/40 py-3">
+          <h1 className="text-sm font-bold text-white text-center">{makerName}{makerData.name_ja ? ` (${makerData.name})` : ""} クラブカタログ</h1>
+        </div>
 
         {/* Category tabs + model list */}
         <MakerCategoryTabs models={allModels} />

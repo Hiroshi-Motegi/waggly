@@ -46,7 +46,7 @@ export default async function CatalogPage() {
         </div>
 
         {/* Page title */}
-        <div className="w-full bg-black/40 py-2">
+        <div className="w-full bg-black/40 py-3">
           <h1 className="text-sm font-bold text-white text-center">ゴルフクラブカタログ</h1>
         </div>
 

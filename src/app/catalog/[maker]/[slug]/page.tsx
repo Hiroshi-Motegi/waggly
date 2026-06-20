@@ -90,14 +90,11 @@ export default async function ModelDetailPage({
         {/* Header */}
         <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
           <BackButton fallbackHref={`/catalog/${maker}`} />
-          <div className="flex flex-col items-center gap-0.5">
-            <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
-            <p className="text-sm font-bold text-white">ゴルフクラブカタログ</p>
-          </div>
+          <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
         </div>
-
-        {/* Banner */}
-        <PromoBanner />
+        <div className="w-full bg-black/40 py-3">
+          <p className="text-sm font-bold text-white text-center">ゴルフクラブカタログ</p>
+        </div>
 
         {/* Model header card */}
         <div className="w-full max-w-screen-sm px-3 pt-4">
