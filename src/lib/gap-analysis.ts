@@ -12,7 +12,10 @@ export interface GapResult {
   missingDistance: string[];
 }
 
-export function analyzeGaps(clubs: Club[]): GapResult {
+/** Minimal fields needed for gap analysis — accepts both Club and Supabase row types */
+type GapAnalysisInput = Pick<Club, "sort_order" | "distance" | "club_number">;
+
+export function analyzeGaps(clubs: GapAnalysisInput[]): GapResult {
   const sorted = [...clubs].sort((a, b) => a.sort_order - b.sort_order);
 
   const missingDistance = sorted

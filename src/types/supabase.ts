@@ -1070,6 +1070,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "practice_plan_items_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "practice_plan_items_plan_id_fkey"
             columns: ["plan_id"]
             isOneToOne: false
@@ -1082,6 +1089,8 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          memo: string | null
+          rating: number | null
           source: string
           status: string
           summary: string
@@ -1091,6 +1100,8 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          memo?: string | null
+          rating?: number | null
           source: string
           status?: string
           summary: string
@@ -1100,6 +1111,8 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          memo?: string | null
+          rating?: number | null
           source?: string
           status?: string
           summary?: string
@@ -1151,6 +1164,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "practice_sessions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "practice_plans"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "practice_sessions_user_id_fkey"
             columns: ["user_id"]

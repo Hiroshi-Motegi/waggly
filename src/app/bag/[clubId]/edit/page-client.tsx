@@ -51,7 +51,7 @@ export default function EditClubPageClient({ params }: { params: Promise<{ clubI
   if (isLoading) return <Loading variant="light" />;
   if (!club) return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">クラブが見つかりません</p></div></div>;
 
-  const { club_images, maintenances, id, user_id, created_at, ...editableData } = club as any;
+  const { club_images, maintenances, id, user_id, created_at, ...editableData } = club as unknown as Record<string, unknown>;
 
   return (
     <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>

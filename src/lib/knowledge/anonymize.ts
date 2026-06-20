@@ -48,7 +48,7 @@ export async function getAnonymousSessions(
   const clubBalls = new Map<string, number>();
   for (const s of items) {
     for (const pc of s.practice_clubs ?? []) {
-      const cn = (pc as any).club?.club_number ?? "?";
+      const cn = (pc as { club?: { club_number?: string } }).club?.club_number ?? "?";
       clubBalls.set(cn, (clubBalls.get(cn) ?? 0) + pc.balls);
     }
   }

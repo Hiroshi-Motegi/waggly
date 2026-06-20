@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { updateClubSchema } from "@/lib/api-schemas";
 import { badRequest, notFound, supabaseError } from "@/lib/api-error";
+import type { Database } from "@/types/supabase";
 
 export function generateStaticParams() {
   return [{ clubId: "_" }];
@@ -42,14 +43,15 @@ export async function PATCH(
     return badRequest(parsed.error.issues.map((i) => i.message).join(", "));
   }
   // Also allow sort_order through (numeric only)
-  const updates: Record<string, unknown> = { ...parsed.data };
+  type ClubUpdate = Database["public"]["Tables"]["clubs"]["Update"];
+  const updates = { ...parsed.data } as ClubUpdate;
   if (typeof raw.sort_order === "number") {
     updates.sort_order = raw.sort_order;
   }
 
   const { data, error } = await supabase
     .from("clubs")
-    .update(updates as any)
+    .update(updates)
     .eq("id", clubId)
     .eq("user_id", userId)
     .select()

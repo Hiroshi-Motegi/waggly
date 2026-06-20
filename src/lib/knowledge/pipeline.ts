@@ -42,7 +42,7 @@ export async function runAutoCollectPipeline(
     .from("knowledge_base")
     .select("title")
     .eq("status", "active");
-  const existingTitles = (existing ?? []).map((k: any) => k.title);
+  const existingTitles = (existing ?? []).map((k) => k.title);
 
   // 3. Analyze gaps
   const analysis = await analyzeKnowledgeGaps(sessions, plans, existingTitles);

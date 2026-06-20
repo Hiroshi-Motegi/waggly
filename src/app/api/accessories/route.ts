@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { createAccessorySchema } from "@/lib/api-schemas";
 import { badRequest, supabaseError } from "@/lib/api-error";
+import type { Database } from "@/types/supabase";
 
 
 export async function GET(request: NextRequest) {
@@ -47,9 +48,10 @@ export async function POST(request: NextRequest) {
   }
   const body = parsed.data;
 
+  type AccessoryInsert = Database["public"]["Tables"]["accessories"]["Insert"];
   const { data, error } = await supabase
     .from("accessories")
-    .insert({ ...body, user_id: userId } as any)
+    .insert({ ...body, user_id: userId } as AccessoryInsert)
     .select()
     .single();
 

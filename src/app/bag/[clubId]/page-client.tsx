@@ -11,6 +11,7 @@ import { apiFetch } from "@/lib/api-client";
 import { ClubUsageSummary } from "@/components/club/club-usage-summary";
 import { useAuth } from "@/hooks/use-auth";
 import { useClub, deleteClub, updateClub } from "@/hooks/use-clubs";
+import type { Club } from "@/types/database";
 import { nativeHref } from "@/lib/native-routes";
 import { formatDate } from "@/lib/utils";
 
@@ -80,7 +81,7 @@ function getSpecSections(category: string): SpecSection[] {
   return sections;
 }
 
-function SpecGrid({ items, club, cols = 2 }: { items: SpecItem[]; club: any; cols?: number }) {
+function SpecGrid({ items, club, cols = 2 }: { items: SpecItem[]; club: Record<string, unknown>; cols?: number }) {
   const filled = items.filter((s) => {
     const v = club[s.key];
     return v != null && v !== "";
@@ -196,7 +197,7 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
   }, [clubId, club]);
 
   async function handleStatusChange(newStatus: string, bagNumber?: number) {
-    const update: any = { status: newStatus };
+    const update: Partial<Club> = { status: newStatus as Club["status"] };
     if (bagNumber != null) update.bag_number = bagNumber;
     await updateClub(clubId, update);
     router.push("/bag");
@@ -276,19 +277,20 @@ export default function ClubDetailPage({ params }: { params: Promise<{ clubId: s
 
           {/* スペックシート */}
           {getSpecSections(club.category).map((section, i) => {
+            const clubRecord = club as unknown as Record<string, unknown>;
             const filled = section.items.filter((s) => {
-              const v = (club as any)[s.key];
+              const v = clubRecord[s.key];
               return v != null && v !== "";
             });
             if (filled.length === 0) return null;
-            const titleKey = section.titleKey ? (club as any)[section.titleKey] : null;
+            const titleKey = section.titleKey ? clubRecord[section.titleKey] : null;
             return (
               <div key={section.title} className={i > 0 ? "pt-2" : ""}>
                 <div className="flex items-baseline gap-2 mb-1">
                   <p className="text-sm font-bold text-[#333]">{section.title}</p>
-                  {titleKey && <span className="text-sm text-[#666]">{titleKey}</span>}
+                  {titleKey != null && <span className="text-sm text-[#666]">{String(titleKey)}</span>}
                 </div>
-                <SpecGrid items={section.items.filter((s) => s.key !== section.titleKey)} club={club} cols={section.cols} />
+                <SpecGrid items={section.items.filter((s) => s.key !== section.titleKey)} club={club as unknown as Record<string, unknown>} cols={section.cols} />
               </div>
             );
           })}

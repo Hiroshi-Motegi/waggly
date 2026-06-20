@@ -63,7 +63,13 @@ export async function GET(
   };
 
   // Build unified timeline
-  const timeline: any[] = [];
+  interface TimelineEntry {
+    type: string;
+    id: string;
+    date: string;
+    [key: string]: unknown;
+  }
+  const timeline: TimelineEntry[] = [];
 
   if (memos) {
     for (const m of memos) {
@@ -82,11 +88,11 @@ export async function GET(
   }
 
   if (practiceClubs) {
-    const memoBySession = new Map((practiceMemos ?? []).map((m: any) => [m.practice_session_id, m]));
+    const memoBySession = new Map((practiceMemos ?? []).map((m) => [m.practice_session_id, m]));
     for (const pc of practiceClubs) {
-      const session = pc.session as any;
+      const session = pc.session as { id: string; practiced_at: string; location: string | null; memo: string | null; created_at: string } | null;
       if (!session) continue;
-      const clubMemo = memoBySession.get(session.id) as any;
+      const clubMemo = memoBySession.get(session.id);
       timeline.push({
         type: "practice",
         id: pc.id,

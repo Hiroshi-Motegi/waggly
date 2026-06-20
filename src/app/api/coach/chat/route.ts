@@ -66,10 +66,10 @@ export async function POST(request: Request) {
   const accessories = accessoriesRes.data ?? [];
   const knowledge = knowledgeRes.data ?? [];
 
-  const gapAnalysis = analyzeGaps(clubs as any);
+  const gapAnalysis = analyzeGaps(clubs);
 
   const systemPrompt = buildSystemPrompt({
-    clubs: clubs.map((c: any) => ({
+    clubs: clubs.map((c) => ({
       club_number: c.club_number,
       maker: c.maker,
       model: c.model,
@@ -77,37 +77,37 @@ export async function POST(request: Request) {
       distance: c.distance,
       status: c.status,
     })),
-    recentSessions: sessions.map((s: any) => ({
+    recentSessions: sessions.map((s) => ({
       practiced_at: s.practiced_at,
       total_balls: s.total_balls,
       memo: s.memo,
       rating: s.rating,
-      clubs: (s.practice_clubs ?? []).map((pc: any) => ({
+      clubs: (s.practice_clubs ?? []).map((pc) => ({
         club_number: pc.club?.club_number ?? "?",
         balls: pc.balls,
       })),
       plan: s.plan ? {
         title: s.plan.title,
-        items: (s.plan.practice_plan_items ?? []).map((i: any) => ({
+        items: (s.plan.practice_plan_items ?? []).map((i) => ({
           club_number: i.club?.club_number ?? "?",
           focus: i.focus,
         })),
       } : null,
     })),
-    recentPlans: plans.map((p: any) => ({
+    recentPlans: plans.map((p) => ({
       title: p.title,
       status: p.status,
       created_at: p.created_at,
     })),
     gapAnalysis,
-    accessories: accessories.map((a: any) => ({
+    accessories: accessories.map((a) => ({
       category: a.category,
       brand: a.brand,
       model: a.model,
       rating: a.rating,
       memo: a.memo,
     })),
-    knowledge: knowledge.map((k: any) => ({
+    knowledge: knowledge.map((k) => ({
       category: k.category,
       title: k.title,
       content: k.content,
@@ -117,8 +117,8 @@ export async function POST(request: Request) {
   // Save user message (last message's text parts)
   const lastMessage = messages[messages.length - 1];
   const userText = lastMessage?.parts
-    ?.filter((p: any) => p.type === "text")
-    ?.map((p: any) => p.text)
+    ?.filter((p: { type: string }) => p.type === "text")
+    ?.map((p: { text: string }) => p.text)
     ?.join("") ?? lastMessage?.content ?? "";
 
   await supabase.from("ai_chats").insert({

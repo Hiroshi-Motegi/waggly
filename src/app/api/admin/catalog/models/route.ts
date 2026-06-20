@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest) {
   const { id, ...updates } = parsed.data;
   const { data, error } = await adminClient
     .from("catalog_models")
-    .update(updates as any)
+    .update(updates)
     .eq("id", id)
     .select()
     .single();

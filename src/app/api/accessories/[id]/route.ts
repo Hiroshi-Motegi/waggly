@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { notFound, supabaseError } from "@/lib/api-error";
+import type { Database } from "@/types/supabase";
 
 export function generateStaticParams() {
   return [{ id: "_" }];
@@ -37,14 +38,15 @@ export async function PATCH(
 
   const body = await request.json();
 
-  const ALLOWED = ["category", "brand", "model", "memo", "rating", "status", "purchase_url", "hidden_from_profile"];
+  type AccessoryUpdate = Database["public"]["Tables"]["accessories"]["Update"];
+  const ALLOWED = ["category", "brand", "model", "memo", "rating", "status", "purchase_url", "hidden_from_profile"] as const;
   const updates = Object.fromEntries(
-    Object.entries(body).filter(([k]) => ALLOWED.includes(k))
-  );
+    Object.entries(body).filter(([k]) => (ALLOWED as readonly string[]).includes(k))
+  ) as AccessoryUpdate;
 
   const { data, error } = await supabase
     .from("accessories")
-    .update(updates as any)
+    .update(updates)
     .eq("id", id)
     .eq("user_id", userId)
     .select()

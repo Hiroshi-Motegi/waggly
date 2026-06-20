@@ -3,6 +3,7 @@ import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { createClubSchema } from "@/lib/api-schemas";
 import { badRequest, supabaseError } from "@/lib/api-error";
 import { computeSortOrder } from "@/lib/club-sort";
+import type { Database } from "@/types/supabase";
 
 
 export async function GET(request: NextRequest) {
@@ -98,9 +99,10 @@ export async function POST(request: NextRequest) {
   const body = parsed.data;
   const sortOrder = computeSortOrder(body.category ?? "", body.club_number ?? "");
 
+  type ClubInsert = Database["public"]["Tables"]["clubs"]["Insert"];
   const { data, error } = await supabase
     .from("clubs")
-    .insert({ ...body, user_id: userId, sort_order: sortOrder } as any)
+    .insert({ ...body, user_id: userId, sort_order: sortOrder } as ClubInsert)
     .select()
     .single();
 

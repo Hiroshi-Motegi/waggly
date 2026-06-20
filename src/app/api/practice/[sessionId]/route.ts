@@ -47,11 +47,12 @@ export async function GET(
 
   // Merge memos into practice_clubs
   if (data.practice_clubs && memos) {
-    const memoByClub = new Map(memos.map((m: { club_id: string }) => [m.club_id, m]));
-    (data as any).practice_clubs = data.practice_clubs.map((pc: { club_id: string; [key: string]: unknown }) => ({
+    const memoByClub = new Map(memos.map((m) => [m.club_id, m]));
+    const enrichedClubs = data.practice_clubs.map((pc) => ({
       ...pc,
       memo: memoByClub.get(pc.club_id) ?? null,
     }));
+    (data as Record<string, unknown>).practice_clubs = enrichedClubs;
   }
 
   return NextResponse.json(data);

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCompareModels } from "@/lib/catalog";
+import { getCompareModels, type CatalogModel } from "@/lib/catalog";
 import { fetchRelatedNews } from "@/lib/catalog-news";
 import { CompareTable } from "@/components/catalog/compare-table";
 import { CompareVisitTracker } from "@/components/catalog/compare-visit-tracker";
@@ -47,7 +47,7 @@ export async function generateMetadata({
   };
 }
 
-function ModelCard({ model, label }: { model: any; label: string }) {
+function ModelCard({ model, label }: { model: CatalogModel; label: string }) {
   return (
     <Link
       href={`/catalog/${model.maker_slug}/${model.slug}`}

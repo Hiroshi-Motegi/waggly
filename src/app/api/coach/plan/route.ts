@@ -85,32 +85,32 @@ export async function POST(request: Request) {
     );
   }
 
-  const gapAnalysis = analyzeGaps(clubs as any);
+  const gapAnalysis = analyzeGaps(clubs);
 
   const systemPrompt = buildSystemPrompt({
-    clubs: clubs.map((c: any) => ({
+    clubs: clubs.map((c) => ({
       club_number: c.club_number, maker: c.maker, model: c.model, status: c.status,
       shaft_name: c.shaft_name, distance: c.distance,
     })),
-    recentSessions: sessions.map((s: any) => ({
+    recentSessions: sessions.map((s) => ({
       practiced_at: s.practiced_at, total_balls: s.total_balls, memo: s.memo,
       rating: s.rating,
-      clubs: (s.practice_clubs ?? []).map((pc: any) => ({
+      clubs: (s.practice_clubs ?? []).map((pc) => ({
         club_number: pc.club?.club_number ?? "?", balls: pc.balls,
       })),
     })),
-    recentPlans: plans.map((p: any) => ({
+    recentPlans: plans.map((p) => ({
       title: p.title, status: p.status, created_at: p.created_at,
     })),
     gapAnalysis,
-    accessories: accessories.map((a: any) => ({
+    accessories: accessories.map((a) => ({
       category: a.category,
       brand: a.brand,
       model: a.model,
       rating: a.rating,
       memo: a.memo,
     })),
-    knowledge: knowledge.map((k: any) => ({
+    knowledge: knowledge.map((k) => ({
       category: k.category,
       title: k.title,
       content: k.content,
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
   });
 
   let text: string;
-  let usage: any;
+  let usage: { inputTokens?: number; outputTokens?: number } | undefined;
   try {
   ({ text, usage } = await generateText({
     model: anthropic("claude-haiku-4-5-20251001"),
@@ -185,7 +185,7 @@ detailは具体的な練習方法・体の使い方・意識するポイント�
 
   // Match club_number to club_id and save items
   const items = parsed.items.map((item, i) => {
-    const matchedClub = clubs.find((c: any) => c.club_number === item.club_number);
+    const matchedClub = clubs.find((c) => c.club_number === item.club_number);
     return {
       plan_id: plan.id,
       club_id: matchedClub?.id ?? null,

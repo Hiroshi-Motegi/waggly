@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiAuth, unauthorized } from "@/lib/supabase/api";
 import { supabaseError } from "@/lib/api-error";
+import type { Database } from "@/types/supabase";
 
 export async function GET() {
   const auth = await getApiAuth();
@@ -50,9 +51,10 @@ export async function PUT(request: NextRequest) {
     "nickname", "golf_start_date", "average_score", "best_score",
     "home_course", "bio", "sns_links", "is_public", "visible_fields",
   ];
-  const updates: Record<string, any> = { updated_at: new Date().toISOString() };
+  type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
+  const updates: ProfileUpdate = { updated_at: new Date().toISOString() };
   for (const key of allowed) {
-    if (key in body) updates[key] = body[key];
+    if (key in body) (updates as Record<string, unknown>)[key] = body[key];
   }
 
   // If turning public ON, require username
@@ -69,7 +71,7 @@ export async function PUT(request: NextRequest) {
 
   const { data, error } = await supabase
     .from("profiles")
-    .update(updates as any)
+    .update(updates)
     .eq("id", userId)
     .select()
     .single();

@@ -250,7 +250,7 @@ export default function CoachPage() {
 
         if (data.conversationId && data.messages?.length > 0) {
           setConversationId(data.conversationId);
-          const uiMessages: UIMessage[] = data.messages.map((m: any) => ({
+          const uiMessages: UIMessage[] = data.messages.map((m: { id: string; role: string; message: string }) => ({
             id: m.id,
             role: m.role as "user" | "assistant",
             parts: [{ type: "text" as const, text: m.message }],
@@ -320,7 +320,7 @@ export default function CoachPage() {
       const data = await res.json();
 
       setConversationId(id);
-      const uiMessages: UIMessage[] = (data ?? []).map((m: any) => ({
+      const uiMessages: UIMessage[] = (data ?? []).map((m: { id: string; role: string; message: string; created_at: string }) => ({
         id: m.id,
         role: m.role as "user" | "assistant",
         parts: [{ type: "text" as const, text: m.message }],

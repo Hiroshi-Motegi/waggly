@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
   const admin = getAdminClient();
 
   // 1. Check cache (heads/sets tables not in generated types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const headQuery = (admin as any)
     .from("heads")
     .select("*, configurations:clubs(length, total_weight, swing_weight, shaft_variant_id)")
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
     let imageUrl = cached.image_url;
     let affiliateUrl = cached.affiliate_url;
     if (cached.set_id && (!imageUrl || !affiliateUrl)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: series } = await (admin as any)
         .from("sets")
         .select("image_url, affiliate_url")
@@ -205,6 +207,7 @@ ${searchContext}
     // Save configuration (length, weight→total_weight, swing_weight) for shaft_variant_id=null
     // head_id, verified, total_weight, shaft_variant_id, source not in generated types
     if (headId && (specs.length != null || specs.weight != null || specs.swing_weight != null)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: existingConfig } = await (admin as any)
         .from("clubs")
         .select("id, verified")
@@ -221,8 +224,10 @@ ${searchContext}
       };
 
       if (existingConfig && !existingConfig.verified) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await admin.from("clubs").update(configFields as any).eq("id", existingConfig.id);
       } else if (!existingConfig) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await admin.from("clubs").insert(configFields as any);
       }
       // Skip if existingConfig.verified === true (preserve verified data)

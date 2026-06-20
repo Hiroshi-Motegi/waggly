@@ -211,7 +211,7 @@ function BagPageInner() {
   async function saveOrder() {
     await Promise.all(
       localClubs.map((club, index) =>
-        updateClub(club.id, { sort_order: index } as any)
+        updateClub(club.id, { sort_order: index })
       )
     );
     setIsReordering(false);

@@ -112,21 +112,21 @@ async function routeLocal(
     const conds: string[] = [];
     const status = params.get("status");
     const bagNum = params.get("bag_number");
-    const values: any[] = [];
+    const values: (string | number)[] = [];
     if (status) { conds.push("status = ?"); values.push(status); }
     if (bagNum) { conds.push("bag_number = ?"); values.push(Number(bagNum)); }
     if (conds.length) sql += " WHERE " + conds.join(" AND ");
     sql += " ORDER BY sort_order ASC";
     const clubs = await q(sql, values);
     // Attach images for each club (single IN query instead of N+1)
-    const clubIds = clubs.map((c: any) => c.id);
+    const clubIds = clubs.map((c: Record<string, unknown>) => c.id);
     if (clubIds.length > 0) {
       const placeholders = clubIds.map(() => "?").join(",");
       const allImages = await q(
         `SELECT * FROM club_images WHERE club_id IN (${placeholders}) ORDER BY is_primary DESC`,
         clubIds
       );
-      const imagesByClub = new Map<string, any[]>();
+      const imagesByClub = new Map<string, Record<string, unknown>[]>();
       for (const img of allImages) {
         if (!imagesByClub.has(img.club_id)) imagesByClub.set(img.club_id, []);
         imagesByClub.get(img.club_id)!.push(img);
@@ -237,8 +237,8 @@ async function routeLocal(
     const maintenances = await q(
       `SELECT *, 'maintenance' as type, done_at as date, type as maintenance_type FROM maintenances WHERE club_id = ?`, [clubId]
     );
-    const all = [...memos, ...practices, ...maintenances].sort((a: any, b: any) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime()
+    const all = [...memos, ...practices, ...maintenances].sort((a, b) =>
+      new Date(String(b.date)).getTime() - new Date(String(a.date)).getTime()
     );
     return all;
   }
@@ -368,7 +368,7 @@ async function routeLocal(
     const month = params.get("month");
 
     let sql = "SELECT * FROM practice_sessions";
-    const sqlParams: any[] = [];
+    const sqlParams: (string | number)[] = [];
 
     if (month) {
       const start = `${month}-01`;
@@ -386,7 +386,7 @@ async function routeLocal(
     // Attach practice_clubs for each session
     for (const s of sessions) {
       const clubs = await q("SELECT pc.*, c.club_number, c.category FROM practice_clubs pc LEFT JOIN clubs c ON pc.club_id = c.id WHERE pc.session_id = ?", [s.id]);
-      s.practice_clubs = clubs.map((pc: any) => ({ ...pc, club: { id: pc.club_id, club_number: pc.club_number, category: pc.category } }));
+      s.practice_clubs = clubs.map((pc: Record<string, unknown>) => ({ ...pc, club: { id: pc.club_id, club_number: pc.club_number, category: pc.category } }));
     }
     return sessions;
   }
@@ -486,7 +486,7 @@ async function routeLocal(
     const params = new URLSearchParams(path.split("?")[1] ?? "");
     const status = params.get("status");
     let sql = "SELECT * FROM accessories";
-    const params2: any[] = [];
+    const params2: string[] = [];
     if (status) { sql += " WHERE status = ?"; params2.push(status); }
     sql += " ORDER BY created_at DESC";
     return q(sql, params2);
@@ -535,7 +535,7 @@ async function routeLocal(
   // ---- Practice Locations ----
   if (path === "/api/practice/locations" && method === "GET") {
     const rows = await q("SELECT DISTINCT location FROM practice_sessions WHERE location IS NOT NULL ORDER BY location");
-    return rows.map((r: any) => r.location);
+    return rows.map((r: Record<string, unknown>) => r.location);
   }
 
   // ---- Stubs for server-only features (return empty data in local mode) ----

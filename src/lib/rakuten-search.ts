@@ -45,7 +45,7 @@ export async function searchRakutenClub(maker: string, model: string, clubNumber
     if (!res.ok) return { imageUrl: null, affiliateUrl: null };
     const data = await res.json();
     const item = (data.Items ?? []).find(
-      (i: any) => !EXCLUDE_WORDS.some((w) => (i.itemName ?? "").includes(w)),
+      (i: { itemName?: string }) => !EXCLUDE_WORDS.some((w) => (i.itemName ?? "").includes(w)),
     );
     if (!item) return { imageUrl: null, affiliateUrl: null };
 
@@ -113,7 +113,7 @@ export async function lookupRakutenUrl(url: string): Promise<{
 
     // Find exact item by code, or fall back to first result
     const items = data.Items ?? [];
-    const exact = items.find((i: any) => i.itemCode === `${shopCode}:${itemCode}`);
+    const exact = items.find((i: { itemCode?: string }) => i.itemCode === `${shopCode}:${itemCode}`);
     const item = exact ?? items[0];
     if (!item) return { imageUrl: null, affiliateUrl: null };
 
