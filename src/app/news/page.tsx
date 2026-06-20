@@ -19,8 +19,11 @@ export default async function NewsTopPage() {
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
       <div className="flex flex-col items-center w-full">
         {/* Header */}
-        <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3">
-          <div className="flex flex-col items-center gap-0.5">
+        <div className="flex items-center w-full max-w-screen-sm py-3 px-3 relative">
+          <Link href="/" className="absolute left-3 p-1 text-white/70 hover:text-white transition-colors">
+            <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </Link>
+          <div className="flex flex-col items-center gap-0.5 mx-auto">
             <Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} />
             <h1 className="text-sm font-bold text-white">ゴルフ最新ニュース</h1>
           </div>
