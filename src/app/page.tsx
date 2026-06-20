@@ -145,10 +145,12 @@ export default async function HomePage() {
         />
 
         {/* Public links */}
-        <div className="w-full px-4 py-6 border-t border-white/15">
-          <p className="text-lg font-bold text-white tracking-wider text-center mb-2">コンテンツ</p>
-          <p className="text-sm text-white/70 text-center leading-relaxed mb-4">会員登録なしで使えるコンテンツです。国内外メーカーのクラブスペック閲覧・比較や、ゴルフクラブの最新ニュースをチェックできます。</p>
-          <div className="flex justify-center gap-4">
+        <div className="w-full border-t border-white/30">
+          <div className="px-4 py-4">
+            <p className="text-lg font-bold text-white tracking-wider">コンテンツ</p>
+            <p className="text-sm text-white/70 leading-relaxed mt-1">会員登録なしで使えるコンテンツです。</p>
+          </div>
+          <div className="flex justify-center gap-4 px-4 pb-4">
             {[
               { href: "/catalog", icon: "/icons/nav-catalog-w.svg", label: "クラブカタログ" },
               { href: "/compare", icon: "/icons/nav-guide-w.svg", label: "クラブ比較" },
@@ -166,9 +168,14 @@ export default async function HomePage() {
 
         {/* お知らせ */}
         {announcements.length > 0 && (
-          <div className="w-full px-4 py-6 border-t border-white/15">
-            <p className="text-lg font-bold text-white tracking-wider text-center mb-4">お知らせ</p>
-            <AnnouncementsSection items={announcements} />
+          <div className="w-full border-t border-white/30">
+            <div className="px-4 py-4 flex items-center justify-between">
+              <p className="text-lg font-bold text-white tracking-wider">お知らせ</p>
+              <Link href="/announcements" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
+            </div>
+            <div className="px-3 pb-4">
+              <AnnouncementsSection items={announcements} />
+            </div>
           </div>
         )}
 
@@ -191,7 +198,7 @@ export default async function HomePage() {
         </div>
 
         {/* SEO content */}
-        <div className="w-full px-4 py-6 border-t border-white/15">
+        <div className="w-full px-4 py-6 border-t border-white/30">
           <p className="text-lg font-bold text-white tracking-wider text-center mb-4">Waggly（ワグリー）について</p>
           <div className="text-sm text-white/70 leading-relaxed space-y-2">
             <p>Wagglyは、ゴルファーのためのギア管理・練習記録アプリです。ドライバー、アイアン、パターなどのクラブ情報をまとめて管理できるほか、練習の記録やAIコーチへの相談機能も備えています。</p>

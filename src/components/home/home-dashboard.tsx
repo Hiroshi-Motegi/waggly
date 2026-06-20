@@ -8,7 +8,7 @@ import { useProfile, useFavoriteCourses } from "@/hooks/use-profile";
 import { RecentPractice } from "@/components/home/recent-practice";
 import { AdBanner } from "@/components/ad-banner";
 import { AnnouncementsSection } from "@/components/home/announcements-section";
-import type { Announcement } from "@/lib/announcements";
+import type { Announcement } from "@/lib/announcements-types";
 
 const featureCards = [
   { href: "/bag", icon: "/icons/my-bag.svg", label: "マイバッグ" },

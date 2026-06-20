@@ -1,17 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Announcement } from "@/lib/announcements-types";
 
-export interface Announcement {
-  id: string;
-  title: string;
-  body: string;
-  published_at: string;
-}
+export type { Announcement, AnnouncementCategory } from "@/lib/announcements-types";
+export { categoryLabel, categoryColor } from "@/lib/announcements-types";
 
 export async function fetchAnnouncements(limit = 5): Promise<Announcement[]> {
   const supabase = await createClient();
   const { data } = await (supabase as any)
     .from("announcements")
-    .select("id, title, body, published_at")
+    .select("id, title, body, published_at, category")
     .eq("is_published", true)
     .lte("published_at", new Date().toISOString())
     .order("published_at", { ascending: false })
@@ -23,7 +20,7 @@ export async function fetchAnnouncement(id: string): Promise<Announcement | null
   const supabase = await createClient();
   const { data } = await (supabase as any)
     .from("announcements")
-    .select("id, title, body, published_at")
+    .select("id, title, body, published_at, category")
     .eq("id", id)
     .eq("is_published", true)
     .single();
