@@ -13,7 +13,7 @@ export const metadata = {
 };
 
 export default async function NewsTopPage() {
-  const news = await fetchRelatedNews("クラブ 新製品", 50);
+  const news = await fetchRelatedNews("クラブ 新製品", 30);
 
   return (
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>

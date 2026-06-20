@@ -43,7 +43,7 @@ export default async function CategoryNewsPage({
   const config = CATEGORY_CONFIG[category];
   if (!config) notFound();
 
-  const news = await fetchRelatedNews(config.query, 50);
+  const news = await fetchRelatedNews(config.query, 30);
 
   return (
     <div className="relative min-h-screen" style={{ minHeight: "100dvh" }}>
