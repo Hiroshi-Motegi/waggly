@@ -30,9 +30,6 @@ export default async function NewsTopPage() {
           <Link href="/login" className="absolute right-3 text-xs text-white/70 hover:text-white transition-colors">ログイン</Link>
         </div>
 
-        {/* Banner */}
-        <PromoBanner />
-
         {/* Tabs */}
         <NewsTabBar />
 
@@ -41,7 +38,7 @@ export default async function NewsTopPage() {
           <NewsListInfinite items={news} />
         </div>
 
-        <div className="pb-8" />
+        <PromoBanner />
       </div>
     </div>
   );

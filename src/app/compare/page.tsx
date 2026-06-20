@@ -71,9 +71,6 @@ export default async function CompareTopPage() {
           <Link href="/login" className="absolute right-3 text-xs text-white/70 hover:text-white transition-colors">ログイン</Link>
         </div>
 
-        {/* Banner */}
-        <PromoBanner />
-
         {/* Search */}
         <div className="w-full max-w-screen-sm px-3 pt-4">
           <CompareSearchGlobal models={allModelOptions} />
@@ -117,6 +114,8 @@ export default async function CompareTopPage() {
         <p className="w-full max-w-screen-sm px-4 py-6 text-left text-xs text-white leading-relaxed">
           ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
         </p>
+
+        <PromoBanner />
       </div>
     </div>
   );

@@ -48,9 +48,6 @@ export default async function CatalogPage() {
           <Link href="/login" className="absolute right-3 text-xs text-white/70 hover:text-white transition-colors">ログイン</Link>
         </div>
 
-        {/* Banner */}
-        <PromoBanner />
-
         {/* Search */}
         <div className="w-full max-w-screen-sm px-4 pt-4 pb-2">
           <h2 className="text-sm font-bold text-white">クラブを検索</h2>
@@ -80,6 +77,8 @@ export default async function CatalogPage() {
 
         {/* Favorite clubs */}
         <FavoriteClubsList />
+
+        <PromoBanner />
       </div>
     </div>
   );
