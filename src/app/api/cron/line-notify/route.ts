@@ -13,14 +13,12 @@ async function fetchTargets(
   supabase: ReturnType<typeof getAdminClient>,
   type: NotificationType
 ): Promise<NotifyTarget[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = supabase as any;
   if (type === "add_club") {
-    const { data, error } = await client.rpc("get_line_notify_add_club");
+    const { data, error } = await supabase.rpc("get_line_notify_add_club");
     if (error) throw new Error(`add_club query failed: ${error.message}`);
     return (data ?? []) as NotifyTarget[];
   } else {
-    const { data, error } = await client.rpc("get_line_notify_share_card");
+    const { data, error } = await supabase.rpc("get_line_notify_share_card");
     if (error) throw new Error(`share_card query failed: ${error.message}`);
     return (data ?? []) as NotifyTarget[];
   }
@@ -35,8 +33,7 @@ async function logAndSend(
   let sent = 0;
   for (const { line_user_id, user_id } of targets) {
     // ログ先行挿入（intent-to-send: 挿入成功したユーザーのみ送信）
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: inserted } = await (supabase as any)
+    const { data: inserted } = await supabase
       .from("line_notification_logs")
       .insert({ user_id, notification_type: type })
       .select("id");

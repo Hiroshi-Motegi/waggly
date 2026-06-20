@@ -895,6 +895,35 @@ export type Database = {
         }
         Relationships: []
       }
+      line_notification_logs: {
+        Row: {
+          id: string
+          notification_type: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          notification_type: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          notification_type?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_notification_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenances: {
         Row: {
           club_id: string
@@ -1420,6 +1449,20 @@ export type Database = {
       ensure_usage_counter: {
         Args: { p_month: string; p_source: string; p_user_id: string }
         Returns: undefined
+      }
+      get_line_notify_add_club: {
+        Args: never
+        Returns: {
+          line_user_id: string
+          user_id: string
+        }[]
+      }
+      get_line_notify_share_card: {
+        Args: never
+        Returns: {
+          line_user_id: string
+          user_id: string
+        }[]
       }
       get_my_user_id: { Args: never; Returns: string }
       increment_coupon_usage: {
