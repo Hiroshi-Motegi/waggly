@@ -14,16 +14,18 @@ const links = [
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-16 text-center">
-      <p className="text-[96px] font-thin leading-none text-white tracking-[0.15em] select-none">
+    <div className="flex flex-col items-center min-h-[60vh] px-4 pt-12 pb-16 text-center">
+      <Image src="/images/witb-waggly-text.png" alt="Waggly" width={140} height={45} priority />
+
+      <p className="text-[96px] font-thin leading-none text-white tracking-[0.15em] select-none mt-10">
         404
       </p>
       <Image src="/ball/ball-sad-w.png" alt="" width={64} height={64} className="mt-4" />
       <p className="text-2xl font-thin text-white mt-4 tracking-[0.2em]">Not Found</p>
       <p className="text-sm text-white mt-1">ページが見つかりません。</p>
 
-      <div className="mt-10 w-full border-t border-white/15 pt-6 px-4">
-        <p className="text-xs text-white/50 text-center mb-5">以下のページからアクセスしてください</p>
+      <div className="mt-12 w-full border-t border-white/15 pt-8 px-4">
+        <p className="text-sm text-white text-center mb-8">以下のページからアクセスしてください</p>
         <div className="grid grid-cols-3 gap-y-6">
           {links.map(({ href, label, icon }) => (
             <Link
