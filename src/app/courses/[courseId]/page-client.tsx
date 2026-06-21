@@ -3,7 +3,7 @@ import { Loading } from "@/components/loading";
 
 import { useEffect, useState, use } from "react";
 import Image from "next/image";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
@@ -121,14 +121,24 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   const [imageIndex, setImageIndex] = useState(0);
   const { user } = useAuth();
   const { courses: favCourses, refetch: refetchFav } = useFavoriteCourses();
-  const [favLoading, setFavLoading] = useState(false);
-  const isFavorited = favCourses.some((c) => c.gora_course_id === Number(courseId));
+  const [optimisticFav, setOptimisticFav] = useState<boolean | null>(null);
+  const [pending, setPending] = useState(false);
+  const serverFav = favCourses.some((c) => c.gora_course_id === Number(courseId));
+  const isFavorited = optimisticFav ?? serverFav;
+
+  // Sync optimistic state back to server state once refetch completes
+  useEffect(() => { setOptimisticFav(null); }, [favCourses]);
 
   async function toggleFavorite() {
-    if (!course) return;
-    setFavLoading(true);
+    if (!course || pending) return;
+
+    const wasFav = isFavorited;
+    // Optimistic update
+    setOptimisticFav(!wasFav);
+    setPending(true);
+
     try {
-      if (isFavorited) {
+      if (wasFav) {
         const fav = favCourses.find((c) => c.gora_course_id === Number(courseId));
         if (fav) await removeFavoriteCourse(fav.id);
       } else {
@@ -142,10 +152,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
         });
       }
       refetchFav();
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // Revert on error
+      setOptimisticFav(wasFav);
     } finally {
-      setFavLoading(false);
+      setPending(false);
     }
   }
 
@@ -199,14 +210,9 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
         {user && (
           <button
             onClick={toggleFavorite}
-            disabled={favLoading}
             className="flex items-center justify-center rounded-full bg-white h-[40px] w-[40px]"
           >
-            {favLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-[#006728]" />
-            ) : (
-              <Heart className={`h-5 w-5 ${isFavorited ? "fill-red-500 text-red-500" : "text-[#006728]"}`} />
-            )}
+            <Heart className={`h-5 w-5 transition-colors ${isFavorited ? "fill-red-500 text-red-500" : "text-[#006728]"} ${pending ? "animate-pulse" : ""}`} />
           </button>
         )}
       </PageHeader>

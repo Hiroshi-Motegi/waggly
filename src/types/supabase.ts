@@ -355,6 +355,8 @@ export type Database = {
           lie: number | null
           loft: number | null
           model_id: string
+          shaft_name: string | null
+          shaft_flex: string | null
           sort_order: number
           swing_weight: string | null
           updated_at: string
@@ -372,6 +374,8 @@ export type Database = {
           lie?: number | null
           loft?: number | null
           model_id: string
+          shaft_name?: string | null
+          shaft_flex?: string | null
           sort_order?: number
           swing_weight?: string | null
           updated_at?: string
@@ -389,6 +393,8 @@ export type Database = {
           lie?: number | null
           loft?: number | null
           model_id?: string
+          shaft_name?: string | null
+          shaft_flex?: string | null
           sort_order?: number
           swing_weight?: string | null
           updated_at?: string

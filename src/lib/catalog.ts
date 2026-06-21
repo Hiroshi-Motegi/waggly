@@ -46,6 +46,8 @@ export type CatalogSpec = {
   id: string;
   model_id: string;
   club_number: string;
+  shaft_name: string | null;
+  shaft_flex: string | null;
   loft: number | null;
   lie: number | null;
   bounce: number | null;
