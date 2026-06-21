@@ -253,6 +253,7 @@ export type Database = {
       catalog_grips: {
         Row: {
           created_at: string
+          description: string | null
           grip_name: string
           grip_size: string | null
           id: string
@@ -268,6 +269,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           grip_name: string
           grip_size?: string | null
           id?: string
@@ -283,6 +285,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           grip_name?: string
           grip_size?: string | null
           id?: string
@@ -301,7 +304,9 @@ export type Database = {
       catalog_makers: {
         Row: {
           created_at: string
+          description: string | null
           id: string
+          image_url: string | null
           is_visible: boolean
           name: string
           name_ja: string | null
@@ -311,7 +316,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
+          image_url?: string | null
           is_visible?: boolean
           name: string
           name_ja?: string | null
@@ -321,7 +328,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
+          image_url?: string | null
           is_visible?: boolean
           name?: string
           name_ja?: string | null

@@ -23,7 +23,7 @@ export function AdminModal({ open, onClose, title, children }: AdminModalProps) 
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      className="rounded-xl border border-[#e0e0e0] bg-white p-0 shadow-xl backdrop:bg-black/40 max-w-lg w-full"
+      className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 rounded-xl border border-[#e0e0e0] bg-white p-0 shadow-xl backdrop:bg-black/40 max-w-lg w-full"
     >
       <div className="flex items-center justify-between border-b border-[#e5e5e5] px-4 py-3">
         <h3 className="text-sm font-bold text-[#006728]">{title}</h3>

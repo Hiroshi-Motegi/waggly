@@ -41,7 +41,10 @@ interface ShaftSpecEditorProps {
 export function ShaftSpecEditor({ specs, clubNumbers, shaftOptions, onChange, onAddShaft, onRemoveShaft }: ShaftSpecEditorProps) {
   const [visibleFields, setVisibleFields] = useState<string[]>(["weight", "swing_weight"]);
   const [addingShaft, setAddingShaft] = useState(false);
-  const [selectedShaftId, setSelectedShaftId] = useState("");
+  const [manualShaftName, setManualShaftName] = useState("");
+  const [manualShaftFlex, setManualShaftFlex] = useState("");
+  const [inputMode, setInputMode] = useState<"select" | "manual">("select");
+  const [shaftSearch, setShaftSearch] = useState("");
 
   // Group specs by shaft_name + shaft_flex
   const shaftGroups: { name: string; flex: string; rows: SpecRow[] }[] = [];
@@ -72,14 +75,6 @@ export function ShaftSpecEditor({ specs, clubNumbers, shaftOptions, onChange, on
     const spec = rows.find((s) => s.club_number === clubNumber);
     const val = spec?.[field];
     return val != null ? String(val) : "";
-  }
-
-  function handleAddShaft() {
-    const shaft = shaftOptions.find((s) => s.id === selectedShaftId);
-    if (!shaft) return;
-    onAddShaft(shaft.shaft_name, shaft.flex ?? "");
-    setSelectedShaftId("");
-    setAddingShaft(false);
   }
 
   const colors = ["bg-white", "bg-[#f8faf8]"];
@@ -142,20 +137,94 @@ export function ShaftSpecEditor({ specs, clubNumbers, shaftOptions, onChange, on
       </div>
 
       {addingShaft ? (
-        <div className="flex items-center gap-2">
-          <select
-            value={selectedShaftId}
-            onChange={(e) => setSelectedShaftId(e.target.value)}
-            className="h-7 rounded border border-input bg-background px-2 text-xs"
-          >
-            <option value="">シャフトを選択...</option>
-            {shaftOptions.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.shaft_name} {s.flex ?? ""}
-              </option>
-            ))}
-          </select>
-          <button onClick={handleAddShaft} className="text-xs font-bold text-[#006728] hover:underline">追加</button>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs">
+            <button
+              onClick={() => setInputMode("select")}
+              className={`px-2 py-0.5 rounded ${inputMode === "select" ? "bg-[#006728] text-white" : "border border-[#ddd] text-[#555]"}`}
+            >
+              登録済みから選択
+            </button>
+            <button
+              onClick={() => setInputMode("manual")}
+              className={`px-2 py-0.5 rounded ${inputMode === "manual" ? "bg-[#006728] text-white" : "border border-[#ddd] text-[#555]"}`}
+            >
+              直接入力
+            </button>
+          </div>
+
+          {inputMode === "select" ? (
+            <div className="space-y-2">
+              <input
+                value={shaftSearch}
+                onChange={(e) => setShaftSearch(e.target.value)}
+                placeholder="シャフト名で検索..."
+                className="h-8 w-64 rounded border border-input bg-background px-3 text-xs"
+                autoFocus
+              />
+              {shaftSearch.length >= 1 && (
+                <div className="max-h-48 overflow-y-auto border border-[#e5e5e5] rounded-md bg-white">
+                  {shaftOptions
+                    .filter((s) => {
+                      const target = `${s.shaft_name} ${s.flex ?? ""}`.toLowerCase();
+                      return shaftSearch.toLowerCase().split(/\s+/).every((w) => target.includes(w));
+                    })
+                    .map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => {
+                          onAddShaft(s.shaft_name, s.flex ?? "");
+                          setShaftSearch("");
+                          setAddingShaft(false);
+                        }}
+                        className="block w-full text-left px-3 py-1.5 text-xs hover:bg-[#f5f5f5] border-b border-[#f0f0f0]"
+                      >
+                        <span className="font-medium">{s.shaft_name}</span>
+                        {s.flex && <span className="ml-2 text-[#888]">{s.flex}</span>}
+                      </button>
+                    ))
+                  }
+                  {shaftOptions.filter((s) => {
+                      const target = `${s.shaft_name} ${s.flex ?? ""}`.toLowerCase();
+                      return shaftSearch.toLowerCase().split(/\s+/).every((w) => target.includes(w));
+                    }).length === 0 && (
+                    <p className="px-3 py-2 text-xs text-[#aaa]">見つかりません</p>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <input
+                value={manualShaftName}
+                onChange={(e) => setManualShaftName(e.target.value)}
+                placeholder="シャフト名"
+                className="h-7 rounded border border-input bg-background px-2 text-xs w-40"
+              />
+              <input
+                value={manualShaftFlex}
+                onChange={(e) => setManualShaftFlex(e.target.value)}
+                placeholder="フレックス (S, SR等)"
+                className="h-7 rounded border border-input bg-background px-2 text-xs w-32"
+              />
+              <button
+                onClick={() => {
+                  const name = manualShaftName.trim();
+                  const flex = manualShaftFlex.trim();
+                  if (name) {
+                    onAddShaft(name, flex);
+                    setManualShaftName("");
+                    setManualShaftFlex("");
+                    setAddingShaft(false);
+                  }
+                }}
+                className="text-xs font-bold text-[#006728] hover:underline"
+              >
+                追加
+              </button>
+            </div>
+          )}
+
           <button onClick={() => setAddingShaft(false)} className="text-xs text-[#888] hover:underline">キャンセル</button>
         </div>
       ) : (

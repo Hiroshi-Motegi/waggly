@@ -48,6 +48,8 @@ function ModelList() {
   const [page, setPage] = useState(1);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [allSelected, setAllSelected] = useState(false);
+  const [loadingAll, setLoadingAll] = useState(false);
 
   const { data: makers = [] } = useSWR<Maker[]>("/api/admin/catalog/makers", async (url: string) => {
     const res = await apiFetch(url); return res.ok ? res.json() : [];
@@ -76,7 +78,7 @@ function ModelList() {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids: [...selected], ...updates }),
     });
-    setSelected(new Set()); mutate();
+    setSelected(new Set()); setAllSelected(false); mutate();
   }
 
   async function handleBulkDelete() {
@@ -88,12 +90,38 @@ function ModelList() {
         body: JSON.stringify({ id }),
       })
     ));
-    setSelected(new Set());
+    setSelected(new Set()); setAllSelected(false);
     mutate();
   }
 
   function toggleSelect(id: string) {
     setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+    setAllSelected(false);
+  }
+
+  async function handleSelectAll() {
+    setLoadingAll(true);
+    try {
+      // Build same filter params but fetch all pages
+      const allQs = new URLSearchParams();
+      if (search) allQs.set("search", search);
+      if (makerSlug) allQs.set("maker_slug", makerSlug);
+      if (category) allQs.set("category", category);
+      if (releaseYear) allQs.set("release_year", releaseYear);
+      if (isVisible) allQs.set("is_visible", isVisible);
+      if (verification) allQs.set("verification_status", verification);
+      if (noSpecs) allQs.set("no_specs", "true");
+      allQs.set("page_size", "10000");
+      const res = await apiFetch(`/api/admin/catalog/models?${allQs}`);
+      if (res.ok) {
+        const json = await res.json();
+        const allIds = (json.items ?? []).map((m: CatalogModel) => m.id);
+        setSelected(new Set(allIds));
+        setAllSelected(true);
+      }
+    } finally {
+      setLoadingAll(false);
+    }
   }
 
   // Generate release year options from data
@@ -155,7 +183,24 @@ function ModelList() {
         { label: "確認中", onClick: () => handleBulkUpdate({ verification_status: "in_review" }) },
         { label: "未確認", onClick: () => handleBulkUpdate({ verification_status: "unverified" }) },
         { label: "削除", onClick: () => handleBulkDelete(), variant: "danger" },
-      ]} onClear={() => setSelected(new Set())} />
+      ]} onClear={() => { setSelected(new Set()); setAllSelected(false); }} />
+      {selected.size > 0 && selected.size >= models.length && !allSelected && total > selected.size && (
+        <div className="rounded-lg border border-[#006728]/30 bg-[#e6f2eb] px-4 py-2 text-sm text-center">
+          ページ内の{models.length}件を選択中。
+          <button
+            onClick={handleSelectAll}
+            disabled={loadingAll}
+            className="ml-2 font-bold text-[#006728] hover:underline"
+          >
+            {loadingAll ? "読み込み中..." : `フィルタ条件に一致する全${total}件を選択`}
+          </button>
+        </div>
+      )}
+      {allSelected && selected.size > 0 && (
+        <div className="rounded-lg border border-[#006728]/30 bg-[#e6f2eb] px-4 py-2 text-sm text-center">
+          全{selected.size}件を選択中
+        </div>
+      )}
       <div className="flex gap-2 flex-wrap">
         <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="モデル名で検索..." className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm w-52" />
         <select value={makerSlug} onChange={(e) => { setMakerSlug(e.target.value); setPage(1); }} className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm">

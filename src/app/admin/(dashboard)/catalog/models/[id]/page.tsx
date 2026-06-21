@@ -46,6 +46,7 @@ const categories = [
 
 async function fetcher<T>(url: string): Promise<T> {
   const res = await apiFetch(url);
+  if (!res.ok) return [] as unknown as T;
   return res.json();
 }
 
@@ -55,14 +56,12 @@ function ModelEditInner() {
   const [saving, setSaving] = useState(false);
 
   // ---- Data fetching ----
-  const { data: model, mutate: mutateModel } = useSWR<CatalogModel>(
-    `/api/admin/catalog/models?search=&id=${modelId}`,
-    // We need single model fetch — use list endpoint filtered, or fetch all and find
-    async () => {
-      // Fetch via list and find by id (no dedicated single-model endpoint)
-      const res = await apiFetch(`/api/admin/catalog/models?page_size=1000`);
-      const { items } = await res.json();
-      return items.find((m: CatalogModel) => m.id === modelId) ?? null;
+  const { data: model, mutate: mutateModel } = useSWR<CatalogModel | null>(
+    `/api/admin/catalog/models?id=${modelId}`,
+    async (url: string) => {
+      const res = await apiFetch(url);
+      if (!res.ok) return null;
+      return res.json();
     }
   );
 
@@ -274,7 +273,8 @@ function ModelEditInner() {
     router.push("/admin/catalog");
   }
 
-  if (!model) return <div className="p-4 text-sm text-[#888]">読み込み中...</div>;
+  if (model === undefined) return <div className="p-4 text-sm text-[#888]">読み込み中...</div>;
+  if (model === null) return <div className="p-4 text-sm text-red-600">モデルが見つかりません</div>;
 
   return (
     <div className="space-y-4 p-4">
@@ -319,10 +319,24 @@ function ModelEditInner() {
             <textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value || null })} rows={2} className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm" />
           </label>
         </div>
-        <label className="flex items-center gap-2 text-xs font-bold text-[#555] mt-2">
-          <input type="checkbox" checked={form.is_visible ?? false} onChange={(e) => setForm({ ...form, is_visible: e.target.checked })} />
-          公開する
-        </label>
+        <div className="flex items-center gap-6 mt-2">
+          <label className="flex items-center gap-2 text-xs font-bold text-[#555]">
+            <input type="checkbox" checked={form.is_visible ?? false} onChange={(e) => setForm({ ...form, is_visible: e.target.checked })} />
+            公開する
+          </label>
+          <label className="flex items-center gap-2 text-xs font-bold text-[#555]">
+            確認状態
+            <select
+              value={form.verification_status ?? "unverified"}
+              onChange={(e) => setForm({ ...form, verification_status: e.target.value })}
+              className="rounded-md border border-input px-2 py-1 text-sm"
+            >
+              <option value="unverified">未確認</option>
+              <option value="in_review">確認中</option>
+              <option value="verified">確認済み</option>
+            </select>
+          </label>
+        </div>
       </AdminFormSection>
 
       {/* Head specs */}

@@ -7,6 +7,8 @@ const createMakerSchema = z.object({
   name: z.string().min(1).max(100),
   name_ja: z.string().max(100).optional().nullable(),
   slug: z.string().min(1).max(100),
+  image_url: z.string().url().optional().nullable(),
+  description: z.string().max(5000).optional().nullable(),
   is_visible: z.boolean().optional(),
   sort_order: z.number().int().optional(),
 });
@@ -16,6 +18,8 @@ const updateMakerSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   name_ja: z.string().max(100).optional().nullable(),
   slug: z.string().max(100).optional(),
+  image_url: z.string().url().optional().nullable(),
+  description: z.string().max(5000).optional().nullable(),
   sort_order: z.number().int().optional(),
   is_visible: z.boolean().optional(),
 });

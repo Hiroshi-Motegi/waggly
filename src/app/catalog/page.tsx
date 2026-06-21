@@ -59,7 +59,7 @@ export default async function CatalogPage() {
           <p className="text-sm text-white/70">カタログデータがありません</p>
         ) : (
           <div className="grid grid-cols-2 gap-2">
-            {makers.map((maker) => (
+            {makers.filter((maker) => allModels.some((m) => m.maker_slug === maker.slug)).map((maker) => (
               <Link
                 key={maker.slug}
                 href={`/catalog/${maker.slug}`}

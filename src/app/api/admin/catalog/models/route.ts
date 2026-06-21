@@ -50,6 +50,19 @@ export async function GET(request: NextRequest) {
   const { adminClient } = result;
 
   const params = request.nextUrl.searchParams;
+
+  // Single model by ID
+  const modelId = params.get("id");
+  if (modelId) {
+    const { data, error } = await adminClient
+      .from("catalog_models")
+      .select("*, catalog_specs(count)")
+      .eq("id", modelId)
+      .single();
+    if (error) return supabaseError(error);
+    return NextResponse.json(data);
+  }
+
   const noSpecs = params.get("no_specs") === "true";
 
   // When no_specs filter is active, we can't paginate at DB level

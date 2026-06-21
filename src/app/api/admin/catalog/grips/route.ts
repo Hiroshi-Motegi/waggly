@@ -10,6 +10,7 @@ const gripSchema = z.object({
   weight: z.number().optional().nullable(),
   material: z.string().max(100).optional().nullable(),
   image_url: z.string().url().optional().nullable(),
+  description: z.string().max(5000).optional().nullable(),
   is_visible: z.boolean().optional(),
   verification_status: z.enum(["verified", "in_review", "unverified"]).optional(),
   spec_updated_at: z.string().optional().nullable(),

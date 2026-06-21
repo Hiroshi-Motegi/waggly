@@ -6,7 +6,7 @@ import useSWR from "swr";
 import { type ColumnDef, type SortingState } from "@tanstack/react-table";
 import { AdminTable } from "@/components/admin/admin-table";
 import { AdminBreadcrumb } from "@/components/admin/admin-breadcrumb";
-import { AdminModal } from "@/components/admin/admin-modal";
+import { BulkActionBar } from "@/components/admin/bulk-action-bar";
 import { apiFetch } from "@/lib/api-client";
 
 interface Maker {
@@ -16,13 +16,13 @@ interface Maker {
   slug: string;
   sort_order: number;
   is_visible: boolean;
+  image_url: string | null;
   catalog_models: [{ count: number }];
 }
 
 function MakerList() {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Partial<Maker> | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const { data: makers = [], mutate } = useSWR<Maker[]>(
     "/api/admin/catalog/makers",
@@ -31,19 +31,6 @@ function MakerList() {
       return res.ok ? res.json() : [];
     }
   );
-
-  async function handleSave() {
-    if (!editing) return;
-    const method = editing.id ? "PATCH" : "POST";
-    await apiFetch("/api/admin/catalog/makers", {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editing),
-    });
-    setModalOpen(false);
-    setEditing(null);
-    mutate();
-  }
 
   async function handleSortMove(id: string, direction: -1 | 1) {
     const idx = makers.findIndex((m) => m.id === id);
@@ -73,7 +60,35 @@ function MakerList() {
     mutate();
   }
 
+  async function handleBulkVisible(isVisible: boolean) {
+    await Promise.all([...selected].map((id) =>
+      apiFetch("/api/admin/catalog/makers", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, is_visible: isVisible }),
+      })
+    ));
+    setSelected(new Set()); mutate();
+  }
+
+  function toggleSelect(id: string) {
+    setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+  }
+
   const columns: ColumnDef<Maker>[] = [
+    {
+      id: "select",
+      header: () => (
+        <input type="checkbox"
+          checked={selected.size === makers.length && makers.length > 0}
+          onChange={() => setSelected(selected.size === makers.length ? new Set() : new Set(makers.map((m) => m.id)))}
+        />
+      ),
+      enableSorting: false,
+      cell: ({ row }) => (
+        <input type="checkbox" checked={selected.has(row.original.id)}
+          onChange={() => toggleSelect(row.original.id)} onClick={(e) => e.stopPropagation()} />
+      ),
+    },
     {
       id: "sort",
       header: "順",
@@ -85,7 +100,30 @@ function MakerList() {
         </div>
       ),
     },
-    { accessorKey: "name", header: "名前", enableSorting: false },
+    {
+      id: "image",
+      header: "",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="w-8 h-8 rounded border border-[#e5e5e5] bg-[#f5f5f5] overflow-hidden">
+          {row.original.image_url ? (
+            <img src={row.original.image_url} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <span className="flex items-center justify-center h-full text-[8px] text-[#ccc]">-</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "name",
+      header: "名前",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <Link href={`/admin/catalog/makers/${row.original.id}`} className="font-medium text-[#006728] hover:underline">
+          {row.original.name}
+        </Link>
+      ),
+    },
     {
       accessorKey: "name_ja",
       header: "日本語名",
@@ -122,12 +160,12 @@ function MakerList() {
       header: "操作",
       enableSorting: false,
       cell: ({ row }) => (
-        <button
-          onClick={() => { setEditing(row.original); setModalOpen(true); }}
+        <Link
+          href={`/admin/catalog/makers/${row.original.id}`}
           className="text-xs text-[#006728] hover:underline font-bold"
         >
           編集
-        </button>
+        </Link>
       ),
     },
   ];
@@ -147,6 +185,11 @@ function MakerList() {
         </Link>
       </div>
 
+      <BulkActionBar count={selected.size} actions={[
+        { label: "公開にする", onClick: () => handleBulkVisible(true) },
+        { label: "非公開にする", onClick: () => handleBulkVisible(false) },
+      ]} onClear={() => setSelected(new Set())} />
+
       <AdminTable<Maker>
         data={makers}
         columns={columns}
@@ -157,41 +200,6 @@ function MakerList() {
         onSortingChange={setSorting}
         onPageChange={() => {}}
       />
-
-      <AdminModal open={modalOpen} onClose={() => { setModalOpen(false); setEditing(null); }} title="メーカー編集">
-        {editing && (
-          <div className="space-y-3">
-            <label className="block text-xs font-bold text-[#555]">
-              名前 *
-              <input
-                value={editing.name ?? ""}
-                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="block text-xs font-bold text-[#555]">
-              日本語名
-              <input
-                value={editing.name_ja ?? ""}
-                onChange={(e) => setEditing({ ...editing, name_ja: e.target.value || null })}
-                className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="block text-xs font-bold text-[#555]">
-              Slug *
-              <input
-                value={editing.slug ?? ""}
-                onChange={(e) => setEditing({ ...editing, slug: e.target.value })}
-                className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm font-mono"
-              />
-            </label>
-            <div className="flex gap-3 pt-2">
-              <button onClick={handleSave} className="rounded bg-[#006728] px-6 py-2 text-sm font-bold text-white hover:bg-[#005520]">保存</button>
-              <button onClick={() => { setModalOpen(false); setEditing(null); }} className="rounded border border-[#ddd] px-6 py-2 text-sm hover:bg-[#f5f5f5]">キャンセル</button>
-            </div>
-          </div>
-        )}
-      </AdminModal>
     </div>
   );
 }
