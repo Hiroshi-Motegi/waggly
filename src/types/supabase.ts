@@ -99,6 +99,39 @@ export type Database = {
           },
         ]
       }
+      announcements: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          is_published: boolean
+          published_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       account_deletion_reasons: {
         Row: {
           created_at: string
@@ -217,12 +250,61 @@ export type Database = {
           },
         ]
       }
+      catalog_grips: {
+        Row: {
+          created_at: string
+          grip_name: string
+          grip_size: string | null
+          id: string
+          image_url: string | null
+          is_visible: boolean
+          maker: string | null
+          material: string | null
+          sort_order: number
+          spec_updated_at: string | null
+          updated_at: string
+          verification_status: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          grip_name: string
+          grip_size?: string | null
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean
+          maker?: string | null
+          material?: string | null
+          sort_order?: number
+          spec_updated_at?: string | null
+          updated_at?: string
+          verification_status?: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          grip_name?: string
+          grip_size?: string | null
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean
+          maker?: string | null
+          material?: string | null
+          sort_order?: number
+          spec_updated_at?: string | null
+          updated_at?: string
+          verification_status?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
       catalog_makers: {
         Row: {
           created_at: string
           id: string
           is_visible: boolean
           name: string
+          name_ja: string | null
           slug: string
           sort_order: number
           updated_at: string
@@ -232,6 +314,7 @@ export type Database = {
           id?: string
           is_visible?: boolean
           name: string
+          name_ja?: string | null
           slug: string
           sort_order?: number
           updated_at?: string
@@ -241,11 +324,114 @@ export type Database = {
           id?: string
           is_visible?: boolean
           name?: string
+          name_ja?: string | null
           slug?: string
           sort_order?: number
           updated_at?: string
         }
         Relationships: []
+      }
+      catalog_model_attributes: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          model_id: string
+          sort_order: number
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          model_id: string
+          sort_order?: number
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          model_id?: string
+          sort_order?: number
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_model_attributes_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_model_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          model_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          model_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          model_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_model_images_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_model_links: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          model_id: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          model_id: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          model_id?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_model_links_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_models"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       catalog_models: {
         Row: {
@@ -275,6 +461,8 @@ export type Database = {
           slug: string | null
           source_url: string | null
           updated_at: string
+          verification_status: string
+          spec_updated_at: string | null
         }
         Insert: {
           alpen_pid?: string | null
@@ -303,6 +491,8 @@ export type Database = {
           slug?: string | null
           source_url?: string | null
           updated_at?: string
+          verification_status?: string
+          spec_updated_at?: string | null
         }
         Update: {
           alpen_pid?: string | null
@@ -331,6 +521,8 @@ export type Database = {
           slug?: string | null
           source_url?: string | null
           updated_at?: string
+          verification_status?: string
+          spec_updated_at?: string | null
         }
         Relationships: [
           {
@@ -341,6 +533,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      catalog_shafts: {
+        Row: {
+          created_at: string
+          flex: string | null
+          id: string
+          image_url: string | null
+          is_visible: boolean
+          kick_point: string | null
+          maker: string | null
+          shaft_name: string
+          shaft_type: string | null
+          shaft_weight: number | null
+          sort_order: number
+          spec_updated_at: string | null
+          torque: number | null
+          updated_at: string
+          verification_status: string
+        }
+        Insert: {
+          created_at?: string
+          flex?: string | null
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean
+          kick_point?: string | null
+          maker?: string | null
+          shaft_name: string
+          shaft_type?: string | null
+          shaft_weight?: number | null
+          sort_order?: number
+          spec_updated_at?: string | null
+          torque?: number | null
+          updated_at?: string
+          verification_status?: string
+        }
+        Update: {
+          created_at?: string
+          flex?: string | null
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean
+          kick_point?: string | null
+          maker?: string | null
+          shaft_name?: string
+          shaft_type?: string | null
+          shaft_weight?: number | null
+          sort_order?: number
+          spec_updated_at?: string | null
+          torque?: number | null
+          updated_at?: string
+          verification_status?: string
+        }
+        Relationships: []
       }
       catalog_specs: {
         Row: {
@@ -496,6 +742,7 @@ export type Database = {
         Row: {
           bag_number: number
           bounce: number | null
+          catalog_model_id: string | null
           category: string
           club_number: string
           created_at: string
@@ -533,6 +780,7 @@ export type Database = {
         Insert: {
           bag_number?: number
           bounce?: number | null
+          catalog_model_id?: string | null
           category: string
           club_number: string
           created_at?: string
@@ -570,6 +818,7 @@ export type Database = {
         Update: {
           bag_number?: number
           bounce?: number | null
+          catalog_model_id?: string | null
           category?: string
           club_number?: string
           created_at?: string
@@ -605,6 +854,13 @@ export type Database = {
           weight?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "clubs_catalog_model_id_fkey"
+            columns: ["catalog_model_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_models"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clubs_user_id_fkey"
             columns: ["user_id"]
