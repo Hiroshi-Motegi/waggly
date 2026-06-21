@@ -44,6 +44,7 @@ export async function updateSession(request: NextRequest) {
       pathname.startsWith("/news") ||
       pathname.startsWith("/announcements") ||
       pathname.startsWith("/report") ||
+      pathname === "/admin/login" ||
       pathname === "/terms" ||
       pathname === "/privacy" ||
       pathname === "/legal" ||

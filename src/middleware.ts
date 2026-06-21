@@ -25,7 +25,7 @@ function checkBasicAuth(request: NextRequest): NextResponse | null {
 export async function middleware(request: NextRequest) {
   // Basic auth for admin pages and APIs
   const { pathname } = request.nextUrl;
-  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+  if ((pathname.startsWith("/admin") && pathname !== "/admin/login") || pathname.startsWith("/api/admin")) {
     // Allow Vercel Cron requests (authenticated by CRON_SECRET in the route handler)
     const authHeader = request.headers.get("authorization");
     const isCron = authHeader === `Bearer ${process.env.CRON_SECRET}`;

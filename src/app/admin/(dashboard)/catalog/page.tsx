@@ -79,6 +79,19 @@ function ModelList() {
     setSelected(new Set()); mutate();
   }
 
+  async function handleBulkDelete() {
+    if (!confirm(`${selected.size}件のモデルを削除しますか？関連するスペック・画像等もすべて削除されます。`)) return;
+    await Promise.all([...selected].map((id) =>
+      apiFetch("/api/admin/catalog/models", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      })
+    ));
+    setSelected(new Set());
+    mutate();
+  }
+
   function toggleSelect(id: string) {
     setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   }
@@ -89,7 +102,7 @@ function ModelList() {
   const columns: ColumnDef<CatalogModel>[] = [
     {
       id: "select", header: () => (
-        <input type="checkbox" checked={selected.size === models.length && models.length > 0}
+        <input type="checkbox" title="ページ内すべて選択" checked={selected.size === models.length && models.length > 0}
           onChange={() => setSelected(selected.size === models.length ? new Set() : new Set(models.map((m) => m.id)))} />
       ), enableSorting: false,
       cell: ({ row }) => <input type="checkbox" checked={selected.has(row.original.id)} onChange={() => toggleSelect(row.original.id)} onClick={(e) => e.stopPropagation()} />,
@@ -141,6 +154,7 @@ function ModelList() {
         { label: "確認済み", onClick: () => handleBulkUpdate({ verification_status: "verified" }) },
         { label: "確認中", onClick: () => handleBulkUpdate({ verification_status: "in_review" }) },
         { label: "未確認", onClick: () => handleBulkUpdate({ verification_status: "unverified" }) },
+        { label: "削除", onClick: () => handleBulkDelete(), variant: "danger" },
       ]} onClear={() => setSelected(new Set())} />
       <div className="flex gap-2 flex-wrap">
         <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="モデル名で検索..." className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm w-52" />

@@ -92,11 +92,33 @@ function ModelEditInner() {
   const [attrs, setAttrs] = useState<ModelAttr[]>([]);
   const [originalSpecIds, setOriginalSpecIds] = useState<Set<string>>(new Set());
 
-  // Sync fetched data to local state
-  useEffect(() => { if (model) setForm(model); }, [model]);
-  useEffect(() => { setSpecs(specsRaw); setOriginalSpecIds(new Set(specsRaw.map((s) => s.id))); }, [specsRaw]);
-  useEffect(() => { setLinks(linksRaw); }, [linksRaw]);
-  useEffect(() => { setAttrs(attrsRaw); }, [attrsRaw]);
+  // Sync fetched data to local state (only on initial load, not on every SWR revalidation)
+  const [initialized, setInitialized] = useState(false);
+  useEffect(() => {
+    if (initialized || !model) return;
+    setForm(model);
+    setInitialized(true);
+  }, [model, initialized]);
+
+  const [specsInitialized, setSpecsInitialized] = useState(false);
+  useEffect(() => {
+    if (specsInitialized || specsRaw.length === 0) return;
+    setSpecs(specsRaw);
+    setOriginalSpecIds(new Set(specsRaw.map((s) => s.id)));
+    setSpecsInitialized(true);
+  }, [specsRaw, specsInitialized]);
+
+  const [linksInitialized, setLinksInitialized] = useState(false);
+  useEffect(() => {
+    if (linksInitialized) return;
+    if (linksRaw.length > 0) { setLinks(linksRaw); setLinksInitialized(true); }
+  }, [linksRaw, linksInitialized]);
+
+  const [attrsInitialized, setAttrsInitialized] = useState(false);
+  useEffect(() => {
+    if (attrsInitialized) return;
+    if (attrsRaw.length > 0) { setAttrs(attrsRaw); setAttrsInitialized(true); }
+  }, [attrsRaw, attrsInitialized]);
 
   // ---- Spec mutations ----
   const headSpecs = specs.filter((s) => !s.shaft_name);

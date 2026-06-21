@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 interface NavGroup {
   label: string;
@@ -42,6 +43,14 @@ const navGroups: NavGroup[] = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/admin/login");
+    router.refresh();
+  }
 
   return (
     <aside className="w-[220px] shrink-0 bg-[#1a1a1a] text-white h-screen sticky top-0 overflow-y-auto">
@@ -75,6 +84,14 @@ export function AdminSidebar() {
           </div>
         ))}
       </nav>
+      <div className="mt-auto border-t border-[#333] px-3 py-3">
+        <button
+          onClick={handleLogout}
+          className="block w-full rounded-md px-2 py-1.5 text-left text-sm text-[#999] hover:text-white"
+        >
+          ログアウト
+        </button>
+      </div>
     </aside>
   );
 }

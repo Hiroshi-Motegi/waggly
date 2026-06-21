@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Link from "next/link";
 import useSWR from "swr";
 import { type ColumnDef, type SortingState } from "@tanstack/react-table";
 import { AdminTable } from "@/components/admin/admin-table";
@@ -108,7 +109,7 @@ function GripList() {
       <AdminBreadcrumb items={[{ label: "カタログ", href: "/admin/catalog" }, { label: "グリップ管理" }]} />
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">グリップ管理 <span className="text-base font-normal text-[#888]">({grips.length}件)</span></h1>
-        <button onClick={() => { setEditing({}); setModalOpen(true); }} className="rounded bg-[#006728] px-4 py-2 text-sm font-bold text-white hover:bg-[#005520]">＋ 新規追加</button>
+        <Link href="/admin/catalog/grips/new" className="rounded bg-[#006728] px-4 py-2 text-sm font-bold text-white hover:bg-[#005520]">＋ 新規追加</Link>
       </div>
       <BulkActionBar count={selected.size} actions={[
         { label: "公開にする", onClick: () => handleBulkUpdate({ is_visible: true }) },
@@ -119,7 +120,7 @@ function GripList() {
       ]} onClear={() => setSelected(new Set())} />
       <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="グリップ名で検索..." className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm w-60" />
       <AdminTable<Grip> data={grips} columns={columns} total={grips.length} page={1} pageSize={1000} sorting={sorting} onSortingChange={setSorting} onPageChange={() => {}} />
-      <AdminModal open={modalOpen} onClose={() => { setModalOpen(false); setEditing(null); }} title={editing?.id ? "グリップ編集" : "グリップ新規追加"}>
+      <AdminModal open={modalOpen} onClose={() => { setModalOpen(false); setEditing(null); }} title="グリップ編集">
         {editing && (
           <div className="space-y-3">
             <label className="block text-xs font-bold text-[#555]">グリップ名 *<input value={editing.grip_name ?? ""} onChange={(e) => setEditing({ ...editing, grip_name: e.target.value })} className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm" /></label>

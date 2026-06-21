@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Link from "next/link";
 import useSWR from "swr";
 import { type ColumnDef, type SortingState } from "@tanstack/react-table";
 import { AdminTable } from "@/components/admin/admin-table";
@@ -210,12 +211,12 @@ function ShaftList() {
         <h1 className="text-xl font-bold">
           シャフト管理 <span className="text-base font-normal text-[#888]">({shafts.length}件)</span>
         </h1>
-        <button
-          onClick={() => { setEditing({}); setModalOpen(true); }}
+        <Link
+          href="/admin/catalog/shafts/new"
           className="rounded bg-[#006728] px-4 py-2 text-sm font-bold text-white hover:bg-[#005520]"
         >
           ＋ 新規追加
-        </button>
+        </Link>
       </div>
 
       <BulkActionBar
@@ -259,7 +260,7 @@ function ShaftList() {
         onPageChange={() => {}}
       />
 
-      <AdminModal open={modalOpen} onClose={() => { setModalOpen(false); setEditing(null); }} title={editing?.id ? "シャフト編集" : "シャフト新規追加"}>
+      <AdminModal open={modalOpen} onClose={() => { setModalOpen(false); setEditing(null); }} title="シャフト編集">
         {editing && (
           <div className="space-y-3">
             <label className="block text-xs font-bold text-[#555]">
