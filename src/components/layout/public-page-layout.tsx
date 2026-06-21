@@ -3,6 +3,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { PublicPageHeader } from "@/components/layout/public-page-header";
 
+
 export function PublicPageLayout({
   title,
   backHref,

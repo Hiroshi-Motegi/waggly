@@ -57,7 +57,7 @@ export default async function HomePage() {
         </div>
 
         {/* Section title */}
-        <p className="text-2xl font-bold text-white tracking-wider text-center mb-2 mt-10">ワグリーでできること</p>
+        <p id="features" className="text-2xl font-bold text-white tracking-wider text-center mb-2 mt-10">ワグリーでできること</p>
         <p className="text-sm text-white/70 text-center mb-8">基本的な機能は会員登録だけで利用できます。</p>
 
         {/* Feature 1: クラブ管理 */}
