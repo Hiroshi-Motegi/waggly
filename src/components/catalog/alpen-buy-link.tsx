@@ -6,6 +6,12 @@ interface AlpenBuyLinkProps {
   label?: string;
 }
 
+function handleAffiliateClick(alpenPid: string) {
+  import("@/lib/gtm").then(({ trackEvent }) =>
+    trackEvent("affiliate_clicked", { pid: alpenPid, provider: "alpen" })
+  );
+}
+
 export function AlpenBuyLink({ alpenPid, label = "アルペンで購入する" }: AlpenBuyLinkProps) {
   if (!alpenPid) return null;
 
@@ -18,6 +24,7 @@ export function AlpenBuyLink({ alpenPid, label = "アルペンで購入する" }
         href={a8Link}
         rel="nofollow"
         target="_blank"
+        onClick={() => handleAffiliateClick(alpenPid)}
         className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#006728] px-6 py-3 text-sm font-bold text-white hover:bg-[#005520] transition-colors w-full"
       >
         {label}

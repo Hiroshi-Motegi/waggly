@@ -87,6 +87,9 @@ export default function ContactPage() {
         return;
       }
 
+      import("@/lib/gtm").then(({ trackEvent }) =>
+        trackEvent("contact_submitted", { category: form.category })
+      );
       router.push("/help/contact/complete");
     } catch {
       setSubmitError("送信に失敗しました");

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Check } from "lucide-react";
@@ -9,6 +9,7 @@ import { useUsage } from "@/hooks/use-usage";
 import { apiFetch } from "@/lib/api-client";
 import { PLAN_ID } from "@/lib/plans";
 import { PageHeader } from "@/components/layout/page-header";
+import { trackEvent } from "@/lib/gtm";
 
 function PlanPageInner() {
   const router = useRouter();
@@ -19,6 +20,10 @@ function PlanPageInner() {
   const [loading, setLoading] = useState(false);
   const isPro = plan?.id === PLAN_ID.PRO;
   const isPaused = subscription?.status === "paused";
+
+  useEffect(() => {
+    trackEvent("plan_page_viewed", { current_plan: isPro ? "pro" : "free" });
+  }, [isPro]);
 
   async function handlePause() {
     const periodEnd = subscription?.current_period_end
@@ -34,6 +39,7 @@ function PlanPageInner() {
     try {
       const res = await apiFetch("/api/subscription/pause", { method: "POST" });
       if (res.ok) {
+        trackEvent("plan_paused");
         mutate();
       } else {
         alert("プラン変更に失敗しました。");

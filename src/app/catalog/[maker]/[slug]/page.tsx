@@ -9,6 +9,7 @@ import { PromoBanner } from "@/components/catalog/promo-banner";
 import { FavoriteClubButton } from "@/components/catalog/favorite-club-button";
 import { AlpenAdImage } from "@/components/catalog/alpen-ad-image";
 import { AlpenBuyLink } from "@/components/catalog/alpen-buy-link";
+import { EventTracker } from "@/components/event-tracker";
 
 export const revalidate = 86400;
 
@@ -86,6 +87,7 @@ export default async function ModelDetailPage({
   return (
     <PublicPageLayout title="ゴルフクラブカタログ" backHref={`/catalog/${maker}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <EventTracker event="catalog_viewed" params={{ maker: model.maker, model: model.name, category: model.category }} />
 
         {/* Model header card */}
         <div className="w-full max-w-screen-sm">

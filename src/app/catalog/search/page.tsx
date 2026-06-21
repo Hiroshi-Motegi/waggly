@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { getAllModels } from "@/lib/catalog";
 import { PublicPageLayout } from "@/components/layout/public-page-layout";
+import { EventTracker } from "@/components/event-tracker";
 
 export const revalidate = 86400;
 
@@ -51,6 +52,7 @@ export default async function CatalogSearchPage({
 
   return (
     <PublicPageLayout title="検索結果" backHref="/catalog">
+      {query.length >= 2 && <EventTracker event="catalog_searched" params={{ query, results_count: results.length }} />}
 
         {/* Query */}
         <div className="w-full max-w-screen-sm pt-2 pb-1">

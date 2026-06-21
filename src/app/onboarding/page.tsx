@@ -9,6 +9,9 @@ export default function OnboardingPreview() {
       <Onboarding
         onComplete={() => {
           localStorage.setItem("onboarding_version", String(ONBOARDING_VERSION));
+          import("@/lib/gtm").then(({ trackEvent }) =>
+            trackEvent("onboarding_completed")
+          );
           window.location.href = "/";
         }}
       />

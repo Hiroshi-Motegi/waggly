@@ -26,6 +26,8 @@ export default function DeleteAccountPage() {
         body: JSON.stringify({ reason: reason.trim() }),
       });
       if (res.ok) {
+        const { trackEvent } = await import("@/lib/gtm");
+        trackEvent("account_deleted", { reason: reason.trim() });
         // ログアウト処理
         if (isNative()) {
           const { createClient } = await import("@/lib/supabase/client");

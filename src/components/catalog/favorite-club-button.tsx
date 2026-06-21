@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Heart } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useFavoriteClubs } from "@/hooks/use-favorite-clubs";
+import { trackEvent } from "@/lib/gtm";
 
 export function FavoriteClubButton({ modelId }: { modelId: string }) {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export function FavoriteClubButton({ modelId }: { modelId: string }) {
       return;
     }
     toggle(modelId);
+    if (!isFav) trackEvent("catalog_favorited", { model_id: modelId });
   }
 
   return (
