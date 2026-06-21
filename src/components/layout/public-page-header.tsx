@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { LoginPromoBanner } from "@/components/catalog/login-promo-banner";
 
-export function PublicPageHeader({ title, backHref }: { title: string; backHref?: string }) {
+export function PublicPageHeader({ title, backHref, backFallbackHref }: { title: string; backHref?: string; backFallbackHref?: string }) {
   const { user } = useAuth();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -23,7 +23,7 @@ export function PublicPageHeader({ title, backHref }: { title: string; backHref?
   }, [user]);
 
   if (user) {
-    return <PageHeader title={title} variant="dark" backHref={backHref} />;
+    return <PageHeader title={title} variant="dark" backHref={backHref} backFallbackHref={backFallbackHref} />;
   }
 
   return (
@@ -32,7 +32,7 @@ export function PublicPageHeader({ title, backHref }: { title: string; backHref?
         <div className="absolute inset-0" style={{ background: "#7cb668 url(/images/home-bg.jpg) center / cover fixed", backgroundBlendMode: "soft-light" }} />
         <div className="absolute inset-0 bg-black/20" />
         <div className="flex items-center justify-center w-full max-w-screen-sm relative py-3 px-3 mx-auto">
-          <BackButton fallbackHref={backHref ?? "/"} />
+          <BackButton fallbackHref={backHref ?? backFallbackHref ?? "/"} />
           <Link href="/"><Image src="/icons/waggly-logo-white.svg" alt="Waggly" width={101} height={32} /></Link>
           <div className="absolute right-3 flex items-center gap-2">
             <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="p-1"><Image src="/icons/user-icon-w.svg" alt="ログイン" width={28} height={28} /></Link>

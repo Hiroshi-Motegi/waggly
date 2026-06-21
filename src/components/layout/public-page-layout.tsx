@@ -7,10 +7,12 @@ import { PublicPageHeader } from "@/components/layout/public-page-header";
 export function PublicPageLayout({
   title,
   backHref,
+  backFallbackHref,
   children,
 }: {
   title: string;
   backHref?: string;
+  backFallbackHref?: string;
   children: React.ReactNode;
 }) {
   const { user } = useAuth();
@@ -25,7 +27,7 @@ export function PublicPageLayout({
           marginBottom: "calc(-1 * var(--bottom-nav-height))",
         }}
       >
-        <PublicPageHeader title={title} backHref={backHref} />
+        <PublicPageHeader title={title} backHref={backHref} backFallbackHref={backFallbackHref} />
         {children}
       </div>
     );
@@ -34,7 +36,7 @@ export function PublicPageLayout({
   return (
     <div className="relative">
       <div className="flex flex-col items-center w-full">
-        <PublicPageHeader title={title} backHref={backHref} />
+        <PublicPageHeader title={title} backHref={backHref} backFallbackHref={backFallbackHref} />
         <div className="w-full px-3 py-3 space-y-2">
           {children}
         </div>

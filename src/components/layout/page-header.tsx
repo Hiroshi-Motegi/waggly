@@ -8,12 +8,14 @@ interface PageHeaderProps {
   title: string;
   subtitle?: string;
   backHref?: string;
+  /** When set, prefer browser back and only use this href as fallback for direct access */
+  backFallbackHref?: string;
   showBack?: boolean;
   variant?: "default" | "dark";
   children?: React.ReactNode;
 }
 
-export function PageHeader({ title, subtitle, backHref, showBack = true, variant = "default", children }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, backHref, backFallbackHref, showBack = true, variant = "default", children }: PageHeaderProps) {
   const router = useRouter();
   const isDark = variant === "dark";
   const [scrolled, setScrolled] = useState(false);
@@ -52,7 +54,7 @@ export function PageHeader({ title, subtitle, backHref, showBack = true, variant
     })();
 
     if (blocked || window.history.length <= 1) {
-      router.push("/");
+      router.push(backFallbackHref ?? "/");
     } else {
       router.back();
     }

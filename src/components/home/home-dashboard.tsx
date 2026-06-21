@@ -1,14 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
+import { apiFetch } from "@/lib/api-client";
 import { usePracticeSessions } from "@/hooks/use-practice";
 import { useProfile, useFavoriteCourses } from "@/hooks/use-profile";
 import { RecentPractice } from "@/components/home/recent-practice";
 import { AdBanner } from "@/components/ad-banner";
 import { AnnouncementsSection } from "@/components/home/announcements-section";
 import type { Announcement } from "@/lib/announcements-types";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  driver: "ドライバー",
+  fairway_wood: "FW",
+  utility: "UT",
+  iron: "アイアン",
+  wedge: "ウェッジ",
+  putter: "パター",
+};
 
 const featureCards = [
   { href: "/bag", icon: "/icons/my-bag.svg", label: "マイバッグ" },
@@ -19,11 +30,32 @@ const featureCards = [
   { href: "/settings", icon: "/icons/settings.svg", label: "設定" },
 ];
 
+interface FavoriteClub {
+  id: string;
+  model_id: string;
+  catalog_models: {
+    name: string;
+    category: string;
+    slug: string;
+    maker: string;
+    maker_slug: string;
+  };
+}
+
 export function HomeDashboard({ announcements }: { announcements: Announcement[] }) {
   const { user } = useAuth();
   const { profile, isLoading: profileLoading } = useProfile();
   const { courses: favCourses } = useFavoriteCourses();
   const { sessions } = usePracticeSessions();
+  const [favClubs, setFavClubs] = useState<FavoriteClub[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    apiFetch("/api/catalog/favorites")
+      .then((res) => res.json())
+      .then((data) => { if (Array.isArray(data)) setFavClubs(data); })
+      .catch(() => {});
+  }, [user]);
 
   return (
     <div className="relative flex flex-col px-2 pt-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
@@ -89,6 +121,37 @@ export function HomeDashboard({ announcements }: { announcements: Announcement[]
           <Link href="/practice" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
         </div>
         <RecentPractice sessions={sessions} />
+
+        {/* Favorite clubs */}
+        <div className="flex items-center px-1 mt-4 mb-2">
+          <h3 className="flex-1 text-lg font-bold text-white">お気に入りクラブ</h3>
+          <Link href="/catalog/favorites" className="rounded-full border border-white px-3 py-0.5 text-sm font-bold text-white">すべて見る</Link>
+        </div>
+        <div className="rounded-lg bg-white p-3">
+          {favClubs.length > 0 ? (
+            favClubs.map((fav, i) => {
+              const m = fav.catalog_models;
+              return (
+                <Link
+                  key={fav.id}
+                  href={`/catalog/${m.maker_slug}/${m.slug}`}
+                  className={`flex items-center gap-2.5 py-2 ${i < favClubs.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-bold truncate">{m.name}</p>
+                    <p className="text-sm text-[#8b8b8b] truncate">{m.maker} · {CATEGORY_LABELS[m.category] ?? m.category}</p>
+                  </div>
+                  <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-40 shrink-0" style={{ width: "auto", height: "auto" }} />
+                </Link>
+              );
+            })
+          ) : (
+            <div className="flex flex-col items-center px-4 py-2 gap-3">
+              <p className="text-sm text-[#8b8b8b]">お気に入りはありません。</p>
+              <Link href="/catalog" className="w-full text-center text-sm font-bold text-[#006728] border border-[#006728] rounded-full py-2">お気に入りクラブを登録する</Link>
+            </div>
+          )}
+        </div>
 
         {/* Favorite courses */}
         <div className="flex items-center px-1 mt-4 mb-2">

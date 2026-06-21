@@ -585,7 +585,7 @@ export default function SettingsPage() {
           ].map((item, i, arr) => (
             <Link key={item.href} href={item.href}>
               <div className={`flex items-center gap-2.5 py-2.5 ${i < arr.length - 1 ? "border-b border-[#dfdfdf]" : ""}`}>
-                <span className="flex-1 text-base font-bold">{item.label}</span>
+                <span className="flex-1 text-base">{item.label}</span>
                 <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" style={{ width: "auto", height: "auto" }} />
               </div>
             </Link>

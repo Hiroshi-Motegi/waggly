@@ -27,7 +27,7 @@ export default function HelpIndexPage() {
                   i < items.length - 1 ? "border-b border-[#dfdfdf]" : ""
                 }`}
               >
-                <span className="flex-1 text-base font-bold">
+                <span className="flex-1 text-base">
                   {item.label}
                 </span>
                 <Image

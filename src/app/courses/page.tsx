@@ -71,24 +71,55 @@ export default function CoursesPage() {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const { courses: favCourses, refetch: refetchFav } = useFavoriteCourses();
+  const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
+  const [optimisticFavIds, setOptimisticFavIds] = useState<Set<number>>(new Set());
+
+  // Sync optimistic state with real data
+  useEffect(() => {
+    setOptimisticFavIds(new Set(favCourses.filter((c) => c.gora_course_id != null).map((c) => c.gora_course_id as number)));
+  }, [favCourses]);
 
   async function toggleFav(e: React.MouseEvent, course: GolfCourse) {
     e.preventDefault();
     e.stopPropagation();
-    const existing = favCourses.find((c) => c.gora_course_id === course.golfCourseId);
-    if (existing) {
-      await removeFavoriteCourse(existing.id);
-    } else {
-      await addFavoriteCourse({
-        gora_course_id: course.golfCourseId,
-        course_name: course.golfCourseName,
-        course_image_url: course.golfCourseImageUrl,
-        evaluation: course.evaluation,
-        address: course.address,
-        is_manual: false,
+    const id = course.golfCourseId;
+    if (pendingIds.has(id)) return;
+
+    const isFav = optimisticFavIds.has(id);
+
+    // Optimistic update
+    setPendingIds((prev) => new Set(prev).add(id));
+    setOptimisticFavIds((prev) => {
+      const next = new Set(prev);
+      if (isFav) next.delete(id); else next.add(id);
+      return next;
+    });
+
+    try {
+      const existing = favCourses.find((c) => c.gora_course_id === id);
+      if (existing) {
+        await removeFavoriteCourse(existing.id);
+      } else {
+        await addFavoriteCourse({
+          gora_course_id: id,
+          course_name: course.golfCourseName,
+          course_image_url: course.golfCourseImageUrl,
+          evaluation: course.evaluation,
+          address: course.address,
+          is_manual: false,
+        });
+      }
+      refetchFav();
+    } catch {
+      // Revert on error
+      setOptimisticFavIds((prev) => {
+        const next = new Set(prev);
+        if (isFav) next.add(id); else next.delete(id);
+        return next;
       });
+    } finally {
+      setPendingIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
     }
-    refetchFav();
   }
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -209,7 +240,7 @@ export default function CoursesPage() {
                         onClick={(e) => toggleFav(e, course)}
                         className="absolute top-2 right-2 z-10"
                       >
-                        <Heart className={`h-5 w-5 ${favCourses.some((c) => c.gora_course_id === course.golfCourseId) ? "fill-red-500 text-red-500" : "text-[#c4c4c4]"}`} />
+                        <Heart className={`h-5 w-5 transition-colors ${optimisticFavIds.has(course.golfCourseId) ? "fill-red-500 text-red-500" : "text-[#c4c4c4]"} ${pendingIds.has(course.golfCourseId) ? "animate-pulse" : ""}`} />
                       </button>
                     )}
                     <div className="flex gap-3">

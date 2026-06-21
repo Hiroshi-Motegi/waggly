@@ -85,7 +85,7 @@ export default async function ModelDetailPage({
   };
 
   return (
-    <PublicPageLayout title="ゴルフクラブカタログ" backHref={`/catalog/${maker}`}>
+    <PublicPageLayout title="ゴルフクラブカタログ" backFallbackHref={`/catalog/${maker}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <EventTracker event="catalog_viewed" params={{ maker: model.maker, model: model.name, category: model.category }} />
 

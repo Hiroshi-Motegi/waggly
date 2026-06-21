@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Plus, X, ChevronDown, ChevronUp } from "lucide-react";
-// import { apiFetch } from "@/lib/api-client"; // TODO: AI自動入力復活時に戻す
-// import { useAuth } from "@/hooks/use-auth"; // TODO: AI自動入力復活時に戻す
+import { Plus, X, ChevronDown, ChevronUp, Search } from "lucide-react";
+import { apiFetch } from "@/lib/api-client";
 import type { Club, ClubCategory } from "@/types/database";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { clubValidationSchema } from "@/lib/form-validation";
@@ -149,45 +148,116 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
     validateOnChange(field, value);
   }
 
-  /* TODO: AI自動入力復活時に戻す
-  const [isSearching, setIsSearching] = useState(false);
+  // Catalog spec lookup
+  interface CatalogSearchResult {
+    id: string;
+    name: string;
+    maker: string;
+    maker_slug: string;
+    slug: string;
+    category: string;
+    release_year: number | null;
+    shaft_names: string[] | null;
+    catalog_specs: {
+      club_number: string;
+      loft: number | null;
+      lie: number | null;
+      bounce: number | null;
+      length: number | null;
+      weight: number | null;
+      swing_weight: string | null;
+      head_volume: number | null;
+      head_weight: number | null;
+      face_angle: number | null;
+    }[];
+  }
 
-  async function handleAutofill() {
-    setIsSearching(true);
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [catalogResults, setCatalogResults] = useState<CatalogSearchResult[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  // Step: "models" = model list, "specs" = spec list for selected model
+  const [catalogStep, setCatalogStep] = useState<"models" | "specs">("models");
+  const [selectedModel, setSelectedModel] = useState<CatalogSearchResult | null>(null);
+
+  async function catalogSearch() {
+    setCatalogLoading(true);
+    setCatalogError(null);
+    setCatalogResults([]);
+    setCatalogStep("models");
+    setSelectedModel(null);
     try {
-      const res = await apiFetch("/api/clubs/autofill", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category: form.category,
-          club_number: form.club_number,
-          maker: form.maker,
-          model: form.model,
-          shaft_name: form.shaft_name,
-          shaft_flex: form.shaft_flex,
-          release_year: form.release_year,
-        }),
-      });
+      const params = new URLSearchParams();
+      if (form.category) params.set("category", form.category);
+      if (form.maker) params.set("maker", form.maker);
+      if (form.model) params.set("model", form.model);
+      const res = await apiFetch(`/api/catalog/search?${params}`);
       if (!res.ok) throw new Error("検索に失敗しました");
-      const specs = await res.json();
-      setForm((prev) => ({
-        ...prev,
-        loft: prev.loft ?? specs.loft ?? prev.loft,
-        lie: prev.lie ?? specs.lie ?? prev.lie,
-        length: prev.length ?? specs.length ?? prev.length,
-        distance: prev.distance ?? specs.distance ?? prev.distance,
-        weight: prev.weight ?? specs.weight ?? prev.weight,
-        swing_weight: prev.swing_weight || specs.swing_weight || prev.swing_weight,
-        head_volume: prev.head_volume ?? specs.head_volume ?? prev.head_volume,
-        head_weight: prev.head_weight ?? specs.head_weight ?? prev.head_weight,
-      }));
-    } catch (error) {
-      console.error("Autofill failed:", error);
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        setCatalogError("該当するモデルが見つかりませんでした");
+      } else if (data.length === 1 && data[0].catalog_specs.length <= 1) {
+        // Single model with single spec: apply directly
+        applySpec(data[0], data[0].catalog_specs[0] ?? null);
+        setCatalogOpen(false);
+      } else {
+        setCatalogResults(data);
+      }
+    } catch {
+      setCatalogError("検索に失敗しました");
     } finally {
-      setIsSearching(false);
+      setCatalogLoading(false);
     }
   }
-  */
+
+  function selectModel(model: CatalogSearchResult) {
+    if (model.catalog_specs.length === 0) {
+      // No specs, just fill basic info
+      applySpec(model, null);
+      setCatalogOpen(false);
+    } else if (model.catalog_specs.length === 1) {
+      applySpec(model, model.catalog_specs[0]);
+      setCatalogOpen(false);
+    } else {
+      // Multiple specs (番手), show spec picker
+      setSelectedModel(model);
+      setCatalogStep("specs");
+    }
+  }
+
+  const currentYear = new Date().getFullYear();
+
+  function applySpec(model: CatalogSearchResult, spec: CatalogSearchResult["catalog_specs"][0] | null) {
+    // Guard: skip values outside validation ranges
+    function inRange(v: number | null | undefined, min: number, max: number) {
+      return v != null && v >= min && v <= max ? v : undefined;
+    }
+    setForm((prev) => ({
+      ...prev,
+      maker: prev.maker || model.maker,
+      model: prev.model || model.name,
+      release_year: prev.release_year ?? inRange(model.release_year, 1950, currentYear + 1) ?? prev.release_year,
+      club_number: spec?.club_number ?? prev.club_number,
+      loft: inRange(spec?.loft, 0, 90) ?? prev.loft,
+      lie: inRange(spec?.lie, 0, 90) ?? prev.lie,
+      length: inRange(spec?.length, 0, 60) ?? prev.length,
+      weight: inRange(spec?.weight, 0, 1000) ?? prev.weight,
+      swing_weight: spec?.swing_weight || prev.swing_weight,
+      head_volume: inRange(spec?.head_volume, 0, 600) ?? prev.head_volume,
+      head_weight: inRange(spec?.head_weight, 0, 400) ?? prev.head_weight,
+      bounce: inRange(spec?.bounce, 0, 30) ?? prev.bounce,
+      face_angle: inRange(spec?.face_angle, -5, 5) ?? prev.face_angle,
+    }));
+  }
+
+  function openCatalog() {
+    setCatalogOpen(true);
+    setCatalogResults([]);
+    setCatalogError(null);
+    setCatalogStep("models");
+    setSelectedModel(null);
+    catalogSearch();
+  }
 
   const presetNumbers = form.category ? (clubNumbersByCategory[form.category] ?? []) : [];
 
@@ -339,6 +409,15 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
 
       {/* クラブスペック */}
       <SectionAccordion id="spec" title="クラブスペック" isOpen={openSections.spec ?? true} onToggle={toggleSection} sectionRef={(el) => { sectionRefs.current.spec = el; }}>
+        <button
+          type="button"
+          onClick={openCatalog}
+          disabled={!form.category && !form.maker && !form.model}
+          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#006728] bg-[#f0f7f2] px-3 py-2.5 text-sm font-bold text-[#006728] disabled:opacity-40 mb-2"
+        >
+          <Search className="h-4 w-4" />
+          カタログからスペックを取得する
+        </button>
         <div className="grid grid-cols-2 gap-1.5 py-1">
           <SpecCell label="ロフト角" unit="°" value={form.loft} step="0.5" min={0} max={90}
             onChange={(v) => update("loft", v ? Number(v) : undefined)} />
@@ -441,6 +520,95 @@ export function ClubForm({ initialData, onSubmit, isSubmitting, showImagePicker,
           </button>
         )}
       </div>
+
+      {/* Catalog spec lookup modal */}
+      {catalogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => setCatalogOpen(false)}>
+          <div
+            className="w-full max-w-screen-sm rounded-2xl bg-white max-h-[70vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+              <h3 className="text-base font-bold">
+                {catalogStep === "specs" ? "番手を選択" : "モデルを選択"}
+              </h3>
+              <button type="button" onClick={() => setCatalogOpen(false)} className="p-1">
+                <X className="h-5 w-5 text-[#888]" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 pb-6">
+              {catalogLoading && (
+                <div className="flex justify-center py-8">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#006728] border-t-transparent" />
+                </div>
+              )}
+
+              {catalogError && (
+                <p className="py-8 text-center text-sm text-[#888]">{catalogError}</p>
+              )}
+
+              {/* Model list */}
+              {catalogStep === "models" && catalogResults.length > 0 && (
+                <div className="flex flex-col">
+                  {catalogResults.map((m, i) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => selectModel(m)}
+                      className={`flex items-center justify-between py-3 text-left ${i < catalogResults.length - 1 ? "border-b border-[#ececec]" : ""}`}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-[#006728] truncate">{m.name}</p>
+                        <p className="text-xs text-[#888]">
+                          {m.maker}
+                          {m.release_year ? ` · ${m.release_year}年` : ""}
+                          {m.catalog_specs.length > 0 ? ` · ${m.catalog_specs.length}番手` : ""}
+                        </p>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-[#bbb] -rotate-90 shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Spec (club_number) list */}
+              {catalogStep === "specs" && selectedModel && (
+                <div className="flex flex-col">
+                  <p className="text-xs text-[#888] pb-2">{selectedModel.maker} {selectedModel.name}</p>
+                  {selectedModel.catalog_specs.map((spec, i) => (
+                    <button
+                      key={spec.club_number}
+                      type="button"
+                      onClick={() => { applySpec(selectedModel, spec); setCatalogOpen(false); }}
+                      className={`flex items-center justify-between py-3 text-left ${i < selectedModel.catalog_specs.length - 1 ? "border-b border-[#ececec]" : ""}`}
+                    >
+                      <div>
+                        <p className="text-sm font-bold">{spec.club_number}</p>
+                        <p className="text-xs text-[#888]">
+                          {[
+                            spec.loft != null ? `ロフト ${spec.loft}°` : null,
+                            spec.lie != null ? `ライ ${spec.lie}°` : null,
+                            spec.length != null ? `長さ ${spec.length}"` : null,
+                          ].filter(Boolean).join(" / ") || "スペック情報なし"}
+                        </p>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-[#bbb] -rotate-90 shrink-0" />
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => { setCatalogStep("models"); setSelectedModel(null); }}
+                    className="mt-2 text-sm text-[#006728] font-bold text-center py-2"
+                  >
+                    モデル一覧に戻る
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
