@@ -194,10 +194,15 @@ function BagPageInner() {
   const weightInsights = useMemo(() => getWeightInsights(weightData), [weightData]);
   const showCharts = statusFilter === "bag1" || statusFilter === "bag2";
 
+  const hasCustomOrder = isBagView && clubs.some((c) => c.sort_order !== 0);
   const displayClubs = isReordering
     ? localClubs
     : isBagView
-      ? [...clubs].sort((a, b) => clubSortKey(a) - clubSortKey(b))
+      ? [...clubs].sort((a, b) =>
+          hasCustomOrder
+            ? a.sort_order - b.sort_order
+            : clubSortKey(a) - clubSortKey(b)
+        )
       : clubs;
 
   const bagCount = isBagView ? clubs.length : null;
