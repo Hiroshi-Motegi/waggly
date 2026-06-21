@@ -6,6 +6,12 @@ import { AuthContext } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 import { isNative } from "@/lib/platform";
 import { trackEvent } from "@/lib/gtm";
+
+function trackLogin(method: string) {
+  if (sessionStorage.getItem("login_tracked")) return;
+  sessionStorage.setItem("login_tracked", "1");
+  trackEvent("login", { method });
+}
 import type { User } from "@/types/database";
 import { showError } from "@/lib/toast";
 
@@ -102,11 +108,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
               setUser(result.user);
               if (result.isNew) trackEvent("sign_up", { method });
-              else trackEvent("login", { method });
+              else trackLogin(method);
             } else if (result.user) {
               setUser(result.user);
               if (result.isNew) trackEvent("sign_up", { method });
-              else trackEvent("login", { method });
+              else trackLogin(method);
               // 衝突なし・アップロード不要 → 通常 sync
               if (isNative()) {
                 try {
@@ -150,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (result.user) {
               setUser(result.user);
               if (result.isNew) trackEvent("sign_up", { method: "liff" });
-              else trackEvent("login", { method: "liff" });
+              else trackLogin("liff");
             }
           }
           if (deepLink) router.replace(deepLink);
@@ -192,7 +198,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (result.user) {
             setUser(result.user);
             if (result.isNew) trackEvent("sign_up", { method: "line" });
-            else trackEvent("login", { method: "line" });
+            else trackLogin("line");
           }
         }
 
