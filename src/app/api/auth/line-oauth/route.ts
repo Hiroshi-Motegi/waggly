@@ -110,20 +110,22 @@ export async function POST(request: NextRequest) {
     // 完全新規
     const { data: newUser } = await supabaseAdmin
       .from("users")
-      .insert({
-        display_name: displayName,
-        avatar_url: null,
-      })
+      .insert({})
       .select("id")
       .single();
 
-    // アバターを Storage に保存
-    if (newUser && avatarUrl) {
-      const storedUrl = await uploadAvatarFromUrl(supabaseAdmin, newUser.id, avatarUrl);
-      await supabaseAdmin.from("users").update({ avatar_url: storedUrl }).eq("id", newUser.id);
-    }
-
     if (newUser) {
+      // profiles にニックネームとアバターを保存
+      let storedAvatarUrl: string | null = null;
+      if (avatarUrl) {
+        storedAvatarUrl = await uploadAvatarFromUrl(supabaseAdmin, newUser.id, avatarUrl);
+      }
+      await supabaseAdmin.from("profiles").insert({
+        id: newUser.id,
+        nickname: displayName,
+        avatar_url: storedAvatarUrl,
+      });
+
       await supabaseAdmin.from("user_providers").insert({
         user_id: newUser.id,
         provider: "line",

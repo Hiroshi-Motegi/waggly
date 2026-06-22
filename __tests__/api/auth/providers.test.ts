@@ -80,12 +80,12 @@ describe("GET /api/auth/providers", () => {
     expect(json).toHaveLength(2);
     expect(json[0]).toEqual({
       provider: "google",
-      provider_email: "test@gmail.com",
+      email: "test@gmail.com",
       is_current: true,
     });
     expect(json[1]).toEqual({
       provider: "line",
-      provider_email: null,
+      email: null,
       is_current: false,
     });
   });
@@ -130,7 +130,7 @@ describe("GET /api/auth/providers", () => {
     expect(json).toHaveLength(1);
     expect(json[0]).toEqual({
       provider: "google",
-      provider_email: "test@gmail.com",
+      email: "test@gmail.com",
       is_current: true,
     });
   });

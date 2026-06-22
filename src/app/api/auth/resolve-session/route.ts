@@ -142,31 +142,27 @@ export async function POST(request: NextRequest) {
     authUser.user_metadata?.picture ??
     null;
 
-  const googleEmail =
-    providerInfo.provider === "google" ? (providerInfo.providerEmail ?? null) : null;
-
-  // まず仮の avatar_url でユーザー作成（user_id が必要なため）
   const { data: newUser, error: userError } = await supabase
     .from("users")
-    .insert({
-      display_name: displayName,
-      avatar_url: null,
-      google_email: googleEmail,
-    })
+    .insert({})
     .select("*")
     .single();
-
-  // アバターを Storage に保存して URL を更新
-  if (newUser && avatarUrl) {
-    const storedUrl = await uploadAvatarFromUrl(supabase, newUser.id, avatarUrl);
-    await supabase.from("users").update({ avatar_url: storedUrl }).eq("id", newUser.id);
-    newUser.avatar_url = storedUrl;
-  }
 
   if (userError || !newUser) {
     console.error("[resolve-session] Failed to create user:", userError);
     return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }
+
+  // profiles にニックネームとアバターを保存
+  let storedAvatarUrl: string | null = null;
+  if (avatarUrl) {
+    storedAvatarUrl = await uploadAvatarFromUrl(supabase, newUser.id, avatarUrl);
+  }
+  await supabase.from("profiles").insert({
+    id: newUser.id,
+    nickname: displayName,
+    avatar_url: storedAvatarUrl,
+  });
 
   await supabase.from("user_providers").insert({
     user_id: newUser.id,

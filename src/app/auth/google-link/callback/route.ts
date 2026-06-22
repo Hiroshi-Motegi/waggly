@@ -115,9 +115,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/settings?error=google_link_failed`);
   }
 
-  if (googleEmail) {
-    await supabaseAdmin.from("users").update({ google_email: googleEmail }).eq("id", originalUserId);
-  }
-
   return NextResponse.redirect(`${origin}/settings?linked=google`);
 }

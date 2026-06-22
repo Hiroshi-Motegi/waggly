@@ -17,21 +17,11 @@ export const GET = withErrorHandler(async () => {
 
   if (error) return supabaseError(error);
 
-  // Create if not exists — users テーブルの表示名・アバターを初期値に
+  // Create if not exists
   if (!data) {
-    const { data: user } = await supabase
-      .from("users")
-      .select("display_name, avatar_url")
-      .eq("id", userId)
-      .single();
-
     const { data: created, error: createError } = await supabase
       .from("profiles")
-      .insert({
-        id: userId,
-        nickname: user?.display_name ?? null,
-        avatar_url: user?.avatar_url ?? null,
-      })
+      .insert({ id: userId })
       .select()
       .single();
     if (createError) return supabaseError(createError);

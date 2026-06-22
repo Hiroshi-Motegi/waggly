@@ -31,7 +31,7 @@ export const GET = withErrorHandler(async () => {
 
   const result = (data ?? []).map((p: { provider: string; provider_email: string | null; auth_user_id: string | null }) => ({
     provider: p.provider,
-    provider_email: p.provider_email,
+    email: p.provider_email,
     is_current: p.auth_user_id === currentAuthUserId,
   }));
 

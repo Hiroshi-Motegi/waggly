@@ -90,8 +90,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
             <div className={`flex gap-2 items-start ${isUser ? "flex-row-reverse" : ""}`}>
               {isUser ? (
                 <Avatar className="h-8 w-8 shrink-0">
-                  <AvatarImage src={user?.avatar_url ?? undefined} />
-                  <AvatarFallback>{user?.display_name?.[0] ?? "U"}</AvatarFallback>
+                  <AvatarFallback>U</AvatarFallback>
                 </Avatar>
               ) : (
                 <img src="/icons/ai-coach.svg" alt="AI" className="h-8 w-8 shrink-0" />

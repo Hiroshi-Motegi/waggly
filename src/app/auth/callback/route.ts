@@ -118,7 +118,7 @@ async function handleGoogleLink(
   const { searchParams } = new URL(request.url);
   const originalUserId = searchParams.get("originalUser");
   const googleSub = googleUser.user_metadata?.sub ?? googleUser.id;
-  const googleEmail = googleUser.user_metadata?.email ?? googleUser.email ?? null;
+  const googleEmail = (googleUser.user_metadata?.email ?? googleUser.email ?? null) as string | null;
 
   if (!originalUserId) {
     return NextResponse.redirect(`${origin}/settings?error=missing_user`);
@@ -178,14 +178,6 @@ async function handleGoogleLink(
     provider_email: googleEmail,
     auth_user_id: googleUser.id,
   });
-
-  // Update google_email on users table too
-  if (googleEmail) {
-    await supabaseAdmin
-      .from("users")
-      .update({ google_email: googleEmail })
-      .eq("id", originalUserId);
-  }
 
   return NextResponse.redirect(`${origin}/settings?linked=google`);
 }

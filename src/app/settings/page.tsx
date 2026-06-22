@@ -70,10 +70,9 @@ export default function SettingsPage() {
     const params = new URLSearchParams(window.location.search);
     const linked = params.get("linked");
     if (linked) {
-      setLinkToast(`${linked === "google" ? "Google" : linked === "facebook" ? "Facebook" : "LINE"}を連携しました`);
+      const msg = `${linked === "google" ? "Google" : linked === "facebook" ? "Facebook" : "LINE"}を連携しました`;
+      setLinkToast(msg);
       window.history.replaceState(null, "", "/settings");
-      const timer = setTimeout(() => setLinkToast(null), 3000);
-      return () => clearTimeout(timer);
     }
     const conflict = params.get("conflict");
     if (conflict) {
@@ -99,6 +98,13 @@ export default function SettingsPage() {
       window.history.replaceState(null, "", "/settings");
     }
   }, []);
+
+  useEffect(() => {
+    if (!linkToast) return;
+    const timer = setTimeout(() => setLinkToast(null), 3000);
+    return () => clearTimeout(timer);
+  }, [linkToast]);
+
   const [usageLoaded, setUsageLoaded] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
 
@@ -426,14 +432,14 @@ export default function SettingsPage() {
       <div className="rounded-lg bg-white p-3">
         <div className="flex items-center gap-3">
           <Avatar className="h-14 w-14">
-            <AvatarImage src={profile?.avatar_url ?? (profileLoading ? undefined : user.avatar_url) ?? undefined} />
+            <AvatarImage src={profile?.avatar_url ?? undefined} />
             <AvatarFallback className="text-lg">
-              {profileLoading ? "" : (profile?.nickname ?? user.display_name ?? "?")[0]}
+              {profileLoading ? "" : (profile?.nickname ?? "?")[0]}
             </AvatarFallback>
           </Avatar>
           <div>
             <p className="text-base font-bold">
-              {profileLoading ? "　" : (profile?.nickname || user.display_name)}
+              {profileLoading ? "　" : (profile?.nickname || "ゲスト")}
             </p>
             <p className="text-sm text-[#8b8b8b]">ID: W-{user.id.replace(/-/g, "").substring(0, 12).toUpperCase()}</p>
           </div>
@@ -687,7 +693,7 @@ function AccountLinking({
 }) {
   const { setUser } = useAuth();
   const router = useRouter();
-  const [providers, setProviders] = useState<{ provider: string; provider_email?: string; is_current?: boolean }[]>([]);
+  const [providers, setProviders] = useState<{ provider: string; email?: string | null; is_current?: boolean }[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLineApp, setIsLineApp] = useState(false);
 
@@ -835,8 +841,6 @@ function AccountLinking({
     });
   }
 
-  const googleEmail = user.google_email ?? providers.find((p) => p.provider === "google")?.provider_email;
-
   return (
     <div className="flex flex-col gap-1 rounded-lg bg-white p-3">
       <div className="flex items-center justify-between py-2 border-b border-[#ececec]">
@@ -892,13 +896,15 @@ function AccountLinking({
                 <button onClick={() => unlinkProvider("google")} className="text-xs text-[#8b8b8b] border border-[#c4c4c4] rounded-full px-2.5 py-0.5 shrink-0">解除</button>
               )}
             </div>
-            {googleEmail && <span className="text-xs text-[#8b8b8b]">{googleEmail}</span>}
+            {providers.find((p) => p.provider === "google")?.email && (
+              <span className="text-xs text-[#8b8b8b]">{providers.find((p) => p.provider === "google")!.email}</span>
+            )}
           </div>
         ) : (
           <button onClick={linkGoogle} className="text-sm font-bold text-[#006728] border border-[#006728] rounded-full px-3 py-1">連携する</button>
         )}
       </div>
-      {isLineApp && !googleEmail && (
+      {isLineApp && !hasGoogle && (
         <p className="text-xs text-[#8b8b8b] px-1 -mt-1">LINEアプリ内ではGoogle連携を利用できません。外部ブラウザを起動します。</p>
       )}
     </div>

@@ -95,7 +95,7 @@ export async function getApiAuth(): Promise<{
     // Create dev user + provider
     const { data: newUser } = await supabase
       .from("users")
-      .insert({ display_name: "開発ユーザー" })
+      .insert({})
       .select("id")
       .single();
 

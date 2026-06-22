@@ -65,11 +65,11 @@ export function HomeDashboard({ announcements }: { announcements: Announcement[]
           <Link href="/settings" className="absolute right-2">
             {profileLoading ? (
               <div className="h-10 w-10 rounded-full bg-white/20 border-2 border-white/60" />
-            ) : (profile?.avatar_url ?? user?.avatar_url) ? (
-              <img src={profile?.avatar_url ?? user?.avatar_url ?? ""} alt="" className="h-10 w-10 rounded-full object-cover border-2 border-white/60" />
+            ) : profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover border-2 border-white/60" />
             ) : (
               <div className="h-10 w-10 rounded-full bg-white/30 border-2 border-white/60 flex items-center justify-center text-white text-base font-bold">
-                {(profile?.nickname ?? user?.display_name)?.[0] ?? "G"}
+                {profile?.nickname?.[0] ?? "G"}
               </div>
             )}
           </Link>
@@ -77,7 +77,7 @@ export function HomeDashboard({ announcements }: { announcements: Announcement[]
 
         {/* Greeting */}
         <p className="text-lg font-medium text-white text-center mt-2">
-          {(() => { const h = new Date().getHours(); return h >= 18 || h < 4 ? "こんばんは" : "こんにちは"; })()}{user && !profileLoading ? `、${profile?.nickname || user.display_name}さん` : ""}
+          {(() => { const h = new Date().getHours(); return h >= 18 || h < 4 ? "こんばんは" : "こんにちは"; })()}{user && !profileLoading && profile?.nickname ? `、${profile.nickname}さん` : ""}
         </p>
 
         {/* Feature cards */}

@@ -182,13 +182,6 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     return NextResponse.json({ error: "Failed to link provider" }, { status: 500 });
   }
 
-  if (provider === "google" && providerEmail) {
-    await supabaseAdmin
-      .from("users")
-      .update({ google_email: providerEmail })
-      .eq("id", userId);
-  }
-
   return NextResponse.json({ linked: true });
 });
 
@@ -253,15 +246,5 @@ export const DELETE = withErrorHandler(async (request: NextRequest) => {
     .delete()
     .eq("id", targetProvider.id);
 
-  const needsRelogin = false;
-
-  // Google 解除時は google_email もクリア
-  if (provider === "google") {
-    await supabaseAdmin
-      .from("users")
-      .update({ google_email: null })
-      .eq("id", userId);
-  }
-
-  return NextResponse.json({ unlinked: true, needsRelogin });
+  return NextResponse.json({ unlinked: true, needsRelogin: false });
 });

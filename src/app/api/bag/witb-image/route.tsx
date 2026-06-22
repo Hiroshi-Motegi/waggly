@@ -96,13 +96,13 @@ export async function GET(request: NextRequest) {
       return new Response("No clubs found", { status: 404 });
     }
 
-    const { data: user } = await admin
-      .from("users")
-      .select("display_name")
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("nickname")
       .eq("id", userId)
       .single();
 
-    const displayName = user?.display_name ?? "Golfer";
+    const displayName = profile?.nickname ?? "Golfer";
 
     const grouped = categoryOrder
       .map((cat) => ({

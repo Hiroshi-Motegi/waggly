@@ -13,7 +13,7 @@ export async function GET() {
 
   const { data: users } = await supabase
     .from("users")
-    .select("id, display_name, created_at");
+    .select("id, created_at, profiles(nickname)");
 
   const { data: providers } = await supabase
     .from("user_providers")
@@ -27,9 +27,9 @@ export async function GET() {
   }
 
   // Mask sensitive IDs but show enough to identify
-  const masked = (users ?? []).map((u: { id: string; display_name: string; created_at: string }) => ({
+  const masked = (users ?? []).map((u: any) => ({
     id: u.id?.substring(0, 8) + "...",
-    display_name: u.display_name,
+    nickname: u.profiles?.nickname ?? null,
     providers: (providersByUser[u.id] ?? []).map((p) => ({
       provider: p.provider,
       provider_sub: p.provider_sub

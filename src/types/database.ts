@@ -10,12 +10,10 @@ export type MemoCondition = "good" | "normal" | "bad";
 
 export interface User {
   id: string;
-  display_name: string;
-  avatar_url: string | null;
-  google_email: string | null;
   agreed_terms_at: string | null;
   onboarding_version: number;
   is_admin: boolean;
+  ad_free: boolean;
   created_at: string;
 }
 

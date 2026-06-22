@@ -35,12 +35,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (localStorage.getItem("dev-logged-in") !== "false") {
               setUser({
                 id: "dev-user",
-                display_name: "開発ユーザー",
-                avatar_url: null,
-                google_email: null,
                 agreed_terms_at: new Date().toISOString(),
                 onboarding_version: 1,
                 is_admin: true,
+                ad_free: true,
                 created_at: new Date().toISOString(),
               });
             }

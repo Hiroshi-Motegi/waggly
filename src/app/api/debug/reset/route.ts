@@ -22,7 +22,7 @@ export async function POST() {
 
   const { data: users } = await supabase
     .from("users")
-    .select("id, display_name");
+    .select("id");
 
   const nonDevUsers = (users ?? []).filter((u: { id: string }) => !devUserIds.has(u.id));
 
@@ -52,8 +52,8 @@ export async function POST() {
       }
     }
 
-    console.log("[reset] Deleted:", u.id, u.display_name);
+    console.log("[reset] Deleted:", u.id);
   }
 
-  return NextResponse.json({ deleted: nonDevUsers.length, users: nonDevUsers.map((u: { display_name: string }) => u.display_name) });
+  return NextResponse.json({ deleted: nonDevUsers.length, users: nonDevUsers.map((u: { id: string }) => u.id) });
 }
