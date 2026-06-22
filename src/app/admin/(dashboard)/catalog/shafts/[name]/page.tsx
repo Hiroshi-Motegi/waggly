@@ -94,6 +94,7 @@ function ShaftEditInner() {
       image_url: imageUrl,
       is_visible: true,
       verification_status: "unverified",
+      spec_updated_at: null,
     }]);
   }
 
