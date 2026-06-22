@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { getAllModels } from "@/lib/catalog";
+import { searchModels } from "@/lib/catalog";
 import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { EventTracker } from "@/components/event-tracker";
 import { CatalogSearchBar } from "@/components/catalog/catalog-search-bar";
@@ -15,13 +15,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   wedge: "ウェッジ",
   putter: "パター",
 };
-
-function fuzzyMatch(text: string, query: string) {
-  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
-  if (tokens.length === 0) return false;
-  const lower = text.toLowerCase();
-  return tokens.every((t) => lower.includes(t));
-}
 
 export async function generateMetadata({
   searchParams,
@@ -42,13 +35,7 @@ export default async function CatalogSearchPage({
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
 
-  let results: Awaited<ReturnType<typeof getAllModels>> = [];
-  if (query.length >= 2) {
-    const all = await getAllModels();
-    results = all.filter((m) =>
-      fuzzyMatch(`${m.maker} ${m.maker_slug.replace(/-/g, " ")} ${m.name}`, query)
-    );
-  }
+  const results = query.length >= 2 ? await searchModels(query) : [];
 
   return (
     <PublicPageLayout title="検索結果" backHref="/catalog">
