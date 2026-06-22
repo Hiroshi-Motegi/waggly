@@ -2,19 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import type { CompareEntry } from "./recent-compares";
 
 const STORAGE_KEY = "waggly_recent_compares";
 
-const CATEGORY_LABELS: Record<string, string> = {
-  driver: "ドライバー",
-  fairway_wood: "FW",
-  utility: "UT",
-  iron: "アイアン",
-  wedge: "ウェッジ",
-  putter: "パター",
-};
+function splitName(name: string): { maker: string; model: string } {
+  const parts = name.split(" ");
+  if (parts.length <= 1) return { maker: "", model: name };
+  return { maker: parts[0], model: parts.slice(1).join(" ") };
+}
 
 export function RecentComparesAll() {
   const [entries, setEntries] = useState<CompareEntry[]>([]);
@@ -46,25 +42,32 @@ export function RecentComparesAll() {
 
   return (
     <div className="w-full max-w-screen-sm pt-4">
-      <h2 className="text-sm font-bold text-white px-1 pb-1">最近の比較</h2>
-      <div className="rounded-lg bg-white overflow-hidden">
-        {entries.map((e, i) => (
-          <Link
-            key={`${e.category}::${e.slug}`}
-            href={`/compare/${e.category}/${e.slug}`}
-            className={`flex items-center justify-between px-4 py-3 ${i < entries.length - 1 ? "border-b border-[#ececec]" : ""}`}
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-sm text-[#006728] font-bold truncate">
-                {e.nameA} vs {e.nameB}
-              </span>
-              <span className="shrink-0 rounded-full bg-[#e6f2eb] px-2 py-0.5 text-[11px] font-medium text-[#006728]">
-                {CATEGORY_LABELS[e.category] ?? e.category}
-              </span>
-            </div>
-            <ChevronLeft className="h-4 w-4 text-[#bbb] rotate-180 shrink-0" />
-          </Link>
-        ))}
+      <h2 className="text-sm font-bold text-white px-1 pb-2">最近の比較</h2>
+      <div className="flex flex-col gap-1 px-2">
+        {entries.map((e) => {
+          const a = splitName(e.nameA);
+          const b = splitName(e.nameB);
+          return (
+            <Link
+              key={`${e.category}::${e.slug}`}
+              href={`/compare/${e.category}/${e.slug}`}
+              className="flex items-center gap-1.5 py-1.5 group"
+            >
+              <div className="flex flex-1 items-center gap-1.5 min-w-0">
+                <div className="flex-1 rounded-md bg-white border border-[#e9e9e9] px-3 py-2 min-w-0">
+                  <p className="text-[10px] text-[#6b6b6b] leading-tight">{a.maker}</p>
+                  <p className="text-xs font-bold text-[#006728] leading-tight truncate">{a.model}</p>
+                </div>
+                <span className="text-[10px] font-bold text-white shrink-0">VS</span>
+                <div className="flex-1 rounded-md bg-white border border-[#e9e9e9] px-3 py-2 min-w-0">
+                  <p className="text-[10px] text-[#6b6b6b] leading-tight">{b.maker}</p>
+                  <p className="text-xs font-bold text-[#006728] leading-tight truncate">{b.model}</p>
+                </div>
+              </div>
+              <svg className="w-2 h-3 text-white/60 shrink-0 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 8 14"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M1 1l6 6-6 6" /></svg>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

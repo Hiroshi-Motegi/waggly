@@ -18,6 +18,24 @@ interface Grip {
   image_url: string | null;
   is_visible: boolean;
   verification_status: string;
+  spec_updated_at: string | null;
+}
+
+// バックライン情報をmaterialフィールドに埋め込み/抽出
+function decodeMaterial(material: string | null): { material: string; backline: boolean | null } {
+  if (!material) return { material: "", backline: null };
+  const blMatch = material.match(/\[BL:(有|無)\]/);
+  const backline = blMatch ? blMatch[1] === "有" : null;
+  const clean = material.replace(/\s*\[BL:(有|無)\]/, "").trim();
+  return { material: clean, backline };
+}
+
+function encodeMaterial(material: string, backline: boolean | null): string | null {
+  const parts: string[] = [];
+  if (material) parts.push(material);
+  if (backline === true) parts.push("[BL:有]");
+  if (backline === false) parts.push("[BL:無]");
+  return parts.length > 0 ? parts.join(" ") : null;
 }
 
 function GripEditInner() {
@@ -35,13 +53,16 @@ function GripEditInner() {
   );
 
   const [form, setForm] = useState<Partial<Grip> | null>(null);
+  const [backline, setBackline] = useState<boolean | null>(null);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (initialized || grips.length === 0) return;
     const grip = grips.find((g) => g.id === id);
     if (grip) {
-      setForm(grip);
+      const decoded = decodeMaterial(grip.material);
+      setForm({ ...grip, material: decoded.material });
+      setBackline(decoded.backline);
       setInitialized(true);
     }
   }, [grips, id, initialized]);
@@ -76,11 +97,12 @@ function GripEditInner() {
           maker: form.maker || null,
           grip_size: form.grip_size || null,
           weight: form.weight,
-          material: form.material || null,
+          material: encodeMaterial(form.material ?? "", backline),
           description: form.description || null,
           image_url: form.image_url || null,
           is_visible: form.is_visible,
           verification_status: form.verification_status,
+          spec_updated_at: form.spec_updated_at || null,
         }),
       });
       alert("保存しました");
@@ -175,6 +197,18 @@ function GripEditInner() {
                 placeholder="ラバー, コード 等"
               />
             </label>
+            <label className="block text-xs font-bold text-[#555]">
+              バックライン
+              <select
+                value={backline === null ? "" : backline ? "true" : "false"}
+                onChange={(e) => setBackline(e.target.value === "" ? null : e.target.value === "true")}
+                className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm"
+              >
+                <option value="">未設定</option>
+                <option value="true">有</option>
+                <option value="false">無</option>
+              </select>
+            </label>
           </div>
         </div>
 
@@ -208,6 +242,15 @@ function GripEditInner() {
               <option value="in_review">確認中</option>
               <option value="verified">確認済み</option>
             </select>
+          </label>
+          <label className="flex items-center gap-2 text-xs font-bold text-[#555]">
+            情報更新日
+            <input
+              type="date"
+              value={form.spec_updated_at ? (form.spec_updated_at as string).slice(0, 10) : ""}
+              onChange={(e) => setForm({ ...form, spec_updated_at: e.target.value || null })}
+              className="rounded-md border border-input px-2 py-1 text-sm"
+            />
           </label>
         </div>
       </AdminFormSection>

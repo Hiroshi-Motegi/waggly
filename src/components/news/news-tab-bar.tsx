@@ -17,7 +17,7 @@ export function NewsTabBar() {
   const pathname = usePathname();
 
   return (
-    <div className="w-full max-w-screen-sm overflow-x-auto no-scrollbar mt-1 -mx-3" style={{ width: "calc(100% + 24px)" }}>
+    <div className="w-full max-w-screen-sm overflow-x-auto no-scrollbar mt-1">
       <div className="flex bg-black/20 min-w-max">
         {TABS.map((tab) => {
           const isActive = tab.href === "/news" ? pathname === "/news" : pathname === tab.href;

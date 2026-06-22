@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { getMakers, getAllModels } from "@/lib/catalog";
+import { getMakers } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { PublicPageLayout } from "@/components/layout/public-page-layout";
-import { CatalogSearch } from "@/components/catalog/catalog-search";
 import { FavoriteClubsList } from "@/components/catalog/favorite-clubs-list";
 
 export const revalidate = 86400;
@@ -13,15 +12,7 @@ export const metadata = {
 };
 
 export default async function CatalogPage() {
-  const [makers, allModels] = await Promise.all([getMakers(), getAllModels()]);
-
-  const searchModels = allModels.map((m) => ({
-    name: m.name,
-    category: m.category,
-    makerSlug: m.maker_slug,
-    slug: m.slug,
-    maker: m.maker,
-  }));
+  const makers = await getMakers();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -37,10 +28,15 @@ export default async function CatalogPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* Search */}
-      <div className="w-full max-w-screen-sm pt-4 pb-2">
-        <h2 className="text-sm font-bold text-white">クラブを検索</h2>
+      <div className="w-full max-w-screen-sm pt-4">
+        <Link
+          href="/catalog/search"
+          className="flex items-center gap-2 w-full rounded-md bg-white px-4 py-3 text-sm text-[#aaa]"
+        >
+          <svg className="w-4 h-4 text-[#aaa]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          メーカー名・モデル名で検索
+        </Link>
       </div>
-      <CatalogSearch models={searchModels} />
 
       {/* Ad banner */}
       <div className="w-full max-w-screen-sm pt-4 flex justify-center">
@@ -59,7 +55,7 @@ export default async function CatalogPage() {
           <p className="text-sm text-white/70">カタログデータがありません</p>
         ) : (
           <div className="grid grid-cols-2 gap-2">
-            {makers.filter((maker) => allModels.some((m) => m.maker_slug === maker.slug)).map((maker) => (
+            {makers.map((maker) => (
               <Link
                 key={maker.slug}
                 href={`/catalog/${maker.slug}`}

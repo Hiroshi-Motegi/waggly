@@ -10,6 +10,10 @@ import { ShaftSpecEditor } from "@/components/admin/shaft-spec-editor";
 import { ModelImagesEditor } from "@/components/admin/model-images-editor";
 import { ModelLinksEditor } from "@/components/admin/model-links-editor";
 import { ModelAttributesEditor } from "@/components/admin/model-attributes-editor";
+import { ModelShaftsEditor } from "@/components/admin/model-shafts-editor";
+import { ModelGripEditor, deserializeGrips, serializeGrips } from "@/components/admin/model-grip-editor";
+import { isGripAttr, deserializeGripNames, serializeGripNames } from "@/lib/grip-utils";
+import { ModelGripsMasterEditor } from "@/components/admin/model-grips-master-editor";
 import { apiFetch } from "@/lib/api-client";
 
 interface CatalogModel {
@@ -18,6 +22,7 @@ interface CatalogModel {
   description: string | null; price: number | null;
   release_year: number | null; release_month: number | null;
   is_visible: boolean; verification_status: string; spec_updated_at: string | null;
+  head_finish: string | null;
 }
 
 interface SpecRow {
@@ -33,11 +38,15 @@ interface ModelImage { id: string; image_url: string; sort_order: number; }
 interface ModelLink { id?: string; label: string; url: string; sort_order: number; model_id?: string; }
 interface ModelAttr { id?: string; label: string; value: string; sort_order: number; model_id?: string; }
 interface Maker { id: string; name: string; slug: string; }
-interface ShaftOption { id: string; shaft_name: string; flex: string | null; }
+interface ShaftOption {
+  id: string; shaft_name: string; flex: string | null;
+  shaft_type: string | null; shaft_weight: number | null;
+  torque: number | null; kick_point: string | null;
+}
 
 const categories = [
   { value: "driver", slug: "driver", label: "ドライバー" },
-  { value: "fairway", slug: "fairway", label: "フェアウェイウッド" },
+  { value: "fairway_wood", slug: "fairway_wood", label: "フェアウェイウッド" },
   { value: "utility", slug: "utility", label: "ユーティリティ" },
   { value: "iron", slug: "iron", label: "アイアン" },
   { value: "wedge", slug: "wedge", label: "ウェッジ" },
@@ -73,11 +82,11 @@ function ModelEditInner() {
     `/api/admin/catalog/model-images?model_id=${modelId}`, (url: string) => fetcher<ModelImage[]>(url)
   );
 
-  const { data: linksRaw = [] } = useSWR<ModelLink[]>(
+  const { data: linksRaw = [], mutate: mutateLinks } = useSWR<ModelLink[]>(
     `/api/admin/catalog/model-links?model_id=${modelId}`, (url: string) => fetcher<ModelLink[]>(url)
   );
 
-  const { data: attrsRaw = [] } = useSWR<ModelAttr[]>(
+  const { data: attrsRaw = [], mutate: mutateAttrs } = useSWR<ModelAttr[]>(
     `/api/admin/catalog/model-attributes?model_id=${modelId}`, (url: string) => fetcher<ModelAttr[]>(url)
   );
 
@@ -119,23 +128,55 @@ function ModelEditInner() {
     if (attrsRaw.length > 0) { setAttrs(attrsRaw); setAttrsInitialized(true); }
   }, [attrsRaw, attrsInitialized]);
 
+  // ---- Grip state (stored inside attrs as __grips__ / __grip_names__ entries) ----
+  const [grips, setGrips] = useState(deserializeGrips(attrs));
+  const [gripNames, setGripNames] = useState(deserializeGripNames(attrs));
+  const [gripsInitialized, setGripsInitialized] = useState(false);
+  useEffect(() => {
+    if (gripsInitialized || attrsRaw.length === 0) return;
+    setGrips(deserializeGrips(attrsRaw));
+    setGripNames(deserializeGripNames(attrsRaw));
+    setGripsInitialized(true);
+  }, [attrsRaw, gripsInitialized]);
+
   // ---- Spec mutations ----
   const headSpecs = specs.filter((s) => !s.shaft_name);
   const clubNumbers = [...new Set(headSpecs.map((s) => s.club_number))];
 
   const handleAddClubNumber = useCallback((cn: string) => {
-    // Add a new head-spec row for this club number
-    const newSpec: SpecRow = {
-      id: `new-${Date.now()}-${cn}`,
-      club_number: cn, model_id: modelId,
-      loft: null, lie: null, length: null, bounce: null,
-      head_volume: null, head_weight: null, face_angle: null,
-      weight: null, swing_weight: null,
-      shaft_name: null, shaft_flex: null,
-      sort_order: specs.length,
-    };
-    setSpecs((prev) => [...prev, newSpec]);
-  }, [modelId, specs.length]);
+    setSpecs((prev) => {
+      const nextOrder = prev.length;
+      // Head spec row
+      const headRow: SpecRow = {
+        id: `new-${Date.now()}-${cn}`,
+        club_number: cn, model_id: modelId,
+        loft: null, lie: null, length: null, bounce: null,
+        head_volume: null, head_weight: null, face_angle: null,
+        weight: null, swing_weight: null,
+        shaft_name: null, shaft_flex: null,
+        sort_order: nextOrder,
+      };
+      // Also create rows for existing shaft groups
+      const shaftKeys = new Set<string>();
+      const shaftRows: SpecRow[] = [];
+      for (const s of prev) {
+        if (!s.shaft_name) continue;
+        const key = `${s.shaft_name}|${s.shaft_flex}`;
+        if (shaftKeys.has(key)) continue;
+        shaftKeys.add(key);
+        shaftRows.push({
+          id: `new-shaft-${Date.now()}-${cn}-${shaftRows.length}`,
+          club_number: cn, model_id: modelId,
+          loft: null, lie: null, length: null, bounce: null,
+          head_volume: null, head_weight: null, face_angle: null,
+          weight: null, swing_weight: null,
+          shaft_name: s.shaft_name, shaft_flex: s.shaft_flex,
+          sort_order: nextOrder + 1 + shaftRows.length,
+        } as SpecRow);
+      }
+      return [...prev, headRow, ...shaftRows];
+    });
+  }, [modelId]);
 
   const handleRemoveClubNumber = useCallback((cn: string) => {
     setSpecs((prev) => prev.filter((s) => s.club_number !== cn));
@@ -164,10 +205,12 @@ function ModelEditInner() {
     if (!model) return;
     setSaving(true);
     try {
+      const errors: string[] = [];
+
       // 1. Update model basic info
       const selectedMaker = makers.find((m) => m.id === form.maker_id);
       const selectedCat = categories.find((c) => c.value === form.category);
-      await apiFetch("/api/admin/catalog/models", {
+      const modelRes = await apiFetch("/api/admin/catalog/models", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -179,8 +222,14 @@ function ModelEditInner() {
           price: form.price, release_year: form.release_year,
           release_month: form.release_month, is_visible: form.is_visible,
           verification_status: form.verification_status,
+          head_finish: form.head_finish,
+          spec_updated_at: form.spec_updated_at,
         }),
       });
+      if (!modelRes.ok) {
+        const err = await modelRes.json().catch(() => ({}));
+        errors.push(`モデル基本情報: ${err.error || err.message || modelRes.status}`);
+      }
 
       // 2. Save specs: update existing, create new, delete removed
       const currentIds = new Set(specs.map((s) => s.id));
@@ -188,14 +237,15 @@ function ModelEditInner() {
       const toUpdate = specs.filter((s) => originalSpecIds.has(s.id));
       const toCreate = specs.filter((s) => s.id.startsWith("new-"));
 
-      await Promise.all(toDelete.map((id) =>
+      const deleteResults = await Promise.all(toDelete.map((id) =>
         apiFetch("/api/admin/catalog/specs", {
           method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }),
         })
       ));
+      if (deleteResults.some((r) => !r.ok)) errors.push("スペック削除");
 
       if (toUpdate.length > 0) {
-        await apiFetch("/api/admin/catalog/specs", {
+        const patchRes = await apiFetch("/api/admin/catalog/specs", {
           method: "PATCH", headers: { "Content-Type": "application/json" },
           body: JSON.stringify(toUpdate.map((s) => ({
             id: s.id, club_number: s.club_number, loft: s.loft, lie: s.lie, length: s.length,
@@ -204,10 +254,11 @@ function ModelEditInner() {
             shaft_name: s.shaft_name, shaft_flex: s.shaft_flex, sort_order: s.sort_order,
           }))),
         });
+        if (!patchRes.ok) errors.push("スペック更新");
       }
 
       if (toCreate.length > 0) {
-        await apiFetch("/api/admin/catalog/specs", {
+        const postRes = await apiFetch("/api/admin/catalog/specs", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify(toCreate.map((s) => ({
             model_id: modelId, club_number: s.club_number, loft: s.loft, lie: s.lie, length: s.length,
@@ -216,6 +267,10 @@ function ModelEditInner() {
             shaft_name: s.shaft_name, shaft_flex: s.shaft_flex, sort_order: s.sort_order,
           }))),
         });
+        if (!postRes.ok) {
+          const err = await postRes.json().catch(() => ({}));
+          errors.push(`スペック作成: ${err.error || err.message || postRes.status}`);
+        }
       }
 
       // 3. Save links: bulk delete all existing + bulk insert current
@@ -247,9 +302,14 @@ function ModelEditInner() {
           })
         ));
       }
-      const validAttrs = attrs.filter((a) => a.label && a.value);
-      if (validAttrs.length > 0) {
-        await Promise.all(validAttrs.map((attr) =>
+      const validAttrs = attrs.filter((a) => a.value && !isGripAttr(a.label));
+      // Include grip data as a special attribute
+      const gripAttr = serializeGrips(grips);
+      const gripNamesAttr = serializeGripNames(gripNames);
+      const extraAttrs = [gripAttr, gripNamesAttr].filter(Boolean).map((a, i) => ({ ...a!, sort_order: 9990 + i }));
+      const allAttrs = [...validAttrs, ...extraAttrs];
+      if (allAttrs.length > 0) {
+        await Promise.all(allAttrs.map((attr) =>
           apiFetch("/api/admin/catalog/model-attributes", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ model_id: modelId, label: attr.label, value: attr.value, sort_order: attr.sort_order }),
@@ -257,9 +317,20 @@ function ModelEditInner() {
         ));
       }
 
-      // Refresh all data
-      await Promise.all([mutateModel(), mutateSpecs(), mutateImages()]);
-      alert("保存しました");
+      // Refresh all data and re-sync local specs from DB
+      // (new specs get real UUIDs from the server)
+      const [, freshSpecs] = await Promise.all([mutateModel(), mutateSpecs(), mutateImages(), mutateLinks(), mutateAttrs()]);
+      if (freshSpecs && freshSpecs.length > 0) {
+        setSpecs(freshSpecs);
+        setOriginalSpecIds(new Set(freshSpecs.map((s) => s.id)));
+      }
+      if (errors.length > 0) {
+        alert(`一部の保存に失敗しました: ${errors.join(", ")}`);
+      } else {
+        alert("保存しました");
+      }
+    } catch (e) {
+      alert(`保存中にエラーが発生しました: ${e instanceof Error ? e.message : "不明なエラー"}`);
     } finally {
       setSaving(false);
     }
@@ -303,6 +374,9 @@ function ModelEditInner() {
           <label className="block text-xs font-bold text-[#555]">Slug
             <input value={form.slug ?? ""} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm font-mono" />
           </label>
+          <label className="col-span-2 block text-xs font-bold text-[#555]">説明
+            <textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value || null })} rows={2} className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm" />
+          </label>
           <label className="block text-xs font-bold text-[#555]">発売年
             <input type="number" value={form.release_year ?? ""} onChange={(e) => setForm({ ...form, release_year: e.target.value ? Number(e.target.value) : null })} className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm" />
           </label>
@@ -315,8 +389,8 @@ function ModelEditInner() {
           <label className="block text-xs font-bold text-[#555]">価格(税込)
             <input type="number" value={form.price ?? ""} onChange={(e) => setForm({ ...form, price: e.target.value ? Number(e.target.value) : null })} className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm" />
           </label>
-          <label className="block text-xs font-bold text-[#555]">説明
-            <textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value || null })} rows={2} className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm" />
+          <label className="block text-xs font-bold text-[#555]">フィニッシュ
+            <input value={form.head_finish ?? ""} onChange={(e) => setForm({ ...form, head_finish: e.target.value || null })} className="mt-1 block w-full rounded-md border border-input px-3 py-2 text-sm" placeholder="例: ハイドロパールクローム仕上げ" />
           </label>
         </div>
         <div className="flex items-center gap-6 mt-2">
@@ -336,7 +410,21 @@ function ModelEditInner() {
               <option value="verified">確認済み</option>
             </select>
           </label>
+          <label className="flex items-center gap-2 text-xs font-bold text-[#555]">
+            情報更新日
+            <input
+              type="date"
+              value={form.spec_updated_at ? form.spec_updated_at.slice(0, 10) : ""}
+              onChange={(e) => setForm({ ...form, spec_updated_at: e.target.value || null })}
+              className="rounded-md border border-input px-2 py-1 text-sm"
+            />
+          </label>
         </div>
+      </AdminFormSection>
+
+      {/* Images */}
+      <AdminFormSection title="画像">
+        <ModelImagesEditor modelId={modelId} images={images} onMutate={() => mutateImages()} />
       </AdminFormSection>
 
       {/* Head specs */}
@@ -362,10 +450,27 @@ function ModelEditInner() {
         />
       </AdminFormSection>
 
-      {/* Images */}
-      <AdminFormSection title="画像">
-        <ModelImagesEditor modelId={modelId} images={images} onMutate={() => mutateImages()} />
+      {/* Grip info */}
+      <AdminFormSection title="標準グリップ">
+        <ModelGripEditor grips={grips} onChange={setGrips} />
       </AdminFormSection>
+
+      {/* Shaft info */}
+      {/* Grip info from master */}
+      <AdminFormSection title="グリップ情報">
+        <ModelGripsMasterEditor
+          modelId={modelId}
+          linkedGripNames={gripNames}
+          onLink={(name) => setGripNames((prev) => [...prev, name])}
+          onUnlink={(name) => setGripNames((prev) => prev.filter((n) => n !== name))}
+        />
+      </AdminFormSection>
+
+      {/* Shaft info */}
+      <AdminFormSection title="シャフト情報">
+        <ModelShaftsEditor modelId={modelId} />
+      </AdminFormSection>
+
 
       {/* Purchase links */}
       <AdminFormSection title="購入先リンク">
@@ -374,7 +479,7 @@ function ModelEditInner() {
 
       {/* Attributes */}
       <AdminFormSection title="その他情報">
-        <ModelAttributesEditor attributes={attrs} onChange={setAttrs} />
+        <ModelAttributesEditor attributes={attrs.filter((a) => !isGripAttr(a.label))} onChange={(updated) => setAttrs([...updated, ...attrs.filter((a) => isGripAttr(a.label))])} />
       </AdminFormSection>
 
       {/* Actions */}

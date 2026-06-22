@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
           protocol: "https",
           hostname: "**.gora.golf.rakuten.co.jp",
         },
+        {
+          protocol: "https",
+          hostname: "**.supabase.co",
+        },
       ],
     },
   }),

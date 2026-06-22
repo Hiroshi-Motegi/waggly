@@ -19,6 +19,7 @@ interface Shaft {
   image_url: string | null;
   is_visible: boolean;
   verification_status: string;
+  spec_updated_at: string | null;
 }
 
 const SPEC_FIELDS = [
@@ -49,7 +50,7 @@ function ShaftEditInner() {
 
   // Common info (from first variant)
   const [editName, setEditName] = useState(shaftName);
-  const [commonInfo, setCommonInfo] = useState({ maker: "", shaft_type: "" as string | null, is_visible: true, verification_status: "unverified" });
+  const [commonInfo, setCommonInfo] = useState({ maker: "", shaft_type: "" as string | null, is_visible: true, verification_status: "unverified", spec_updated_at: "" });
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [variants, setVariants] = useState<Shaft[]>([]);
   const [newFlex, setNewFlex] = useState("");
@@ -62,6 +63,7 @@ function ShaftEditInner() {
       shaft_type: allShafts[0].shaft_type,
       is_visible: allShafts[0].is_visible,
       verification_status: allShafts[0].verification_status,
+      spec_updated_at: allShafts[0].spec_updated_at?.slice(0, 10) ?? "",
     });
     setImageUrl(allShafts.find((s) => s.image_url)?.image_url ?? null);
     setVariants(allShafts);
@@ -137,6 +139,7 @@ function ShaftEditInner() {
             shaft_type: commonInfo.shaft_type || null,
             is_visible: commonInfo.is_visible,
             verification_status: commonInfo.verification_status,
+            spec_updated_at: commonInfo.spec_updated_at || null,
             flex: v.flex,
             shaft_weight: v.shaft_weight,
             torque: v.torque,
@@ -156,6 +159,7 @@ function ShaftEditInner() {
             shaft_type: commonInfo.shaft_type || null,
             is_visible: commonInfo.is_visible,
             verification_status: commonInfo.verification_status,
+            spec_updated_at: commonInfo.spec_updated_at || null,
             flex: v.flex,
             shaft_weight: v.shaft_weight,
             torque: v.torque,
@@ -255,6 +259,10 @@ function ShaftEditInner() {
               <option value="in_review">確認中</option>
               <option value="verified">確認済み</option>
             </select>
+          </label>
+          <label className="flex items-center gap-2 text-xs font-bold text-[#555]">
+            情報更新日
+            <input type="date" value={commonInfo.spec_updated_at} onChange={(e) => setCommonInfo({ ...commonInfo, spec_updated_at: e.target.value })} className="rounded-md border border-input px-2 py-1 text-sm" />
           </label>
         </div>
       </AdminFormSection>

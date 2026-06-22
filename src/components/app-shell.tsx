@@ -13,6 +13,7 @@ import { CookieConsent } from "@/components/cookie-consent";
 import { TERMS_UPDATED_AT, ONBOARDING_VERSION } from "@/lib/constants";
 import { isNative } from "@/lib/platform";
 import { PublicFooter } from "@/components/public-footer";
+import { NavProgress, useNavigating } from "@/components/layout/nav-progress";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -184,6 +185,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isPublicPage = pathname.startsWith("/p/");
   const hideChrome = isPublicPage || (!user && !native);
   return (
+    <NavProgress>
     <div className={`min-h-dvh flex flex-col relative animate-fade-in bg-black/20 ${native ? "w-full overflow-x-clip" : "mx-auto max-w-screen-sm shadow-sm"}`}>
       <main className="flex-1 flex flex-col" style={{ paddingBottom: hideChrome || pathname === "/coach" ? undefined : "var(--bottom-nav-height)" }}>
         <PageTransition>{children}</PageTransition>
@@ -194,5 +196,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
       {!hideChrome && <BottomNav />}
     </div>
+    </NavProgress>
   );
 }

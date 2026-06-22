@@ -10,8 +10,8 @@ const text = "読み込み中...";
  * - "light" (page loading): full-screen overlay via portal, dark bg, white text, always centered
  * - "default" (inline loading): compact, for use inside cards/sections
  */
-export function Loading({ variant = "default" }: { variant?: "default" | "light" }) {
-  const isLight = variant === "light";
+export function Loading({ variant = "default" }: { variant?: "default" | "light" | "inline-light" }) {
+  const isLight = variant === "light" || variant === "inline-light";
   const textColor = isLight ? "text-white" : "text-[#006728]";
   const [mounted, setMounted] = useState(false);
 
@@ -42,6 +42,11 @@ export function Loading({ variant = "default" }: { variant?: "default" | "light"
       </div>
     </div>
   );
+
+  // Inline light: white ball without overlay
+  if (variant === "inline-light") {
+    return <div className="flex items-center justify-center py-12">{ball}</div>;
+  }
 
   // Page loading: portal to body to escape transform ancestors
   if (isLight) {

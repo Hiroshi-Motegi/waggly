@@ -26,7 +26,7 @@ interface Maker { id: string; name: string; slug: string; }
 
 const categories = [
   { value: "driver", label: "ドライバー" },
-  { value: "fairway", label: "フェアウェイウッド" },
+  { value: "fairway_wood", label: "フェアウェイウッド" },
   { value: "utility", label: "ユーティリティ" },
   { value: "iron", label: "アイアン" },
   { value: "wedge", label: "ウェッジ" },

@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
+import { AlpenAdImage } from "@/components/catalog/alpen-ad-image";
+import { useAuth } from "@/hooks/use-auth";
 
 const CATEGORY_ORDER = ["driver", "fairway_wood", "utility", "iron", "wedge", "putter"] as const;
 
@@ -21,9 +24,15 @@ interface Model {
   category: string;
   slug: string;
   makerSlug: string;
+  image_url: string | null;
+  alpen_pid: string | null;
 }
 
 export function MakerCategoryTabs({ models }: { models: Model[] }) {
+  const { user } = useAuth();
+  const mx = user ? "-mx-2" : "-mx-3";
+  const mxWidth = user ? "calc(100% + 1rem)" : "calc(100% + 1.5rem)";
+  const mt = user ? "mt-0" : "-mt-3";
   const availableCategories = CATEGORY_ORDER.filter((cat) =>
     models.some((m) => m.category === cat)
   );
@@ -34,20 +43,20 @@ export function MakerCategoryTabs({ models }: { models: Model[] }) {
   return (
     <>
       {/* Category tabs */}
-      <div className="flex gap-1 pt-4 w-full max-w-screen-sm overflow-x-auto scrollbar-hide">
-        {availableCategories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActive(cat)}
-            className={`shrink-0 rounded-full px-3 py-2.5 text-sm font-bold whitespace-nowrap transition-colors ${
-              active === cat
-                ? "bg-[#17552f] border border-white text-white"
-                : "text-white"
-            }`}
-          >
-            {CATEGORY_LABELS[cat]} ({models.filter((m) => m.category === cat).length})
-          </button>
-        ))}
+      <div className={`${mx} ${mt} overflow-x-auto no-scrollbar`} style={{ width: mxWidth }}>
+        <div className={`flex bg-black/20 min-w-max ${!user ? "border-t border-white/30" : ""}`}>
+          {availableCategories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActive(cat)}
+              className={`flex items-center justify-center px-3 py-2.5 text-sm font-semibold whitespace-nowrap text-white border-r border-white/40 last:border-r-0 ${
+                active === cat ? "bg-[#17552f]" : ""
+              }`}
+            >
+              {CATEGORY_LABELS[cat]} ({models.filter((m) => m.category === cat).length})
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Ad banner */}
@@ -67,9 +76,18 @@ export function MakerCategoryTabs({ models }: { models: Model[] }) {
             <Link
               key={m.id}
               href={`/catalog/${m.makerSlug}/${m.slug}`}
-              className={`flex items-center justify-between px-4 py-3 ${i < filtered.length - 1 ? "border-b border-[#ececec]" : ""}`}
+              className={`flex items-center gap-3 min-h-[56px] pr-2 ${m.alpen_pid || m.image_url ? "py-1 pl-2" : "py-3 pl-4"} ${i < filtered.length - 1 ? "border-b border-[#ececec]" : ""}`}
             >
-              <span className="font-bold text-sm text-[#006728] truncate">{m.name}</span>
+              {(m.alpen_pid || m.image_url) && (
+                <div className="relative w-12 h-12 shrink-0 bg-[#f5f5f5] rounded overflow-hidden">
+                  {m.alpen_pid ? (
+                    <AlpenAdImage alpenPid={m.alpen_pid} alt={m.name} className="w-full h-full" />
+                  ) : (
+                    <Image src={m.image_url!} alt={m.name} fill className="object-contain p-0.5" sizes="40px" />
+                  )}
+                </div>
+              )}
+              <span className="font-bold text-sm text-[#006728] truncate flex-1">{m.name}</span>
               <ChevronLeft className="h-4 w-4 text-[#bbb] rotate-180 shrink-0" />
             </Link>
           ))}

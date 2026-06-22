@@ -60,8 +60,54 @@ export type CatalogSpec = {
   sort_order: number;
 };
 
+export type CatalogModelImage = {
+  id: string;
+  image_url: string;
+  sort_order: number;
+};
+
+export type CatalogModelLink = {
+  id: string;
+  label: string;
+  url: string;
+  sort_order: number;
+};
+
+export type CatalogModelAttribute = {
+  id: string;
+  label: string;
+  value: string;
+  sort_order: number;
+};
+
+export type CatalogGrip = {
+  id: string;
+  grip_name: string;
+  maker: string | null;
+  grip_size: string | null;
+  weight: number | null;
+  material: string | null;
+  image_url: string | null;
+};
+
+export type CatalogShaft = {
+  id: string;
+  shaft_name: string;
+  maker: string | null;
+  shaft_type: string | null;
+  flex: string | null;
+  shaft_weight: number | null;
+  torque: number | null;
+  kick_point: string | null;
+};
+
 export type CatalogModelWithSpecs = CatalogModel & {
   catalog_specs: CatalogSpec[];
+  catalog_model_images: CatalogModelImage[];
+  catalog_model_links: CatalogModelLink[];
+  catalog_model_attributes: CatalogModelAttribute[];
+  linked_shafts: CatalogShaft[];
+  linked_grips: CatalogGrip[];
 };
 
 // --- Queries ---
@@ -95,25 +141,73 @@ export async function getModelsByMaker(makerSlug: string) {
 
   const { data } = await supabase
     .from("catalog_models")
-    .select("*")
+    .select("*, catalog_model_images(image_url, sort_order)")
     .eq("maker_id", maker.id)
     .eq("is_visible", true)
     .order("category")
-    .order("name");
+    .order("name")
+    .order("sort_order", { referencedTable: "catalog_model_images" });
   return (data ?? []) as CatalogModel[];
 }
 
 /** モデル詳細 + スペック */
 export async function getModelDetail(makerSlug: string, slug: string) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("catalog_models")
-    .select("*, catalog_specs(*)")
+    .select("*, catalog_specs(*), catalog_model_images(*), catalog_model_links(*), catalog_model_attributes(*)")
     .eq("maker_slug", makerSlug)
     .eq("slug", slug)
     .eq("is_visible", true)
     .order("sort_order", { referencedTable: "catalog_specs" })
+    .order("sort_order", { referencedTable: "catalog_model_images" })
+    .order("sort_order", { referencedTable: "catalog_model_links" })
+    .order("sort_order", { referencedTable: "catalog_model_attributes" })
     .single();
-  return data as CatalogModelWithSpecs | null;
+  if (error) { console.error("getModelDetail error:", error); return null; }
+  if (!data) return null;
+
+  // Fetch linked shafts from shaft_names array
+  const shaftNames: string[] = data.shaft_names ?? [];
+  let linkedShafts: CatalogShaft[] = [];
+  if (shaftNames.length > 0) {
+    const { data: shafts } = await supabase
+      .from("catalog_shafts")
+      .select("*")
+      .in("shaft_name", shaftNames)
+      .order("sort_order");
+    linkedShafts = (shafts ?? []) as CatalogShaft[];
+  }
+
+  // Fetch linked grips from __grip_names__ attribute
+  const { deserializeGripNames: parseGripNames } = await import("@/lib/grip-utils");
+  const gripNamesList = parseGripNames(data.catalog_model_attributes ?? []);
+  let linkedGrips: CatalogGrip[] = [];
+  if (gripNamesList.length > 0) {
+    const { data: gripsData } = await supabase
+      .from("catalog_grips")
+      .select("*")
+      .in("grip_name", gripNamesList)
+      .order("sort_order");
+    linkedGrips = (gripsData ?? []) as CatalogGrip[];
+  }
+
+  return {
+    ...data,
+    linked_shafts: linkedShafts,
+    linked_grips: linkedGrips,
+  } as CatalogModelWithSpecs;
+}
+
+/** モデルに紐づくシャフト情報を取得 */
+export async function getShaftsForModel(shaftNames: string[]): Promise<CatalogShaft[]> {
+  if (shaftNames.length === 0) return [];
+  const { data } = await supabase
+    .from("catalog_shafts")
+    .select("id, shaft_name, maker, shaft_type, flex, shaft_weight, torque, kick_point")
+    .in("shaft_name", shaftNames)
+    .eq("is_visible", true)
+    .order("sort_order");
+  return (data ?? []) as CatalogShaft[];
 }
 
 /** 全モデル一覧（検索用、ページネーション対応） */

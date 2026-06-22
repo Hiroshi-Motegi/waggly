@@ -61,7 +61,7 @@ export default async function CompareIndexPage({
     <PublicPageLayout title={`${label} スペック比較`} backHref="/compare">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <div className="w-full max-w-screen-sm pt-4">
+      <div className="w-full max-w-screen-sm pt-0">
         <CompareSearch category={category} models={modelOptions} />
       </div>
 
@@ -77,9 +77,11 @@ export default async function CompareIndexPage({
 
       <RecentCompares category={category} />
 
-      <p className="w-full max-w-screen-sm py-6 text-left text-xs text-white leading-relaxed">
-        ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
-      </p>
+      <div className="w-full max-w-screen-sm mt-6 rounded-md bg-black/40 px-4 py-6">
+        <p className="text-xs text-white leading-relaxed">
+          ※ スペック・関連情報の収集にはAIを利用しており、内容が正確でない場合があります。正確な情報はメーカー公式サイトをご確認ください。
+        </p>
+      </div>
 
       <PromoBanner />
     </PublicPageLayout>

@@ -27,7 +27,7 @@ const updateModelSchema = z.object({
   maker_slug: z.string().max(100).optional(),
   category: z.string().max(50).optional(),
   category_slug: z.string().max(50).optional(),
-  slug: z.string().max(200).optional(),
+  slug: z.string().max(200).optional().nullable(),
   image_url: z.string().url().optional().nullable(),
   description: z.string().max(2000).optional().nullable(),
   price: z.number().optional().nullable(),
@@ -36,6 +36,7 @@ const updateModelSchema = z.object({
   is_visible: z.boolean().optional(),
   verification_status: z.enum(["verified", "in_review", "unverified"]).optional(),
   spec_updated_at: z.string().optional().nullable(),
+  head_finish: z.string().max(200).optional().nullable(),
 });
 
 const bulkUpdateSchema = z.object({
