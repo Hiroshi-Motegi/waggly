@@ -40,6 +40,7 @@ export type CatalogModel = {
   image_url: string | null;
   alpen_pid: string | null;
   is_visible: boolean;
+  spec_updated_at: string | null;
 };
 
 export type CatalogSpec = {

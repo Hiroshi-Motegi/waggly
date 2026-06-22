@@ -16,7 +16,7 @@ export function NavProgress({ children }: { children: React.ReactNode }) {
   const [exiting, setExiting] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const prevPath = useRef(pathname);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   useEffect(() => {
     if (prevPath.current !== pathname) {
@@ -25,8 +25,8 @@ export function NavProgress({ children }: { children: React.ReactNode }) {
       setNavigating(false);
       setExiting(true);
       if (timerRef.current) clearInterval(timerRef.current);
-      const t1 = setTimeout(() => setProgress(0), 300);
-      const t2 = setTimeout(() => { setExiting(false); setShowOverlay(false); }, 400);
+      const t1 = setTimeout(() => setProgress(0), 200);
+      const t2 = setTimeout(() => { setExiting(false); setShowOverlay(false); }, 200);
       return () => { clearTimeout(t1); clearTimeout(t2); };
     }
   }, [pathname]);

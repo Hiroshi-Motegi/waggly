@@ -1,0 +1,374 @@
+<h2>Admin CRUD 管理画面 設計スペック</h2>
+<p class="subtitle">レビュー用 — 変更点があればターミナルで教えてください</p>
+
+<div class="section">
+  <h3>スコープ</h3>
+  <div style="font-size:14px;line-height:1.8;">
+    <ol>
+      <li>カタログモデル管理（一覧・追加・編集・削除）</li>
+      <li>カタログスペック管理（横型テーブルでの番手別編集）</li>
+      <li>シャフトスペック管理（モデル単位のシャフト情報）</li>
+      <li>メーカー管理（一覧・追加・編集・並べ替え・表示切替）</li>
+      <li>お知らせ管理（一覧・作成・編集・削除・公開制御）</li>
+    </ol>
+  </div>
+</div>
+
+<div class="section">
+  <h3>DB変更 — 新テーブル: catalog_shaft_specs</h3>
+  <div style="font-size:13px;background:#1a1a1a;color:#e0e0e0;padding:16px;border-radius:8px;font-family:monospace;line-height:1.6;">
+    catalog_shaft_specs<br>
+    &nbsp;&nbsp;id: uuid (PK)<br>
+    &nbsp;&nbsp;model_id: uuid (FK → catalog_models)<br>
+    &nbsp;&nbsp;shaft_name: text NOT NULL<br>
+    &nbsp;&nbsp;shaft_type: text NULL &nbsp;&nbsp;&nbsp;-- カーボン / スチール<br>
+    &nbsp;&nbsp;flex: text NULL &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- R, SR, S, X, S200 等<br>
+    &nbsp;&nbsp;shaft_weight: numeric NULL &nbsp;-- g<br>
+    &nbsp;&nbsp;torque: numeric NULL &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- 度<br>
+    &nbsp;&nbsp;kick_point: text NULL &nbsp;&nbsp;&nbsp;&nbsp;-- 先調子, 中調子, 元調子 等<br>
+    &nbsp;&nbsp;sort_order: integer DEFAULT 0<br>
+    &nbsp;&nbsp;created_at / updated_at: timestamptz
+  </div>
+  <p style="font-size:13px;color:#888;margin-top:8px;">※ 既存テーブル (catalog_specs, catalog_models) の変更なし</p>
+</div>
+
+<div class="section">
+  <h3>ルーティング</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr style="background:#f5f5f5;">
+      <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">ページ</th>
+      <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">内容</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/admin/catalog/models</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">モデル一覧（検索・フィルタ付き）</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/admin/catalog/models/new</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">モデル新規作成</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/admin/catalog/models/[id]</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">モデル編集 + スペック3セクション</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/admin/catalog/makers</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">メーカー一覧・編集</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/admin/announcements</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">お知らせ一覧</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/admin/announcements/new</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">お知らせ新規作成</td></tr>
+      <tr><td style="padding:6px 8px;font-family:monospace;font-size:12px;">/admin/announcements/[id]</td><td style="padding:6px 8px;">お知らせ編集</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h3>API</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr style="background:#f5f5f5;">
+      <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">メソッド</th>
+      <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">パス</th>
+      <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">備考</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;">GET/POST/PATCH/DELETE</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/api/admin/catalog/models</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">既存拡張 (DELETE追加)</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;">GET/POST/PATCH/DELETE</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/api/admin/catalog/specs</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">既存拡張 (DELETE追加)</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;">GET/POST/PATCH/DELETE</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/api/admin/catalog/shaft-specs</td><td style="padding:6px 8px;border-bottom:1px solid #eee;color:#006728;font-weight:bold;">新規</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;">GET/POST/PATCH</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/api/admin/catalog/makers</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">既存拡張 (POST追加)</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #eee;">GET/POST</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:12px;">/api/admin/announcements</td><td style="padding:6px 8px;border-bottom:1px solid #eee;color:#006728;font-weight:bold;">新規</td></tr>
+      <tr><td style="padding:6px 8px;">GET/PATCH/DELETE</td><td style="padding:6px 8px;font-family:monospace;font-size:12px;">/api/admin/announcements/[id]</td><td style="padding:6px 8px;color:#006728;font-weight:bold;">新規</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:#888;margin-top:4px;">全APIで requireAdmin() による認証ガード</p>
+</div>
+
+<div class="section">
+  <h3>画面設計</h3>
+
+  <h4 style="margin-top:16px;">サイドバー</h4>
+  <div class="mockup">
+    <div class="mockup-body" style="background:#1a1a1a;color:#fff;padding:20px;width:200px;font-size:13px;">
+      <div style="font-size:16px;font-weight:bold;color:#006728;margin-bottom:16px;">Waggly Admin</div>
+      <div style="font-size:10px;color:#888;margin-bottom:4px;text-transform:uppercase;">カタログ</div>
+      <div style="padding:5px 10px;background:#006728;border-radius:4px;margin-bottom:2px;">モデル管理</div>
+      <div style="padding:5px 10px;color:#ccc;margin-bottom:12px;">メーカー管理</div>
+      <div style="font-size:10px;color:#888;margin-bottom:4px;text-transform:uppercase;">コンテンツ</div>
+      <div style="padding:5px 10px;color:#ccc;margin-bottom:2px;">お知らせ</div>
+      <div style="padding:5px 10px;color:#ccc;">ナレッジベース</div>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;">① モデル一覧</h4>
+  <div class="mockup">
+    <div class="mockup-header">/admin/catalog/models</div>
+    <div class="mockup-body" style="padding:12px;font-size:12px;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <input class="mock-input" placeholder="🔍 モデル名検索" style="width:180px;font-size:12px;">
+        <select class="mock-input" style="width:120px;font-size:12px;"><option>全メーカー</option></select>
+        <select class="mock-input" style="width:120px;font-size:12px;"><option>全カテゴリ</option></select>
+        <select class="mock-input" style="width:100px;font-size:12px;"><option>全年度</option></select>
+        <select class="mock-input" style="width:120px;font-size:12px;"><option>全ステータス</option></select>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <label style="font-size:11px;color:#666;"><input type="checkbox"> スペックなしのみ</label>
+        <span style="margin-left:auto;font-size:12px;color:#888;">2,398件</span>
+        <button class="mock-button" style="font-size:12px;">+ 新規追加</button>
+      </div>
+      <div style="border:1px solid #ddd;border-radius:4px;">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 0.5fr 0.7fr 0.5fr 0.5fr;background:#f5f5f5;padding:6px 8px;font-weight:bold;font-size:11px;border-bottom:1px solid #ddd;">
+          <div>モデル名</div><div>メーカー</div><div>カテゴリ</div><div>年</div><div>スペック数</div><div>表示</div><div>操作</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 0.5fr 0.7fr 0.5fr 0.5fr;padding:6px 8px;border-bottom:1px solid #eee;">
+          <div style="color:#006728;font-weight:bold;">G440 MAX ドライバー</div><div>ピン</div><div>ドライバー</div><div>2025</div><div>3</div><div style="color:green;">●</div><div><a style="color:#006728;">編集</a></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 0.5fr 0.7fr 0.5fr 0.5fr;padding:6px 8px;border-bottom:1px solid #eee;">
+          <div style="color:#006728;font-weight:bold;">Stealth2 HD ドライバー</div><div>テーラーメイド</div><div>ドライバー</div><div>2023</div><div style="color:red;">0</div><div style="color:green;">●</div><div><a style="color:#006728;">編集</a></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 0.5fr 0.7fr 0.5fr 0.5fr;padding:6px 8px;background:#fff8f8;color:#999;">
+          <div>旧モデル XXX</div><div>ミズノ</div><div>アイアン</div><div>2018</div><div>7</div><div><span style="color:#ccc;">○</span></div><div><a style="color:#006728;">編集</a></div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:8px;font-size:12px;color:#888;">1 / 120 ページ</div>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;">② モデル編集 — 基本情報</h4>
+  <div class="mockup">
+    <div class="mockup-header">/admin/catalog/models/[id]</div>
+    <div class="mockup-body" style="padding:12px;font-size:12px;">
+      <div style="font-size:11px;color:#888;margin-bottom:8px;">カタログ / ピン / G440 MAX ドライバー</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><label style="font-size:11px;color:#666;">モデル名</label><input class="mock-input" value="G440 MAX ドライバー" style="width:100%;font-size:12px;"></div>
+        <div><label style="font-size:11px;color:#666;">メーカー</label><select class="mock-input" style="width:100%;font-size:12px;"><option>ピン</option></select></div>
+        <div><label style="font-size:11px;color:#666;">カテゴリ</label><select class="mock-input" style="width:100%;font-size:12px;"><option>ドライバー</option></select></div>
+        <div><label style="font-size:11px;color:#666;">発売年 / 月</label><div style="display:flex;gap:4px;"><input class="mock-input" value="2025" style="width:50%;font-size:12px;"><input class="mock-input" value="3" style="width:50%;font-size:12px;"></div></div>
+        <div><label style="font-size:11px;color:#666;">Slug</label><input class="mock-input" value="g440-max-driver-2025" style="width:100%;font-size:12px;"></div>
+        <div><label style="font-size:11px;color:#666;">価格</label><input class="mock-input" value="88000" style="width:100%;font-size:12px;"></div>
+      </div>
+      <div style="margin-top:8px;"><label style="font-size:11px;color:#666;"><input type="checkbox" checked> 表示する</label></div>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;">② モデル編集 — セクション1: ヘッドスペック（横型）</h4>
+  <div class="mockup">
+    <div class="mockup-header">ヘッドスペック — アイアンの例</div>
+    <div class="mockup-body" style="padding:12px;font-size:11px;overflow-x:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="color:#888;text-transform:uppercase;font-size:10px;">ヘッドスペック（全シャフト共通）</span>
+        <div style="display:flex;gap:4px;">
+          <select class="mock-input" style="font-size:11px;width:120px;"><option>+ 項目追加</option><option>バンス角</option><option>ヘッド体積</option><option>ヘッド重量</option><option>フェース角</option></select>
+          <button class="mock-button" style="font-size:11px;">+ 番手追加</button>
+        </div>
+      </div>
+      <table style="border-collapse:collapse;font-size:11px;">
+        <thead><tr style="background:#e8e8e8;">
+          <th style="padding:4px 6px;border:1px solid #ccc;min-width:90px;text-align:left;"></th>
+          <th style="padding:4px 6px;border:1px solid #ccc;min-width:50px;">5番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;min-width:50px;">6番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;min-width:50px;">7番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;min-width:50px;">8番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;min-width:50px;">9番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;min-width:50px;">PW</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">ロフト角(°)</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">22</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">25.5</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">29</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">33</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">37</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">42</td>
+          </tr>
+          <tr><td style="padding:4px 6px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">ライ角(°)</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">61</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">61.5</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">62</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">62.8</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">63.5</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">64.1</td>
+          </tr>
+          <tr><td style="padding:4px 6px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">クラブ長さ(inch)</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">38.5</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">37.75</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">37</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">36.5</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">36</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">35.5</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:10px;color:#999;margin-top:4px;">セルクリックで直接編集。空セルは「-」表示、DBにはnull保存。</p>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;">② モデル編集 — セクション2: シャフト別クラブスペック（横型）</h4>
+  <div class="mockup">
+    <div class="mockup-header">シャフト別クラブスペック</div>
+    <div class="mockup-body" style="padding:12px;font-size:11px;overflow-x:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="color:#888;text-transform:uppercase;font-size:10px;">シャフト別クラブスペック</span>
+        <div style="display:flex;gap:4px;">
+          <select class="mock-input" style="font-size:11px;width:120px;"><option>+ 項目追加</option></select>
+          <button class="mock-button" style="font-size:11px;">+ シャフト追加</button>
+        </div>
+      </div>
+      <table style="border-collapse:collapse;font-size:11px;">
+        <thead><tr style="background:#e8e8e8;">
+          <th style="padding:4px 6px;border:1px solid #ccc;" colspan="2">シャフト / フレックス</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">5番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">6番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">7番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">8番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">9番</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">PW</th>
+        </tr></thead>
+        <tbody>
+          <tr style="background:#f0f7f2;">
+            <td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold;" rowspan="2">ALTA J CB BLUE<br><span style="font-weight:normal;color:#888;">R</span></td>
+            <td style="padding:4px 6px;border:1px solid #ddd;background:#f0f7f2;font-weight:bold;">重量(g)</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;text-align:center;">369</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+          </tr>
+          <tr style="background:#f0f7f2;">
+            <td style="padding:4px 6px;border:1px solid #ddd;background:#f0f7f2;font-weight:bold;">バランス</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;text-align:center;">C9</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;background:#f0f7f2;color:#ccc;text-align:center;">-</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold;" rowspan="2">AWT 3.0 LITE<br><span style="font-weight:normal;color:#888;">S</span></td>
+            <td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold;">重量(g)</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">408</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold;">バランス</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;text-align:center;">D1</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+            <td style="padding:1px;border:1px solid #ddd;color:#ccc;text-align:center;">-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;">② モデル編集 — セクション3: シャフトスペック</h4>
+  <div class="mockup">
+    <div class="mockup-header">シャフトスペック（モデル単位・番手に依存しない）</div>
+    <div class="mockup-body" style="padding:12px;font-size:11px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="color:#888;text-transform:uppercase;font-size:10px;">シャフトスペック</span>
+        <button class="mock-button" style="font-size:11px;">+ シャフト追加</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="background:#e8e8e8;">
+          <th style="padding:4px 6px;border:1px solid #ccc;text-align:left;">シャフト名</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">種類</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">フレックス</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">重量(g)</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">トルク(°)</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">キックポイント</th>
+          <th style="padding:4px 6px;border:1px solid #ccc;">操作</th>
+        </tr></thead>
+        <tbody>
+          <tr style="background:#f0f7f2;"><td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold;">ALTA J CB BLUE</td><td style="padding:4px 6px;border:1px solid #ddd;">カーボン</td><td style="padding:4px 6px;border:1px solid #ddd;">R</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">54</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">4.8</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">先調子</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;"><span style="color:#006728;cursor:pointer;">複製</span> <span style="color:#c00;cursor:pointer;">✕</span></td></tr>
+          <tr><td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold;">ALTA J CB BLUE</td><td style="padding:4px 6px;border:1px solid #ddd;">カーボン</td><td style="padding:4px 6px;border:1px solid #ddd;">SR</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">64</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">4.5</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">中先調子</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;"><span style="color:#006728;cursor:pointer;">複製</span> <span style="color:#c00;cursor:pointer;">✕</span></td></tr>
+          <tr style="background:#f0f7f2;"><td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold;">AWT 3.0 LITE</td><td style="padding:4px 6px;border:1px solid #ddd;">スチール</td><td style="padding:4px 6px;border:1px solid #ddd;">S</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">95</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">2.9</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">中調子</td><td style="padding:4px 6px;border:1px solid #ddd;text-align:center;"><span style="color:#006728;cursor:pointer;">複製</span> <span style="color:#c00;cursor:pointer;">✕</span></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:10px;color:#999;margin-top:4px;">「複製」で同シャフト別フレックスを効率入力</p>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;">③ メーカー管理</h4>
+  <div class="mockup">
+    <div class="mockup-header">/admin/catalog/makers</div>
+    <div class="mockup-body" style="padding:12px;font-size:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="color:#888;">37メーカー</span>
+        <button class="mock-button" style="font-size:12px;">+ 新規追加</button>
+      </div>
+      <div style="border:1px solid #ddd;border-radius:4px;">
+        <div style="display:grid;grid-template-columns:0.3fr 1fr 1fr 0.8fr 0.5fr 0.4fr 0.4fr;background:#f5f5f5;padding:6px 8px;font-weight:bold;font-size:11px;border-bottom:1px solid #ddd;">
+          <div>順序</div><div>名前</div><div>日本語名</div><div>Slug</div><div>モデル数</div><div>表示</div><div>操作</div>
+        </div>
+        <div style="display:grid;grid-template-columns:0.3fr 1fr 1fr 0.8fr 0.5fr 0.4fr 0.4fr;padding:6px 8px;border-bottom:1px solid #eee;align-items:center;">
+          <div>↑↓</div><div style="font-weight:bold;">PING</div><div>ピン</div><div style="color:#888;">ping</div><div>56</div><div style="color:green;">●</div><div><a style="color:#006728;">編集</a></div>
+        </div>
+        <div style="display:grid;grid-template-columns:0.3fr 1fr 1fr 0.8fr 0.5fr 0.4fr 0.4fr;padding:6px 8px;border-bottom:1px solid #eee;align-items:center;">
+          <div>↑↓</div><div style="font-weight:bold;">TaylorMade</div><div>テーラーメイド</div><div style="color:#888;">taylormade</div><div>263</div><div style="color:green;">●</div><div><a style="color:#006728;">編集</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;">④ お知らせ一覧</h4>
+  <div class="mockup">
+    <div class="mockup-header">/admin/announcements</div>
+    <div class="mockup-body" style="padding:12px;font-size:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;gap:6px;">
+          <select class="mock-input" style="width:120px;font-size:12px;"><option>全カテゴリ</option></select>
+          <select class="mock-input" style="width:120px;font-size:12px;"><option>全ステータス</option></select>
+        </div>
+        <button class="mock-button" style="font-size:12px;">+ 新規作成</button>
+      </div>
+      <div style="border:1px solid #ddd;border-radius:4px;">
+        <div style="display:grid;grid-template-columns:2fr 0.8fr 0.8fr 0.6fr 0.5fr;background:#f5f5f5;padding:6px 8px;font-weight:bold;font-size:11px;border-bottom:1px solid #ddd;">
+          <div>タイトル</div><div>カテゴリ</div><div>公開日</div><div>状態</div><div>操作</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 0.8fr 0.8fr 0.6fr 0.5fr;padding:6px 8px;border-bottom:1px solid #eee;">
+          <div style="font-weight:bold;">カタログ機能をリリースしました</div>
+          <div><span style="background:#e6f2eb;color:#006728;padding:1px 6px;border-radius:8px;font-size:10px;">機能</span></div>
+          <div>2026-06-21</div><div style="color:green;">公開中</div><div><a style="color:#006728;">編集</a></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 0.8fr 0.8fr 0.6fr 0.5fr;padding:6px 8px;">
+          <div style="font-weight:bold;">メンテナンスのお知らせ</div>
+          <div><span style="background:#fff3e0;color:#e65100;padding:1px 6px;border-radius:8px;font-size:10px;">メンテ</span></div>
+          <div>2026-06-20</div><div style="color:#999;">下書き</div><div><a style="color:#006728;">編集</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;">④ お知らせ編集</h4>
+  <div class="mockup">
+    <div class="mockup-header">/admin/announcements/[id]</div>
+    <div class="mockup-body" style="padding:12px;font-size:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div style="grid-column:1/3;"><label style="font-size:11px;color:#666;">タイトル</label><input class="mock-input" value="カタログ機能をリリースしました" style="width:100%;font-size:12px;"></div>
+        <div><label style="font-size:11px;color:#666;">カテゴリ</label><select class="mock-input" style="width:100%;font-size:12px;"><option>機能追加</option></select></div>
+        <div><label style="font-size:11px;color:#666;">公開日</label><input class="mock-input" type="date" value="2026-06-21" style="width:100%;font-size:12px;"></div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <label style="font-size:11px;color:#666;">本文 (Markdown)</label>
+        <textarea class="mock-input" style="width:100%;height:80px;font-family:monospace;font-size:11px;">## 新機能
+クラブカタログのスペック比較ができるようになりました。</textarea>
+      </div>
+      <div style="margin-bottom:12px;"><label style="font-size:11px;color:#666;"><input type="checkbox" checked> 公開する</label></div>
+      <div style="display:flex;gap:6px;">
+        <button class="mock-button" style="background:#006728;color:white;border:none;font-size:12px;">保存</button>
+        <button class="mock-button" style="font-size:12px;">キャンセル</button>
+        <button class="mock-button" style="margin-left:auto;color:#c00;border-color:#c00;font-size:12px;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>技術方針</h3>
+  <div style="font-size:13px;line-height:1.8;">
+    <ul>
+      <li>既存コンポーネント活用: AdminTable, AdminSidebar, AdminFormSection, AdminBreadcrumb</li>
+      <li>全ページ <code>"use client"</code> のClient Component</li>
+      <li>API層: <code>requireAdmin()</code> で認証、<code>adminClient</code>（service_role）でDB操作</li>
+      <li>横型スペックテーブルは専用コンポーネント <code>SpecGridEditor</code> として新規作成</li>
+      <li>お知らせ本文はMarkdown入力</li>
+      <li>削除操作は全て確認ダイアログ表示</li>
+      <li>「+ 項目追加」はDBカラム名をプルダウンで選択、将来カラム追加時は選択肢が自然に増える設計</li>
+    </ul>
+  </div>
+</div>
