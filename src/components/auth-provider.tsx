@@ -181,7 +181,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }),
         });
 
-        if (!res.ok) throw new Error("Auth failed");
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.error("[LIFF auth] API error:", res.status, errData);
+          throw new Error(errData.error || `Auth failed (${res.status})`);
+        }
 
         const { access_token, refresh_token } = await res.json();
 

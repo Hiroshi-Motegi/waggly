@@ -19,8 +19,10 @@ export async function POST(request: NextRequest) {
   let avatarUrl: string | null = null;
 
   if (body.idToken) {
+    console.log("[line-auth] Verifying ID token...");
     const verified = await verifyLineIdToken(body.idToken);
     if (!verified) {
+      console.error("[line-auth] Token verification failed. LIFF_CHANNEL_ID set:", !!process.env.NEXT_PUBLIC_LIFF_CHANNEL_ID, "LINE_CHANNEL_ID set:", !!process.env.NEXT_PUBLIC_LINE_CHANNEL_ID);
       return NextResponse.json({ error: "Invalid LINE token" }, { status: 401 });
     }
     lineUserId = verified.sub;
@@ -61,11 +63,12 @@ export async function POST(request: NextRequest) {
   if (created?.user) {
     authUserId = created.user.id;
   } else {
-    // 既存の auth user を探してパスワード更新
-    const { data: signIn } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+    console.log("[line-auth] createUser failed:", createError?.message, "— trying signInWithPassword");
+    const { data: signIn, error: signInErr } = await supabaseAdmin.auth.signInWithPassword({ email, password });
     if (signIn?.user) {
       authUserId = signIn.user.id;
     } else {
+      console.error("[line-auth] signInWithPassword also failed:", signInErr?.message);
       // パスワード不一致 → admin で強制リセット
       // createUser のエラーからは ID が取れないので、dummy signUp で探す
       // 最もシンプル: 既存を削除して再作成
