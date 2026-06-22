@@ -31,7 +31,7 @@ function PlanPageInner() {
       : null;
     if (
       !confirm(
-        `無料プランに変更しますか？${periodEnd ? `\n${periodEnd}まではPro機能を引き続きご利用いただけます。\nそれまでの間はいつでもProに戻せます。` : ""}`
+        `有料プランを解約しますか？${periodEnd ? `\n${periodEnd}まではPro機能を引き続きご利用いただけます。\nそれまでの間はいつでも再開できます。` : ""}`
       )
     )
       return;
@@ -104,95 +104,92 @@ function PlanPageInner() {
           </div>
         )}
 
-        {/* プラン一覧 */}
-        <div className="space-y-3">
-          {/* 無料プラン */}
-          <div className={`rounded-lg bg-white p-4 ${!isPro && !isPaused ? "ring-2 ring-[#006728]" : ""}`}>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold">無料プラン</h3>
-              {!isPro && !isPaused && (
-                <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
-                  現在のプラン
-                </span>
-              )}
-              {isPaused && (
-                <span className="rounded-full bg-[#8b8b8b] px-2.5 py-0.5 text-xs font-bold text-white">
-                  変更予定
-                </span>
-              )}
+        {/* Pro 未加入 */}
+        {!isPro && !isPaused && (
+          <div className="space-y-3">
+            <div className="rounded-lg bg-white p-4 text-center space-y-4">
+              <p className="text-sm text-[#666] leading-relaxed">
+                基本機能は無料でお使いいただけます。<br />
+                AI機能の利用回数を増やしたい場合は、有料プランをご検討ください。
+              </p>
+              <Link
+                href="/settings/plan/checkout"
+                className="flex items-center justify-center w-full py-3 rounded-full bg-[#006728] text-white font-bold"
+              >
+                Waggly Pro に加入する
+              </Link>
+              <Link
+                href="/help/plans"
+                className="text-sm text-[#006728] underline"
+              >
+                有料プランについて
+              </Link>
             </div>
-            <p className="text-xl font-bold mb-2">¥0</p>
-            <ul className="text-sm space-y-1 text-[#666] mb-4">
-              <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />AIチャット 月5回</li>
-              <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />練習メニュー提案 月3回</li>
-              <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />ギア管理・練習記録は無制限</li>
-            </ul>
-            {isPro && !isPaused && (
+          </div>
+        )}
+
+        {/* Pro 加入中 */}
+        {isPro && !isPaused && (
+          <div className="space-y-3">
+            <div className="rounded-lg bg-white p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-base font-bold">Waggly Pro</h3>
+                <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
+                  加入中
+                </span>
+              </div>
+              <p className="text-xl font-bold text-[#006728] mb-2">
+                ¥480<span className="text-sm font-normal">/月</span>
+              </p>
+              <ul className="text-sm space-y-1 text-[#666] mb-4">
+                <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />AIチャット 月100回</li>
+                <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />練習メニュー提案 月30回</li>
+              </ul>
+              {subscription?.current_period_end && (
+                <p className="text-xs text-[#8b8b8b] text-center mb-3">
+                  次回更新日: {new Date(subscription.current_period_end).toLocaleDateString("ja-JP")}
+                </p>
+              )}
               <button
                 onClick={handlePause}
                 disabled={loading}
                 className="w-full py-2.5 rounded-full border border-[#c4c4c4] text-sm text-[#666]"
               >
-                {loading ? "処理中..." : "無料プランに変更"}
+                {loading ? "処理中..." : "有料プランを解約する"}
               </button>
-            )}
+            </div>
           </div>
+        )}
 
-          {/* Pro プラン */}
-          <div className={`rounded-lg bg-white p-4 ${isPro || isPaused ? "ring-2 ring-[#006728]" : ""}`}>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold">Waggly Pro</h3>
-              {isPro && !isPaused && (
-                <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white">
-                  現在のプラン
-                </span>
-              )}
-              {isPaused && (
+        {/* 解約予定（課金期間内） */}
+        {isPaused && (
+          <div className="space-y-3">
+            <div className="rounded-lg bg-white p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-base font-bold">Waggly Pro</h3>
                 <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-bold text-white">
                   解約予定
                 </span>
+              </div>
+              <ul className="text-sm space-y-1 text-[#666] mb-4">
+                <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />AIチャット 月100回</li>
+                <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />練習メニュー提案 月30回</li>
+              </ul>
+              <button
+                onClick={handleResume}
+                disabled={loading}
+                className="w-full py-3 rounded-full bg-[#006728] text-white font-bold disabled:opacity-40 mb-2"
+              >
+                {loading ? "処理中..." : "Waggly Pro を再開する"}
+              </button>
+              {subscription?.current_period_end && (
+                <p className="text-xs text-[#8b8b8b] text-center">
+                  {new Date(subscription.current_period_end).toLocaleDateString("ja-JP")}まで Pro 機能をご利用いただけます
+                </p>
               )}
             </div>
-            <p className="text-xl font-bold text-[#006728] mb-2">
-              ¥480<span className="text-sm font-normal">/月</span>
-            </p>
-            <ul className="text-sm space-y-1 text-[#666] mb-4">
-              <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />AIチャット 月100回</li>
-              <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />練習メニュー提案 月30回</li>
-              <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#006728]" />ギア管理・練習記録は無制限</li>
-            </ul>
-
-            {!isPro && !isPaused && (
-              <Link
-                href="/settings/plan/checkout"
-                className="flex items-center justify-center w-full py-3 rounded-full bg-[#006728] text-white font-bold"
-              >
-                アップグレード
-              </Link>
-            )}
-            {isPaused && (
-              <>
-                <button
-                  onClick={handleResume}
-                  disabled={loading}
-                  className="w-full py-3 rounded-full bg-[#006728] text-white font-bold disabled:opacity-40"
-                >
-                  {loading ? "処理中..." : "Pro に戻す"}
-                </button>
-                {subscription?.current_period_end && (
-                  <p className="text-xs text-[#8b8b8b] text-center mt-2">
-                    {new Date(subscription.current_period_end).toLocaleDateString("ja-JP")}まで Pro 機能をご利用いただけます
-                  </p>
-                )}
-              </>
-            )}
-            {isPro && !isPaused && subscription?.current_period_end && (
-              <p className="text-xs text-[#8b8b8b] text-center">
-                次回更新日: {new Date(subscription.current_period_end).toLocaleDateString("ja-JP")}
-              </p>
-            )}
           </div>
-        </div>
+        )}
 
         {/* Waggly を解約（アカウント削除） */}
         <div className="pt-4">
