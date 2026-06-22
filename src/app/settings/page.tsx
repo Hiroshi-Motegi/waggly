@@ -70,10 +70,9 @@ export default function SettingsPage() {
     const params = new URLSearchParams(window.location.search);
     const linked = params.get("linked");
     if (linked) {
-      setLinkToast(`${linked === "google" ? "Google" : linked === "facebook" ? "Facebook" : "LINE"}を連携しました`);
+      const msg = `${linked === "google" ? "Google" : linked === "facebook" ? "Facebook" : "LINE"}を連携しました`;
+      setLinkToast(msg);
       window.history.replaceState(null, "", "/settings");
-      const timer = setTimeout(() => setLinkToast(null), 3000);
-      return () => clearTimeout(timer);
     }
     const conflict = params.get("conflict");
     if (conflict) {
@@ -99,6 +98,13 @@ export default function SettingsPage() {
       window.history.replaceState(null, "", "/settings");
     }
   }, []);
+
+  useEffect(() => {
+    if (!linkToast) return;
+    const timer = setTimeout(() => setLinkToast(null), 3000);
+    return () => clearTimeout(timer);
+  }, [linkToast]);
+
   const [usageLoaded, setUsageLoaded] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
 
