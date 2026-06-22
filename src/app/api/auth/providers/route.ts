@@ -29,10 +29,21 @@ export const GET = withErrorHandler(async () => {
     currentAuthUserId = user?.id ?? null;
   }
 
-  const result = (data ?? []).map((p: { provider: string; auth_user_id: string | null }) => ({
-    provider: p.provider,
-    is_current: p.auth_user_id === currentAuthUserId,
-  }));
+  // 各プロバイダーの auth_user_id から auth.users のメールを取得
+  const result = await Promise.all(
+    (data ?? []).map(async (p: { provider: string; auth_user_id: string | null }) => {
+      let email: string | null = null;
+      if (p.auth_user_id) {
+        const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(p.auth_user_id);
+        email = authUser?.email ?? authUser?.user_metadata?.email ?? null;
+      }
+      return {
+        provider: p.provider,
+        email,
+        is_current: p.auth_user_id === currentAuthUserId,
+      };
+    })
+  );
 
   return NextResponse.json(result);
 });

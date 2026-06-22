@@ -71,6 +71,11 @@ describe("GET /api/auth/providers", () => {
       data: { user: { id: "auth-google-1" } },
     });
 
+    // auth.admin.getUserById for each provider
+    supabase.auth.admin.getUserById
+      .mockResolvedValueOnce({ data: { user: { id: "auth-google-1", email: "test@gmail.com", user_metadata: {} } } })
+      .mockResolvedValueOnce({ data: { user: { id: "auth-line-1", email: null, user_metadata: {} } } });
+
     const res = await GET();
     const json = await res.json();
 
@@ -78,10 +83,12 @@ describe("GET /api/auth/providers", () => {
     expect(json).toHaveLength(2);
     expect(json[0]).toEqual({
       provider: "google",
+      email: "test@gmail.com",
       is_current: true,
     });
     expect(json[1]).toEqual({
       provider: "line",
+      email: null,
       is_current: false,
     });
   });
@@ -118,6 +125,11 @@ describe("GET /api/auth/providers", () => {
     });
     vi.mocked(createClient).mockResolvedValue(mockCookieSupabase);
 
+    // auth.admin.getUserById for the provider
+    supabase.auth.admin.getUserById.mockResolvedValueOnce({
+      data: { user: { id: "auth-google-1", email: "test@gmail.com", user_metadata: {} } },
+    });
+
     const res = await GET();
     const json = await res.json();
 
@@ -125,6 +137,7 @@ describe("GET /api/auth/providers", () => {
     expect(json).toHaveLength(1);
     expect(json[0]).toEqual({
       provider: "google",
+      email: "test@gmail.com",
       is_current: true,
     });
   });
