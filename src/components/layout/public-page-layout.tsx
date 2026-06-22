@@ -37,7 +37,7 @@ export function PublicPageLayout({
     <div className="relative">
       <div className="flex flex-col items-center w-full">
         <PublicPageHeader title={title} backHref={backHref} backFallbackHref={backFallbackHref} />
-        <div className="w-full px-3 py-3 space-y-2">
+        <div className="w-full px-3 py-3 space-y-2 overflow-x-hidden">
           {children}
         </div>
       </div>

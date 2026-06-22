@@ -30,12 +30,14 @@ export default async function MakerPage({ params }: { params: Promise<{ maker: s
 
   const makerName = makerData.name_ja ?? makerData.name;
 
-  const allModels = models.map((m) => ({
+  const allModels = models.map((m: any) => ({
     id: m.id,
     name: m.name,
     category: m.category,
     slug: m.slug,
     makerSlug: m.maker_slug,
+    image_url: m.catalog_model_images?.[0]?.image_url ?? m.image_url,
+    alpen_pid: m.alpen_pid,
   }));
 
   const jsonLd = {

@@ -5,7 +5,7 @@ import { badRequest, supabaseError } from "@/lib/api-error";
 
 const attrSchema = z.object({
   model_id: z.string().uuid(),
-  label: z.string().min(1).max(200),
+  label: z.string().max(200),
   value: z.string().min(1).max(5000),
   sort_order: z.number().int().optional(),
 });
