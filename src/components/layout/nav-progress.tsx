@@ -16,7 +16,7 @@ export function NavProgress({ children }: { children: React.ReactNode }) {
   const [exiting, setExiting] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const prevPath = useRef(pathname);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   useEffect(() => {
     if (prevPath.current !== pathname) {
