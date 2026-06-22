@@ -485,33 +485,53 @@ export default function SettingsPage() {
       <AccountLinking user={user} onConflict={setConflictInfo} setProcessing={setProcessing} />
 
       {/* プラン */}
-      <p className="text-base font-bold text-white px-1 pt-4">プラン</p>
-      <div className="rounded-lg bg-white p-3">
-        <div className="flex items-center justify-between">
+      <p className="text-base font-bold text-white px-1 pt-4">有料オプション</p>
+      {isPro && !isPaused ? (
+        <Link href="/settings/plan" className="rounded-lg bg-white p-3 flex items-center justify-between">
           <div>
-            <span className="text-base font-bold">{!subscription ? "" : isPro ? "Waggly Pro" : "無料プラン"}</span>
-            {!isPro && !isPaused && (
-              <p className="text-xs text-[#8b8b8b] mt-0.5">AI相談・練習生成に回数制限があります</p>
+            <span className="text-base font-bold">Waggly Pro</span>
+            {subscription?.subscription?.current_period_end && (
+              <p className="text-xs text-[#8b8b8b] mt-0.5">
+                次回更新日: {new Date(subscription.subscription.current_period_end).toLocaleDateString("ja-JP")}
+              </p>
             )}
-            {isPaused && subscription?.subscription?.current_period_end && (
+          </div>
+          <span className="rounded-full bg-[#006728] px-2.5 py-0.5 text-xs font-bold text-white shrink-0">
+            加入中
+          </span>
+        </Link>
+      ) : isPaused ? (
+        <Link href="/settings/plan" className="rounded-lg bg-white p-3 flex items-center justify-between">
+          <div>
+            <span className="text-base font-bold">Waggly Pro</span>
+            {subscription?.subscription?.current_period_end && (
               <p className="text-xs text-amber-500 mt-0.5">
                 解約予定（{new Date(subscription.subscription.current_period_end).toLocaleDateString("ja-JP")}まで利用可能）
               </p>
             )}
           </div>
-          {!isPro && !isPaused && (
-            <span className="rounded-full bg-[#8b8b8b] px-2.5 py-0.5 text-xs font-bold text-white shrink-0">
-              準備中
-            </span>
-          )}
+          <Image src="/icons/chevron-right.svg" alt="" width={6} height={10} className="opacity-60" style={{ width: "auto", height: "auto" }} />
+        </Link>
+      ) : (
+        <div className="rounded-lg bg-white p-3 space-y-3">
+          <p className="text-sm text-[#666] leading-relaxed text-center font-bold py-2">
+            以下の機能は、有料プランに加入することで制限が解除されます。
+          </p>
+          <ul className="text-sm text-[#666] list-disc pl-5 space-y-0.5">
+            <li>AIチャット相談回数の追加</li>
+            <li>AI練習メニュー提案の追加</li>
+          </ul>
+          <Link href="/help/plans" className="flex items-center justify-center mx-auto max-w-60 py-2.5 rounded-full border border-[#006728] text-sm font-bold text-[#006728]">
+            有料プランについて
+          </Link>
+          <div className="flex items-center justify-center mx-auto max-w-60 py-2.5 rounded-full bg-[#8b8b8b] text-sm font-bold text-white gap-1">
+            有料プランに申し込む
+            <span className="text-xs opacity-80">（準備中）</span>
+          </div>
         </div>
-      </div>
-      {!isPro && !isPaused && (
-        <p className="text-xs text-white/70 px-1 mt-1">有料プランは現在準備中です</p>
       )}
 
       {/* 広告設定 */}
-      <p className="text-base font-bold text-white px-1 pt-4">広告</p>
       {isAdFree ? (
         <div className="rounded-lg bg-white p-3">
           <p className="text-base font-bold">広告非表示</p>
