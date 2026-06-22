@@ -23,11 +23,20 @@ export async function initLiff(): Promise<string | null> {
   if (!liff.isLoggedIn()) {
     // Auto-login only inside LINE app; on web, let user click the button
     if (liff.isInClient()) {
-      liff.login();
+      // Prevent infinite redirect loop: only attempt login once per session
+      const alreadyAttempted = sessionStorage.getItem("liff_login_attempted");
+      if (!alreadyAttempted) {
+        sessionStorage.setItem("liff_login_attempted", "1");
+        liff.login();
+      } else {
+        console.warn("[LIFF] login already attempted but isLoggedIn still false — skipping to prevent loop");
+      }
     }
     return null;
   }
 
+  // Login succeeded — clear the guard flag
+  sessionStorage.removeItem("liff_login_attempted");
   return liffState && liffState !== "/" ? liffState : null;
 }
 
