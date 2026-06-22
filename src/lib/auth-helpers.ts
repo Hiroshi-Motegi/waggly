@@ -14,41 +14,42 @@ export function getSupabaseAdmin() {
 export function extractProviderInfo(authUser: {
   app_metadata: Record<string, unknown>;
   user_metadata: Record<string, unknown>;
-}): { provider: string; providerSub: string } | null {
+}): { provider: string; providerSub: string; providerEmail: string | null } | null {
   const appMeta = authUser.app_metadata ?? {};
   const userMeta = authUser.user_metadata ?? {};
+  const email = (userMeta.email as string) ?? null;
 
   // Google
   if (appMeta.provider === "google") {
     const sub = userMeta.sub as string | undefined;
     if (!sub) return null;
-    return { provider: "google", providerSub: sub };
+    return { provider: "google", providerSub: sub, providerEmail: email };
   }
 
   // Apple
   if (appMeta.provider === "apple") {
     const sub = userMeta.sub as string | undefined;
     if (!sub) return null;
-    return { provider: "apple", providerSub: sub };
+    return { provider: "apple", providerSub: sub, providerEmail: null };
   }
 
   // Facebook
   if (appMeta.provider === "facebook") {
     const sub = (userMeta.sub ?? userMeta.provider_id) as string | undefined;
     if (!sub) return null;
-    return { provider: "facebook", providerSub: sub };
+    return { provider: "facebook", providerSub: sub, providerEmail: email };
   }
 
   // Twitter / X
   if (appMeta.provider === "twitter") {
     const sub = (userMeta.sub ?? userMeta.provider_id) as string | undefined;
     if (!sub) return null;
-    return { provider: "twitter", providerSub: sub };
+    return { provider: "twitter", providerSub: sub, providerEmail: null };
   }
 
   // LINE (email/password auth with line_user_id in metadata)
   if (userMeta.line_user_id) {
-    return { provider: "line", providerSub: userMeta.line_user_id as string };
+    return { provider: "line", providerSub: userMeta.line_user_id as string, providerEmail: null };
   }
 
   return null;

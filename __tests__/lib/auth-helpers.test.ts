@@ -10,6 +10,7 @@ describe("extractProviderInfo", () => {
     expect(result).toEqual({
       provider: "google",
       providerSub: "google-123",
+      providerEmail: "test@gmail.com",
     });
   });
 
@@ -21,6 +22,7 @@ describe("extractProviderInfo", () => {
     expect(result).toEqual({
       provider: "line",
       providerSub: "U1234567890",
+      providerEmail: null,
     });
   });
 
@@ -32,6 +34,7 @@ describe("extractProviderInfo", () => {
     expect(result).toEqual({
       provider: "apple",
       providerSub: "apple-001",
+      providerEmail: null,
     });
   });
 

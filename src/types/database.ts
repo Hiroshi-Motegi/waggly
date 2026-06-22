@@ -23,6 +23,7 @@ export interface UserProvider {
   provider: string;
   auth_user_id: string | null;
   provider_sub: string;
+  provider_email: string | null;
   created_at: string;
 }
 

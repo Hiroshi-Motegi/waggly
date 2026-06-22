@@ -169,6 +169,7 @@ export async function POST(request: NextRequest) {
     provider: providerInfo.provider,
     auth_user_id: authUserId,
     provider_sub: providerInfo.providerSub,
+    provider_email: providerInfo.providerEmail,
   });
 
   return NextResponse.json({ user: newUser, conflict: false, isNew: true, provider: providerInfo.provider });

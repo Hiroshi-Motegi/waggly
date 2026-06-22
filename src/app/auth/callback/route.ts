@@ -44,6 +44,7 @@ async function handleProviderLink(
   const { searchParams } = new URL(request.url);
   const originalUserId = searchParams.get("originalUser");
   const providerSub = (authUser.user_metadata?.sub ?? authUser.user_metadata?.provider_id ?? authUser.id) as string;
+  const providerEmail = (authUser.user_metadata?.email as string) ?? null;
 
   if (!originalUserId) {
     return NextResponse.redirect(`${origin}/settings?error=missing_user`);
@@ -97,6 +98,7 @@ async function handleProviderLink(
     user_id: originalUserId,
     provider,
     provider_sub: providerSub,
+    provider_email: providerEmail,
     auth_user_id: authUser.id,
   });
 
@@ -116,6 +118,7 @@ async function handleGoogleLink(
   const { searchParams } = new URL(request.url);
   const originalUserId = searchParams.get("originalUser");
   const googleSub = googleUser.user_metadata?.sub ?? googleUser.id;
+  const googleEmail = (googleUser.user_metadata?.email ?? googleUser.email ?? null) as string | null;
 
   if (!originalUserId) {
     return NextResponse.redirect(`${origin}/settings?error=missing_user`);
@@ -172,6 +175,7 @@ async function handleGoogleLink(
     user_id: originalUserId,
     provider: "google",
     provider_sub: googleSub,
+    provider_email: googleEmail,
     auth_user_id: googleUser.id,
   });
 

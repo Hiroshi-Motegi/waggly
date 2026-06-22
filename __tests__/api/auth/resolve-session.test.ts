@@ -156,6 +156,7 @@ describe("POST /api/auth/resolve-session", () => {
       vi.mocked(extractProviderInfo).mockReturnValue({
         provider: "google",
         providerSub: "google-456",
+        providerEmail: "test@gmail.com",
       });
       // user_providers query finds existing provider
       supabase.queueResult("user_providers", {
@@ -226,6 +227,7 @@ describe("POST /api/auth/resolve-session", () => {
       vi.mocked(extractProviderInfo).mockReturnValue({
         provider: "google",
         providerSub: "google-new",
+        providerEmail: "newuser@gmail.com",
       });
 
       // user_providers query returns nothing (no existing provider)

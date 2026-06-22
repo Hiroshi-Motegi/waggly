@@ -1638,6 +1638,7 @@ export type Database = {
           created_at: string
           id: string
           provider: string
+          provider_email: string | null
           provider_sub: string
           user_id: string
         }
@@ -1646,6 +1647,7 @@ export type Database = {
           created_at?: string
           id?: string
           provider: string
+          provider_email?: string | null
           provider_sub: string
           user_id: string
         }
@@ -1654,6 +1656,7 @@ export type Database = {
           created_at?: string
           id?: string
           provider?: string
+          provider_email?: string | null
           provider_sub?: string
           user_id?: string
         }

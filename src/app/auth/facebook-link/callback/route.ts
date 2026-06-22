@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
 
   const me = await meRes.json();
   const facebookSub = me.id as string;
+  const facebookEmail = (me.email as string) ?? null;
 
   if (!facebookSub) {
     return NextResponse.redirect(`${origin}/settings?error=facebook_link_failed`);
@@ -103,6 +104,7 @@ export async function GET(request: NextRequest) {
     user_id: originalUserId,
     provider: "facebook",
     provider_sub: facebookSub,
+    provider_email: facebookEmail,
   });
 
   return NextResponse.redirect(`${origin}/settings?linked=facebook`);
