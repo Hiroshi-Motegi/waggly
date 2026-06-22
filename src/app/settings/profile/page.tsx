@@ -125,7 +125,7 @@ export default function ProfileSettingsPage() {
               <Avatar className="h-16 w-16">
                 <AvatarImage src={profile?.avatar_url ?? undefined} />
                 <AvatarFallback className="bg-[#006728] text-white text-xl">
-                  {(profile?.nickname ?? user.display_name ?? "?")[0]}
+                  {(profile?.nickname ?? "?")[0]}
                 </AvatarFallback>
               </Avatar>
               {isUploading && (

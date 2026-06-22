@@ -11,7 +11,7 @@ export const GET = withErrorHandler(async () => {
   const supabaseAdmin = getSupabaseAdmin();
   const { data } = await supabaseAdmin
     .from("user_providers")
-    .select("provider, provider_email, auth_user_id")
+    .select("provider, auth_user_id")
     .eq("user_id", auth.userId);
 
   // 現在のセッションの auth_user_id を取得
@@ -29,9 +29,8 @@ export const GET = withErrorHandler(async () => {
     currentAuthUserId = user?.id ?? null;
   }
 
-  const result = (data ?? []).map((p: { provider: string; provider_email: string | null; auth_user_id: string | null }) => ({
+  const result = (data ?? []).map((p: { provider: string; auth_user_id: string | null }) => ({
     provider: p.provider,
-    provider_email: p.provider_email,
     is_current: p.auth_user_id === currentAuthUserId,
   }));
 

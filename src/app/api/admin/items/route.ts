@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   let query = adminClient
     .from("accessories")
-    .select("*, users!accessories_user_id_fkey(display_name)")
+    .select("*, users!accessories_user_id_fkey(profiles(nickname))")
     .order("created_at", { ascending: false });
 
   const search = params.get("search");

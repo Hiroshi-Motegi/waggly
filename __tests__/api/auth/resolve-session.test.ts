@@ -27,9 +27,6 @@ const BASE_URL = "http://localhost:3000/api/auth/resolve-session";
 
 const mockUser = {
   id: "user-1",
-  display_name: "Test User",
-  avatar_url: null,
-  google_email: null,
 };
 
 const mockAuthUserId = "auth-user-123";
@@ -159,8 +156,7 @@ describe("POST /api/auth/resolve-session", () => {
       vi.mocked(extractProviderInfo).mockReturnValue({
         provider: "google",
         providerSub: "google-456",
-        providerEmail: "test@gmail.com",
-      } as any);
+      });
       // user_providers query finds existing provider
       supabase.queueResult("user_providers", {
         data: { user_id: "existing-user-99" },
@@ -230,8 +226,7 @@ describe("POST /api/auth/resolve-session", () => {
       vi.mocked(extractProviderInfo).mockReturnValue({
         provider: "google",
         providerSub: "google-new",
-        providerEmail: "newuser@gmail.com",
-      } as any);
+      });
 
       // user_providers query returns nothing (no existing provider)
       supabase.queueResult("user_providers", { data: null, error: null });
@@ -239,11 +234,11 @@ describe("POST /api/auth/resolve-session", () => {
       // users insert returns new user
       const newUser = {
         id: "new-user-1",
-        display_name: "New User",
-        avatar_url: null,
-        google_email: "newuser@gmail.com",
       };
       supabase.queueResult("users", { data: newUser, error: null });
+
+      // profiles insert
+      supabase.queueResult("profiles", { data: null, error: null });
 
       // user_providers insert (for linking)
       supabase.queueResult("user_providers", { data: null, error: null });

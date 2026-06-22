@@ -32,14 +32,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   // Step 1: プロバイダトークンを検証して provider_sub を取得
   let providerSub: string | null = null;
-  let providerEmail: string | null = null;
 
   if (provider === "google") {
     if (idToken) {
       const result = await verifyGoogleIdToken(idToken);
       if (!result) return NextResponse.json({ error: "Invalid Google ID token" }, { status: 401 });
       providerSub = result.sub;
-      providerEmail = result.email ?? null;
     } else if (confirmMerge && bodyProviderSub) {
       // confirmMerge時: OAuthフローは使い捨てのため再利用不可。初回検証済みのproviderSubをそのまま使用。
       providerSub = bodyProviderSub;
@@ -174,19 +172,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     user_id: userId,
     provider,
     provider_sub: providerSub,
-    provider_email: providerEmail,
   });
 
   if (error) {
     console.error("[link-provider] Insert failed:", error);
     return NextResponse.json({ error: "Failed to link provider" }, { status: 500 });
-  }
-
-  if (provider === "google" && providerEmail) {
-    await supabaseAdmin
-      .from("users")
-      .update({ google_email: providerEmail })
-      .eq("id", userId);
   }
 
   return NextResponse.json({ linked: true });
@@ -253,15 +243,5 @@ export const DELETE = withErrorHandler(async (request: NextRequest) => {
     .delete()
     .eq("id", targetProvider.id);
 
-  const needsRelogin = false;
-
-  // Google 解除時は google_email もクリア
-  if (provider === "google") {
-    await supabaseAdmin
-      .from("users")
-      .update({ google_email: null })
-      .eq("id", userId);
-  }
-
-  return NextResponse.json({ unlinked: true, needsRelogin });
+  return NextResponse.json({ unlinked: true, needsRelogin: false });
 });

@@ -1638,7 +1638,6 @@ export type Database = {
           created_at: string
           id: string
           provider: string
-          provider_email: string | null
           provider_sub: string
           user_id: string
         }
@@ -1647,7 +1646,6 @@ export type Database = {
           created_at?: string
           id?: string
           provider: string
-          provider_email?: string | null
           provider_sub: string
           user_id: string
         }
@@ -1656,7 +1654,6 @@ export type Database = {
           created_at?: string
           id?: string
           provider?: string
-          provider_email?: string | null
           provider_sub?: string
           user_id?: string
         }
@@ -1674,10 +1671,7 @@ export type Database = {
         Row: {
           ad_free: boolean
           agreed_terms_at: string | null
-          avatar_url: string | null
           created_at: string
-          display_name: string
-          google_email: string | null
           id: string
           is_admin: boolean
           onboarding_version: number
@@ -1685,10 +1679,7 @@ export type Database = {
         Insert: {
           ad_free?: boolean
           agreed_terms_at?: string | null
-          avatar_url?: string | null
           created_at?: string
-          display_name: string
-          google_email?: string | null
           id?: string
           is_admin?: boolean
           onboarding_version?: number
@@ -1696,10 +1687,7 @@ export type Database = {
         Update: {
           ad_free?: boolean
           agreed_terms_at?: string | null
-          avatar_url?: string | null
           created_at?: string
-          display_name?: string
-          google_email?: string | null
           id?: string
           is_admin?: boolean
           onboarding_version?: number

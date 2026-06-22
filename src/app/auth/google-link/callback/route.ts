@@ -52,7 +52,6 @@ export async function GET(request: NextRequest) {
   }
   const verified = await verifyRes.json();
   const googleSub = verified.sub as string;
-  const googleEmail = (verified.email as string) ?? null;
 
   if (!googleSub) {
     return NextResponse.redirect(`${origin}/settings?error=google_link_failed`);
@@ -107,16 +106,11 @@ export async function GET(request: NextRequest) {
     user_id: originalUserId,
     provider: "google",
     provider_sub: googleSub,
-    provider_email: googleEmail,
   });
 
   if (insertError) {
     console.error("[google-link] Insert failed:", insertError);
     return NextResponse.redirect(`${origin}/settings?error=google_link_failed`);
-  }
-
-  if (googleEmail) {
-    await supabaseAdmin.from("users").update({ google_email: googleEmail }).eq("id", originalUserId);
   }
 
   return NextResponse.redirect(`${origin}/settings?linked=google`);

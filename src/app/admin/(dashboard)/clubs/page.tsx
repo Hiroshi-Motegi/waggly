@@ -11,7 +11,7 @@ import { apiFetch } from "@/lib/api-client";
 interface Club {
   id: string; maker: string | null; model: string | null; category: string;
   catalog_model_id: string | null;
-  users: { display_name: string } | null;
+  users: { profiles: { nickname: string | null } | null } | null;
   catalog_models: { name: string; maker: string } | null;
 }
 
@@ -67,7 +67,7 @@ function ClubList() {
   }
 
   const columns: ColumnDef<Club>[] = [
-    { id: "user", header: "ユーザー", enableSorting: false, cell: ({ row }) => <span className="text-xs">{row.original.users?.display_name ?? "-"}</span> },
+    { id: "user", header: "ユーザー", enableSorting: false, cell: ({ row }) => <span className="text-xs">{row.original.users?.profiles?.nickname ?? "-"}</span> },
     { accessorKey: "maker", header: "メーカー", enableSorting: false, cell: ({ getValue }) => <span className="text-xs">{(getValue() as string) ?? "-"}</span> },
     { accessorKey: "model", header: "モデル名", enableSorting: false, cell: ({ getValue }) => <span className="text-sm font-medium">{(getValue() as string) ?? "-"}</span> },
     { accessorKey: "category", header: "カテゴリ", enableSorting: false, cell: ({ getValue }) => <span className="text-xs">{categories.find((c) => c.value === getValue())?.label ?? (getValue() as string)}</span> },

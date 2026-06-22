@@ -10,7 +10,7 @@ import { apiFetch } from "@/lib/api-client";
 interface Item {
   id: string; brand: string | null; model: string | null;
   category: string; created_at: string;
-  users: { display_name: string } | null;
+  users: { profiles: { nickname: string | null } | null } | null;
 }
 
 function ItemList() {
@@ -28,7 +28,7 @@ function ItemList() {
   );
 
   const columns: ColumnDef<Item>[] = [
-    { id: "user", header: "ユーザー", enableSorting: false, cell: ({ row }) => <span className="text-xs">{row.original.users?.display_name ?? "-"}</span> },
+    { id: "user", header: "ユーザー", enableSorting: false, cell: ({ row }) => <span className="text-xs">{row.original.users?.profiles?.nickname ?? "-"}</span> },
     { id: "name", header: "アイテム名", enableSorting: false, cell: ({ row }) => (
       <span className="text-sm font-medium">{[row.original.brand, row.original.model].filter(Boolean).join(" ") || "-"}</span>
     )},

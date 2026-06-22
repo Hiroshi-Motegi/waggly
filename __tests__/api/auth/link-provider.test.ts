@@ -66,8 +66,6 @@ describe("POST /api/auth/link-provider", () => {
     supabase.queueResult("user_providers", { data: null, error: null });
     // Insert new provider row
     supabase.queueResult("user_providers", { data: null, error: null });
-    // Update users.google_email
-    supabase.queueResult("users", { data: null, error: null });
 
     const req = createMockRequest(BASE_URL, {
       method: "POST",
@@ -256,7 +254,6 @@ describe("DELETE /api/auth/link-provider", () => {
 
     // Delete the LINE provider row (not current session)
     supabase.queueResult("user_providers", { data: null, error: null });
-    // No google_email clear needed for LINE unlink
 
     const req = createMockRequest(BASE_URL, {
       method: "DELETE",
