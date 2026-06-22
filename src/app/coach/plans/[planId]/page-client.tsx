@@ -101,7 +101,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ planId: s
     router.push("/coach/plans");
   }
 
-  if (isLoading) return <Loading variant="light" />;
+  if (isLoading) return <Loading />;
   if (!plan) return <div className="px-2 pt-16"><div className="rounded-lg bg-white p-6 text-center"><p className="text-base text-[#8b8b8b]">見つかりません</p></div></div>;
 
   const totalBalls = plan.practice_plan_items?.reduce((sum: number, i: PracticePlanItem) => sum + i.balls, 0) ?? 0;

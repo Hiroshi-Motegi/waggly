@@ -1,0 +1,207 @@
+<h2>Admin CRUD 管理画面 設計</h2>
+<p class="subtitle">カタログ(モデル・スペック・メーカー) + お知らせ管理</p>
+
+<div class="section">
+  <h3>1. サイドバーナビゲーション</h3>
+  <div class="mockup">
+    <div class="mockup-header">Admin Sidebar</div>
+    <div class="mockup-body" style="background:#1a1a1a;color:#fff;padding:20px;width:220px;">
+      <div style="font-size:18px;font-weight:bold;color:#006728;margin-bottom:20px;">Waggly Admin</div>
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase;">カタログ</div>
+        <div style="padding:6px 12px;background:#006728;border-radius:6px;margin-bottom:4px;font-size:14px;">モデル管理</div>
+        <div style="padding:6px 12px;color:#ccc;margin-bottom:4px;font-size:14px;">メーカー管理</div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase;">コンテンツ</div>
+        <div style="padding:6px 12px;color:#ccc;margin-bottom:4px;font-size:14px;">お知らせ</div>
+        <div style="padding:6px 12px;color:#ccc;margin-bottom:4px;font-size:14px;">ナレッジベース</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. カタログモデル一覧</h3>
+  <div class="mockup">
+    <div class="mockup-header">GET /admin/catalog/models</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <input class="mock-input" placeholder="モデル名検索" style="width:200px;">
+        <select class="mock-input" style="width:140px;"><option>全メーカー</option></select>
+        <select class="mock-input" style="width:140px;"><option>全カテゴリ</option></select>
+        <select class="mock-input" style="width:120px;"><option>全年度</option></select>
+        <select class="mock-input" style="width:140px;"><option>全ステータス</option></select>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:4px;"><input type="checkbox"> スペックなしのみ</label>
+        <span style="margin-left:auto;font-size:13px;color:#888;">2,398件</span>
+        <button class="mock-button" style="font-size:13px;">+ 新規追加</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#f5f5f5;text-align:left;">
+          <th style="padding:8px;border-bottom:1px solid #ddd;">モデル名</th>
+          <th style="padding:8px;border-bottom:1px solid #ddd;">メーカー</th>
+          <th style="padding:8px;border-bottom:1px solid #ddd;">カテゴリ</th>
+          <th style="padding:8px;border-bottom:1px solid #ddd;">年</th>
+          <th style="padding:8px;border-bottom:1px solid #ddd;">スペック数</th>
+          <th style="padding:8px;border-bottom:1px solid #ddd;">表示</th>
+          <th style="padding:8px;border-bottom:1px solid #ddd;">操作</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#006728;font-weight:bold;">G440 MAX ドライバー</td><td style="padding:8px;border-bottom:1px solid #eee;">ピン</td><td style="padding:8px;border-bottom:1px solid #eee;">ドライバー</td><td style="padding:8px;border-bottom:1px solid #eee;">2025</td><td style="padding:8px;border-bottom:1px solid #eee;">3</td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="color:green;">●</span></td><td style="padding:8px;border-bottom:1px solid #eee;"><a style="color:#006728;">編集</a></td></tr>
+          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#006728;font-weight:bold;">Stealth2 HD ドライバー</td><td style="padding:8px;border-bottom:1px solid #eee;">テーラーメイド</td><td style="padding:8px;border-bottom:1px solid #eee;">ドライバー</td><td style="padding:8px;border-bottom:1px solid #eee;">2023</td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="color:red;">0</span></td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="color:green;">●</span></td><td style="padding:8px;border-bottom:1px solid #eee;"><a style="color:#006728;">編集</a></td></tr>
+          <tr style="background:#fff8f8;"><td style="padding:8px;border-bottom:1px solid #eee;color:#999;">旧モデル XXX</td><td style="padding:8px;border-bottom:1px solid #eee;color:#999;">ミズノ</td><td style="padding:8px;border-bottom:1px solid #eee;color:#999;">アイアン</td><td style="padding:8px;border-bottom:1px solid #eee;color:#999;">2018</td><td style="padding:8px;border-bottom:1px solid #eee;color:#999;">7</td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="color:#ccc;">○</span></td><td style="padding:8px;border-bottom:1px solid #eee;"><a style="color:#006728;">編集</a></td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;justify-content:center;gap:8px;margin-top:12px;">
+        <button class="mock-button" style="font-size:12px;">← 前</button>
+        <span style="font-size:13px;color:#666;line-height:32px;">1 / 120</span>
+        <button class="mock-button" style="font-size:12px;">次 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. モデル編集画面</h3>
+  <div class="mockup">
+    <div class="mockup-header">GET /admin/catalog/models/[id]</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="font-size:12px;color:#666;margin-bottom:12px;">カタログ / ピン / G440 MAX ドライバー</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div><label style="font-size:12px;color:#666;">モデル名</label><input class="mock-input" value="G440 MAX ドライバー" style="width:100%;"></div>
+        <div><label style="font-size:12px;color:#666;">メーカー</label><select class="mock-input" style="width:100%;"><option>ピン</option></select></div>
+        <div><label style="font-size:12px;color:#666;">カテゴリ</label><select class="mock-input" style="width:100%;"><option>ドライバー</option></select></div>
+        <div><label style="font-size:12px;color:#666;">発売年</label><input class="mock-input" value="2025" style="width:100%;"></div>
+        <div><label style="font-size:12px;color:#666;">Slug</label><input class="mock-input" value="g440-max-driver-2025" style="width:100%;"></div>
+        <div><label style="font-size:12px;color:#666;">価格</label><input class="mock-input" value="88000" style="width:100%;"></div>
+        <div style="grid-column:1/3;"><label style="font-size:12px;color:#666;display:flex;align-items:center;gap:6px;"><input type="checkbox" checked> 表示する</label></div>
+      </div>
+      <div style="border-top:1px solid #eee;padding-top:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <h4 style="margin:0;font-size:14px;">スペック (3番手)</h4>
+          <button class="mock-button" style="font-size:12px;">+ 番手追加</button>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr style="background:#f5f5f5;">
+            <th style="padding:6px;">番手</th><th style="padding:6px;">シャフト</th><th style="padding:6px;">フレックス</th>
+            <th style="padding:6px;">ロフト</th><th style="padding:6px;">ライ</th><th style="padding:6px;">長さ</th>
+            <th style="padding:6px;">重量</th><th style="padding:6px;">バランス</th><th style="padding:6px;">体積</th><th style="padding:6px;">操作</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:6px;border-bottom:1px solid #eee;">1W</td><td style="padding:6px;border-bottom:1px solid #eee;">ALTA J CB BLACK</td><td style="padding:6px;border-bottom:1px solid #eee;">S</td><td style="padding:6px;border-bottom:1px solid #eee;">9.0</td><td style="padding:6px;border-bottom:1px solid #eee;">58.0</td><td style="padding:6px;border-bottom:1px solid #eee;">45.25</td><td style="padding:6px;border-bottom:1px solid #eee;">298</td><td style="padding:6px;border-bottom:1px solid #eee;">D1</td><td style="padding:6px;border-bottom:1px solid #eee;">460</td><td style="padding:6px;border-bottom:1px solid #eee;"><a style="color:#006728;cursor:pointer;">✎</a> <a style="color:#c00;cursor:pointer;">✕</a></td></tr>
+            <tr><td style="padding:6px;border-bottom:1px solid #eee;">1W</td><td style="padding:6px;border-bottom:1px solid #eee;">ALTA J CB BLACK</td><td style="padding:6px;border-bottom:1px solid #eee;">SR</td><td style="padding:6px;border-bottom:1px solid #eee;">10.5</td><td style="padding:6px;border-bottom:1px solid #eee;">58.0</td><td style="padding:6px;border-bottom:1px solid #eee;">45.25</td><td style="padding:6px;border-bottom:1px solid #eee;">293</td><td style="padding:6px;border-bottom:1px solid #eee;">D0</td><td style="padding:6px;border-bottom:1px solid #eee;">460</td><td style="padding:6px;border-bottom:1px solid #eee;"><a style="color:#006728;cursor:pointer;">✎</a> <a style="color:#c00;cursor:pointer;">✕</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button class="mock-button" style="background:#006728;color:white;border:none;">保存</button>
+        <button class="mock-button">キャンセル</button>
+        <button class="mock-button" style="margin-left:auto;color:#c00;border-color:#c00;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>4. メーカー管理</h3>
+  <div class="mockup">
+    <div class="mockup-header">GET /admin/catalog/makers</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+        <span style="font-size:13px;color:#888;">37メーカー</span>
+        <button class="mock-button" style="font-size:13px;">+ 新規追加</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#f5f5f5;text-align:left;">
+          <th style="padding:8px;">順序</th><th style="padding:8px;">名前</th><th style="padding:8px;">日本語名</th><th style="padding:8px;">Slug</th><th style="padding:8px;">モデル数</th><th style="padding:8px;">表示</th><th style="padding:8px;">操作</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:8px;border-bottom:1px solid #eee;">↑↓</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">PING</td><td style="padding:8px;border-bottom:1px solid #eee;">ピン</td><td style="padding:8px;border-bottom:1px solid #eee;color:#888;">ping</td><td style="padding:8px;border-bottom:1px solid #eee;">56</td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="color:green;">●</span></td><td style="padding:8px;border-bottom:1px solid #eee;"><a style="color:#006728;">編集</a></td></tr>
+          <tr><td style="padding:8px;border-bottom:1px solid #eee;">↑↓</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">TaylorMade</td><td style="padding:8px;border-bottom:1px solid #eee;">テーラーメイド</td><td style="padding:8px;border-bottom:1px solid #eee;color:#888;">taylormade</td><td style="padding:8px;border-bottom:1px solid #eee;">263</td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="color:green;">●</span></td><td style="padding:8px;border-bottom:1px solid #eee;"><a style="color:#006728;">編集</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>5. お知らせ管理</h3>
+  <div class="mockup">
+    <div class="mockup-header">GET /admin/announcements</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;gap:8px;">
+          <select class="mock-input" style="width:140px;"><option>全カテゴリ</option></select>
+          <select class="mock-input" style="width:140px;"><option>全ステータス</option></select>
+        </div>
+        <button class="mock-button" style="font-size:13px;">+ 新規作成</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#f5f5f5;text-align:left;">
+          <th style="padding:8px;">タイトル</th><th style="padding:8px;">カテゴリ</th><th style="padding:8px;">公開日</th><th style="padding:8px;">状態</th><th style="padding:8px;">操作</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">カタログ機能をリリースしました</td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="background:#e6f2eb;color:#006728;padding:2px 8px;border-radius:10px;font-size:11px;">機能</span></td><td style="padding:8px;border-bottom:1px solid #eee;">2026-06-21</td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="color:green;">公開中</span></td><td style="padding:8px;border-bottom:1px solid #eee;"><a style="color:#006728;">編集</a></td></tr>
+          <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">メンテナンスのお知らせ</td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:10px;font-size:11px;">メンテ</span></td><td style="padding:8px;border-bottom:1px solid #eee;">2026-06-20</td><td style="padding:8px;border-bottom:1px solid #eee;"><span style="color:#999;">下書き</span></td><td style="padding:8px;border-bottom:1px solid #eee;"><a style="color:#006728;">編集</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="mockup" style="margin-top:12px;">
+    <div class="mockup-header">お知らせ編集画面</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div style="grid-column:1/3;"><label style="font-size:12px;color:#666;">タイトル</label><input class="mock-input" value="カタログ機能をリリースしました" style="width:100%;"></div>
+        <div><label style="font-size:12px;color:#666;">カテゴリ</label><select class="mock-input" style="width:100%;"><option>機能追加</option><option>お知らせ</option><option>メンテナンス</option><option>キャンペーン</option></select></div>
+        <div><label style="font-size:12px;color:#666;">公開日</label><input class="mock-input" type="date" value="2026-06-21" style="width:100%;"></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;color:#666;">本文 (Markdown)</label>
+        <textarea class="mock-input" style="width:100%;height:120px;font-family:monospace;font-size:13px;">## 新機能
+
+クラブカタログのスペック比較ができるようになりました。
+
+- メーカー別にクラブを検索
+- 番手ごとのスペック確認
+- お気に入り保存</textarea>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:6px;"><input type="checkbox" checked> 公開する</label>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="mock-button" style="background:#006728;color:white;border:none;">保存</button>
+        <button class="mock-button">キャンセル</button>
+        <button class="mock-button" style="margin-left:auto;color:#c00;border-color:#c00;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>技術設計</h3>
+  <div style="font-size:14px;line-height:1.8;">
+    <p><strong>ルーティング:</strong></p>
+    <ul>
+      <li><code>/admin/catalog/models</code> — モデル一覧 (既存ページを拡張)</li>
+      <li><code>/admin/catalog/models/new</code> — モデル新規作成</li>
+      <li><code>/admin/catalog/models/[id]</code> — モデル編集 + スペック管理</li>
+      <li><code>/admin/catalog/makers</code> — メーカー一覧・編集</li>
+      <li><code>/admin/announcements</code> — お知らせ一覧</li>
+      <li><code>/admin/announcements/new</code> — お知らせ新規作成</li>
+      <li><code>/admin/announcements/[id]</code> — お知らせ編集</li>
+    </ul>
+    <p><strong>API:</strong></p>
+    <ul>
+      <li><code>GET/POST/PATCH/DELETE /api/admin/catalog/models</code> — 既存を拡張 (DELETE追加)</li>
+      <li><code>GET/POST/PATCH/DELETE /api/admin/catalog/specs</code> — 既存を拡張</li>
+      <li><code>GET/PATCH /api/admin/catalog/makers</code> — 既存を拡張 (POST/DELETE追加)</li>
+      <li><code>GET/POST /api/admin/announcements</code> — 新規</li>
+      <li><code>GET/PATCH/DELETE /api/admin/announcements/[id]</code> — 新規</li>
+    </ul>
+    <p><strong>既存コンポーネント活用:</strong> AdminTable, AdminSidebar, AdminFormSection, AdminBreadcrumb</p>
+    <p><strong>認証:</strong> 全API/ページで既存の <code>requireAdmin()</code> を使用</p>
+  </div>
+</div>

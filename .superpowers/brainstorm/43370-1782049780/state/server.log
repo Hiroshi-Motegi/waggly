@@ -1,0 +1,6 @@
+{"type":"server-started","port":55648,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:55648","screen_dir":"/Users/hiroshi-motegi/Git/Waggly/.superpowers/brainstorm/43370-1782049780/content","state_dir":"/Users/hiroshi-motegi/Git/Waggly/.superpowers/brainstorm/43370-1782049780/state"}
+{"type":"screen-added","file":"/Users/hiroshi-motegi/Git/Waggly/.superpowers/brainstorm/43370-1782049780/content/admin-design.html"}
+{"type":"screen-added","file":"/Users/hiroshi-motegi/Git/Waggly/.superpowers/brainstorm/43370-1782049780/content/spec-editor.html"}
+{"type":"screen-added","file":"/Users/hiroshi-motegi/Git/Waggly/.superpowers/brainstorm/43370-1782049780/content/waiting.html"}
+{"type":"screen-added","file":"/Users/hiroshi-motegi/Git/Waggly/.superpowers/brainstorm/43370-1782049780/content/spec-review.html"}
+{"type":"server-stopped","reason":"idle timeout"}
