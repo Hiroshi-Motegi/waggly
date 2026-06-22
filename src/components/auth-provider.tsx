@@ -162,7 +162,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        if (!isLiffClient) {
+        if (!isLiffClient || !liff.isLoggedIn()) {
+          // Not inside LINE app, or LIFF login redirect in progress → stop here
           setIsLoading(false);
           return;
         }

@@ -22,9 +22,10 @@ export default function LineCallbackPage() {
         return;
       }
 
-      // CSRF: validate state
-      const storedState = sessionStorage.getItem("line_oauth_state");
+      // CSRF: validate state (localStorage fallback for iOS Safari new-tab redirect)
+      const storedState = sessionStorage.getItem("line_oauth_state") || localStorage.getItem("line_oauth_state");
       sessionStorage.removeItem("line_oauth_state");
+      localStorage.removeItem("line_oauth_state");
       if (!stateParam || stateParam !== storedState) {
         window.location.href = "/?error=line_auth_failed";
         return;

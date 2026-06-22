@@ -26,6 +26,9 @@ function loginLine() {
   const redirectUri = encodeURIComponent(`${window.location.origin}/auth/line/callback`);
   const state = crypto.randomUUID();
   sessionStorage.setItem("line_oauth_state", state);
+  // iOS Safari: LINE app opens via Universal Link → callback may open in new tab
+  // where sessionStorage is lost. Use localStorage as fallback.
+  localStorage.setItem("line_oauth_state", state);
   window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=openid%20profile`;
 }
 
