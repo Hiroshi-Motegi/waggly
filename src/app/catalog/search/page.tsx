@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { getAllModels } from "@/lib/catalog";
 import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { EventTracker } from "@/components/event-tracker";
+import { CatalogSearchBar } from "@/components/catalog/catalog-search-bar";
 
 export const revalidate = 86400;
 
@@ -54,12 +54,19 @@ export default async function CatalogSearchPage({
     <PublicPageLayout title="検索結果" backHref="/catalog">
       {query.length >= 2 && <EventTracker event="catalog_searched" params={{ query, results_count: results.length }} />}
 
-        {/* Query */}
-        <div className="w-full max-w-screen-sm pt-2 pb-1">
-          <p className="text-sm text-white">
-            「<span className="font-bold">{query}</span>」{results.length > 0 ? `${results.length}件` : ""}
-          </p>
+        {/* Search bar */}
+        <div className="w-full max-w-screen-sm pt-4">
+          <CatalogSearchBar defaultValue={query} />
         </div>
+
+        {/* Query result count */}
+        {query.length >= 2 && (
+          <div className="w-full max-w-screen-sm pt-2 pb-1">
+            <p className="text-sm text-white">
+              「<span className="font-bold">{query}</span>」{results.length}件
+            </p>
+          </div>
+        )}
 
         {/* Results */}
         <div className="w-full max-w-screen-sm pt-2 pb-4">
