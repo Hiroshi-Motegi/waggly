@@ -226,7 +226,7 @@ export async function searchModels(query: string): Promise<CatalogModel[]> {
     q = q.or(`name.ilike.%${token}%,maker.ilike.%${token}%,maker_slug.ilike.%${token}%`);
   }
 
-  const { data } = await q.order("maker").order("name").limit(50);
+  const { data } = await q.order("maker").order("name").limit(200);
 
   // Client-side AND filter (DB or() is OR per token, we need AND across tokens)
   const results = (data ?? []).filter((m) => {

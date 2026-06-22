@@ -81,6 +81,9 @@ export default async function CatalogSearchPage({
                 </Link>
               ))}
             </div>
+            {results.length >= 200 && (
+              <p className="pt-2 text-xs text-white/70 text-center">結果が多いため200件まで表示しています。キーワードを追加して絞り込んでください。</p>
+            )}
           )}
         </div>
     </PublicPageLayout>
