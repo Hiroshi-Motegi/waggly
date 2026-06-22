@@ -170,7 +170,7 @@ function HistoryPanel({
       </PageHeader>
       <div className="flex flex-col rounded-lg bg-white p-3">
         {isLoading ? (
-          <Loading />
+          <Loading variant="inline-light" />
         ) : conversations.length === 0 ? (
           <p className="py-4 text-center text-base text-[#8b8b8b]">会話履歴がありません</p>
         ) : (
@@ -340,7 +340,7 @@ export default function CoachPage() {
       <div className="relative flex flex-col px-2 py-2 space-y-2" style={{ minHeight: "100dvh", paddingBottom: "var(--bottom-nav-height)", marginBottom: "calc(-1 * var(--bottom-nav-height))" }}>
         <div className="relative z-10 flex flex-col space-y-2">
         <PageHeader title="AIに相談" backHref="/" variant="dark" />
-        <Loading />
+        <Loading variant="inline-light" />
         </div>
       </div>
     );

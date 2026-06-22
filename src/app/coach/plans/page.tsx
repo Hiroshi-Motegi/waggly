@@ -103,7 +103,7 @@ function PlansPageInner() {
           <p className="text-base text-[#8b8b8b]">練習メニューを生成中...</p>
         </div>
       ) : isLoading ? (
-        <Loading />
+        <Loading variant="inline-light" />
       ) : plans.length === 0 ? (
         <div className="rounded-lg bg-white p-3">
           <p className="text-center text-base text-[#8b8b8b] py-4">まだ練習メニューがありません</p>
