@@ -211,6 +211,32 @@ export async function getShaftsForModel(shaftNames: string[]): Promise<CatalogSh
   return (data ?? []) as CatalogShaft[];
 }
 
+/** モデル検索（DB側フィルタ） */
+export async function searchModels(query: string): Promise<CatalogModel[]> {
+  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return [];
+
+  // Build query: each token must match name OR maker
+  let q = supabase
+    .from("catalog_models")
+    .select("*")
+    .eq("is_visible", true);
+
+  for (const token of tokens) {
+    q = q.or(`name.ilike.%${token}%,maker.ilike.%${token}%,maker_slug.ilike.%${token}%`);
+  }
+
+  const { data } = await q.order("maker").order("name").limit(200);
+
+  // Client-side AND filter (DB or() is OR per token, we need AND across tokens)
+  const results = (data ?? []).filter((m) => {
+    const text = `${m.maker} ${m.maker_slug} ${m.name}`.toLowerCase();
+    return tokens.every((t) => text.includes(t));
+  });
+
+  return results as CatalogModel[];
+}
+
 /** 全モデル一覧（検索用、ページネーション対応） */
 export async function getAllModels() {
   const all: CatalogModel[] = [];

@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { getAllModels } from "@/lib/catalog";
+import { searchModels } from "@/lib/catalog";
 import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { EventTracker } from "@/components/event-tracker";
+import { CatalogSearchBar } from "@/components/catalog/catalog-search-bar";
 
 export const revalidate = 86400;
 
@@ -15,13 +15,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   wedge: "ウェッジ",
   putter: "パター",
 };
-
-function fuzzyMatch(text: string, query: string) {
-  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
-  if (tokens.length === 0) return false;
-  const lower = text.toLowerCase();
-  return tokens.every((t) => lower.includes(t));
-}
 
 export async function generateMetadata({
   searchParams,
@@ -42,24 +35,25 @@ export default async function CatalogSearchPage({
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
 
-  let results: Awaited<ReturnType<typeof getAllModels>> = [];
-  if (query.length >= 2) {
-    const all = await getAllModels();
-    results = all.filter((m) =>
-      fuzzyMatch(`${m.maker} ${m.maker_slug.replace(/-/g, " ")} ${m.name}`, query)
-    );
-  }
+  const results = query.length >= 2 ? await searchModels(query) : [];
 
   return (
     <PublicPageLayout title="検索結果" backHref="/catalog">
       {query.length >= 2 && <EventTracker event="catalog_searched" params={{ query, results_count: results.length }} />}
 
-        {/* Query */}
-        <div className="w-full max-w-screen-sm pt-2 pb-1">
-          <p className="text-sm text-white">
-            「<span className="font-bold">{query}</span>」{results.length > 0 ? `${results.length}件` : ""}
-          </p>
+        {/* Search bar */}
+        <div className="w-full max-w-screen-sm pt-4">
+          <CatalogSearchBar defaultValue={query} />
         </div>
+
+        {/* Query result count */}
+        {query.length >= 2 && (
+          <div className="w-full max-w-screen-sm pt-2 pb-1">
+            <p className="text-sm text-white">
+              「<span className="font-bold">{query}</span>」{results.length}件
+            </p>
+          </div>
+        )}
 
         {/* Results */}
         <div className="w-full max-w-screen-sm pt-2 pb-4">
@@ -70,23 +64,28 @@ export default async function CatalogSearchPage({
               </p>
             </div>
           ) : (
-            <div className="rounded-lg bg-white overflow-hidden">
-              {results.map((m, i) => (
-                <Link
-                  key={m.id}
-                  href={`/catalog/${m.maker_slug}/${m.slug}`}
-                  className={`flex items-center justify-between px-4 py-3 ${i < results.length - 1 ? "border-b border-[#ececec]" : ""}`}
-                >
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="font-bold text-sm text-[#006728] truncate">{m.name}</span>
-                    <span className="text-xs text-[#888]">
-                      {m.maker} · {CATEGORY_LABELS[m.category] ?? m.category}
-                    </span>
-                  </div>
-                  <ChevronLeft className="h-4 w-4 text-[#bbb] rotate-180 shrink-0" />
-                </Link>
-              ))}
-            </div>
+            <>
+              <div className="rounded-lg bg-white overflow-hidden">
+                {results.map((m, i) => (
+                  <Link
+                    key={m.id}
+                    href={`/catalog/${m.maker_slug}/${m.slug}`}
+                    className={`flex items-center justify-between px-4 py-3 ${i < results.length - 1 ? "border-b border-[#ececec]" : ""}`}
+                  >
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="font-bold text-sm text-[#006728] truncate">{m.name}</span>
+                      <span className="text-xs text-[#888]">
+                        {m.maker} · {CATEGORY_LABELS[m.category] ?? m.category}
+                      </span>
+                    </div>
+                    <ChevronLeft className="h-4 w-4 text-[#bbb] rotate-180 shrink-0" />
+                  </Link>
+                ))}
+              </div>
+              {results.length >= 200 && (
+                <p className="pt-2 text-xs text-white/70 text-center">結果が多いため200件まで表示しています。キーワードを追加して絞り込んでください。</p>
+              )}
+            </>
           )}
         </div>
     </PublicPageLayout>

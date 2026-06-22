@@ -3,6 +3,7 @@ import { getMakers } from "@/lib/catalog";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { PublicPageLayout } from "@/components/layout/public-page-layout";
 import { FavoriteClubsList } from "@/components/catalog/favorite-clubs-list";
+import { CatalogSearchBar } from "@/components/catalog/catalog-search-bar";
 
 export const revalidate = 86400;
 
@@ -29,13 +30,7 @@ export default async function CatalogPage() {
 
       {/* Search */}
       <div className="w-full max-w-screen-sm pt-4">
-        <Link
-          href="/catalog/search"
-          className="flex items-center gap-2 w-full rounded-md bg-white px-4 py-3 text-sm text-[#aaa]"
-        >
-          <svg className="w-4 h-4 text-[#aaa]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          メーカー名・モデル名で検索
-        </Link>
+        <CatalogSearchBar />
       </div>
 
       {/* Ad banner */}
